@@ -16,9 +16,12 @@ function restart() {
 }
 
 
-#sed -i.orig -e 's/# deb/deb/g' -e 's/deb cdrom/\#&/g' /etc/apt/sources.list
-#apt-get update
-#apt-get upgrade
+# --------------------------------------------------
+#
+# Install ubuntu native pachages via apt-get
+#
+apt-get update
+apt-get upgrade
 apt-get autoremove
 
 insta openssh-server
@@ -38,21 +41,25 @@ insta libcurl3 libmysqlclient15off uuid-dev mysql-common mysql-server
 insta liblua5.1-sql-mysql-dev
 insta libmysqlclient15-dev
 
+apt-get autoremove
+apt-get clean
+
+
+# --------------------------------------------------
 #
 # LUA ROCKS
 #
-# Do not install it from apt-get. It is broken!
-#insta luarocks
+# Do not install it from apt-get. It is broken! #insta luarocks
+#
 wget -P /tmp http://luarocks.org/releases/luarocks-2.0.2.tar.gz
 tar zxf /tmp/luarocks-2.0.2.tar.gz -C /usr/src
 cd /usr/src/luarocks-2.0.2/
 ./configure --prefix=/usr --sysconfdir=/etc/luarocks --with-lua-include=/usr/include/lua5.1
 make
 make install
+cd
 
-#
-# LUA COMPONENTS
-#
+# Rocks
 luarocks install wsapi
 luarocks install cgilua
 luarocks install orbit
@@ -60,20 +67,10 @@ luarocks install cosmo
 #luarocks install wsapi-xavante
 #luarocks install markdown
 
-#
-# LUA PAGES PATH CONFIG
-#
-#cat << EOF > /tmp/bashrc
-#
-#PATH=\$PATH:/usr/local/itvision/bin
-#export LUA_PATH="/usr/local/itvision/model/?.lua;/usr/local/itvision/view/?.lua;/usr/local/itvision/controler/?.lua;/usr/local/itvision/model/db/?.lua;/usr/local/itvision/www/?.lua;/usr/local/itvision/daemon/?.lua;\$LUA_PATH"
-#EOF
-#
-#cat /tmp/bashrc >> /root/.bashrc
-#cat /tmp/bashrc >> /home/itvision/.bashrc
 
 
 
+# --------------------------------------------------
 #  
 # NAGIOS
 #
@@ -91,7 +88,6 @@ urlitiv=http://itiv.atmatec.com.br/ks-files
 wget -P /tmp $urlitiv/nagios-$nagver-itiv.tgz
 tar zxf /tmp/nagios-3.2.1-itiv.tgz -C /usr/local/src
 
-
 cd /usr/local/src/nagios-$nagver
 ./configure \
 	--prefix=/usr/local/monitor \
@@ -103,7 +99,6 @@ cd /usr/local/src/nagios-$nagver
 	--with-cgiurl=/monitor/cgi-bin \
 	--with-httpd-conf=/etc/apache2/sites-available \
 	--enable-event-broker
-
 
 make all
 make fullinstall
@@ -149,6 +144,8 @@ insta ndoutils-nagios3-mysql ndoutils-common ndoutils-doc
 #broker_module=@bindir@/ndomod-3x.o config_file=@sysconfdir@/ndomod.cfg # MUDAR AQUI!!!
 #' /usr/local/monitor/etc/nagios.cfg
 
+
+# --------------------------------------------------
 #
 # BUSINESS PROCESS
 #
@@ -167,10 +164,10 @@ cp ~/site.php /usr/local/monitor/share
 
 
 
-
-###
-### APACHE
-###
+# --------------------------------------------------
+#
+# APACHE
+#
 cd /etc/apache2/
 #wget -P ./sites-available $URL/itvision.conf
 cp ~/itvision.conf ./sites-available
@@ -188,12 +185,10 @@ chown -R $user.$user /usr/local/itvision
 
 
 
-#####  ATÉ AQUI  #####
-insta ndoutils-nagios3-mysql ndoutils-common ndoutils-doc
 
-#
-# EDITAR nagios.cfg
-#
+
+############  ATÉ AQUI  ##############
+
 
 # 
 # NSCA - Nagios
