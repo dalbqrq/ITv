@@ -1,11 +1,6 @@
 #!/bin/bash
 
-#
-#URL=http://www.itvision.com.br/ks-files
-#pass='itvision'
-#dbpass='mttp0c0s'
 user=itv
-
 
 function insta() {
 	apt-get -y install $*
@@ -17,7 +12,6 @@ function restart() {
 
 
 # --------------------------------------------------
-#
 # Install ubuntu native pachages via apt-get
 #
 apt-get update
@@ -41,12 +35,9 @@ insta libcurl3 libmysqlclient15off uuid-dev mysql-common mysql-server
 insta liblua5.1-sql-mysql-dev
 insta libmysqlclient15-dev
 
-apt-get autoremove
-apt-get clean
 
 
 # --------------------------------------------------
-#
 # LUA ROCKS
 #
 # Do not install it from apt-get. It is broken! #insta luarocks
@@ -58,7 +49,6 @@ cd /usr/src/luarocks-2.0.2/
 make
 make install
 cd
-
 # Rocks
 luarocks install wsapi
 luarocks install cgilua
@@ -71,7 +61,6 @@ luarocks install cosmo
 
 
 # --------------------------------------------------
-#  
 # NAGIOS
 #
 url=http://prdownloads.sourceforge.net/sourceforge
@@ -84,9 +73,9 @@ tar zxf /tmp/nagios-$nagver.tar.gz -C /usr/local/src
 #wget -P /tmp $url/nagiosplug/nagios-plugins-$plgver.tar.gz
 #tar zxf /tmp/nagios-plugins-$plgver.tar.gz -C /usr/local/src
 
-urlitiv=http://itiv.atmatec.com.br/ks-files
-wget -P /tmp $urlitiv/nagios-$nagver-itiv.tgz
-tar zxf /tmp/nagios-3.2.1-itiv.tgz -C /usr/local/src
+urlitiv=http://www.itvision.com.br/ks
+wget -P /tmp $urlitiv/nagios-$nagver-itvision.tgz
+tar zxf /tmp/nagios-3.2.1-itvision.tgz -C /usr/local/src
 
 cd /usr/local/src/nagios-$nagver
 ./configure \
@@ -104,37 +93,31 @@ make all
 make fullinstall
 make install-config
 make install-webconf
-
+# Config user
 htpasswd -cb /usr/local/monitor/etc/htpasswd.users $user $user
 chown $user.$user /usr/local/monitor/etc/htpasswd.users
 sed -i.orig -e "s/nagiosadmin/$user/g" /usr/local/monitor/etc/cgi.cfg
-
-cd /usr/local/monitor
-for f in `grep nagiosadmin */* */*/* | cut -d: -f1 | sort | uniq`; do
-	sed -i.orig -e "s/nagiosadmin/$user/g" $f
-done
-
 /usr/sbin/usermod -a -G $user www-data
-
+# Config plugins
 insta nagios-plugins
 insta nagios-nrpe-plugin nagios-nrpe-server
 mv libexec libexec.orig
-ln -s /usr/lib/nagios/plugins/ libexec
-
+# Config cfg
 cd /usr/local/monitor/etc
 mkdir orig
-mv *.orig nagios.cfg objects/* orig
-wget $urlitiv/nagios-config.tgz
-tar zxf nagios-config.tgz
-chown -R $user.users /usr/local/monitor/etc
+mv * orig
+wget $urlitiv/nagios-cfg.tgz
+tar zxf nagios-cfg.tgz
+chown -R $user.$user /usr/local/monitor/etc
 
 
 
-# 
+# --------------------------------------------------
 # NDO UTILS - Nagios
 #
 #wget -P /tmp http://prdownloads.sourceforge.net/sourceforge/nagios/ndoutils-1.4b9.tar.gz
 insta ndoutils-nagios3-mysql ndoutils-common ndoutils-doc
+update-rc.d nagios3 disable
 #
 # CORRIGIR ESTAS CONFIGS
 #
@@ -146,7 +129,6 @@ insta ndoutils-nagios3-mysql ndoutils-common ndoutils-doc
 
 
 # --------------------------------------------------
-#
 # BUSINESS PROCESS
 #
 bp=monitorbp
@@ -154,43 +136,59 @@ insta libcgi-simple-perl
 wget -P /tmp https://www.nagiosforge.org/gf/download/frsrelease/154/411/nagios-business-process-addon-0.9.5.tar.gz
 tar zxf /tmp/nagios-business-process-addon-0.9.5.tar.gz -C /usr/local/src
 cd /usr/local/src/nagios-business-process-addon-0.9.5
-
-./configure --prefix=/usr/local/$bp --with-nagiosbp-user=itiv --with-nagiosbp-group=itiv --with-nagetc=/usr/local/monitor/etc --with-naghtmurl=/monitor --with-nagcgiurl=/monitor/cgi-bin --with-htmurl=/$bp --with-cgiurl=/$bp/cgi-bin
+./configure --prefix=/usr/local/$bp --with-nagiosbp-user=$user --with-nagiosbp-group=$user --with-nagetc=/usr/local/monitor/etc --with-naghtmurl=/monitor --with-nagcgiurl=/monitor/cgi-bin --with-htmurl=/$bp --with-cgiurl=/$bp/cgi-bin
 make all
 make install
-mv /usr/local/monitor/share/site.php /usr/local/monitor/side.php.orig
-cp ~/site.php /usr/local/monitor/share
+mv /usr/local/monitor/share/side.php /usr/local/monitor/side.php.orig
+cp ~itv/itv/ks/side.php /usr/local/monitor/share
+chown -R $user.$user /usr/local/monitor/share
+\rm -rf /usr/local/monitorbp/etc/*
+tar ~itv/itv/ks/bp-cfg.tgz -C /usr/local/monitorbp/etc
+cat << EOF > /etc/default/ndoutils
+ENABLE_NDOUTILS=1
+DAEMON_OPTS="-c /usr/local/monitor/etc/ndo2db.cfg"
+EOF
+cat << EOF > /usr/local/bin
+#!/bin/bash
 
+/usr/local/monitorbp/bin/bp_cfg2service_cfg.pl
+mv /usr/local/monitor/etc/services-bp.cfg /usr/local/monitor/etc/objects
+sudo invoke-rc.d nagios restart
+EOF
+chmod 755 /usr/local/bin/reset-bp
 
 
 
 # --------------------------------------------------
-#
 # APACHE
 #
 cd /etc/apache2/
-#wget -P ./sites-available $URL/itvision.conf
-cp ~/itvision.conf ./sites-available
+cp ~itv/itv/ks/itvision.conf ./sites-available
 cd ./sites-enabled
 rm -f ./000-default
 sed -i -e "s/Nagios/ITVision Monitor/g" ../sites-available/nagios.conf
 ln -s ../sites-available/itvision.conf 100-itvision
 ln -s ../sites-available/nagios.conf 001-nagios
-
-mkdir -p /usr/local/itvision/www
+mkdir -p /usr/local/itvision/html
+mkdir -p /usr/local/itvision/orb
 chown -R $user.$user /usr/local/itvision
 
 
 
+# --------------------------------------------------
+# Re INIT SERVICES
+#
+invoke-rc.d apache2 restart
+invoke-rc.d nagios restart
+invoke-rc.d ndoutils restart
+invoke-rc.d nagios restart
 
 
+exit 0
+###############################################  ATÉ AQUI  ################################################
 
 
-
-############  ATÉ AQUI  ##############
-
-
-# 
+# --------------------------------------------------
 # NSCA - Nagios
 #
 cd /usr/local/src
@@ -202,8 +200,8 @@ cd nsca-2.7.2
 
 
 
-#
-# BUSINESS PROCESS - NAgios
+# --------------------------------------------------
+# BUSINESS PROCESS  - compilation
 #
 wget https://www.nagiosforge.org/gf/download/frsrelease/138/316/nagios-business-process-addon-0.9.3.tar.gz
 tar zxf nagios-business-process-addon-0.9.3.tar.gz
@@ -239,7 +237,7 @@ sed -i -e "/Stopping /a \
 " /etc/init.d/nagios
 
 
-#
+# --------------------------------------------------
 # ITVision
 #
 VERSION=0.2.5
@@ -249,13 +247,12 @@ chown -R itvision.users /usr/local/itvision
 chown www-data /usr/local/itvision/www/figs
 
 
-#
+# --------------------------------------------------
 # MAIL
 #
 email=alert@itvision.com.br
 pass=serserfm
 
-##################################
 ### FROM: http://ez.no/developer/forum/install_configuration/sending_mail_via_gmail_or_google_apps_smtp
 
 insta ssmtp mailx stunnel4
@@ -312,10 +309,10 @@ restart stunnel4
 
 
 
-
+# --------------------------------------------------
+# THE END
 #
-# FIM
-#
-insta autoremove
+apt-get autoremove
+apt-get clean
 
 
