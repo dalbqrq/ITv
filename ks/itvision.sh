@@ -118,6 +118,7 @@ chown -R $user.$user /usr/local/monitor/etc
 #wget -P /tmp http://prdownloads.sourceforge.net/sourceforge/nagios/ndoutils-1.4b9.tar.gz
 insta ndoutils-nagios3-mysql ndoutils-common ndoutils-doc
 update-rc.d nagios3 disable
+sed -i -e 's/nagios/$user/g' /etc/init.d/ndoutils
 #
 # CORRIGIR ESTAS CONFIGS
 #
