@@ -12,7 +12,13 @@ end
 
 select_all_hosts = function()
 	-- melhor uso: create table
-	assert ( pcall( db.assertexec, db, "select * from nagios_hosts"))
+	cur = assert ( pcall( db.assertexec, db, "select * from nagios_hosts"))
+
+	row = cur:fetch({}, "a")
+	while row do
+		print( row.Field  )
+		row = cur:fetch(row,"a")
+	end
 end
 
 select_full_path_tree = function()

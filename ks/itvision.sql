@@ -6,12 +6,12 @@ DROP TABLE IF EXISTS `itvision_app_tree`;
 CREATE TABLE `itvision_app_tree` (
   `app_tree_id` int(11) NOT NULL AUTO_INCREMENT,
   `instance_id` smallint(6) NOT NULL DEFAULT '0',
-  `service_object_id` int(11) NOT NULL DEFAULT '0',
+  `service_object_id` int(11) DEFAULT NULL,
   `lft` int(11) NOT NULL DEFAULT '0',
   `rgt` int(11) NOT NULL DEFAULT '0',
   `app_list_id` int(11) DEFAULT NULL,
-  `app_tree_type` enum('and','or') NOT NULL,
-  `is_active` enum('0','1') NOT NULL,
+  `app_tree_type` enum('and','or') DEFAULT 'and',
+  `is_active` enum('0','1') NOT NULL DEFAULT '0',
   PRIMARY KEY (`app_tree_id`),
   UNIQUE KEY `instance_id` (`instance_id`,`service_object_id`,`lft`,`rgt`) 
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Application tree';
