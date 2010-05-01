@@ -1,0 +1,8 @@
+#!/bin/bash 
+
+if [ $# -eq 1 ]; then
+	echo "$1" | mysql -u ndoutils --password=itv ndoutils
+else
+	mysql -u ndoutils --password=itv ndoutils
+fi
+

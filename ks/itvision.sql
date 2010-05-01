@@ -1,3 +1,8 @@
+/* 
+Acesso externo a base de dados
+
+GRANT ALL ON ndoutils.* TO ndoutils@192.168.153.1 IDENTIFIED BY 'itv'; 
+*/
 
 
 DROP TABLE IF EXISTS `itvision_app_tree`;
