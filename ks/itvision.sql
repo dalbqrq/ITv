@@ -9,8 +9,8 @@ CREATE TABLE `itvision_app_tree` (
   `service_object_id` int(11) NOT NULL DEFAULT '0',
   `lft` int(11) NOT NULL DEFAULT '0',
   `rgt` int(11) NOT NULL DEFAULT '0',
-  `app_list_id` int(11) NOT NULL DEFAULT '0',
-  `app_tree_type` enum('and-tree','or-tree') NOT NULL,
+  `app_list_id` int(11) DEFAULT NULL,
+  `app_tree_type` enum('and','or') NOT NULL,
   `is_active` enum('0','1') NOT NULL,
   PRIMARY KEY (`app_tree_id`),
   UNIQUE KEY `instance_id` (`instance_id`,`service_object_id`,`lft`,`rgt`) 
@@ -26,7 +26,7 @@ CREATE TABLE `itvision_app_list` (
   `app_list_id` int(11) NOT NULL AUTO_INCREMENT,
   `instance_id` smallint(6) NOT NULL DEFAULT '0',
   `object_id` int(11) NOT NULL DEFAULT '0',
-  `app_list_type` enum('and-tree','or-tree','host','service') NOT NULL,
+  `app_list_type` enum('and','or','hst','svc') NOT NULL,
   PRIMARY KEY (`app_list_id`),
   UNIQUE KEY `instance_id` (`instance_id`,`object_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Application list';
