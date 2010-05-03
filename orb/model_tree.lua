@@ -16,7 +16,7 @@ function select_all_hosts ()
 	assert ( pcall( db.assertexec, db, "select * from nagios_hosts"))
 end
 
-select_full_path_tree function ()
+function select_full_path_tree ()
 	select = [[ 
 		SELECT node.name
 		FROM nested_category AS node,
@@ -29,6 +29,8 @@ end
 
 select_hosts()
 select_all_hosts()
+
+print('---------------------------------')
 
 
 t = db:selectall ("host_id, alias", "nagios_hosts", "host_id >= 11")
