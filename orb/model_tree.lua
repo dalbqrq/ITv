@@ -2,7 +2,7 @@
 local dado = require "dado"
 
 
-local db = dado.connect ("ndoutils", "ndoutils", "itv", "mysql")
+local db = dado.connect ("ndoutils", "ndoutils", "itiv", "mysql")
 
 
 function select_hosts ()
@@ -42,10 +42,20 @@ end
 -- Init tree
 -- Inicia a arvore
 function init_app_tree()
-	assert ( db:assertexec ( [[
-		INSERT INTO itvision_app_tree(instance_id, service_object_id, lft, rgt, app_list_id, 
-			app_tree_type, is_active) VALUES ( 0, NULL, 1, 2, NULL, NULL, 0 )
-	]] ))
+	local t = {}
+
+	t = db:selectall ("lft", "itvision_app_tree", "lft = 1")
+
+	if t[1] == nil then
+		assert ( db:assertexec ( [[
+			INSERT INTO itvision_app_tree(instance_id, service_object_id, lft, rgt, app_list_id, 
+				app_tree_type, is_active) VALUES ( 0, NULL, 1, 2, NULL, NULL, 0 )
+		]] ))
+		return true
+	else
+		return false
+	end
+
 end
 
 
@@ -181,40 +191,88 @@ end
 
 -- Adding New Nodes
 -- Incluindo novos noh
-function insert_node_app_tree(t, origin)
-	origin = origin or "1"
+function insert_node_app_tree(t, origin, position)
+	origin = origin or 1
+	position = position or 1 -- 0 -> anter; 1 -> abaixo; 2 -> depois
+	local t = {}
 
-	cur = assert ( db:assertexec ("LOCK TABLE itvision_app_tree WRITE"))
-	cur = assert ( db:assertexec ("SELECT rgt FROM itvision_app_tree WHERE app_tree_id = ".. origin))
-	row = cur:fetch({}, "a")
+	assert ( db:assertexec ("LOCK TABLE itvision_app_tree WRITE"))
+	t = db:selectall ("lft, rgt", "itvision_app_tree", "app_tree_id = ".. origin)
 
-	print(row.rgt)
+	if t[1] == nil then
+		print("origin not found")
+		res = false
+	else
+		res = true
+		lft = tonumber(t[1].lft)
+		rgt = tonumber(t[1].rgt)
+		print(lft, rgt)
 
-	--UPDATE itvision_app_tree SET rgt = rgt + 2 WHERE rgt > @myRight;
-	--UPDATE itvision_app_tree SET lft = lft + 2 WHERE lft > @myRight;
+		if position == 0 then
+			newLft = lft
+			newRgt = lft + 1
+			condLft = "lft >= " .. lft
+			condRgt = "rgt >= " .. lft
 
-	--INSERT INTO itvision_app_tree(lft, rgt) VALUES('GAME CONSOLES', @myRight + 1, @myRight + 2);
+		elseif position == 1 then
+			newLft = rgt
+			newRgt = rgt + 1
+			condLft = "lft >  " .. rgt
+			condRgt = "rgt >= " .. rgt
 
-	cur = assert ( db:assertexec ("UNLOCK TABLES"))
+		elseif position == 2 then
+			newLft = rgt + 1
+			newRgt = rgt + 2
+			condLft = "lft > " .. lft
+			condRgt = "rgt > " .. rgt
 
+		end
 
+		stmt = [[ INSERT INTO itvision_app_tree(instance_id, service_object_id, lft, rgt, 
+			app_list_id, app_tree_type, is_active) 
+			VALUES ( 0, NULL, ]]..newLft..[[, ]]..newRgt..[[, NULL, NULL, 0 ) ]]
+
+		--[[
+		print(condLft)
+		print(cond2)
+		print(newLft, newRgt)
+
+		print( "update itvision_app_tree set lft = lft + 2 where "..condLft )
+		print( "update itvision_app_tree set rgt = rgt + 2 where "..cond2 )
+		print(stmt)
+		]]--
+
+		assert ( db:assertexec ( "update itvision_app_tree set lft = lft + 2 where "..condLft ))
+		assert ( db:assertexec ( "update itvision_app_tree set rgt = rgt + 2 where "..condRgt ))
+		assert ( db:assertexec ( stmt ))
+	end
+
+	assert ( db:assertexec ("UNLOCK TABLES"))
+	return res
 end
 
 
-insert_node_app_tree(nil, '1')
+init_app_tree()
+
+if insert_node_app_tree(nil, 14, 1) then
+	print("done")
+else
+	print("not done")
+end
+
 
 --[[
 tab = select_columns("itvision_app_tree")
 select_hosts()
 select_all_hosts()
-print('-TEST----------------------------')
+print("-TEST----------------------------")
 t = select_full_path_app_tree("0")
 
 for i, v in ipairs(t) do
 	print (v)
 end
 
-print('---------------------------------')
+print("---------------------------------")
 
 
 t = db:selectall ("host_id, alias", "nagios_hosts", "host_id >= 11")
