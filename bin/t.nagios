@@ -1,0 +1,5 @@
+#!/bin/bash
+
+
+/usr/local/monitor/bin/nagios -v /usr/local/monitor/etc/nagios.cfg
+

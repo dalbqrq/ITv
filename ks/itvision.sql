@@ -2,6 +2,8 @@
 Acesso externo a base de dados
 
 GRANT ALL ON ndoutils.* TO ndoutils@192.168.153.1 IDENTIFIED BY 'itv'; 
+GRANT ALL ON ndoutils.* TO     root@192.168.153.1 IDENTIFIED BY 'itv'; 
+
 */
 
 
