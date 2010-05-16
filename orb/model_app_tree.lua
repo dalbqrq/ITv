@@ -9,6 +9,22 @@ local db = dado.connect ("ndoutils", "ndoutils", "itv", "mysql")
 --
 --
 
+-- Create table structure
+function table_app_tree()
+	local t = {
+		app_tree_id = 0,
+		lft = 0,
+		rgt = 0,
+		app_list_id = "NULL",
+		app_tree_type = "NULL",
+		is_active = 0,
+		instance_id = 0,
+		service_id = "NULL"
+	}
+
+	return t
+end
+
 
 -- Init tree
 -- Inicia a arvore
@@ -19,7 +35,7 @@ function init_app_tree()
 
 	if t[1] == nil then
 		assert ( db:assertexec ( [[
-			INSERT INTO itvision_app_tree(instance_id, service_object_id, lft, rgt, app_list_id, 
+			INSERT INTO itvision_app_tree(instance_id, service_id, lft, rgt, app_list_id, 
 				app_tree_type, is_active) VALUES ( 0, NULL, 1, 2, NULL, NULL, 0 )
 		]] ))
 		return true
@@ -27,136 +43,6 @@ function init_app_tree()
 		return false
 	end
 
-end
-
-
--- Retrieving a Full Tree
--- Seleciona toda sub-arvore a patir de um noh de origem
-function select_full_path_app_tree (origin)
-	origin = origin or "1"
-	local t = {}
-
-	columns   = [[ node.app_tree_id, node.instance_id, node.service_object_id, node.lft,
-			node.rgt, node.app_list_id, node.app_tree_type, node.is_active ]]
-	tablename = "itvision_app_tree AS node, itvision_app_tree AS parent"
-	cond      = "node.lft BETWEEN parent.lft AND parent.rgt AND parent.app_tree_id = " .. origin
-	extra     = "ORDER BY node.lft"
-
-	t = db:selectall (columns, tablename, cond, extra)
-
-	return t
-end
-
-
--- Finding all the Leaf Nodes
--- Seleciona todas as folhas da arvore
-function select_leaf_nodes_app_tree ()
-	local t = {}
-
-	columns   = [[ app_tree_id, instance_id, service_object_id, lft,
-			rgt, app_list_id, app_tree_type, is_active ]]
-	tablename = "itvision_app_tree"
-	cond      = "rgt = lft + 1"
-	extra     = "ORDER BY lft"
-
-	t = db:selectall (columns, tablename, cond, extra)
-
-	return t
-end
-
-
--- Retrieving a Single Path
--- Seleciona um unico caminho partindo de um noh ateh o topo da arvore
-function select_simple_path_app_tree (origin)
-	origin = origin or "1"
-	local t = {}
-
-	columns   = [[ parent.app_tree_id, parent.instance_id, parent.service_object_id, parent.lft,
-			parent.rgt, parent.app_list_id, parent.app_tree_type, parent.is_active ]]
-	tablename = "itvision_app_tree AS node, itvision_app_tree AS parent"
-	cond      = "node.lft BETWEEN parent.lft AND parent.rgt AND node.app_tree_id = " .. origin
-	extra     = "ORDER BY parent.lft"
-
-	t = db:selectall (columns, tablename, cond, extra)
-
-	return t
-end
-
-
--- Finding the Depth of the Nodes
--- Seleciona a profundidade de cada noh
-function select_depth_app_tree (origin)
-	origin = origin or "1"
-	local t = {}
-
-	columns   = [[ node.app_tree_id, node.instance_id, node.service_object_id, node.lft,
-			node.rgt, node.app_list_id, node.app_tree_type, node.is_active, 
-			(COUNT(parent.app_tree_id) - 1) AS depth ]]
-	tablename = "itvision_app_tree AS node, itvision_app_tree AS parent"
-	cond      = "node.lft BETWEEN parent.lft AND parent.rgt AND node.app_tree_id = " .. origin
-	extra     = "GROUP BY node.app_tree_id ORDER BY parent.lft"
-
-	t = db:selectall (columns, tablename, cond, extra)
-
-	return t
-end
-
-
--- Finding the Depth of a Sub-Tree
--- Seleciona a profundidade de cada noh a partir de um noh especifico
-function select_depth_subtree_app_tree (origin)
-	origin = origin or "1"
-	local t = {}
-
-	columns   = [[ node.app_tree_id, node.instance_id, node.service_object_id, node.lft,
-			node.rgt, node.app_list_id, node.app_tree_type, node.is_active, 
-			(COUNT(parent.app_tree_id) - (sub_tree.depth + 1)) AS depth ]]
-	tablename = [[ itvision_app_tree AS node, itvision_app_tree AS parent, itvision_app_tree AS sub_parent
-			(	SELECT node.app_tree_id, (COUNT(parent.app_tree_id) - 1) AS depth
-				FROM itvision_ap_tree AS node, itvision_ap_tree AS parent
-				WHERE node.lft BETWEEN parent.lft AND parent.rgt
-				AND node.app_tree_id = ]] .. origin .. [[
-				GROUP BY node.app_tree_id
-				ORDER BY node.lft
-			) AS sub_tree ]]
-	cond      = [[ node.lft BETWEEN parent.lft AND parent.rgt
-			AND node.lft BETWEEN sub_parent.lft AND sub_parent.rgt
-			AND sub_parent.app_tree_id = sub_tree.app_tree_id ]]
-	extra     = "GROUP BY node.app_tree_id ORDER BY node.lft"
-
-	t = db:selectall (columns, tablename, cond, extra)
-
-	return t
-end
-
-
--- Find the Immediate Subordinates of a Node
--- Encontra o noh subordinado imediato
-function select_subrdinates_app_tree (origin)
-	origin = origin or "1"
-	local t = {}
-
-	columns   = [[ node.app_tree_id, node.instance_id, node.service_object_id, node.lft,
-			node.rgt, node.app_list_id, node.app_tree_type, node.is_active, 
-			(COUNT(parent.app_tree_id) - (sub_tree.depth + 1)) AS depth ]]
-	tablename = [[ itvision_app_tree AS node, itvision_app_tree AS parent, itvision_app_tree AS sub_parent
-			(	SELECT node.app_tree_id, (COUNT(parent.app_tree_id) - 1) AS depth
-				FROM itvision_app_tree AS node,
-				itvision_app_tree AS parent
-				WHERE node.lft BETWEEN parent.lft AND parent.rgt
-				AND node.app_tree_id = ]] .. origin .. [[
-				GROUP BY node.app_tree_id
-				ORDER BY node.lft
-			) AS sub_tree ]]
-	cond      = [[ node.lft BETWEEN parent.lft AND parent.rgt
-			AND node.lft BETWEEN sub_parent.lft AND sub_parent.rgt
-			AND sub_parent.app_tree_id = sub_tree.app_tree_id ]]
-	extra     = [[ GROUP BY node.app_tree_id HAVING depth <= 1 ORDER BY node.lft ]]
-
-
-	t = db:selectall (columns, tablename, cond, extra)
-
-	return t
 end
 
 
@@ -199,7 +85,7 @@ function insert_node_app_tree(t, origin, position)
 
 		end
 
-		stmt = [[ INSERT INTO itvision_app_tree(instance_id, service_object_id, lft, rgt, 
+		stmt = [[ INSERT INTO itvision_app_tree(instance_id, service_id, lft, rgt, 
 			app_list_id, app_tree_type, is_active) 
 			VALUES ( 0, NULL, ]]..newLft..[[, ]]..newRgt..[[, NULL, NULL, 0 ) ]]
 
@@ -220,6 +106,135 @@ function insert_node_app_tree(t, origin, position)
 
 	assert ( db:assertexec ("UNLOCK TABLES"))
 	return res
+end
+
+-- Retrieving a Full Tree
+-- Seleciona toda sub-arvore a patir de um noh de origem
+function select_full_path_app_tree (origin)
+	origin = origin or "1"
+	local t = {}
+
+	columns   = [[ node.app_tree_id, node.instance_id, node.service_id, node.lft,
+			node.rgt, node.app_list_id, node.app_tree_type, node.is_active ]]
+	tablename = "itvision_app_tree AS node, itvision_app_tree AS parent"
+	cond      = "node.lft BETWEEN parent.lft AND parent.rgt AND parent.app_tree_id = " .. origin
+	extra     = "ORDER BY node.lft"
+
+	t = db:selectall (columns, tablename, cond, extra)
+
+	return t
+end
+
+
+-- Finding all the Leaf Nodes
+-- Seleciona todas as folhas da arvore
+function select_leaf_nodes_app_tree ()
+	local t = {}
+
+	columns   = [[ app_tree_id, instance_id, service_id, lft,
+			rgt, app_list_id, app_tree_type, is_active ]]
+	tablename = "itvision_app_tree"
+	cond      = "rgt = lft + 1"
+	extra     = "ORDER BY lft"
+
+	t = db:selectall (columns, tablename, cond, extra)
+
+	return t
+end
+
+
+-- Retrieving a Single Path
+-- Seleciona um unico caminho partindo de um noh ateh o topo da arvore
+function select_simple_path_app_tree (origin)
+	origin = origin or "1"
+	local t = {}
+
+	columns   = [[ parent.app_tree_id, parent.instance_id, parent.service_id, parent.lft,
+			parent.rgt, parent.app_list_id, parent.app_tree_type, parent.is_active ]]
+	tablename = "itvision_app_tree AS node, itvision_app_tree AS parent"
+	cond      = "node.lft BETWEEN parent.lft AND parent.rgt AND node.app_tree_id = " .. origin
+	extra     = "ORDER BY parent.lft"
+
+	t = db:selectall (columns, tablename, cond, extra)
+
+	return t
+end
+
+
+-- Finding the Depth of the Nodes
+-- Seleciona a profundidade de cada noh
+function select_depth_app_tree (origin)
+	origin = origin or "1"
+	local t = {}
+
+	columns   = [[ node.app_tree_id, node.instance_id, node.service_id, node.lft,
+			node.rgt, node.app_list_id, node.app_tree_type, node.is_active, 
+			(COUNT(parent.app_tree_id) - 1) AS depth ]]
+	tablename = "itvision_app_tree AS node, itvision_app_tree AS parent"
+	cond      = "node.lft BETWEEN parent.lft AND parent.rgt AND node.app_tree_id = " .. origin
+	extra     = "GROUP BY node.app_tree_id ORDER BY parent.lft"
+
+	t = db:selectall (columns, tablename, cond, extra)
+
+	return t
+end
+
+
+-- Finding the Depth of a Sub-Tree
+-- Seleciona a profundidade de cada noh a partir de um noh especifico
+function select_depth_subtree_app_tree (origin)
+	origin = origin or "1"
+	local t = {}
+
+	columns   = [[ node.app_tree_id, node.instance_id, node.service_id, node.lft,
+			node.rgt, node.app_list_id, node.app_tree_type, node.is_active, 
+			(COUNT(parent.app_tree_id) - (sub_tree.depth + 1)) AS depth ]]
+	tablename = [[ itvision_app_tree AS node, itvision_app_tree AS parent, itvision_app_tree AS sub_parent
+			(	SELECT node.app_tree_id, (COUNT(parent.app_tree_id) - 1) AS depth
+				FROM itvision_ap_tree AS node, itvision_ap_tree AS parent
+				WHERE node.lft BETWEEN parent.lft AND parent.rgt
+				AND node.app_tree_id = ]] .. origin .. [[
+				GROUP BY node.app_tree_id
+				ORDER BY node.lft
+			) AS sub_tree ]]
+	cond      = [[ node.lft BETWEEN parent.lft AND parent.rgt
+			AND node.lft BETWEEN sub_parent.lft AND sub_parent.rgt
+			AND sub_parent.app_tree_id = sub_tree.app_tree_id ]]
+	extra     = "GROUP BY node.app_tree_id ORDER BY node.lft"
+
+	t = db:selectall (columns, tablename, cond, extra)
+
+	return t
+end
+
+
+-- Find the Immediate Subordinates of a Node
+-- Encontra o noh subordinado imediato
+function select_subrdinates_app_tree (origin)
+	origin = origin or "1"
+	local t = {}
+
+	columns   = [[ node.app_tree_id, node.instance_id, node.service_id, node.lft,
+			node.rgt, node.app_list_id, node.app_tree_type, node.is_active, 
+			(COUNT(parent.app_tree_id) - (sub_tree.depth + 1)) AS depth ]]
+	tablename = [[ itvision_app_tree AS node, itvision_app_tree AS parent, itvision_app_tree AS sub_parent
+			(	SELECT node.app_tree_id, (COUNT(parent.app_tree_id) - 1) AS depth
+				FROM itvision_app_tree AS node,
+				itvision_app_tree AS parent
+				WHERE node.lft BETWEEN parent.lft AND parent.rgt
+				AND node.app_tree_id = ]] .. origin .. [[
+				GROUP BY node.app_tree_id
+				ORDER BY node.lft
+			) AS sub_tree ]]
+	cond      = [[ node.lft BETWEEN parent.lft AND parent.rgt
+			AND node.lft BETWEEN sub_parent.lft AND sub_parent.rgt
+			AND sub_parent.app_tree_id = sub_tree.app_tree_id ]]
+	extra     = [[ GROUP BY node.app_tree_id HAVING depth <= 1 ORDER BY node.lft ]]
+
+
+	t = db:selectall (columns, tablename, cond, extra)
+
+	return t
 end
 
 
