@@ -24,7 +24,7 @@ insta locate
 insta apache2
 insta libapache2-mod-php5
 insta libgd2-xpm-dev
-insta graphviz
+insta graphviz graphviz-dev libgv-lua
 insta unzip
 insta wget
 insta vim
@@ -48,16 +48,37 @@ cd /usr/src/luarocks-2.0.2/
 ./configure --prefix=/usr --sysconfdir=/etc/luarocks --with-lua-include=/usr/include/lua5.1
 make
 make install
+cd /usr/include
+for f in `ls lua5.1/*`; do ln -s  $f; done
+wget -P /tmp http://luaforge.net/frs/download.php/1410/compat-5.1r5.tar.gz
+tar zxf /tmp/compat-5.1r5.tar.gz -C /usr/local
+cd /usr/include 
+ln -s /usr/local/compat-5.1r5/compat-5.1.h
 cd
+
 # Rocks
 luarocks install wsapi
 luarocks install cgilua
 luarocks install orbit
 luarocks install cosmo
+#luarocks install luagraph
 #luarocks install wsapi-xavante
 #luarocks install markdown
 
-
+#
+# luagraph - install manually instead of using luarocks that with problems
+#
+cd /tmp
+wget -P /tmp wget http://luarocks.org/repositories/rocks/luagraph-1.0.2-2.src.rock
+unzip luagraph-1.0.2-2.src.rock
+tar zxf luagraph-1.0.2.tar.gz
+cd luagraph-1.0.2
+mv config config.orig
+cp ~itv/itv/ks/luagraph-config .
+make
+make install
+make webbook
+cd
 
 
 # --------------------------------------------------

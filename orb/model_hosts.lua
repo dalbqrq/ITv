@@ -1,6 +1,6 @@
 
 local dado = require "dado"
-local db = dado.connect ("ndoutils", "ndoutils", "itiv", "mysql")
+local db = dado.connect ("ndoutils", "ndoutils", "itv", "mysql")
 
 
 ----------------------------- HOSTS ----------------------------------
