@@ -32,14 +32,15 @@ local objecttype = {
 
 ----------------------------- CONFIG ----------------------------------
 
-function conect()
+
+function connect ()
 	local c = db_config
 	return dado.connect (c.dbname, c.dbuser, c.dbpass, c.driver)
 end
 
 
-function get_bp_id() -- usado para selecionar os 'services' que sao aplicacoes
-	local db = connect()
+function get_bp_id () -- usado para selecionar os 'services' que sao aplicacoes
+	local db = connect ()
 	local content = db:selectall ("object_id", "nagios_objects", "name1 = 'check_bp_status'")
 	return content[1].object_id
 end
@@ -48,20 +49,19 @@ end
 function select_columns (table_) -- Retorna tabela com nome dos campos de uma tabela sql
 	local content = {}
 	local cur = assert ( db:assertexec ("show columns from "..table_))
-	local row = cur:fetch({}, "a")
+	local row = cur:fetch ({}, "a")
 
 	while row do
-		table.insert(t, row.Field)
-		row = cur:fetch(row,"a")
+		table.insert (t, row.Field)
+		row = cur:fetch (row,"a")
 	end
 	return content
 end
 
 
-
 --[[ TODO: esta funcao deve estar em outra camada de acesso
-function init_config()
-	local db = connect()
+function init_config ()
+	local db = connect ()
 	local content = db:selectall ("config_id", "itvision_config")
 
 	if content[1] == nil then
@@ -71,13 +71,15 @@ function init_config()
 	else
 		return false
 	end
-	db:close()
+	db:close ()
 end
 ]]
 
+
 ----------------------------- DB ACCESS ----------------------------------
 
-function set_instance (inst_)
+
+function set_instance (inst_) -- change instance to be included in condition stmt
 	if inst_ then
 		inst = " instance_id = "..inst_
 	else
@@ -86,7 +88,7 @@ function set_instance (inst_)
 end
 
 
-function set_cond (cond_)
+function set_cond (cond_) -- include instance condition
 	if cond_ then 
 		cond = cond_.." and ".. inst 
 	else 
@@ -95,48 +97,48 @@ function set_cond (cond_)
 end
 
 
-function select (table_, cond_)
-	local db = connect()
-	local cond = set_cond(cond_)
-	local content = db:selectall ("*", table_, cond_)
-	db:close()
+function select (table_, cond_, extra_)
+	local db = connect ()
+	local cond = set_cond (cond_)
+	local content = db:selectall ("*", table_, cond_, extra_)
+	db:close ()
 	return content
 end
 
 
 function select_func (table_, cond_) -- this function return another function
-        local db = connect()
-	local cond = set_cond(cond_)
+        local db = connect ()
+	local cond = set_cond (cond_)
         local content = db:select ("*", table_, cond_)
 	-- Exemplo de uso:
-	--   for field1, field2 in content do print(field1, field2) end     
-        --   print(type(t))
-        db:close()
+	--   for field1, field2 in content do print (field1, field2) end     
+        --   print (type (t))
+        db:close ()
         return content
 end
 
 function insert (table_, content_)
-	local db = connect()
-	content_.instance_id = model_config.instance_id -- nao insere outras instancias
+	local db = connect ()
+	content_.instance_id = db_config.instance_id -- nao insere outras instancias
 	assert ( db:insert (table_, content_))
-	db:close()
+	db:close ()
 end
 
 
 function update (table_, content_, cond_)
-	local db = connect()
-	cond_ = set_cond(cond_)
-	content_.instance_id = model_config.instance_id -- nao atualiza outras instancias
+	local db = connect ()
+	cond_ = set_cond (cond_)
+	content_.instance_id = db_config.instance_id -- nao atualiza outras instancias
 	assert ( db:update (table_, content_, cond_))
-	db:close()
+	db:close ()
 end
 
 
 function delete (table_, cond_)
-	local db = connect()
-	local cond = set_cond(cond_)
+	local db = connect ()
+	local cond = set_cond (cond_)
 	assert ( db:update (table_, cond_))
-	db:close()
+	db:close ()
 end
 
 

@@ -1,46 +1,40 @@
-require "model_config"
+module (..., package.seeall);
 
-local dado = require "dado"
-
+local m = require "model_access"
 
 ----------------------------- SERVICES ----------------------------------
 
 function select_services (app)
 	if app ~= nil then app = " = " else app = " <> " end
-	local db = model_conn()
-	local bp_id = model_bp_id()
-	local t = db:selectall ("service_id, display_name", "nagios_services", 
-		"service_id >= 0 and check_command_object_id"..app..bp_id)
+	local db = m.connect()
+	local bp_id = m.get_bp_id()
+	local content = m.select ("nagios_services", "check_command_object_id"..app..bp_id)
 	db:close()
-	return t
+	return content
 end
 
 
 function select_all_service_objects (app)
 	if app ~= nil then app = " = " else app = " <> " end
-	local db = model_conn()
-	local bp_id = model_bp_id()
-	local t = db:selectall ("h.service_id, h.display_name, o.object_id ", 
-		"nagios_services h, nagios_objects o ", "h.service_object_id = o.object_id "..
-		"and check_command_object_id"..app..bp_id)
+	local db = m.connect()
+	local bp_id = m.get_bp_id()
+	local content = m.select ("nagios_services s, nagios_objects o ", 
+		"s.service_object_id = o.object_id and s.check_command_object_id"..app..bp_id)
 	db:close()
-	return t
+	return content
 end
 
 ----------------------------- APP ----------------------------------
 
 function select_apps ()
-	return select_service_apps ("app")
+	return select_services ("app")
 end
 
 
-function select_all_service_app_objects ()
-	return select_service_objects ("app")
+function select_all_app_objects ()
+	return select_all_service_objects ("app")
 end
 
-
-
-local dado = require "dado"
 
 
 ---------------------- NESTED SET MODEL for APP TREE -----------------------------
@@ -49,9 +43,9 @@ local dado = require "dado"
 --
 --
 
--- Create table structure
-function table_app_tree()
-	local t = {
+
+function table_app_tree() -- Create table structure
+	local content = {
 		app_tree_id = 0,
 		lft = 0,
 		rgt = 0,
@@ -63,28 +57,27 @@ function table_app_tree()
 		name = ""
 	}
 
-	return t
-end
-
-function open_app_tree_db()
-	return dado.connect ("ndoutils", "ndoutils", "itv", "mysql")
+	return content
 end
 
 
--- Init tree
--- Inicia a arvore
-function init_app_tree()
-	local t = {}
-	local db = open_app_tree_db()
+function init_app_tree() -- Init tree -- Inicia a arvore
+	local content = {}
+	local db = m.connect()
 
-	--t = db:selectall ("lft", "itvision_app_tree", "lft = 1")
-	t = db:selectall ("lft", "itvision_app_tree", "lft > 0", "order by lft desc limit 1")
+	--content = db:selectall ("lft", "itvision_app_tree", "lft = 1")
+	--content = db:selectall ("lft", "itvision_app_tree", "lft > 0", "order by lft desc limit 1")
+	content = m.select ("itvision_app_tree", nil, "order by lft desc limit 1")
 
-	if t[1] == nil then
-		assert ( db:assertexec ( [[
-			INSERT INTO itvision_app_tree(instance_id, service_id, lft, rgt, app_list_id, 
-				app_tree_type, is_active) VALUES ( 0, NULL, 1, 2, NULL, NULL, 0 )
-		]] ))
+	if content[1] == nil then
+		content ={}
+		content.lft = 1
+		content.lft = 2
+--		assert ( db:assertexec ( [[
+--			INSERT INTO itvision_app_tree(instance_id, service_id, lft, rgt, app_list_id, 
+--				app_tree_type, is_active) VALUES ( 0, NULL, 1, 2, NULL, NULL, 0 )
+--		]] ))
+		m.insert ("itvision_app_tree", content)
 		db:close()
 		return true
 	else
@@ -95,18 +88,16 @@ function init_app_tree()
 end
 
 
--- Adding New Nodes
--- Incluindo novos noh
-function insert_node_app_tree(t, origin, position)
+function insert_node_app_tree(t, origin, position) -- Adding New Nodes -- Incluindo novos noh
 	origin = origin or 1
 	position = position or 1 -- 0 : anter; 1 : abaixo; 2 : depois
-	local t = {}
-	local db = open_app_tree_db()
+	local content = {}
+	local db = m.connect()
 
 	assert ( db:assertexec ("LOCK TABLE itvision_app_tree WRITE"))
-	t = db:selectall ("lft, rgt", "itvision_app_tree", "app_tree_id = ".. origin)
+	content = db:selectall ("lft, rgt", "itvision_app_tree", "app_tree_id = ".. origin)
 
-	if t[1] == nil then
+	if content[1] == nil then
 		print("origin not found")
 		res = false
 	else
@@ -163,8 +154,8 @@ end
 -- Seleciona toda sub-arvore a patir de um noh de origem
 function select_full_path_app_tree (origin)
 	origin = origin or "1"
-	local db = open_app_tree_db()
-	local t = {}
+	local db = m.connect()
+	local content = {}
 
 	columns   = [[ node.app_tree_id, node.instance_id, node.service_id, node.lft,
 			node.rgt, node.app_list_id, node.app_tree_type, node.is_active ]]
@@ -172,18 +163,18 @@ function select_full_path_app_tree (origin)
 	cond      = "node.lft BETWEEN parent.lft AND parent.rgt AND parent.app_tree_id = " .. origin
 	extra     = "ORDER BY node.lft"
 
-	t = db:selectall (columns, tablename, cond, extra)
+	content = db:selectall (columns, tablename, cond, extra)
 
 	db:close()
-	return t
+	return content
 end
 
 
 -- Finding all the Leaf Nodes
 -- Seleciona todas as folhas da arvore
 function select_leaf_nodes_app_tree ()
-	local db = open_app_tree_db()
-	local t = {}
+	local db = m.connect()
+	local content = {}
 
 	columns   = [[ app_tree_id, instance_id, service_id, lft,
 			rgt, app_list_id, app_tree_type, is_active ]]
@@ -191,10 +182,10 @@ function select_leaf_nodes_app_tree ()
 	cond      = "rgt = lft + 1"
 	extra     = "ORDER BY lft"
 
-	t = db:selectall (columns, tablename, cond, extra)
+	content = db:selectall (columns, tablename, cond, extra)
 
 	db:close()
-	return t
+	return content
 end
 
 
@@ -202,8 +193,8 @@ end
 -- Seleciona um unico caminho partindo de um noh ateh o topo da arvore
 function select_simple_path_app_tree (origin)
 	origin = origin or "1"
-	local db = open_app_tree_db()
-	local t = {}
+	local db = m.connect()
+	local content = {}
 
 	columns   = [[ parent.app_tree_id, parent.instance_id, parent.service_id, parent.lft,
 			parent.rgt, parent.app_list_id, parent.app_tree_type, parent.is_active ]]
@@ -211,10 +202,10 @@ function select_simple_path_app_tree (origin)
 	cond      = "node.lft BETWEEN parent.lft AND parent.rgt AND node.app_tree_id = " .. origin
 	extra     = "ORDER BY parent.lft"
 
-	t = db:selectall (columns, tablename, cond, extra)
+	content = db:selectall (columns, tablename, cond, extra)
 
 	db:close()
-	return t
+	return content
 end
 
 
@@ -222,8 +213,8 @@ end
 -- Seleciona a profundidade de cada noh
 function select_depth_app_tree (origin)
 	origin = origin or "1"
-	local db = open_app_tree_db()
-	local t = {}
+	local db = m.connect()
+	local content = {}
 
 	columns   = [[ node.app_tree_id, node.instance_id, node.service_id, node.lft,
 			node.rgt, node.app_list_id, node.app_tree_type, node.is_active, 
@@ -232,10 +223,10 @@ function select_depth_app_tree (origin)
 	cond      = "node.lft BETWEEN parent.lft AND parent.rgt AND node.app_tree_id = " .. origin
 	extra     = "GROUP BY node.app_tree_id ORDER BY parent.lft"
 
-	t = db:selectall (columns, tablename, cond, extra)
+	content = db:selectall (columns, tablename, cond, extra)
 
 	db:close()
-	return t
+	return content
 end
 
 
@@ -243,8 +234,8 @@ end
 -- Seleciona a profundidade de cada noh a partir de um noh especifico
 function select_depth_subtree_app_tree (origin)
 	origin = origin or "1"
-	local db = open_app_tree_db()
-	local t = {}
+	local db = m.connect()
+	local content = {}
 
 	columns   = [[ node.app_tree_id, node.instance_id, node.service_id, node.lft,
 			node.rgt, node.app_list_id, node.app_tree_type, node.is_active, 
@@ -262,10 +253,10 @@ function select_depth_subtree_app_tree (origin)
 			AND sub_parent.app_tree_id = sub_tree.app_tree_id ]]
 	extra     = "GROUP BY node.app_tree_id ORDER BY node.lft"
 
-	t = db:selectall (columns, tablename, cond, extra)
+	content = db:selectall (columns, tablename, cond, extra)
 
 	db:close()
-	return t
+	return content
 end
 
 
@@ -273,8 +264,8 @@ end
 -- Encontra o noh subordinado imediato
 function select_subrdinates_app_tree (origin)
 	origin = origin or "1"
-	local db = open_app_tree_db()
-	local t = {}
+	local db = m.connect()
+	local content = {}
 
 	columns   = [[ node.app_tree_id, node.instance_id, node.service_id, node.lft,
 			node.rgt, node.app_list_id, node.app_tree_type, node.is_active, 
@@ -294,10 +285,10 @@ function select_subrdinates_app_tree (origin)
 	extra     = [[ GROUP BY node.app_tree_id HAVING depth <= 1 ORDER BY node.lft ]]
 
 
-	t = db:selectall (columns, tablename, cond, extra)
+	content = db:selectall (columns, tablename, cond, extra)
 
 	db:close()
-	return t
+	return content
 end
 
 
