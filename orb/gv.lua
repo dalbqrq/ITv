@@ -27,41 +27,48 @@ function graph_show(grph)
 end
 
 
-local content = {}
+function create_graph_content()
+  local content = {}
 
-table.insert(content, node{"A", shape="box",style="filled",height=.1,width=.1,fontsize=20.,
+  table.insert(content, node{"A", shape="box",style="filled",height=.1,width=.1,fontsize=20.,
 		fontname="Helvetica", label="A", color="green",URL="ics.lp?ickey=01",target="_self"})
-table.insert(content, node{"B", shape="ellipse",style="filled",height=.1,width=.1,fontsize=20.,
+  table.insert(content, node{"B", shape="ellipse",style="filled",height=.1,width=.1,fontsize=20.,
 		fontname="Helvetica", label="B", color="red",URL="ics.lp?ickey=01",target="_self"})
-table.insert(content, edge{"A", "B", label=""})
+  table.insert(content, edge{"A", "B", label=""})
+
+  return content
+end
 
 
 
-local g = digraph{"G",
---  comment = "LuaGraph: exam2.lua",
---  compound = "1",
---  rankdir = "LR",
-  size="6.5,6.5",
+function create_graph_file(content, file)
+  file = file or "../html/gv.png"
+  local file_type = "png"
 
-  unpack(content)
-}
+  local g = digraph{"G",
+  --  comment = "LuaGraph: exam2.lua",
+  --  compound = "1",
+  --  rankdir = "LR",
+    size="6.5,6.5",
 
+    unpack(content)
+  }
 
-
--- Make the layout using 'dot' (default) engine
-print("Layout ...")
-g:layout()
-
--- write graph to stdout
-print("Write ...")
-g:write()
-
--- Render the graph into postscript format
-print("Render ...")
-g:render("png", "../html/gv.png")
-
--- Close the graph
-print("Close ...")
-g:close()
-
+  -- Make the layout using 'dot' (default) engine
+  --print("Layout ...")
+  g:layout()
+  
+  -- write graph to stdout
+  --print("Write ...")
+  --g:write()
+  
+  -- Render the graph into postscript format
+  --print("Render ...")
+  g:render(file_type, file)
+  
+  -- Close the graph
+  --print("Close ...")
+  g:close()
+  
+end
 
