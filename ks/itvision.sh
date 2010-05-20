@@ -24,7 +24,7 @@ insta locate
 insta apache2
 insta libapache2-mod-php5
 insta libgd2-xpm-dev
-insta graphviz graphviz-dev libgv-lua
+insta graphviz graphviz-dev
 insta unzip
 insta wget
 insta vim
