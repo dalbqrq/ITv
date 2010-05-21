@@ -9,7 +9,7 @@
 	position:relative;
 	overflow:hidden;
 	width: 760px;
-	height: 90px;
+	height: 70px;
 
 	/* custom decorations */
 /* daniel
@@ -55,8 +55,8 @@
 	background-color:#fff;
 	padding: 0px;
 	border:2px solid #ccc;
-	width:110px;
-	height:80px;
+	width:40px;
+	height:40px;
 	
 	-moz-border-radius:4px;
 	-webkit-border-radius:4px;
@@ -80,7 +80,7 @@
 	width:100%;
 */
 	width:980px;
-	height:555px;
+	height:590px;
 	margin:0;
 	padding:0;
 
