@@ -26,7 +26,7 @@ end
 -- pass multiple patterns, and any captures get passed to
 -- the controller
 
-hello:dispatch_get(index, "/", "/index")
+hello:dispatch_get(index, "/", "/horbit")
 hello:dispatch_get(say, "/say/(%a+):(%d+):(%d+)")
 
 -- These are the view functions referenced by the controllers.

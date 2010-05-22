@@ -1,0 +1,78 @@
+<html>
+<body>
+<table>
+<tbody id="dataTable">
+</tbody>
+</table>
+
+<script>
+function processReqChange()
+{
+ if (req.readyState == 4 && req.status == 200 && req.responseXML != null)
+ {
+    var dto = document.getElementById( 'dataTable' );
+    var items = [];
+    var nl = req.responseXML.getElementsByTagName( 'slide' );
+
+    for( var i = 0; i < nl.length; i++ )
+    {
+      var nli = nl.item( i );
+      var src = nli.getAttribute( 'src' ).toString();
+      var width = parseInt( nli.getAttribute( 'width' ).toString() );
+      var height = parseInt( nli.getAttribute( 'height' ).toString() );
+
+      var trNode = document.createElement( 'tr' );
+
+      var srcNode = document.createElement( 'td' );
+      srcNode.innerHTML = src;
+      trNode.appendChild( srcNode );
+
+      var widthNode = document.createElement( 'td' );
+      widthNode.innerHTML = width.toString();
+      trNode.appendChild( widthNode );
+
+      var heightNode = document.createElement( 'td' );
+      heightNode.innerHTML = height.toString();
+      trNode.appendChild( heightNode );
+
+      dto.appendChild( trNode );
+    }
+    load_slides( items );
+    start_slides();
+  }
+}
+
+function loadXMLDoc( url )
+{
+  req = false;
+  if(window.XMLHttpRequest) {
+    try {
+      req = new XMLHttpRequest();
+    } catch(e) {
+      req = false;
+    }
+  }
+  else if(window.ActiveXObject)
+  {
+    try {
+      req = new ActiveXObject("Msxml2.XMLHTTP");
+    } catch(e) {
+    try {
+      req = new ActiveXObject("Microsoft.XMLHTTP");
+    } catch(e) {
+      req = false;
+    }
+  }
+  }
+  if(req) {
+    req.onreadystatechange = processReqChange;
+    req.open("GET", url, true);
+    req.send("");
+  }
+}
+
+loadXMLDoc( "http://itv/ajax/slides.php" );
+</script>
+
+</body>
+</html>
