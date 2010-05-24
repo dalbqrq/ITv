@@ -2,6 +2,7 @@ local m = require "model_access"
 local r = require "model_rules"
 
 require "initialization"
+require "messages"
 
 
 function test_select1()
@@ -97,6 +98,7 @@ end
 
 print("\n--------------------------------------------------------\n")
 
+print(strings.user_group_name)
 
 
 --[[

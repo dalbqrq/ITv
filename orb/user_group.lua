@@ -14,49 +14,80 @@ local env = luasql[database.driver]()
 mapper.conn = env:connect(database.dbname, database.dbuser, database.dbpass)
 mapper.driver = database.driver
 
-local r = require "model_rules"
+local ru = require "model_rules"
+local ac = require "model_rules"
 
 -- models
 
-app_list = itvision:model "app_list"
---app_relat = itvision:model "app_relat"
---app_relat_type = itvision:model "app_relat_type"
---app_tree = itvision:model "app_tree"
---apps = itvision:model "apps"
---config = itvision:model "config"
---contract = itvision:model "contract"
---device = itvision:model "device"
---device_host = itvision:model "device_host"
---location_tree = itvision:model "location_tree"
---manufacturer = itvision:model "manufacturer"
---site_tree = itvision:model "site_tree"
---user = itvision:model "user"
---user_group = itvision:model "user_group"
+apps = itvision:model "apps"
+user = itvision:model "user"
+user_group = itvision:model "user_group"
 
-function app_list:select_app_list()
-   return self:find_all("")
+function apps:select_apps(app_id)
+   local clause = ""
+   if app_id then
+      clause = "app_id = "..app_id
+   end
+   return self:find_all(clause)
+end
+
+function user:select_user(user_id)
+   local clause = ""
+   if user_id then
+      clause = "user_id = "..user_id
+   end
+   return self:find_all(clause)
+end
+
+function user_group:select_user_group(user_group_id)
+   local clause = ""
+   if user_group_id then
+      clause = "user_group_id = "..user_group_id
+   end
+   return self:find_all(clause)
 end
 
 -- controllers
 
-function index(web)
-   return render_index()
+function list(web)
+   local ug = user_group:select_user_group()
+   return render_list(web, ug)
 end
 
-itvision:dispatch_get(index, "/", "/index")
+itvision:dispatch_get(list, "/", "/list")
 
 
-function say(web, name, n1, n2)
-   return render_say(web, name, n1, n2)
+function show(web, user_group_id)
+   local ug = user_group:select_user_group(user_group_id)
+   return render_show(web, ug)
 end
 
-itvision:dispatch_get(say, "/say/(%a+):(%d+):(%d+)")
+itvision:dispatch_get(show, "/show/(%d+)")
 
 
-function add_nothing(web, id)
+function add(web)
+   local ap = apps:select_apps()
+   return render_add(web, ap)
+end
+
+itvision:dispatch_get(add, "/add")
+
+
+function insert(web)
+   user_group.name = web.input.name
+   user_group.root_app = web.input.root_app
+   user_group:save()
+   return web:redirect(web:link("/list"))
+end
+
+itvision:dispatch_post(insert, "/insert")
+
+
+--[[
+function add(web, id)
    local input = web.input
    id=3
---[[
+
    if string.find(input.app_id, "^%s*$") then
       return render_nothing(web, id, true)
    else
@@ -64,7 +95,8 @@ function add_nothing(web, id)
       app_list.app_id = tonumber(id)
       --app_list.body = input.comment
    end
-]]--
+
+
    --return web:redirect(web:link("/nothing/" .. id))
    local app_list = app_list:new()
    app_list.app_id = tonumber(id)
@@ -90,73 +122,78 @@ function form_input(web)
 end
 
 itvision:dispatch_get(form_input, "/input")
+]]--
 
 -- views
 
 function render_layout(inner_html)
    return html{
-     head{ title"Hello" },
+     head{ title"ITvision" },
      body{ inner_html }
    }
 end
 
-function render_itvision()
-   local s = "<p>"
-   local a = app_list:select_app_list()
-   for i,v in ipairs(a) do
-      s = s.."[ "..v.app_id.." + "..v.object_id.." ] <p>"
+
+function render_insert(web)
+   local res = p{web.input.ap_list.." + "..web.input.user_group_name}
+   return render_layout(res)
+end
+
+
+function render_list(web, ug)
+   local rows = {}
+   
+   for i, v in ipairs(ug) do
+      rows[#rows + 1] = tr{ 
+         td{ v.name },
+         td{ v.root_app }
+      }
    end
-   return p.itvision"Hello World!"..s
+
+   local res = H("table") { border=1, frame="border",
+      thead{ 
+         tr{ 
+             th{ strings.user_group_name }, 
+             th{ strings.application }
+         }
+      },
+      tbody{
+         rows
+      }
+   }
+   return render_layout(res)
 end
 
-function render_index()
-   return render_layout(render_itvision())
+
+function render_show(web, ug)
+   local res = p{"SHOW"}
+   return render_layout(res)
 end
 
-function render_say(web, name, n1, n2)
-   return render_layout(render_itvision() .. 
-     p.itvision((web.input.greeting or "Hello ") .. name .. " : " .. n1 .." : " .. n2 .." !"))
-end
 
-function render_nothing(web, id, app)
-   return render_layout(p.itvision"Hello Nothing!"..id.." :: "..app.app_id.." :: "..app.type)
-end
-
-function render_add(web, post_id, user)
-   return render_layout(p.itvision((web.input.greeting or "Hello ") .. post_id .." & ".. user))
-end
-
-function render_input(web)
+function render_add(web, ap)
    local res = {}
+   local ap_list = {} 
+   local s = ""
+
+   for i, v in ipairs(ap) do
+         ap_list[#ap_list + 1] = H("option") { value = v.app_id, label = v.name }
+   end
 
    res[#res + 1] = form{
       name = "input",
       method = "post",
-      action = web:link("/add/30"),
-
-      p{ "NAME:", input{ type="text", name="user", value = "Daniel" },
+      action = web:link("/insert"),
+      p { 
+         strings.user_group_name..": ", input{ type="text", name="name", value = "" }, 
          br(),
-
-         "form_email:", br(), input{ type="text", name="email",
-         --value = web.input.email },
-         value = web.prefix },
+         strings.application..": ", H("select"){ name="root_app",  ap_list },
          br(),
-         "form_url:", br(), input{ type="text", name="url",
-         --value = web.input.url },
-         value = web.real_path },
-         br(),
-         "Comentarion:", br(), err_msg,
-         textarea{ name="comment", rows="10", cols="60", web.input.comment },
-         br(),
-         em(" *italics* "),
-         strong(" **bold** "),
-         " [" .. a{ href="/url", "link" } .. "](http://url) ",
-         br(),
-
-         input.button{ type="submit", value="Enviar" }
+         input.button{ type="submit", value="Enviar" }, " ",
+         input.button{ type="reset", value="Reset" }
       }
    }
-   res[#res + 1] = p.itvision "INPUT"
+
    return render_layout(res)
 end
 

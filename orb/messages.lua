@@ -1,5 +1,20 @@
 local conf = require "config"
 
+----------------------------- MESSAGE ----------------------------------
+
+local strgs = {}
+strgs.pt_BR = {
+	user_group_name = "Nome do grupo",
+	application = "Aplica&ccedil;&atilde;o"
+}
+
+strgs.us = {
+	user_group_name = "Group name",
+	application = "Aplication"
+}
+
+strings = strgs[config.language]
+
 ----------------------------- ERROR MESSAGE ----------------------------------
 local err_msg = {} 
 err_msg.pt_BR = {
