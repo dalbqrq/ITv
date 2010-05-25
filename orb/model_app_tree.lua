@@ -1,6 +1,5 @@
 
 local dado = require "dado"
-local db = dado.connect ("ndoutils", "ndoutils", "itv", "mysql")
 
 
 ---------------------- NESTED SET MODEL for APP TREE -----------------------------
@@ -19,10 +18,15 @@ function table_app_tree()
 		app_tree_type = "NULL",
 		is_active = 0,
 		instance_id = 0,
-		service_id = "NULL"
+		service_id = "NULL",
+		name = ""
 	}
 
 	return t
+end
+
+function open_app_tree_db()
+	return dado.connect ("ndoutils", "ndoutils", "itv", "mysql")
 end
 
 
@@ -30,16 +34,20 @@ end
 -- Inicia a arvore
 function init_app_tree()
 	local t = {}
+	local db = open_app_tree_db()
 
-	t = db:selectall ("lft", "itvision_app_tree", "lft = 1")
+	--t = db:selectall ("lft", "itvision_app_tree", "lft = 1")
+	t = db:selectall ("lft", "itvision_app_tree", "lft > 0", "order by lft desc limit 1")
 
 	if t[1] == nil then
 		assert ( db:assertexec ( [[
 			INSERT INTO itvision_app_tree(instance_id, service_id, lft, rgt, app_list_id, 
 				app_tree_type, is_active) VALUES ( 0, NULL, 1, 2, NULL, NULL, 0 )
 		]] ))
+		db:close()
 		return true
 	else
+		db:close()
 		return false
 	end
 
@@ -52,6 +60,7 @@ function insert_node_app_tree(t, origin, position)
 	origin = origin or 1
 	position = position or 1 -- 0 : anter; 1 : abaixo; 2 : depois
 	local t = {}
+	local db = open_app_tree_db()
 
 	assert ( db:assertexec ("LOCK TABLE itvision_app_tree WRITE"))
 	t = db:selectall ("lft, rgt", "itvision_app_tree", "app_tree_id = ".. origin)
@@ -105,6 +114,7 @@ function insert_node_app_tree(t, origin, position)
 	end
 
 	assert ( db:assertexec ("UNLOCK TABLES"))
+	db:close()
 	return res
 end
 
@@ -112,6 +122,7 @@ end
 -- Seleciona toda sub-arvore a patir de um noh de origem
 function select_full_path_app_tree (origin)
 	origin = origin or "1"
+	local db = open_app_tree_db()
 	local t = {}
 
 	columns   = [[ node.app_tree_id, node.instance_id, node.service_id, node.lft,
@@ -122,6 +133,7 @@ function select_full_path_app_tree (origin)
 
 	t = db:selectall (columns, tablename, cond, extra)
 
+	db:close()
 	return t
 end
 
@@ -129,6 +141,7 @@ end
 -- Finding all the Leaf Nodes
 -- Seleciona todas as folhas da arvore
 function select_leaf_nodes_app_tree ()
+	local db = open_app_tree_db()
 	local t = {}
 
 	columns   = [[ app_tree_id, instance_id, service_id, lft,
@@ -139,6 +152,7 @@ function select_leaf_nodes_app_tree ()
 
 	t = db:selectall (columns, tablename, cond, extra)
 
+	db:close()
 	return t
 end
 
@@ -147,6 +161,7 @@ end
 -- Seleciona um unico caminho partindo de um noh ateh o topo da arvore
 function select_simple_path_app_tree (origin)
 	origin = origin or "1"
+	local db = open_app_tree_db()
 	local t = {}
 
 	columns   = [[ parent.app_tree_id, parent.instance_id, parent.service_id, parent.lft,
@@ -157,6 +172,7 @@ function select_simple_path_app_tree (origin)
 
 	t = db:selectall (columns, tablename, cond, extra)
 
+	db:close()
 	return t
 end
 
@@ -165,6 +181,7 @@ end
 -- Seleciona a profundidade de cada noh
 function select_depth_app_tree (origin)
 	origin = origin or "1"
+	local db = open_app_tree_db()
 	local t = {}
 
 	columns   = [[ node.app_tree_id, node.instance_id, node.service_id, node.lft,
@@ -176,6 +193,7 @@ function select_depth_app_tree (origin)
 
 	t = db:selectall (columns, tablename, cond, extra)
 
+	db:close()
 	return t
 end
 
@@ -184,6 +202,7 @@ end
 -- Seleciona a profundidade de cada noh a partir de um noh especifico
 function select_depth_subtree_app_tree (origin)
 	origin = origin or "1"
+	local db = open_app_tree_db()
 	local t = {}
 
 	columns   = [[ node.app_tree_id, node.instance_id, node.service_id, node.lft,
@@ -204,6 +223,7 @@ function select_depth_subtree_app_tree (origin)
 
 	t = db:selectall (columns, tablename, cond, extra)
 
+	db:close()
 	return t
 end
 
@@ -212,6 +232,7 @@ end
 -- Encontra o noh subordinado imediato
 function select_subrdinates_app_tree (origin)
 	origin = origin or "1"
+	local db = open_app_tree_db()
 	local t = {}
 
 	columns   = [[ node.app_tree_id, node.instance_id, node.service_id, node.lft,
@@ -234,17 +255,20 @@ function select_subrdinates_app_tree (origin)
 
 	t = db:selectall (columns, tablename, cond, extra)
 
+	db:close()
 	return t
 end
 
 
-init_app_tree()
+--init_app_tree()
 
+--[[
 if insert_node_app_tree(nil, 14, 1) then
 	print("done")
 else
 	print("not done")
 end
+]]
 
 
 --[[
@@ -262,10 +286,9 @@ for i, v in ipairs(t) do
 end
 
 print("---------------------------------")
-]]--
+]]
 
 
-db:close()
 
 
 
