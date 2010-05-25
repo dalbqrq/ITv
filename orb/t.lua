@@ -64,7 +64,7 @@ function test_select1()
    end
 ]]
    print ("----- USER_GROUP X APP-----")
-   t = m.select ("itvision_user_group ug, itvision_apps ap", "ug.root_app = ap.app_id", "", 
+   t = m.select ("itvision_user_group ug, itvision_apps ap", "ug.root_app = ap.app_id and ug.user_group_id = 4", "", 
       "ap.name, ap.type, ug.name as ugname" )
    for i, v in ipairs (t) do
       print ("->",v.name, v.type, v.ugname )

@@ -49,11 +49,13 @@ end
 
 function user_group:select_user_group_app(user_group_id)
    local clause = "ug.root_app = ap.app_id"
+   user_group_id = nil
+
    if user_group_id then
-      clause = "and ug.user_group_id = "..user_group_id
+      clause = clause.." and ug.user_group_id = "..tostring(user_group_id)
    end
    local tables = "itvision_user_group ug, itvision_apps ap"
-   local cols = "ap.name, ap.type, ug.name as ugname, user_group_id"
+   local cols = "ap.name as name, ap.type as type, ug.name as ugname, user_group_id"
    local res = ac.select (tables, clause, "", cols) 
 
    return res
@@ -71,7 +73,7 @@ itvision:dispatch_get(list, "/", "/list")
 
 function show(web, user_group_id)
    local ug = user_group:select_user_group_app(user_group_id)
-   return render_show(web, ug)
+   return render_show(web, ug, user_group_id)
 end
 
 itvision:dispatch_get(show, "/show/(%d+)")
@@ -117,6 +119,7 @@ function render_list(web, ug)
       rows[#rows + 1] = tr{ 
          td{ v.ugname },
          td{ v.name },
+         --td{ v.user_group_id },
          td{ a{ href= web:link("/remove/"..v.user_group_id), strings.remove} },
          td{ a{ href= web:link("/edit/"..v.user_group_id), strings.edit} },
          td{ a{ href= web:link("/show/"..v.user_group_id), strings.show} },
@@ -128,6 +131,7 @@ function render_list(web, ug)
          tr{ 
              th{ strings.user_group_name }, 
              th{ strings.application },
+             --th{ "user_group_id" },
              th{ "." },
              th{ "." },
              th{ "." }
@@ -142,8 +146,18 @@ function render_list(web, ug)
 end
 
 
-function render_show(web, ug)
-   local res = p{"SHOW"}
+function render_show(web, ug, ug_id)
+   local res = H("table") { border=1, cellpadding=1,
+      tbody{
+         tr{ td{ strings.user_group_name }, td{ ug.ugname } },
+         tr{ td{ strings.type }, td{ ug.type } },
+         tr{ td{ strings.application }, td{ ug.name } },
+      }
+   }
+   res = res ..  a{ href= web:link("/add"), strings.add}
+   res = res ..  ug_id .." "..tostring(#ug)
+   --res = res ..  a{ href= web:link("/remove/"..ug.user_group_id), strings.remove}
+   --res = res ..  a{ href= web:link("/edit/"..ug.user_group_id), strings.edit}
    return render_layout(res)
 end
 
