@@ -142,3 +142,10 @@ function delete (table_, cond_)
 end
 
 
+function execute (stmt_)
+	local db = connect ()
+	assert ( db:assertexec (stmt_))
+	db:close ()
+end
+
+

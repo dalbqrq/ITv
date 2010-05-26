@@ -88,22 +88,26 @@ function init_app_tree() -- Init tree -- Inicia a arvore
 end
 
 
-function insert_node_app_tree(t, origin, position) -- Adding New Nodes -- Incluindo novos noh
-	origin = origin or 1
-	position = position or 1 -- 0 : anter; 1 : abaixo; 2 : depois
-	local content = {}
+function insert_node_app_tree(content_, origin_, position_) -- Adding New Nodes -- Incluindo novos noh
+	origin_ = origin_ or 0
+	position_ = position_ or 1 -- 0 : anter; 1 : abaixo; 2 : depois
 	local db = m.connect()
+	local newLft, newRgt
 
-	assert ( db:assertexec ("LOCK TABLE itvision_app_tree WRITE"))
-	content = db:selectall ("lft, rgt", "itvision_app_tree", "app_tree_id = ".. origin)
+	local content = m.select ("itvision_app_tree", "app_tree_id = ".. origin_)
 
-	if content[1] == nil then
+	if origin_ == 0 then
+		newLft = 1
+		newRgt = 2
+
+	elseif content[1] == nil then
 		print("origin not found")
 		res = false
+
 	else
 		res = true
-		lft = tonumber(t[1].lft)
-		rgt = tonumber(t[1].rgt)
+		lft = tonumber(content[1].lft)
+		rgt = tonumber(content[1].rgt)
 		print(lft, rgt)
 
 		if position == 0 then
@@ -126,29 +130,28 @@ function insert_node_app_tree(t, origin, position) -- Adding New Nodes -- Inclui
 
 		end
 
-		stmt = [[ INSERT INTO itvision_app_tree(instance_id, service_id, lft, rgt, 
-			app_list_id, app_tree_type, is_active) 
-			VALUES ( 0, NULL, ]]..newLft..[[, ]]..newRgt..[[, NULL, NULL, 0 ) ]]
+		content_.lft   = newLft
+		content_.rgt   = newRgt
+		updateLft_.lft = "lft + 2"
+		updateRgt_.rgt = "rgt + 2"
 
-		--[[
-		print(condLft)
-		print(cond2)
-		print(newLft, newRgt)
-
-		print( "update itvision_app_tree set lft = lft + 2 where "..condLft )
-		print( "update itvision_app_tree set rgt = rgt + 2 where "..cond2 )
-		print(stmt)
-		]]--
-
-		assert ( db:assertexec ( "update itvision_app_tree set lft = lft + 2 where "..condLft ))
-		assert ( db:assertexec ( "update itvision_app_tree set rgt = rgt + 2 where "..condRgt ))
-		assert ( db:assertexec ( stmt ))
 	end
 
-	assert ( db:assertexec ("UNLOCK TABLES"))
+	--assert ( m.execute ( "LOCK TABLE itvision_app_tree WRITE" ))
+	if origin_ ~= 0 then
+		--assert ( m.update  ( "itvision_app_tree", update_, condLft ))
+		--assert ( m.update  ( "itvision_app_tree", update_, condRgt ))
+		print("update itvision_app_tree set lft = "..updateLft_.lft.." where "..condLft)
+		print("update itvision_app_tree set rgt = "..updateRgt_.rgt.." where "..condRgt)
+	end
+	--assert ( m.insert  ( "itvision_app_tree", content_ ))
+	print  ( "insert into ".. table.concat(content_," ") )
+	--assert ( m.execute ( "UNLOCK TABLES" ))
+
 	db:close()
 	return res
 end
+
 
 -- Retrieving a Full Tree
 -- Seleciona toda sub-arvore a patir de um noh de origem
