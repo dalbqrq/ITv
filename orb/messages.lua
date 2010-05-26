@@ -12,6 +12,8 @@ strgs.pt_BR = {
 	add = "Adicionar",
 	edit = "Editar",
 	remove = "Remover",
+	send = "Enviar",
+	reset = "Resetar",
 }
 
 strgs.us = {
@@ -23,6 +25,8 @@ strgs.us = {
 	add = "Add",
 	edit = "Edit",
 	remove = "Remove",
+	send = "Send",
+	reset = "Reset",
 }
 
 strings = strgs[config.language]
