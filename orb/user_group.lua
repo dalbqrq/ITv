@@ -160,12 +160,43 @@ end
 itvision:dispatch_get(delete, "/delete/(%d+)")
 
 
+itvision:dispatch_static("/css/%.css", "/script/%.js")
+
 -- views ------------------------------------------------------------
+
+local scrt = [[
+
+
+function confirmation(question, url) { 
+   var answer = confirm(question) 
+   if (answer){ 
+      //alert("The answer is OK!"); 
+      window.location = url;
+   } else { 
+      //alert("The answer is CANCEL!") 
+   } 
+} 
+]]
+
+function do_button(web, label, url, question)
+   --return { form { action = web:link("/list"),  input { value = strings.list, type = "submit" } } }
+   --return { form = { action = web:link(url),  input = { value = label, type = "submit" } } }
+   return { form = { action = web:link("/list"),  input = { value = strings.list, type = "submit" } } }
+end
 
 function render_layout(inner_html)
    return html{
-     head{ title"ITvision" },
-     body{ inner_html }
+      head{ 
+         title("ITvision"),
+         meta{ ["http-equiv"] = "Content-Type",
+            content = "text/html; charset=utf-8" },
+         link{ rel = 'stylesheet', type = 'text/css', 
+            href = '/css/style.css', media = 'screen' },
+         --script{ type="text/javascript", src="http://itv/js/scripts.js" },
+         script{ type="text/javascript", scrt },
+
+      },
+      body{ inner_html }
    }
 end
 
@@ -275,7 +306,11 @@ function render_add(web, ap, edit)
       input.button{ type="submit", value=strings.send }, " ",
       input.button{ type="reset", value=strings.reset },
    }
-   res[#res + 1] = a{ href= web:link("/list"), strings.list}
+   --res[#res + 1] = a{ href= web:link("/list"), strings.list}
+   --res[#res + 1] = form { action = web:link("/list"),  input { value = strings.list, type = "submit" } }
+   --res[#res + 1] = do_button(web, strings.list, "/list")
+   res[#res + 1] = do_button(web)
+   res[#res + 1] = "NONONO"
 
    return render_layout(res)
 end
@@ -291,39 +326,12 @@ function render_remove(web, ug)
       question = "Apagar?"
    end
 
-
---[[
-<html>
-<head>
-<script type="text/javascript">
-<!--
-function confirmation() {
-	var answer = confirm("Leave tizag.com?")
-	if (answer){
-		alert("Bye bye!")
-		window.location = "http://www.google.com/";
-	}
-	else{
-		alert("Thanks for sticking around!")
-	}
-}
-//-->
-</script>
-</head>
-<body>
-<form>
-<input type="button" onclick="confirmation()" value="Leave Tizag.com">
-</form>
-</body>
-</html>
-]]
-
-   res[#res + 1] = form{
+   res[#res + 1] = form{ input {
       name = "confirm",
-      type = "button",
+      --type = "button",
       onclick = "confirmation('"..question.."','"..url.."')",
-      value = label,
-   }
+      --value = label,
+   } }
 --[[
       input.button{ type="submit", value=strings.send }, " ",
       input.button{ type="reset", value=strings.reset },

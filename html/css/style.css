@@ -111,3 +111,13 @@ pre{
  } 
 
 
+/*  -------------- forms -------------------------*/
+input, select{
+  color:#000;
+  font: bold 100%;
+  background-color:#aaa;
+  border:1px solid;
+  border-color: #696 #363 #363 #696;
+  padding: 3px;
+  margin: 3px;
+}
