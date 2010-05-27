@@ -124,7 +124,7 @@ function init_app_tree() --  inicia tabela itvision_app_tree com app da propria 
 	-- o primeiro IM da aplicacao raiz eh a aplicacao ITvision
 	t = {}
 	t.app_id = app2[1].app_id
-	t.object_id = 53 -- TODO: Este numero deve ser o do bp criado acima!!!!!
+	t.object_id = 52 -- TODO: Este numero deve ser o do bp criado acima!!!!!
 	t.type = 'and'
 	app_lst = r.insert_app_list(t)
 
@@ -146,11 +146,11 @@ end
 
 print("\n\n--------------------------------------------------------\n\n")
 
-init_app_tree()
+--init_app_tree()
+test_select1()
 
 print("\n\n--------------------------------------------------------\n\n")
 
---test_select1()
 
 
 --[[
