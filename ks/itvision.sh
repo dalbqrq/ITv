@@ -132,7 +132,7 @@ tar zxf nagios-cfg.tgz
 mkdir /usr/local/monitor/etc/itvision
 chown -R $user.$user /usr/local/monitor/etc /etc/init.d/nagios
 sed -i.orig -e "s,NagiosLockDir=/var/lock/subsys,NagiosLockDir=\${prefix}/var,g" \
-	-e "s,su - $NagiosUser -c \",,g" \
+	-e "s,su - \$NagiosUser -c \",,g" \
 	-e "s,NagiosRetentionFile\",NagiosRetentionFile,g" /etc/init.d/nagios
 
 
