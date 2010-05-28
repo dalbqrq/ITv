@@ -51,7 +51,6 @@ end
 ----------------------------- DB ACCESS ----------------------------------
 
 function set_instance (inst_) -- change instance to be included in condition stmt
-   local inst
    if inst_ then
       inst = " instance_id = "..inst_
    else
@@ -62,7 +61,6 @@ end
 
 
 function set_cond (cond_) -- include instance condition
-   local cond
    if cond_ then 
       cond = cond_.." and ".. inst 
    else 

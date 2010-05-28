@@ -8,7 +8,9 @@ config = {
 		driver = "mysql"
 	},
 
-	lang = "pt_BR"
+	lang = "pt_BR",
+        monitor_dir = "/usr/local/monitor",
+        monitor_script = "/etc/init.d/nagios",
 
 }
 

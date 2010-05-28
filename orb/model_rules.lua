@@ -15,8 +15,8 @@ end
 
 
 function select_host_object (cond_, extra_, columns_)
-   -- TODO: incluir cond_ no select
-   local content = m.select ("nagios_hosts h, nagios_objects o ", "h.host_object_id = o.object_id",
+   if cond_ then cond_ = " and "..cond_ else cond_ = "" end
+   local content = m.select ("nagios_hosts h, nagios_objects o ", "h.host_object_id = o.object_id"..cond_,
       extra_, columns_)
    return content
 end
@@ -25,27 +25,28 @@ end
 ----------------------------- SERVICES ----------------------------------
 
 function get_bp_id () -- usado para selecionar os 'services' que sao aplicacoes
-   -- TODO: incluir cond_ no select
    local content = m.select ("nagios_objects", "name1 = 'check_bp_status'", extra_, columns_)
    return content[1].object_id
 end
 
 
 function select_service (cond_, extra_, columns_, app)
-   -- TODO: incluir cond_ no select
    if app ~= nil then app = " = " else app = " <> " end
+   if cond_ ~= nil then cond_ = " and "..cond_ else cond_ = "" end
    local bp_id = get_bp_id()
-   local content = m.select ("nagios_services", "check_command_object_id"..app..bp_id, extra_, columns_)
+   local content = m.select ("nagios_services", "check_command_object_id"..app..bp_id..cond_, 
+      extra_, columns_)
    return content
 end
 
 
 function select_service_object (cond_, extra_, columns_, app)
-   -- TODO: incluir cond_ no select
    if app ~= nil then app = " = " else app = " <> " end
+   if cond_ then cond_ = " and "..cond_ else cond_ = "" end
    local bp_id = get_bp_id()
    local content = m.select ("nagios_services s, nagios_objects o ", 
-      "s.service_object_id = o.object_id and s.check_command_object_id"..app..bp_id, extra_, columns_)
+      "s.service_object_id = o.object_id and s.check_command_object_id"..app..bp_id..cond_, 
+      extra_, columns_)
    return content
 end
 
