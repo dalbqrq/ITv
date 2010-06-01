@@ -19,7 +19,7 @@ function index(web)
 end
 
 function say(web, name)
-  return render_say(web, name)
+  return render_say(web, name, num)
 end
 
 -- Builds the application's dispatch table, you can
@@ -27,7 +27,7 @@ end
 -- the controller
 
 hello:dispatch_get(index, "/", "/index")
-hello:dispatch_get(say, "/say/(%a+)")
+hello:dispatch_get(say, "/say/(%a+)/(%d+)")
 
 -- These are the view functions referenced by the controllers.
 -- orbit.htmlify does through the functions in the table passed
@@ -59,9 +59,9 @@ function render_index()
    return render_layout(render_hello())
 end
 
-function render_say(web, name)
+function render_say(web, name, num)
    return render_layout(render_hello() .. 
-     p.hello((web.input.greeting or "Hello ") .. name .. "!"))
+     p.hello((web.input.greeting or "Hello ") .. name .. " : " .. tostring(num) .."!"))
 end
 
 orbit.htmlify(hello, "render_.+")
