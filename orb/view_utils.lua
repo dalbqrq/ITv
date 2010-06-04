@@ -10,7 +10,7 @@
 ]]
 
 require "orbit"
-module("itvision", package.seeall, orbit.new)
+--module("itvision", package.seeall, orbit.new)
 require "cosmo"
 
 require "messages"
@@ -26,12 +26,6 @@ local scrt = [[
       } 
    } 
    ]]
-
-local NoOrYes = {
-      { id = 0, name = strings.no },
-      { id = 1, name = strings.yes },
-   }
-
 
 function do_button(web, label, url, question)
    -- TODO:  NAO ESTAh FUNCIONANDO !!!!
@@ -75,16 +69,11 @@ function select_option(name, T, value_idx, label_idx, default_value)
 
    olist[#olist + 1] = "<select name=\""..name.."\">"
    for i, v in ipairs(T) do
-      --if default_value and (tonumber(default_value) == tonumber(v[value_idx])) then
---[[
-      if default_value and ( (type(tonumber(default_value)) and 
-            tonumber(default_value) == tonumber(v[value_idx]) ) or
-            ( default_value == v[value_idx] ) ) then
-]]
       if default_value then
-         if (type(tonumber(default_value)) and (tonumber(default_value) == tonumber(v[value_idx])) ) or
-            ( default_value == v[value_idx] ) then
-            selected = "selected"..default_value
+         if ((type(tonumber(default_value)) ~= "nil") and (tonumber(default_value) == tonumber(v[value_idx])) )
+            or ( default_value == v[value_idx] )
+         then
+            selected = "selected "
          else
             selected = ""
          end
@@ -102,5 +91,24 @@ function select_option(name, T, value_idx, label_idx, default_value)
 
 end
 
+AndOrOr = {
+   { id = "and", name = strings.logical_and },
+   { id = "or",  name = strings.logical_or },
+}
+
+NoOrYes = {
+      { id = 0, name = strings.no },
+      { id = 1, name = strings.yes },
+   }
+
+
+function select_and_or(name, default)
+   return select_option(name, AndOrOr, "id", "name", default)
+end
+
+
+function select_yes_no(name, default)
+   return select_option(name, NoOrYes, "id", "name", default)
+end
 
 

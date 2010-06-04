@@ -26,6 +26,19 @@ function apps:select_apps(id)
    return self:find_all(clause)
 end
 
+--[[
+module("nagios", package.seeall, orbit.new)
+local services = nagios:model "services"
+
+function services:select_services(id)
+   local clause = ""
+   if id then
+      clause = "service_object_id = "..id
+   end
+   return self:find_all(clause)
+end
+]]
+
 -- controllers ------------------------------------------------------------
 
 function list(web)
@@ -55,7 +68,7 @@ function update(web, id)
       local clause = "app_id = "..id
       --A:new()
       A.name = web.input.name
-      A.type = web.input.tpe
+      A.type = web.input.type
       A.is_active = web.input.is_active
       --A.service_object_id = 0
 
@@ -76,7 +89,7 @@ itvision:dispatch_get(add, "/add")
 function insert(web)
    apps:new()
    apps.name = web.input.name
-   apps.type = web.input.tpe
+   apps.type = web.input.type
    apps.is_active = web.input.is_active
    --apps.service_object_id = 0
    apps.instance_id = config.db.instance_id
@@ -121,7 +134,7 @@ function render_list(web, A)
       rows[#rows + 1] = tr{ 
          td{ a{ href= web:link("/show/"..v.app_id), v.name} },
          td{ strings["logical_"..v.type] },
-         td{ v.is_active },
+         td{ NoOrYes[v.is_active+1].name },
          td{ (v.service_object_id or "_") },
          td{ button_link(strings.remove, web:link("/remove/"..v.app_id), "negative") },
          td{ button_link(strings.edit, web:link("/edit/"..v.app_id)) },
@@ -202,13 +215,6 @@ function render_add(web, edit)
       default_val3 = 0
    end
 
-   local A = {
-      { tpe = "and", name = strings.logical_and },
-      { tpe = "or",  name = strings.logical_or },
-   }
-
-   local B = NoOrYes
-
    -- LISTA DE OPERACOES 
    res[#res + 1] = p{ button_link(strings.list, web:link("/list")) }
    res[#res + 1] = p{ br(), br() }
@@ -219,8 +225,8 @@ function render_add(web, edit)
       action = web:link(url),
 
       strings.name..": ", input{ type="text", name="name", value = val1 },br(),
-      strings.type..": ", select_option("tpe", A, "tpe", "name", default_val2), br(),
-      strings.is_active..": ", select_option("is_active", B, "id", "name", default_val3), br(),
+      strings.type..": ", select_and_or("type", default_val2), br(),
+      strings.is_active..": ", select_yes_no("is_active", default_val3), br(),
 
       p{ button_form(strings.send, "submit", "positive") },
       p{ button_form(strings.reset, "reset", "negative") },
