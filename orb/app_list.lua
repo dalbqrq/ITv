@@ -199,7 +199,7 @@ function render_show(web, A)
    if A then
       if A.service_object_id then
          svc = services:select_services(A.service_object_id)[1].display_name
-         lst = mr.select_host_object(...
+         --lst = mr.select_host_object(...
       else
          svc = "-"
       end

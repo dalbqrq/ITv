@@ -1,0 +1,19 @@
+select 
+   *
+from 
+   nagios_objects no, itvision_app_list al, itvision_apps ap 
+where 
+   no.object_id = al.object_id and  
+   al.app_id = ap.app_id;
+
+select 
+   no.object_id, no.objecttype_id, no.name1, no.name2, 
+   al.type as list_type, 
+   ap.app_id, ap.name as app_name, ap.type as app_type, ap.is_active, ap.service_object_id as service_id
+from 
+   nagios_objects no, itvision_app_list al, itvision_apps ap 
+where 
+   no.object_id = al.object_id and  
+   al.app_id = ap.app_id;
+
+
