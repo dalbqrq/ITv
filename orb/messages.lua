@@ -44,6 +44,7 @@ strgs.pt_BR = {
 	child_of = "Filho de",
 	is_active = "Ativo",
 	service = "Serviço",
+	all = "Todos(as)",
 }
 
 strgs.us = {
@@ -87,6 +88,7 @@ strgs.us = {
 	child_of = "Child of",
 	is_active = "Is active",
 	service = "Service",
+	all = "All",
 }
 
 

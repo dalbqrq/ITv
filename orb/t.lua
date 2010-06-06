@@ -41,22 +41,23 @@ function test_select1()
       print ("->",v.service_id, v.display_name )
    end
 ]]
---[[
 
    print ("----- HOSTS OBJECTS-----")
-   t = r.select_host_object (nil, "order by object_id")
+   --t = r.select_host_object (nil, "order by object_id")
+   t = r.select_host_object ()
    for i, v in ipairs (t) do
-      print ("->",v.object_id, v.host_id, v.alias)
+      print ("->",v.object_id, v.host_id, v.alias, v.name1, v.name2)
    end
    
 
    print ("----- SERVICES OBJECTS-----")
    t = r.select_service_object ()
    for i, v in ipairs (t) do
-      print ("->",v.object_id, v.service_id, v.display_name)
+      print ("->",v.object_id, v.service_id, v.display_name, v.name1, v.name2)
    end
    
    
+--[[
    print ("----- APPS OBJECTS -----")
    t = r.select_service_app_object ()
    for i, v in ipairs (t) do
@@ -93,6 +94,7 @@ end
 
 
 --  imprime toda arvore de apps 
+--[[ 
 root_id = r.select_root_app_tree()
 t = r.select_full_path_app_tree(root_id)
 print("FULL APP TREE")
@@ -101,7 +103,6 @@ for i, v in ipairs(t) do
 end
 
 table.show(t)
---[[ 
 ]]
 
 

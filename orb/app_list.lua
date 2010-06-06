@@ -99,6 +99,9 @@ itvision:dispatch_post(update, "/update/(%d+)")
 
 
 function add(web)
+   local H = apps:select_apps(id)
+   local S = apps:select_apps(id)
+   local A = apps:select_apps(id)
    return render_add(web)
 end
 itvision:dispatch_get(add, "/add")
@@ -146,23 +149,29 @@ function render_list(web, A, B)
    local rows = {}
    local res = {}
    local svc = {}
+   local str = ""
+   local selected = ""
+   local curr_app = 1
 
+   str = [[<FORM> <SELECT ONCHANGE="location = this.options[this.selectedIndex].value;">]]
+   for i, v in ipairs(B) do
+      url = web:link("/list/"..v.app_id)
+      if v.app_id == A[1].app_id then 
+         selected = " selected " 
+         curr_app = i
+      else 
+         selected = " " 
+      end
+      str = str .. [[<OPTION]]..selected..[[ VALUE="]]..url..[[">]]..v.name
+   end
+   str = str .. [[</SELECT> </FORM>]]
 
-str = [[<FORM>
-<SELECT ONCHANGE="location = this.options[this.selectedIndex].value;">
-<OPTION VALUE="/list/]]..B[1].app_id..[[">]]..B[1].name..[[
-<OPTION VALUE="/list/"]]..B[2].app_id..[[>]]..B[2].name..[[
-</SELECT>
-</FORM>]]
-
-   res[#res + 1] = p{ str };
-  
-   res[#res + 1] = p{ A[1].app_id };
-   res[#res + 1] = p{ strings.application..": ", select_option("app_id", B, "app_id", "name", A[1].app_id ), br(), }
-   
+      
+   res[#res + 1] = p{ strings.application..": ", str };
+   res[#res + 1] = p{ render_show(web, B[curr_app]) }
+   web.prefix = "/orb/app_list/"
    res[#res + 1] = p{ button_link(strings.add, web:link("/add")) }
    res[#res + 1] = p{ br(), br() }
-
 
 
    for i, v in ipairs(A) do
@@ -180,8 +189,8 @@ str = [[<FORM>
          td{ v.type },
          td{ v.object_id },
 
-         td{ button_link(strings.remove, web:link("/remove/"..v.app_id), "negative") },
-         td{ button_link(strings.edit, web:link("/edit/"..v.app_id)) },
+         td{ button_link(strings.remove, web:link("/remove/"..v.app_id..":"..v.object_id), "negative") },
+         --td{ button_link(strings.edit, web:link("/edit/"..v.app_id)) },
       }
    end
 
@@ -192,7 +201,7 @@ str = [[<FORM>
              th{ strings.type },
              th{ strings.service },
              th{ "." },
-             th{ "." },
+             --th{ "." },
          }
       },
       tbody{
@@ -200,17 +209,20 @@ str = [[<FORM>
       }
    }
 
+
    return render_layout(res)
 end
 
 
 function render_show(web, A)
-   A = A[1]
+   --A = A[1]
    local res = {}
    local svc = {}
    local lst = {}
 
-   res[#res + 1] = p{ button_link(strings.add, web:link("/add")) }
+   web.prefix = "/orb/apps" 
+
+   --res[#res + 1] = p{ button_link(strings.add, web:link("/add")) }
    res[#res + 1] = p{ button_link(strings.remove, web:link("/remove/"..A.app_id)) }
    res[#res + 1] = p{ button_link(strings.edit, web:link("/edit/"..A.app_id)) }
    res[#res + 1] = p{ button_link(strings.list, web:link("/list")) }
@@ -234,7 +246,7 @@ function render_show(web, A)
          }
       } }
 
-      
+--[[
       B = applist:select_app_list(A.app_id)
 
       -- app_list
@@ -246,6 +258,7 @@ function render_show(web, A)
             tr{ th{ strings.service }, td{ B.object_id } },
          }
       } }
+]]
 
    else
       res = { error_message(3),
@@ -259,7 +272,7 @@ function render_show(web, A)
 end
 
 
-function render_add(web, edit)
+function render_add(web)
    local res = {}
    local s = ""
    local val1 = ""
@@ -268,20 +281,9 @@ function render_add(web, edit)
    local url = ""
    local default_value = ""
 
-   if edit then
-      edit = edit[1]
-      val1 = edit.name
-      val2 = edit.type
-      val3 = edit.is_active
-      val4 = edit.service_object_id
-      url = "/update/"..edit.app_id
-      default_val2 = val2
-      default_val3 = val3
-   else
-      url = "/insert"
-      default_val2 = "and"
-      default_val3 = 0
-   end
+   url = "/insert"
+   default_val2 = "and"
+   default_val3 = 0
 
    -- LISTA DE OPERACOES 
    res[#res + 1] = p{ button_link(strings.list, web:link("/list")) }
@@ -294,7 +296,6 @@ function render_add(web, edit)
 
       strings.name..": ", input{ type="text", name="name", value = val1 },br(),
       strings.type..": ", select_and_or("type", default_val2), br(),
-      --strings.service..": ", select_option("service_object_id", services:find_all(), "service_object_id", 
       strings.service..": ", select_option("service_object_id", services:find_all(""), "service_object_id", 
          "display_name", val4 ), br(),
       strings.is_active..": ", select_yes_no("is_active", default_val3), br(),
