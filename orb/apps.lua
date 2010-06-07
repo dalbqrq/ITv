@@ -148,7 +148,7 @@ function render_list(web, A)
          td{ a{ href= web:link("/show/"..v.app_id), v.name} },
          td{ strings["logical_"..v.type] },
          td{ NoOrYes[v.is_active+1].name },
-         td{ svc },
+         --td{ svc },
          td{ button_link(strings.remove, web:link("/remove/"..v.app_id), "negative") },
          td{ button_link(strings.edit, web:link("/edit/"..v.app_id)) },
       }
@@ -160,7 +160,7 @@ function render_list(web, A)
              th{ strings.name }, 
              th{ strings.type },
              th{ strings.is_active },
-             th{ strings.service },
+             --th{ strings.service },
              th{ "." },
              th{ "." },
          }
@@ -196,7 +196,7 @@ function render_show(web, A)
             tr{ th{ strings.name }, td{ A.name } },
             tr{ th{ strings.type }, td{ strings["logical_"..A.type] } },
             tr{ th{ strings.is_active }, td{ NoOrYes[A.is_active+1].name } },
-            tr{ th{ strings.service }, td{ svc } },
+            --tr{ th{ strings.service }, td{ svc } },
          }
       } }
    else

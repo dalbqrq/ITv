@@ -17,6 +17,7 @@ local mr = require "model_rules"
 module("itvision", package.seeall, orbit.new)
 mapper.conn, mapper.driver = config.setup_orbdb()
 local apps = itvision:model "apps"
+local app_relat = itvision:model "app_relat"
 local app_list = itvision:model "app_list"
 
 
@@ -30,6 +31,15 @@ local objects = nagios:model "objects"
 -- models ------------------------------------------------------------
 
 function apps:select_apps(id)
+   local clause = ""
+   if id then
+      clause = "app_id = "..id
+   end
+   return self:find_all(clause)
+end
+
+
+function app_relat:select_app_relat(id)
    local clause = ""
    if id then
       clause = "app_id = "..id
@@ -61,7 +71,7 @@ end
 -- controllers ------------------------------------------------------------
 
 function list(web, id)
-   local B = apps:select_apps()
+   local B = app_relat:select_app_relat()
    if id == "/" then id = B[1].app_id end
    local A = mr.select_app_app_list_objects(id)
    return render_list(web, A, B)
@@ -70,7 +80,7 @@ itvision:dispatch_get(list, "/", "/list/(%d+)")
 
 
 function show(web, id)
-   local A = apps:select_apps(id)
+   local A = app_relat:select_app_relat(id)
    return render_show(web, A)
 end itvision:dispatch_get(show, "/show/(%d+)")
 
@@ -85,34 +95,21 @@ end
 itvision:dispatch_get(add, "/add/(%d+)")
 
 
--- TODO: problema na inclusão de multiplos itens
 function insert(web)
    app_list:new()
-local r = ""
-   if type(web.input.item) == "table" then
-      for i, v in ipairs(web.input.item) do
-         app_list.app_id = web.input.app_id
-         app_list.type = web.input.type
-         app_list.instance_id = config.db.instance_id
-         app_list.object_id = v
-         app_list:save()
-r = r.."|"..v
-      end
-   else
-      app_list.app_id = web.input.app_id
-      app_list.type = web.input.type
-      app_list.instance_id = config.db.instance_id
-      app_list.object_id = web.input.item
-      app_list:save()
-   end
+   app_list.app_id = web.input.app_id
+   app_list.type = web.input.type
+   app_list.instance_id = config.db.instance_id
+   app_list.object_id = web.input.item
+   app_list:save()
 
-   return web:redirect(web:link("/add/"..app_list.app_id.."+"..r))
+   return web:redirect(web:link("/add/"..app_list.app_id))
 end
 itvision:dispatch_post(insert, "/insert")
 
 
 function remove(web, app_id, obj_id)
-   local A = apps:select_apps(app_id)
+   local A = app_relat:select_app_relat(app_id)
    local O = objects:select_objects(obj_id)
    return render_remove(web, A, O)
 end
@@ -160,12 +157,12 @@ function render_list(web, A, B)
 
 
    res[#res + 1] = p{ strings.application..": ", str };
-   res[#res + 1] = p{ render_show(web, B[curr_app]) }
+   res[#res + 1] = p{ render_table(web, A) }
 
-   web.prefix = "/orb/app_list"
+--[[
    res[#res + 1] = p{ button_link(strings.add, web:link("/add/"..A[1].app_id)) }
    res[#res + 1] = p{ br(), br() }
-   res[#res + 1] = p{ render_table(web, A) }
+]]
 
    return render_layout(res)
 end
@@ -210,7 +207,7 @@ function render_show(web, A)
    local svc = {}
    local lst = {}
 
-   web.prefix = "/orb/apps" 
+   web.prefix = "/orb/app_relat" 
 
    --res[#res + 1] = p{ button_link(strings.add, web:link("/add")) }
    res[#res + 1] = p{ button_link(strings.remove, web:link("/remove/"..A.app_id)) }
@@ -220,8 +217,8 @@ function render_show(web, A)
 
    if A then
       if A.service_object_id then
+         svc = services:select_services(A.service_object_id)[1].display_name
          --lst = mr.select_host_object(...
-         svc = "-to change-"
       else
          svc = "-nonono-"
       end

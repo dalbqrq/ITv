@@ -130,6 +130,18 @@ function select_app_relat (cond_, extra_, columns_)
 end
 
 
+function select_app_relat_object (cond_, extra_, columns_)
+   local cond = "ar.from_object_id = o1.object_id and ar.to_object_id = o2.object_id"
+   if cond_ then cond_ = cond.." and "..cond_ end
+   local tables_ = "itvision_app_relat ar, nagios_objects o1, nagios_objects o2"
+   local columns_ [[o1.name1 as from_name1, o1.name2 as from_name1, o2.name1 as to_name1, o2.name2 as to_name2,
+                   ar.from_object_id, ar.to_object_id,
+                   ar.app_id, ar.connection_type, ar.app_relat_type_id, .. ]] terminar aqui daniel
+   local content = m.select (tables_, cond_, extra_, columns_)
+   return content
+end
+
+
 function insert_app_relat (content_)
    local table_ = "itvision_app_relat"
    m.insert (table_, content_)

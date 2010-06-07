@@ -8,14 +8,22 @@ itvision_sysconfig
 
 DONE (with new config header):
 itvision_apps
+itvision_app_list
 
 TODO:
 itvision_location_tree
 itvision_device_host
 itvision_device
-itvision_app_list
 itvision_app_relat
 itvision_app_tree
 itvision_site_tree
 
 itvision_user_prefs
+
+
+
+BUGS TO FIX:
+app_list.lua: nao inclui mais de um item a app_list ao mesmo tempo (multipla selecao)
+app_list.lua: ao clicar no nome da aplicacao para chamar "/show/:id" gera erro
+
+
