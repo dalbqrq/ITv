@@ -72,7 +72,9 @@ end
 
 function list(web, id)
    local B = app_relat:select_app_relat()
-   if id == "/" then id = B[1].app_id end
+   if id == "/" then 
+      if B[1] then id = B[1].app_id else id = nil end
+   end
    local A = mr.select_app_app_list_objects(id)
    return render_list(web, A, B)
 end
@@ -157,9 +159,9 @@ function render_list(web, A, B)
 
 
    res[#res + 1] = p{ strings.application..": ", str };
+--[[
    res[#res + 1] = p{ render_table(web, A) }
 
---[[
    res[#res + 1] = p{ button_link(strings.add, web:link("/add/"..A[1].app_id)) }
    res[#res + 1] = p{ br(), br() }
 ]]

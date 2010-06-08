@@ -103,11 +103,9 @@ function select_app_app_list_objects (id)
       cond_ = cond_ .. " and ap.app_id = "..id
    end
    local tables_ = "nagios_objects no, itvision_app_list al, itvision_apps ap"
-   local columns_ = [[
-      no.object_id, no.objecttype_id, no.name1, no.name2,
-      al.type as list_type,
+   local columns_ = [[ no.object_id, no.objecttype_id, no.name1, no.name2, al.type as list_type,
       ap.app_id, ap.name as app_name, ap.type as app_type, ap.is_active, ap.service_object_id as service_id ]]
-   local extra_ = "order by ap.app_id, no.name1, no.name2"
+   --local extra_ = "order by ap.app_id, no.name1, no.name2"
    local content = m.select (tables_, cond_, extra_, columns_)
    return content
 end
@@ -131,13 +129,15 @@ end
 
 
 function select_app_relat_object (cond_, extra_, columns_)
-   local cond = [[ ar.from_object_id = o1.object_id and ar.to_object_id = o2.object_id 
-                   and ar.app_relat_type_id = rt.app_relat_type_id ]]
-   local tables_ = [[ itvision_app_relat ar, nagios_objects o1, nagios_objects o2, 
-                      itvision_app_relat_type rt ]]
-   local columns_ = [[o1.name1 as from_name1, o1.name2 as from_name1, o2.name1 as to_name1, o2.name2 as to_name2,
-                   ar.from_object_id, ar.to_object_id,
-                   ar.app_id, ar.connection_type, ar.app_relat_type_id, rt.name as relat_name ]]
+   local cond = [[ar.from_object_id = o1.object_id and ar.to_object_id = o2.object_id
+                  ar.app_relat_type_id = rt.app_relat_type_id ]]
+   local tables_ = [[itvision_app_relat ar, nagios_objects o1, nagios_objects o2, 
+                     itvision_app_relat_type]]
+   local columns_ = [[o1.name1 as from_name1, o1.name2 as from_name1, 
+                    o2.name1 as to_name1, o2.name2 as to_name2,
+                    ar.from_object_id, ar.to_object_id,
+                    ar.app_id, ar.connection_type, ar.app_relat_type_id, 
+                    ar.app_relat_type_id = rt.app_relat_type_id ]]
 
    if cond_ then cond_ = cond.." and "..cond_ end
    local content = m.select (tables_, cond_, extra_, columns_)
