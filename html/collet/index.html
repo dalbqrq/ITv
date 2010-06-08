@@ -1,0 +1,85 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!--
+Design by Free CSS Templates
+http://www.freecsstemplates.org
+Released for free under a Creative Commons Attribution 2.5 License
+
+Title      : Travel Portal
+Version    : 1.0
+Released   : 20070618
+Description: A two-column, fixed-width template.
+
+-->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>Simone Collet ::  Design de Interiores</title>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<meta name="keywords" content="" />
+	<meta name="description" content="" />
+	<link href="default.css" rel="stylesheet" type="text/css" />
+</head>
+	<script src="http://cdn.jquerytools.org/1.1.2/jquery.tools.min.js"></script>
+<body>
+
+<div id="container">
+	<div id="header">
+		<!--
+		-->
+		<div id="logo">
+			<h1><a href="#"><img src="images/simonecollet.png" width="85%" height="85%"/></a></h1>
+		</div>
+		<!--
+		-->
+		<div id="mainnav">
+			<ul class="tabs">
+				<li><a class="button blue current" href="#">Portfolio</a></li>
+				<li><a class="button pink" href="#">Serviços</a></li>
+				<li><a class="button green" href="#">Perfil</a></li>
+				<li><a class="button orange" href="#">Contato</a></li>
+			</ul>
+		</div>
+	</div>
+
+	<!--
+	-->
+	<div id="content">
+		<!--
+		-->
+		<div class="panes">
+			<div style="display: none;">
+				<div class="pics">
+					<img src="pics/dani_01.jpg" />
+				</div>
+			</div>
+			<div style="display: block;">
+				Second tab content. Tab contents are called "panes"<p> 
+				<a href=http://www.maxdesign.com.au/articles/process/>See MaxDesign</a><p>
+				More text...
+			</div>
+			<div style="display: none;">Third tab content</div>
+			<div style="display: none;">Fourth tab content</div>
+		</div>
+	</div>
+	<div style="clear: both;"></div>
+	<div id="footer">
+		<p id="legal">Copyright &copy; 2010 Simone Collet. All Rights Reserved.<a href="#"> link </a></p>
+	<!--
+		<p id="legal">Copyright &copy; 2010 Simone Collet. All Rights Reserved.</a></p>
+		<p id="links"><a href="#">Privacidade</a> | <a href="#">Termos de Uso</a></p>
+		-->
+	</div>
+</div>
+<!-- end page -->
+
+<!-- This JavaScript snippet activates those tabs -->
+<script>
+$(function() {
+	// setup ul.tabs to work as tabs for each div directly under div.panes
+	$("ul.tabs").tabs("div.panes > div");
+});
+</script>
+
+
+
+</body>
+</html>
