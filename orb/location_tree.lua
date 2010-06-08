@@ -182,13 +182,12 @@ function render_add(web, edit)
 
    local t = {}
 
---[[
-   t[#t +1] = strings.root
-   for i,v in ipairs(location_tree:find_all()) do
-      t[#t +1] = v
-   end
-]]
+   t = location_tree:find_all()
+   t[#t+1].name = strings.root
+   t[#t].location_tree_id = 0
+
    --t = { [0] = strings.root }
+
    t = location_tree:find_all()
 
    -- LISTA DE OPERACOES 
