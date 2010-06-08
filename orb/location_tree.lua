@@ -64,17 +64,29 @@ end
 itvision:dispatch_post(update, "/update/(%d+)")
 
 
-function add(web)
-   return render_add(web)
+function add(web, err)
+   return render_add(web, nil, err)
 end
-itvision:dispatch_get(add, "/add")
+itvision:dispatch_get(add, "/add", "/add/(%d+)")
 
 
 function insert(web)
-   location_tree:new()
-   location_tree.name = web.input.name
-   location_tree:save()
+   local origin
+   --location_tree:new()
+   location_tree = mr.new_location_tree()
+   if web.input.name then
+      location_tree.name = web.input.name
+   else
+      return web:redirect(web:link("/add/0"))
+   end
+   location_tree.geotag = web.input.geotag
+   location_tree.obs = web.input.obs
+
+   if tonumber(web.input.parent) > 0 then origin = web.input.parent end
+   mr.insert_node_location_tree(location_tree, origin, 1)
+
    return web:redirect(web:link("/list"))
+   --return render_table(web, location_tree)
 end
 itvision:dispatch_post(insert, "/insert")
 
@@ -97,11 +109,25 @@ function delete(web, id)
 end
 itvision:dispatch_get(delete, "/delete/(%d+)")
 
+function map(web, lat, lon)
+   return render_map(web, lat, lon)
+end
+itvision:dispatch_get(map, "/map/([+-]?%d+\.%d+),([+-]?%d+\.%d+)")
+
+
 
 itvision:dispatch_static("/css/%.css", "/script/%.js")
 
 
 -- views ------------------------------------------------------------
+
+
+function render_table(web, t)
+   local res = {}
+   res[#res + 1] = p{ table.dump(t) }
+   return render_layout(res)
+end
+
 
 function render_list(web, A)
    local rows = {}
@@ -113,6 +139,8 @@ function render_list(web, A)
    for i, v in ipairs(A) do
       rows[#rows + 1] = tr{ 
          td{ a{ href= web:link("/show/"..v.location_tree_id), v.name} },
+         td{ a{ href= web:link("/map/"..v.geotag), v.geotag} },
+         td{ v.obs },
          td{ button_link(strings.remove, web:link("/remove/"..v.location_tree_id), "negative") },
          td{ button_link(strings.edit, web:link("/edit/"..v.location_tree_id)) },
       }
@@ -122,6 +150,8 @@ function render_list(web, A)
       thead{ 
          tr{ 
              th{ strings.name }, 
+             th{ "Geotab" },
+             th{ "Obs" },
              th{ "." },
              th{ "." },
          }
@@ -134,6 +164,45 @@ function render_list(web, A)
    return render_layout(res)
 end
 
+function render_map(web, lat, lon)
+
+    s = [[
+<html>
+<head>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html;charset=ISO-8859-1">
+<title>Exemplo de Google Maps API</title>
+<script src="http://maps.google.com/maps?file=api&v=2&key=#SUA CHAVE GOOGLE MAPS#" type="text/javascript"></script>
+<script type="text/javascript">
+   //<![CDATA[
+   
+   //função para carregar um mapa de Google. 
+   //Esta função é chamada quando a página termina de carregar. Evento onload
+   function load() {
+      //comprovamos se o navegador é compatível com os mapas de google
+      if (GBrowserIsCompatible()) {
+         //instanciamos um mapa com GMap, passando-lhe uma referência à camada ou <div> onde quisermos mostrar o mapa
+         var map = new GMap2(document.getElementById("map"));   
+         //centralizamos o mapa em uma latitude e longitude desejadas
+         map.setCenter(new GLatLng(]]..lat..[[,]]..lon..[[), 18);   
+         //adicionamos controles ao mapa, para interação com o usuário
+         map.setMapType(G_SATELLITE_MAP)
+         map.addControl(new GLargeMapControl());
+         map.addControl(new GMapTypeControl()); 
+         //daniel  map.addControl(new GOverviewMapControl()); ;
+      }
+   }
+   
+   //] ]>
+   </script>
+</head>
+<body onload="load()" onunload="GUnload()">
+<div id="map" style="width: 615px; height: 400px"></div>
+</body>
+</html>
+]]
+
+    return s
+end
 
 function render_show(web, A)
    A = A[1]
@@ -163,32 +232,27 @@ function render_show(web, A)
 end
 
 
-function render_add(web, edit)
+function render_add(web, edit, err)
    local res = {}
    local s = ""
-   local val1 = ""
-   local val2 = ""
-   local url = ""
+   local val1, val2, val3, val4, mess, url
+
+   if err == 0 then mess = error_message(4) else mess = "" end
 
    if edit then
       edit = edit[1]
       val1 = edit.name
-      url = "/update/"..edit.location_tree_id
-      --default_value = ......
+      val2 = edit.geotag
+      val3 = edit.obs
+      val4 = edit.location_tree_id
+      url = "/update/"..val4
    else
       url = "/insert"
-      --default_value = ......
    end
 
-   local t = {}
-
-   t = location_tree:find_all()
-   t[#t+1].name = strings.root
-   t[#t].location_tree_id = 0
-
-   --t = { [0] = strings.root }
-
-   t = location_tree:find_all()
+   local t = location_tree:find_all()
+   local r = { name=strings.root, location_tree_id=0, obs = nil, geotag=nil}
+   table.insert(t, r)
 
    -- LISTA DE OPERACOES 
    res[#res + 1] = p{ button_link(strings.list, web:link("/list")) }
@@ -199,8 +263,10 @@ function render_add(web, edit)
       method = "post",
       action = web:link(url),
 
-      strings.name..": ", input{ type="text", name="name", value = val1 },br(),
-      strings.child_of..": ", select_option("location_tree_id", t, "location_tree_id", "name", default_value), br(),
+      strings.name..": ", input{ type="text", name="name", value = val1 }, mess, br(),
+      "Geotag: ", input{ type="text", name="geotag", value = val2 }, br(),
+      "Obs: ", input{ type="text", name="obs", value = val3 }, br(),
+      strings.child_of..": ", select_option("parent", t, "location_tree_id", "name", val4), br(),
 
       p{ button_form(strings.send, "submit", "positive") },
       p{ button_form(strings.reset, "reset", "negative") },
@@ -213,7 +279,6 @@ end
 
 function render_remove(web, A)
    local res = {}
-   local url = ""
 
    if A then
       A = A[1]
@@ -223,7 +288,8 @@ function render_remove(web, A)
 
    res[#res + 1] = p{
       --"Voce tem certeza que deseja excluir o usuario "..A.name.."?",
-      strings.exclude_quest.." "..strings.location_tree.." "..A.name.."?",
+      "PROBLEMA COM REMOCAO DE LOCALIZACAO!",
+      strings.exclude_quest.." "..strings.location.." "..A.name.."?",
       p{ button_link(strings.yes, web:link(url_ok)) },
       p{ button_link(strings.cancel, web:link(url_cancel)) },
    }
