@@ -48,6 +48,12 @@ strgs.pt_BR = {
 	all = "Todos(as)",
 	root = "Raiz",
 	location = "Localização",
+	physical = "Físico",
+	logical = "Lógico",	
+	origin = "Origem",	
+	destiny = "Destino",	
+	category = "Categoria",	
+
 }
 
 strgs.us = {
@@ -95,6 +101,11 @@ strgs.us = {
 	all = "All",
 	root = "Root",
 	location = "Location",
+	physical = "Physical",
+	logical = "Logiclo",	
+	origin = "Origin",	
+	destiny = "Destiny",	
+	category = "Category",	
 }
 
 

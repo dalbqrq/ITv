@@ -19,6 +19,7 @@ mapper.conn, mapper.driver = config.setup_orbdb()
 local apps = itvision:model "apps"
 local app_relat = itvision:model "app_relat"
 local app_list = itvision:model "app_list"
+local app_relat_type = itvision:model "app_relat_type"
 
 
 -- config NAGIOS mvc app
@@ -57,6 +58,15 @@ function app_list:select_app_list(id)
 end
 
 
+function app_relat_type:select_app_relat_type(id)
+   local clause = ""
+   if id then
+      clause = "app_relat_type_id = "..id
+   end
+   return self:find_all(clause)
+end
+
+
 function objects:select_objects(id)
    local clause = ""
    if id then
@@ -71,12 +81,14 @@ end
 -- controllers ------------------------------------------------------------
 
 function list(web, id)
-   local B = app_relat:select_app_relat()
+   local A = apps:select_apps()
    if id == "/" then 
-      if B[1] then id = B[1].app_id else id = nil end
+      if A[1] then id = A[1].app_id else id = nil end
    end
-   local A = mr.select_app_app_list_objects(id)
-   return render_list(web, A, B)
+   local AR = mr.select_app_relat_object(id)
+   --local AL = mr.select_app_app_list_objects(id)
+   --local RT = app_relat_type:select_app_relat_type()
+   return render_list(web, id, A, AR)
 end
 itvision:dispatch_get(list, "/", "/list/(%d+)")
 
@@ -88,24 +100,31 @@ end itvision:dispatch_get(show, "/show/(%d+)")
 
 
 function add(web, id)
-   local H = mr.select_host_object()
-   local S = mr.select_service_object()
-   local A = mr.select_service_object(nil, nil, nil, true)
-   local APPL = mr.select_app_app_list_objects(id)
-   return render_add(web, H, S, A, APPL, id)
+   local A = apps:select_apps()
+   if id == "/" then 
+      if A[1] then id = A[1].app_id else id = nil end
+   end
+   local AR = mr.select_app_relat_object(id)
+   local AL = mr.select_app_app_list_objects(id)
+   local RT = app_relat_type:select_app_relat_type()
+   return render_add(web, id, A, AR, AL, RT)
 end
 itvision:dispatch_get(add, "/add/(%d+)")
 
 
 function insert(web)
-   app_list:new()
-   app_list.app_id = web.input.app_id
-   app_list.type = web.input.type
-   app_list.instance_id = config.db.instance_id
-   app_list.object_id = web.input.item
-   app_list:save()
+   app_relat:new()
 
-   return web:redirect(web:link("/add/"..app_list.app_id))
+   app_relat.app_id = web.input.app_id
+   app_relat.from_object_id = web.input.from
+   app_relat.to_object_id = web.input.to
+   app_relat.connection_type = web.input.categ
+   app_relat.instance_id = config.db.instance_id
+   app_relat.app_relat_type_id = web.input.relat
+
+   app_relat:save()
+
+   return web:redirect(web:link("/add/"..app_relat.app_id))
 end
 itvision:dispatch_post(insert, "/insert")
 
@@ -135,19 +154,17 @@ itvision:dispatch_static("/css/%.css", "/script/%.js")
 
 -- views ------------------------------------------------------------
 
-
-function render_list(web, A, B)
-   local rows = {}
-   local res = {}
-   local svc = {}
+function render_selector(web, A, id, path)
+   local url = ""
    local str = ""
    local selected = ""
    local curr_app = 0
+   id = id or -1
 
    str = [[<FORM> <SELECT ONCHANGE="location = this.options[this.selectedIndex].value;">]]
-   for i, v in ipairs(B) do
-      url = web:link("/list/"..v.app_id)
-      if tonumber(v.app_id) == tonumber(A[1].app_id) then 
+   for i, v in ipairs(A) do
+      url = web:link(path..v.app_id)
+      if tonumber(v.app_id) == tonumber(id) then 
          selected = " selected " 
          curr_app = i
       else 
@@ -157,31 +174,37 @@ function render_list(web, A, B)
    end
    str = str .. [[</SELECT> </FORM>]]
 
+   return str
+end
 
+
+function render_list(web, id, A, AR)
+   local res = {}
+
+   res[#res + 1] = p{ render_selector(web, A, id, "/list/") }
    res[#res + 1] = p{ strings.application..": ", str };
---[[
-   res[#res + 1] = p{ render_table(web, A) }
+   res[#res + 1] = p{ render_table(web, AR) }
 
-   res[#res + 1] = p{ button_link(strings.add, web:link("/add/"..A[1].app_id)) }
-   res[#res + 1] = p{ br(), br() }
-]]
+   res[#res + 1] = p{ button_link(strings.add, web:link("/add/"..id)) }
 
    return render_layout(res)
 end
 
 
-function render_table(web, A)
+function render_table(web, AR)
    local res = {}
 
-   for i, v in ipairs(A) do
+   for i, v in ipairs(AR) do
       local obj = v.name1
       if v.name2 then obj = v.name2.."@"..obj end
 
       rows[#rows + 1] = tr{ 
          td{ a{ href= web:link("/show/"..v.app_id), v.app_name} },
+         td{ align="center", v.to_name1 },
+         td{ align="center", v.name2 },
          td{ align="center", v.list_type },
          td{ align="right", obj },
-         td{ button_link(strings.remove, web:link("/remove/"..v.app_id..":"..v.object_id), "negative") },
+         --td{ button_link(strings.remove, web:link("/remove/"..v.app_id..":"..v.object_id), "negative") },
       }
    end
 
@@ -189,6 +212,8 @@ function render_table(web, A)
       thead{ 
          tr{ 
              th{ strings.application }, 
+             th{ "name1" },
+             th{ "name2" },
              th{ strings.type },
              th{ strings.service.."@"..strings.host },
              th{ "." },
@@ -247,17 +272,15 @@ function render_show(web, A)
 end
 
 
-function render_add(web, H, S, A, APPL)
+function render_add(web, id, A, AR, AL, RT)
    local res = {}
-   local hst = {}
-   local svc = {}
-   local app = {}
+   local from, to, relat, categ
    local url = "/insert"
    local list_size = 7
-   local s = ""
-   local app_id = APPL[1].app_id
+
 
    local make_form = function(selopt)
+
       return form{
          name = "input",
          method = "post",
@@ -270,55 +293,73 @@ function render_add(web, H, S, A, APPL)
 
 
    -- LISTA DE OPERACOES 
-   res[#res + 1] = p{ button_link(strings.list, web:link("/list/"..app_id)) }
+   res[#res + 1] = p{ render_selector(web, A, id, "/add/") }
+   res[#res + 1] = p{ button_link(strings.list, web:link("/list/"..id)) }
    res[#res + 1] = p{ br(), br() }
    res[#res + 1] = p{ render_table(web, APPL) }
    res[#res + 1] = p{ br() }
 
-   -- LISTA DE HOSTS PARA SEREM INCLUIDOS ---------------------------------
-   s = [[<SELECT multiple size=]]..list_size..[[ NAME="item">]]
-   for i,v in ipairs(H) do
-     s = s..[[<OPTION VALUE="]]..v.object_id..[[">]]..v.name1
+   -- LISTA APP ORIGEM DOS RELACIONAMENTO ---------------------------------
+   if AL[1].object_id then
+      s = [[<SELECT multiple size=]]..list_size..[[ NAME="from">]]
+      for i,v in ipairs(AL) do
+        if v.name2 then ic = v.name2.."@"..v.name1 else ic = v.name1 end
+        s = s..[[<OPTION VALUE="]]..v.object_id..[[">]]..ic
+      end
+      s = s..[[ </SELECT> ]]
+   else 
+      s = ""
    end
-   s = s..[[ </SELECT>
-      <INPUT TYPE=HIDDEN NAME="app_id" value="]]..app_id..[[">
-      <INPUT TYPE=HIDDEN NAME="type" value="hst"> ]]
-   hst = make_form(s)
+   from = s
 
-   -- LISTA DE SERVICES PARA SEREM INCLUIDOS ---------------------------------
-   s = [[<SELECT multiple size=]]..list_size..[[ NAME="item">]]
-   for i,v in ipairs(S) do
-     s = s..[[<OPTION VALUE="]]..v.object_id..[[">]]..v.name2.."@"..v.name1
+   -- LISTA APP DESTINO DOS RELACIONAMENTO ---------------------------------
+   if AL[1].object_id then
+      s = [[<SELECT multiple size=]]..list_size..[[ NAME="to">]]
+      for i,v in ipairs(AL) do
+        if v.name2 then ic = v.name2.."@"..v.name1 else ic = v.name1 end
+        s = s..[[<OPTION VALUE="]]..v.object_id..[[">]]..ic
+      end
+      s = s..[[ </SELECT> ]]
+   else 
+      s = ""
    end
-   s = s..[[ </SELECT>
-      <INPUT TYPE=HIDDEN NAME="app_id" value="]]..app_id..[[">
-      <INPUT TYPE=HIDDEN NAME="type" value="svc"> ]]
-   svc = make_form(s)
+   to = s
 
-   -- LISTA DE APPLIC PARA SEREM INCLUIDOS ---------------------------------
-   s = [[<SELECT multiple size=]]..list_size..[[ NAME="item">]]
-   for i,v in ipairs(A) do
-     s = s..[[<OPTION VALUE="]]..v.object_id..[[">]]..v.name2
+   -- LISTA TIPOS DE RELACIONAMENTO  ---------------------------------
+   s = [[<SELECT multiple size=]]..list_size..[[ NAME="relat">]]
+   for i,v in ipairs(RT) do
+     s = s..[[<OPTION VALUE="]]..v.app_relat_type_id..[[">]]..v.name
    end
-   s = s..[[ </SELECT>
-      <INPUT TYPE=HIDDEN NAME="app_id" value="]]..app_id..[[">
-      <INPUT TYPE=HIDDEN NAME="type" value="app"> ]]
-   app = make_form(s)
+   s = s..[[ </SELECT> ]]
+   relat = s
+
+   -- LISTA CATEGORIA DE RELACIONAMENTO  ---------------------------------
+   s = [[<SELECT multiple size=]]..list_size..[[ NAME="categ">]]
+   s = s..[[<OPTION VALUE="physical">]]..strings.physical
+   s = s..[[<OPTION VALUE="logical">]]..strings.logical
+   s = s..[[ </SELECT> ]]
+   categ = s
+
+   id = [[ <INPUT TYPE=HIDDEN NAME="app_id" value="]]..id..[["> ]]
 
 
    res[#res + 1] = [[<table border=1, cellpadding=1>]]
    res[#res + 1] = {
       thead{ tr{ 
-         th{ strings.host }, 
-         th{ strings.service }, 
-         th{ strings.application }, 
+         th{ strings.origin }, 
+         th{ strings.type }, 
+         th{ strings.category }, 
+         th{ strings.destiny }, 
       } },
       tbody{ tr{
-         td{ hst },
-         td{ svc },
-         td{ app },
+         td{ from },
+         td{ relat },
+         td{ categ },
+         td{ to },
       } },
    }
+
+   res = make_form(res) 
 
    return render_layout(res)
 end

@@ -106,7 +106,7 @@ r = r.."|"..v
       app_list:save()
    end
 
-   return web:redirect(web:link("/add/"..app_list.app_id.."+"..r))
+   return web:redirect(web:link("/add/"..app_list.app_id))
 end
 itvision:dispatch_post(insert, "/insert")
 
