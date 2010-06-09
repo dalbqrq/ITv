@@ -8,12 +8,14 @@
 	/* required settings */
 	position:relative;
 	overflow:hidden;
-	width: 680px;
-	height:50px;
+	width: 760px;
+	height: 90px;
 
 	/* custom decorations */
+/* daniel
 	border:1px solid #ccc;
 	background:url(/img/global/gradient/h300.png) repeat-x;
+*/
 }
 
 /*
@@ -31,11 +33,12 @@
 
 .items div {
 	float:left;
-	width:680px;
+	width:765px;
 }
 
 /* single scrollable item */
 .scrollable img {
+/*
 	float:left;
 	margin: 5px;
 	background-color:#fff;
@@ -43,6 +46,17 @@
 	border:1px solid #ccc;
 	width:50px;
 	height:30px;
+	
+	-moz-border-radius:4px;
+	-webkit-border-radius:4px;
+*/
+	float:center;
+	margin: 5px;
+	background-color:#fff;
+	padding: 0px;
+	border:2px solid #ccc;
+	width:110px;
+	height:80px;
 	
 	-moz-border-radius:4px;
 	-webkit-border-radius:4px;
@@ -54,5 +68,48 @@
 	position:relative;
 	cursor:default;
 }
+
+
+/* styling for the image wrapper  */
+#image_wrap {
+	/* dimensions */
+/*
+	width:677px;
+	margin:15px 0 15px 40px;
+	padding:15px 0;
+	width:100%;
+*/
+	width:980px;
+	height:555px;
+	margin:0;
+	padding:0;
+
+	/* centered */
+	text-align:center;
+
+	/* some "skinning" */
+/*
+	background-color:#efefef;
+	border:2px solid #fff;
+	outline:1px solid #ddd;
+	background-color:#ffffff;
+*/
+	background-color:#383838;
+	-moz-ouline-radius:4px;
+}
+
+
+.crop{
+	float:left;
+	margin:.5em 10px .5em 0;
+	overflow:hidden; /* this is important */
+	border:1px solid #ccc;
+	}
+	/* input values to crop the image: top, right, bottom, left */
+.crop img{
+	margin:-20px -15px -40px -55px;
+	}
+
+
 
 

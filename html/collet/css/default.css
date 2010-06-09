@@ -6,10 +6,11 @@ Released for free under a Creative Commons Attribution 2.5 License
 
 /* GLOBAL HTML STYLES */
 body {
-	margin: 40px 0 0 0;
+	margin: 10px 0 0 0;
 	padding: 0;
 	font-family: Georgia, "Times New Roman", Times, serif;
 	font-size: 13px;
+	color: #F0F0F0;
 }
 
 a		{ color: #135293; }
@@ -17,12 +18,16 @@ a:hover		{ text-decoration: none; }
 blockquote	{ font-style: italic; }
 p		{ line-height: 2em; }
 blockquote p	{ line-height: 2em; } 
+a:active, a:focus { outline-style: none; -moz-outline-style:none; }
+
+
 
 
 /* CONTAINER */
 #container {
 	width: 980px;
 	margin: 0 auto;
+	border-bottom:3px solid #000000;	
 }
 
 
@@ -30,7 +35,7 @@ blockquote p	{ line-height: 2em; }
 #header {
 	/*
 	*/
-	height: 50px;
+	height: 70px;
 	border-bottom:3px solid #000000;	
 	background: #333333;
 	background: #FFFFFF;
@@ -42,8 +47,9 @@ blockquote p	{ line-height: 2em; }
 	height: 100%;
 	text-align: left;
 	background: #FFFFFF;
+	background: #000000;
 	*/
-	padding: 27px 0px 0px 600px;
+	padding: 47px 0px 0px 500px;
 	color: #FFFFFF;
 }
 
@@ -52,13 +58,14 @@ blockquote p	{ line-height: 2em; }
 	/*
 	height: 100%;
 	width: 210px;
+	background-color: #505050;
+	color: #9C9C9C;
 	*/
 	margin: 0px 0px 0px 0px;
 	padding: 0px 0px 0px 0px;
+	border:  0px 0px 0px 0px;
 	float: left;
 	background: #FFFFFF no-repeat center center;
-	color: #9C9C9C;
-	background-color: #505050;
 	background-color: #FFFFFF;
 }
 
@@ -100,17 +107,28 @@ blockquote p	{ line-height: 2em; }
 #content {
 	float: left;
 	width: 980px;
-	height: 500px;
-	background-color: #919191;
+	height: 643px;
 	background-color: #616161;
 	background-color: #FFFFFF;
+	background-color: #919191;
+	background-color: #383838;
+}
+
+#text {
+	color: #FFFFFF;
+	margin: 60px 100px 50px 100px;
+}
+
+#text h {
+	color: #555555;
+	font-size: 80px;
 }
 
 
 /* FOOTER */
 #footer {
 	width: 980px;
-	height: 35px;
+	height: 45px;
 	margin: 0 auto;
 	/*
 	background: url(images/img12.gif) repeat-x;
@@ -207,6 +225,10 @@ blockquote p	{ line-height: 2em; }
 	padding: 0px 0px;
 	border-top: 0;
 	font-size: 18px;
+}
+
+.imagepane {
+	padding: 0 0 0 80px;
 }
 
 /* root element for tabs  */

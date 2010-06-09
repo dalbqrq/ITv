@@ -19,47 +19,105 @@ Description: A two-column, fixed-width template.
 	<link href="css/default.css" rel="stylesheet" type="text/css" />
 	<link href="css/scrollable-horizontal.css" rel="stylesheet" type="text/css" />
 	<link href="css/scrollable-buttons.css" rel="stylesheet" type="text/css" />
+	<link href="css/tabs-slideshow.css" rel="stylesheet" type="text/css" />
+
+	<script src="http://cdn.jquerytools.org/1.2.2/jquery.tools.min.js?select=full&debug=true"></script>
+
+	<script language="JavaScript1.1">
+		//*****************************************
+		// Blending Image Slide Show Script- 
+		// © Dynamic Drive (www.dynamicdrive.com)
+		// For full source code, visit http://www.dynamicdrive.com/
+		//*****************************************
+
+		//specify images and corresponding links
+		var slideimages=new Array("pics/dani_04.jpg","pics/dani_12.jpg","pics/dani_19.jpg")
+		var slidespeed=8000 //specify interval between slide (in mili seconds)
+		var newwindow=1 //open links in new window? 1=yes, 0=no
+
+		var imageholder=new Array()
+		var ie=document.all
+		for (i=0;i<slideimages.length;i++){
+			imageholder[i]=new Image()
+			imageholder[i].src=slideimages[i]
+		}
+	</script>
+
 
 
 </head>
-	<script src="http://cdn.jquerytools.org/1.2.2/jquery.tools.min.js?select=full&debug=true"></script>
 <body>
 
 <div id="container">
 	<div id="header">
-		<!--
-		-->
+		<!-- -->
 		<div id="logo">
-			<h1><a href="#"><img src="images/simonecollet.png" width="85%" height="85%"/></a></h1>
+			<img src="images/simonecollet2.png" width="100%" height="85%"/>
 		</div>
-		<!--
-		-->
+		<!-- -->
 		<div id="mainnav">
 			<ul class="tabs">
-				<li><a class="button blue current" href="#">Portfolio</a></li>
-				<li><a class="button pink" href="#">Serviços</a></li>
-				<li><a class="button green" href="#">Perfil</a></li>
-				<li><a class="button orange" href="#">Contato</a></li>
+				<li><a class="button blue current" href="">Home</a></li>
+				<li><a class="button yellow " href="">Portfolio</a></li>
+				<li><a class="button pink" href="">Serviços</a></li>
+				<li><a class="button green" href="">Perfil</a></li>
+				<li><a class="button orange" href="">Contato</a></li>
 			</ul>
 		</div>
 	</div>
 
 	<div id="content">
 		<div class="panes">
+		<!-- TAB 1 : HOME-->
 			<div style="display: none;">
 				<div class="pics">
-					<img src="pics/dani_05.jpg" height="100%" width="100%"/>
+
+<!-- ======================== SLIDE SHOW =============================== -->
+	<!--
+         <img src="pics/dani_04.jpg" height="100%" width="100%" alt="Simone Collet"/>
+	-->
+
+	<img src="pics/dani_04.jpg" name="slide" border=0 
+		style="filter:blendTrans(duration=3)" width=100% height=100%>
+
+	<script language="JavaScript1.1">
+
+	var whichlink=0
+	var whichimage=0
+	var blenddelay=(ie)? document.images.slide.filters[0].duration*5000 : 0
+	function slideit(){
+		if (!document.images) return
+		if (ie) document.images.slide.filters[0].apply()
+		document.images.slide.src=imageholder[whichimage].src
+		if (ie) document.images.slide.filters[0].play()
+		whichlink=whichimage
+		whichimage=(whichimage<slideimages.length-1)? whichimage+1 : 0
+		setTimeout("slideit()",slidespeed+blenddelay)
+	}
+	slideit()
+
+	</script>
+
+
+<!-- ======================== FIM DO SLIDE SHOW =============================== -->
+
+
 				</div>
 			</div>
-			<div style="display: block;">
-				Second tab content. Tab contents are called "panes"<p> 
-				<a href=http://www.maxdesign.com.au/articles/process/>See MaxDesign</a><p>
-				More text...
-			</div>
+		<!-- TAB 2 : PORTFOLIO -->
 			<div style="display: none;">
-
 <!-- ======================== IMAGES =============================== -->
+			<!-- wrapper element for the large image -->
+			<div id="image_wrap">
+				<!-- Initially the image is a simple 1x1 pixel transparent GIF -->
+				<!--
+				<img src="collet/img/blank.gif" height="85%" width="100%" />
+				-->
+				<img src="collet/img/blank.gif" />
+			</div>
 
+<!-- ======================== THUNBNAILS =============================== -->
+			<div class="imagepane">
 				<!-- "previous page" action -->
 				<a class="prev browse left"></a>
 				<!-- root element for scrollable -->
@@ -67,8 +125,7 @@ Description: A two-column, fixed-width template.
    				<!-- root element for the items -->
    				<div class="items">
    
-      				<!-- 1-5 -->
-      				<!-- 5-10 -->
+      				<!-- -->
       				<div>
 					<img src="pics/dani_01.jpg" height="10%" width="10%"/>
 					<img src="pics/dani_02.jpg" height="10%" width="10%"/>
@@ -76,26 +133,30 @@ Description: A two-column, fixed-width template.
 					<img src="pics/dani_04.jpg" height="10%" width="10%"/>
 					<img src="pics/dani_05.jpg" height="10%" width="10%"/>
 					<img src="pics/dani_06.jpg" height="10%" width="10%"/>
+      				</div>
+      				<!-- -->
+      				<div>
 					<img src="pics/dani_07.jpg" height="10%" width="10%"/>
 					<img src="pics/dani_08.jpg" height="10%" width="10%"/>
 					<img src="pics/dani_09.jpg" height="10%" width="10%"/>
 					<img src="pics/dani_10.jpg" height="10%" width="10%"/>
-      				</div>
-      				
-      				<!-- 10-15 -->
-      				<!-- 16-20 -->
-      				<div>
 					<img src="pics/dani_11.jpg" height="10%" width="10%"/>
 					<img src="pics/dani_12.jpg" height="10%" width="10%"/>
+      				</div>
+      				<!-- -->
+      				<div>
 					<img src="pics/dani_13.jpg" height="10%" width="10%"/>
 					<img src="pics/dani_14.jpg" height="10%" width="10%"/>
 					<img src="pics/dani_15.jpg" height="10%" width="10%"/>
 					<img src="pics/dani_16.jpg" height="10%" width="10%"/>
 					<img src="pics/dani_17.jpg" height="10%" width="10%"/>
 					<img src="pics/dani_18.jpg" height="10%" width="10%"/>
+      				</div>
+      				<!-- -->
+      				<div>
 					<img src="pics/dani_19.jpg" height="10%" width="10%"/>
 					<img src="pics/dani_10.jpg" height="10%" width="10%"/>
-      				</div>
+   				</div>
    				</div>
 				</div>
 				
@@ -103,24 +164,71 @@ Description: A two-column, fixed-width template.
 				<a class="next browse right"></a>
 				
 				<br clear="all" /> 
+
+			</div>
 				
-<!-- ======================== FIM DAS IMAGES =============================== -->
+<!-- ======================== FIM DAS THUMBNAILS =============================== -->
+
+			</div>
+		<!-- TAB 3 : SERVICOS -->
+			<div id="text" style="display: block;">
+				<h>
+				SERVICOS
+				</h>
+				<p> testelk askdfa sdfja sdfa sdfa sdfasd
+				pdiq  q dqpeif qn asdf sdbcpv asfhbf v fhqGjsl h  qf alf
+				asdf; alksdf asdf asdf asdf lasd fas dflastg qr fglah f
+				pdiq  q dqpeif qn asdf sdbcpv asfhbf v fhqGjsl h  qf alf
+				pdibfa lnsd fahs dfbasdf ashd ;tagndr. nxclqv ewnm wg 
+				asdf;alksdf asdf asdf asdf lasd fas dflastg qr fglah f
+				pdiq  q dqpeif qn asdf sdbcpv asfhbf v fhqGjsl h  qf alf
+				asdf;alksdf asdf asdf asdf lasd fas dflastg qr fglah f
+				<p>
+
+			</div>
+		<!-- TAB 4 : PERFIL -->
+			<div id="text" style="display: none;">
+				<h>
+				PERFIL
+				</h>
+				<p> testelk askdfa sdfja sdfa sdfa sdfasd
+				pdiq  q dqpeif qn asdf sdbcpv asfhbf v fhqGjsl h  qf alf
+				asdf; alksdf asdf asdf asdf lasd fas dflastg qr fglah f
+				pdiq  q dqpeif qn asdf sdbcpv asfhbf v fhqGjsl h  qf alf
+				pdibfa lnsd fahs dfbasdf ashd ;tagndr. nxclqv ewnm wg 
+				asdf;alksdf asdf asdf asdf lasd fas dflastg qr fglah f
+				pdiq  q dqpeif qn asdf sdbcpv asfhbf v fhqGjsl h  qf alf
+				asdf;alksdf asdf asdf asdf lasd fas dflastg qr fglah f
+				<p>
 
 
 			</div>
-			<div style="display: none;">
-				Fourth tab content
+		<!-- TAB 5 : CONTATO -->
+			<div id="text" style="display: none;">
+				<h>
+				CONTATO
+				</h>
+				<p> testelk askdfa sdfja sdfa sdfa sdfasd
+				pdiq  q dqpeif qn asdf sdbcpv asfhbf v fhqGjsl h  qf alf
+				asdf; alksdf asdf asdf asdf lasd fas dflastg qr fglah f
+				pdiq  q dqpeif qn asdf sdbcpv asfhbf v fhqGjsl h  qf alf
+				pdibfa lnsd fahs dfbasdf ashd ;tagndr. nxclqv ewnm wg 
+				asdf;alksdf asdf asdf asdf lasd fas dflastg qr fglah f
+				pdiq  q dqpeif qn asdf sdbcpv asfhbf v fhqGjsl h  qf alf
+				asdf;alksdf asdf asdf asdf lasd fas dflastg qr fglah f
+				<p>
+
 			</div>
 		</div>
 	</div>
 	<div style="clear: both;"></div>
-	<div id="footer">
 	<!--
+	<div id="footer">
 		<p id="legal">Copyright &copy; 2010 Simone Collet. All Rights Reserved.<a href="#"> link </a></p>
 		<p id="legal">Copyright &copy; 2010 Simone Collet. All Rights Reserved.</a></p>
 		<p id="links"><a href="#">Privacidade</a> | <a href="#">Termos de Uso</a></p>
-	-->
 	</div>
+	-->
 </div>
 <!-- end page -->
 
@@ -141,6 +249,49 @@ $(function() {
 });
 </script>
 
+<!-- Change image -->
+<script>
+$(".scrollable").scrollable();
+
+$(".items img").click(function() {
+
+	// see if same thumb is being clicked
+	if ($(this).hasClass("active")) { return; }
+
+	// calclulate large image's URL based on the thumbnail URL (flickr specific)
+	//var url = $(this).attr("src").replace("_t", "");
+	var url = $(this).attr("src")
+
+	// get handle to element that wraps the image and make it semi-transparent
+	//var wrap = $("#image_wrap").fadeTo("medium", 0.5);
+	var wrap = $("#image_wrap").fadeTo("medium", 1);
+
+	// the large image from www.flickr.com
+	var img = new Image();
+
+	// call this function after it's loaded
+	img.onload = function() {
+		// make wrapper fully visible
+		//wrap.fadeTo("fast", 2);
+
+		// change the image
+		wrap.find("img").attr("src", url);
+	};
+
+	// begin loading the image from www.flickr.com
+	img.src = url;
+
+	// activate item
+	$(".items img").removeClass("active");
+	$(this).addClass("active");
+
+// when page loads simulate a "click" on the first image
+}).filter(":first").click();
+</script>
 
 </body>
 </html>
+
+
+
+
