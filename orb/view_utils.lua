@@ -48,9 +48,22 @@ end
 
 
 local menu = {}
-   menu[#menu + 1] = button_link("ARVORE APPS", "http://itiv/orb/app_tree")
-   menu[#menu + 1] = button_link("APPS", "http://itiv/orb/apps")
-   menu[#menu + 1] = button_link("APP LIST", "http://itiv/orb/app_list")
+   menu[#menu + 1] = button_link("ARVORE APPS", "app_tree")
+   menu[#menu + 1] = button_link("APPS", "apps")
+   menu[#menu + 1] = button_link("APP LIST", "app_list")
+   menu[#menu + 1] = button_link("RELACIONAMENTOS", "app_relat")
+   menu[#menu + 1] = button_link("TIPO RELAC.", "app_relat_type")
+   menu[#menu + 1] = button_link("CONTRATOS", "contract")
+   menu[#menu + 1] = button_link("LOCALIZACAO", "location_tree")
+   menu[#menu + 1] = button_link("FABRICANTE", "manufacturer")
+   menu[#menu + 1] = button_link("USUARIO", "user")
+   menu[#menu + 1] = button_link("GRUPO", "user_group")
+   menu[#menu + 1] = button_link("CHECK", "checkcmd")
+   menu[#menu + 1] = button_link("SISTEMA", "sysconfig")
+--[[
+   menu[#menu + 1] = button_link("ARVORE APPS", "http://itv/orb/app_tree")
+   menu[#menu + 1] = button_link("APPS", "http://itv/orb/apps")
+   menu[#menu + 1] = button_link("APP LIST", "http://itv/orb/app_list")
    menu[#menu + 1] = button_link("RELACIONAMENTOS", "http://itiv/orb/app_relat")
    menu[#menu + 1] = button_link("TIPO RELAC.", "http://itiv/orb/app_relat_type")
    menu[#menu + 1] = button_link("CONTRATOS", "http://itiv/orb/contract")
@@ -60,6 +73,7 @@ local menu = {}
    menu[#menu + 1] = button_link("GRUPO", "http://itiv/orb/user_group")
    menu[#menu + 1] = button_link("CHECK", "http://itiv/orb/checkcmd")
    menu[#menu + 1] = button_link("SISTEMA", "http://itiv/orb/sysconfig")
+]]
    menu[#menu + 1] = "<br><br><br>"
 
 
