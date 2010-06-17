@@ -8,7 +8,7 @@
 	/* required settings */
 	position:relative;
 	overflow:hidden;
-	width: 760px;
+	width: 100px;
 	height: 70px;
 
 	/* custom decorations */
@@ -27,13 +27,15 @@
 .scrollable .items {
 	/* this cannot be too large */
 	width:20000em;
+/*
 	position:absolute;
+*/
 	clear:both;
 }
 
 .items div {
-	float:left;
-	width:765px;
+	float:right;
+	width:100px;
 }
 
 /* single scrollable item */
@@ -79,8 +81,9 @@
 	padding:15px 0;
 	width:100%;
 */
-	width:980px;
-	height:590px;
+	float: left;
+	width:850px;
+	height:500px;
 	margin:0;
 	padding:0;
 
@@ -111,5 +114,9 @@
 	}
 
 
+
+.imagepane {
+	padding: 0 0 0 860px;
+}
 
 

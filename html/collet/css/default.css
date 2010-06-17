@@ -231,10 +231,6 @@ a:active, a:focus { outline-style: none; -moz-outline-style:none; }
 	font-size: 18px;
 }
 
-.imagepane {
-	padding: 0 0 0 80px;
-}
-
 /* root element for tabs  */
 ul.tabs { 
 	list-style:none; 
