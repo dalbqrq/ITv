@@ -288,7 +288,6 @@ cat << EOF > /etc/ssmtp/ssmtp.conf
 #
 # ssmtp.conf
 #
-#
 # GOOGLE APPS ACCOUNT 
 #
 root=alert@itvision.com.br
@@ -299,6 +298,9 @@ UseSTARTTLS=YES
 AuthUser=alert@itvision.com.br
 AuthPass=serserfm
 FromLineOverride=YES
+EOF
+#
+# ssmtp.conf
 #
 # GMAIL (STANDARD) ACCOUNT
 #
@@ -310,7 +312,6 @@ FromLineOverride=YES
 # AuthUser=daniel.dalb
 # AuthPass=0tucamis
 # FromLineOverride=YES
-EOF
 
 cd /etc/stunnel
 mv stunnel.conf stunnel.conf_
@@ -328,7 +329,7 @@ restart stunnel4
 ### 
 ### To test ssmtp with stunnel4 run: 
 ###    telnet localhost 1925
-###    echo test | mail -s "test ssmtp" daniel.dalb@gmail.com
+###    echo test | mail -v -s "test ssmtp" daniel.dalb@gmail.com
 ###
 
 
