@@ -8,8 +8,8 @@
 	/* required settings */
 	position:relative;
 	overflow:hidden;
-	width: 760px;
-	height: 90px;
+	width: 100px;
+	height: 70px;
 
 	/* custom decorations */
 /* daniel
@@ -27,13 +27,15 @@
 .scrollable .items {
 	/* this cannot be too large */
 	width:20000em;
+/*
 	position:absolute;
+*/
 	clear:both;
 }
 
 .items div {
-	float:left;
-	width:765px;
+	float:right;
+	width:100px;
 }
 
 /* single scrollable item */
@@ -55,8 +57,8 @@
 	background-color:#fff;
 	padding: 0px;
 	border:2px solid #ccc;
-	width:110px;
-	height:80px;
+	width:40px;
+	height:40px;
 	
 	-moz-border-radius:4px;
 	-webkit-border-radius:4px;
@@ -79,8 +81,9 @@
 	padding:15px 0;
 	width:100%;
 */
-	width:980px;
-	height:555px;
+	float: left;
+	width:850px;
+	height:500px;
 	margin:0;
 	padding:0;
 
@@ -111,5 +114,9 @@
 	}
 
 
+
+.imagepane {
+	padding: 0 0 0 860px;
+}
 
 
