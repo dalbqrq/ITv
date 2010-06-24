@@ -1,0 +1,69 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<link rel="stylesheet" href="css/master.css" type="text/css" media="screen" title="master" charset="utf-8" />
+	<link href="css/tabs.css" rel="stylesheet" type="text/css" />
+	<script src="http://cdn.jquerytools.org/1.2.2/jquery.tools.min.js?select=full&debug=true"></script>
+	<title>ITvision</title>
+</head>
+
+<body>
+
+<div id="wrapper" class="span-12">
+	<div id="header" class="col last span-12">
+		<h1>ITvision <span class="amp"></span> </h1> 
+		<!--<h2><span class="by">by</span> Pink Floyd</h2>-->
+	</div>
+	
+	<div id="pages">
+	<div class="tabs">
+		<ul>
+			<li><a href="#">Monitor</a></li>
+			<li><a href="#">ServiceDesk</a></li>
+			<li><a href="#">CMDB</a></li>
+			<li><a href="#">Configuração</a></li>
+			<li><a href="#">Ajuda</a></li>
+		</ul>
+	</div>
+	</div>
+
+
+
+	<!-- tab "panes" -->
+	<div class="panes">
+		<div>
+		<p> <iframe src ="text-cols.html" width="120%" height="550px" align="center" 
+			frameborder="0" scrolling="no">
+		<p>Your browser does not support iframes. Please use Firefox or Chrome</p>
+		</iframe> </p>
+		</div>
+
+
+		<div>Second tab content</div>
+		<div>Third tab content</div>
+	</div>
+
+
+	
+	<div id="footer">
+		<p><a href="http://www.rodrigogalindez.com/wordpress-themes/" title="Free Wordpress Theme">Experimental</a>, coming soon for <a href="http://www.wordpress.org">WordPress</a>.</p>
+		<p>Copyright © 2009 Rodrigo Galindez. All rights reserved.</p>		
+	</div>
+</div>
+
+<script>
+// perform JavaScript after the document is scriptable.
+$(function() {
+	// setup ul.tabs to work as tabs for each div directly under div.panes
+	$("ul.tabs").tabs("div.panes > div");
+});
+</script>
+
+</body>
+</html>
+
+
+
