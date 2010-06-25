@@ -73,6 +73,7 @@
 
 #thumbs {
 	background:url(img/demo-navi.jpeg) no-repeat;
+	background:none;
 	height:90px;
 	position:absolute;
 	top:525px;
@@ -87,6 +88,7 @@
 
 .t a {
 	background:transparent url(img/demo-navi.jpeg) no-repeat scroll -21px -90px;
+	background:red;
 	margin-left:11px;
 	display:block;
 	width:99px;
@@ -105,6 +107,7 @@
 }
 
 /* CSS sprite for the navigation */
+/*
 #t0		{ margin-left:20px; _margin-left:10px;}
 #t0.active	{ background-position:-21px 0 !important; }
 #t0:hover	{ background-position:-21px -180px; }
@@ -139,6 +142,7 @@
 #t6:hover 	{ background-position:-875px -180px; }
 #t6:active	{ background-position:-875px -270px; }
 #t6.active	{ background-position:-875px 0 !important; }
+*/
 </STYLE>
 
 <DIV id="wrap">	
@@ -237,17 +241,17 @@
 	<DIV id="thumbs" class="t">
 
 		<!-- intro page navi button -->
-		<A id="t0" class=""></A>
+		<A id="t0" class="">A</A>
 
 		<!-- scrollable navigator root element -->
 		<DIV class="navi">
-			<A style="display:none"></A>
-			<A id="t1" class=""></A>
-			<A id="t2" class="active"></A>
-			<A id="t3" class=""></A>
-			<A id="t4" class=""></A>
-			<A id="t5" class=""></A>
-			<A id="t6"></A>
+			<A style="display:none">B</A>
+			<A id="t1" class="">C</A>
+			<A id="t2" class="active">D</A>
+			<A id="t3" class="">E</A>
+			<A id="t4" class="">F</A>
+			<A id="t5" class="">G</A>
+			<A id="t6">H</A>
 		</DIV>
 
 	</DIV>

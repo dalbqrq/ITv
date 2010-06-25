@@ -1,0 +1,12 @@
+
+SEE:
+
+Termos de uso:
+http://code.google.com/apis/maps/faq.html#tos
+
+Obtendo um KEY de uso da API:
+http://code.google.com/apis/maps/faq.html#keysystem
+
+Colocando pins no mapa:
+http://code.google.com/apis/maps/documentation/javascript/v2/overlays.html#Custom_Icons
+

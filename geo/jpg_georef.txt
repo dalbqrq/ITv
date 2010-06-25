@@ -1,0 +1,29 @@
+
+Usar programa jhead 
+
+  http://www.sentex.net/~mwandel/jhead/
+  apt-get install jhead
+
+Ex: 
+
+jhead IMG_0849.jpg 
+File name    : IMG_0849.jpg
+File size    : 894798 bytes
+File date    : 2010:06:24 17:52:02
+Camera make  : Apple
+Camera model : iPhone 3GS
+Date/Time    : 2010:03:12 09:43:02
+Resolution   : 1536 x 2048
+Flash used   : No
+Focal length :  3.8mm
+Exposure time: 0.0061 s  (1/164)
+Aperture     : f/2.8
+ISO equiv.   : 70
+Whitebalance : Auto
+Metering Mode: spot
+Exposure     : program (auto)
+GPS Latitude : S 23d 36.79m  0s
+GPS Longitude: W 46d 41.91m  0s
+GPS Altitude :  729.00m
+Comment      : AppleMark
+
