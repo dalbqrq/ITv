@@ -1,0 +1,24 @@
+#!/usr/bin/env op.cgi
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="pt-br" lang="pt-br" >
+<head>
+        <title>ITvision</title>
+        <link rel="stylesheet" href="http://itiv/css/style.css" type="text/css" />
+        <link rel="stylesheet" href="http://itiv/css/tabs.css" type="text/css" />
+</head>
+<body>
+
+    <div class="panes" id="inner">
+    <p>Hello Orbit!</p>
+    <p>I am in $web|real_path, and the script is
+    $web|script_name.</p>
+    $lua{[[
+      if not web.input.msg then
+        web.input.msg = "nothing"
+      end
+    ]]}
+    <p>You passed: $web|input|msg.</p>
+    $include{ "bar.op" }
+    </div>
+
+</body>
+</html>

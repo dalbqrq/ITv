@@ -4,6 +4,7 @@
 
 body {
  background-color: #EEE;
+ background-color: #FFF;
  font-size: 11px;
  font-family: Verdana, Arial, SunSans-Regular, Sans-Serif;
  color:#564b47;
@@ -54,6 +55,7 @@ img.download {vertical-align:middle;}
  text-align: left;
  font-size: 21px;
  background-color: #EEE;
+ background-color: #FFF;
  padding: 0px;
  margin: 0px; 
  }
