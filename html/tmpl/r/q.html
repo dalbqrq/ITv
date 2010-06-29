@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<!-- saved from url=(0038)http://flowplayer.org/tools/index.html -->
+<HTML lang="en"><HEAD><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+					
+<TITLE>ITvision</TITLE>
+<META name="Description" content="The Information Technology Infrastructure Visualization and Monitoring System">	
+<META name="Keywords" content="ITIL ITvision monitoring infrastructure IT servicedesk cmdb">		
+
+	<META name="Distribution" content="Global">
+	<META name="Author" content="Tero Piirainen">
+	<META name="Robots" content="index,follow"> 
+	<LINK rel="shortcut icon" href="img/favicon.ico" type="image/png">
+	<LINK rel="stylesheet" type="text/css" href="css/style.css">
+	<SCRIPT src="css/jquery.tools.min.js"></SCRIPT> 
+
+</HEAD>
+<BODY id="tools_index" class="webkit tools">
+
+
+<DIV id="wrap">	
+
+<DIV id="head">
+	<STRONG>ITvision</STRONG>
+</DIV>
+
+
+<!-- root element for everything -->
+<DIV id="scroll">
+
+	<!-- scrollable items -->
+	<DIV id="tools" style="left: -2000px; ">
+
+
+		<!-- empty slot -->
+		<DIV class="tool">&nbsp;</DIV>
+
+		<!-- tabs -->
+		<DIV class="tool">
+			<DIV class="details">
+				<STRONG>Tabs</STRONG> is the most popular JavaScript tool on the web. 
+				Tabs, horizontal tabs and accordions, finally done the right way.
+			</DIV>
+		</DIV>
+
+		<!-- tooltip -->
+		<DIV class="tool">
+			<DIV class="details">
+				<STRONG>Tooltip</STRONG> helps you to build easier user interfaces. 
+				Big or small. Pluggable effects. Yet another crucial tool.
+			</DIV>
+		</DIV>
+
+		<!-- overlay -->
+		<DIV class="tool">
+			<DIV class="details">
+				<STRONG>Overlay</STRONG> is a significant part of the JavaScript/Web 2.0 landscape. 
+				This tool handles them all: commercial overlays, modal dialogs and slideshows.
+			</DIV>
+		</DIV>
+
+		<!-- scrollable -->
+		<DIV class="tool">
+			<DIV class="details">
+				<STRONG>Scrollable</STRONG> is the most successful tool in this library. 
+				Any size and shape. Infinite loops and more.
+			</DIV>
+		</DIV>
+
+		<!-- FORM -->
+		<DIV class="tool">
+			<DIV class="details">
+				<STRONG>FORM</STRONG> is a collection of essential form building tools. 
+				Validation, range- and date inputs for humans. New wave form development is here.
+			</DIV>
+		</DIV>
+
+		<!-- toolbox -->
+		<DIV class="tool">
+			<DIV class="details">
+				<STRONG>TOOLBOX</STRONG> is a set of small niceties. 
+				Take control of the mousewheel and your browser's back button. 
+				Embed Flash and place masks over your document.
+			</DIV>
+		</DIV>
+
+
+	</DIV>
+
+	<!-- intro "page" -->
+	<DIV id="intro" class="tool" style="display: none; ">
+		<DIV class="details">
+			<STRONG>jQuery Tools</STRONG> is a collection of the most important user-interface 
+			components for modern websites. Used by large sites all over the world.
+		</DIV>
+	</DIV>
+
+	<!-- required for IE6/IE7 -->
+	<BR clear="all">
+
+	<!-- thumbnails -->
+	<DIV id="thumbs" class="t">
+
+		<!-- intro page navi button -->
+		<A id="t0" class="">A</A>
+
+		<!-- scrollable navigator root element -->
+		<DIV class="navi">
+			<A style="display:none">B</A>
+			<A id="t1" class="">C</A>
+			<A id="t2" class="active">D</A>
+			<A id="t3" class="">E</A>
+			<A id="t4" class="">F</A>
+			<A id="t5" class="">G</A>
+			<A id="t6">H</A>
+		</DIV>
+
+	</DIV>
+
+</DIV>
+
+<SCRIPT>
+// initialize scrollable and return the programming API
+var api = $("#scroll").scrollable({
+	items: '#tools'
+
+// use the navigator plugin
+}).navigator().data("scrollable");
+
+
+// this callback does the special handling of our "intro page"
+api.onBeforeSeek(function(e, i) {
+
+	// when on the first item: hide the intro
+	if (i) {
+		$("#intro").fadeOut("slow");
+
+		// dirty hack for IE7-. cannot explain
+		if ($.browser.msie && $.browser.version < 8) {
+			$("#intro").hide();
+		}
+
+	// otherwise show the intro
+	} else {
+		$("#intro").fadeIn(1000);
+	}
+
+	// toggle activity for the intro thumbnail
+	$("#t0").toggleClass("active", i == 0);
+});
+
+// a dedicated click event for the intro thumbnail
+$("#t0").click(function() {
+
+	// seek to the beginning (the hidden first item)
+	$("#scroll").scrollable().begin();
+
+});
+
+</SCRIPT>
+
+
+<BR clear="all">
+
+</DIV>  
+
+</BODY></HTML>
