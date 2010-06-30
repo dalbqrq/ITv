@@ -26,7 +26,7 @@ end
 -- pass multiple patterns, and any captures get passed to
 -- the controller
 
-hello:dispatch_get(index, "/", "/horbit")
+hello:dispatch_get(index, "/", "/index")
 hello:dispatch_get(say, "/say/(%a+):(%d+):(%d+)")
 
 -- These are the view functions referenced by the controllers.
@@ -61,7 +61,7 @@ end
 
 function render_say(web, name, n1, n2)
    return render_layout(render_hello() .. 
-     p.hello((web.input.greeting or "Hello ") .. name .. " : " .. n1 ..." : " .. n2 .." !"))
+     p.hello((web.input.greeting or "Hello ") .. name .. " : " .. n1 .." : " .. n2 .." !"))
 end
 
 orbit.htmlify(hello, "render_.+")
