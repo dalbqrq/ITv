@@ -7,12 +7,12 @@ require "initialization"
 function test_select1()
    local t = {}
 
---[[
    print ("----- HOSTS -----")
    t = r.select_host ()
    for i, v in ipairs (t) do
       print ("->",v.host_id, v.alias )
    end
+--[[
 
    print ("----- ALL SERVICES -----")
    t = m.select ("nagios_services", "service_id > 0", "order by service_id DESC", 
@@ -64,13 +64,13 @@ function test_select1()
 ]]
 end
 
-
+--[[
 print("\n--------------------------------------------------------\n")
 
 init_config()
 init_app_relat_type()
 init_app_tree()
-
+]]
 print("\n--------------------------------------------------------\n")
 
 test_select1()
