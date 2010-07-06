@@ -40,49 +40,17 @@ end
 -- controllers
 
 function index(web)
-  return render_index()
+   return render_index()
 end
 
 itvision:dispatch_get(index, "/", "/index")
---itvision:dispatch_get(add_nothing, "/", "/index")
 
 
 function say(web, name, n1, n2)
-  return render_say(web, name, n1, n2)
+   return render_say(web, name, n1, n2)
 end
 
 itvision:dispatch_get(say, "/say/(%a+):(%d+):(%d+)")
-
-
-function add_comment(web, post_id)
-   local input = web.input
-   if string.find(input.comment, "^%s*$") then
-      return view_post(web, post_id, true)
-   else
-      local comment = comments:new()
-      comment.post_id = tonumber(post_id)
-      comment.body = input.comment
-      if not string.find(input.author, "^%s*$") then
-         comment.author = input.author
-      end
-      if not string.find(input.email, "^%s*$") then
-         comment.email = input.email
-      end
-      if not string.find(input.url, "^%s*$") then
-         comment.url = input.url
-      end
-      comment:save()
-      local post = posts:find(tonumber(post_id))
-      post.n_comments = (post.n_comments or 0) + 1
-      post:save()
-      cache:invalidate("/")
-      cache:invalidate("/post/" .. post_id)
-      cache:invalidate("/archive/" .. os.date("%Y/%m", post.published_at))
-      return web:redirect(web:link("/post/" .. post_id))
-   end
-end
-
-itvision:dispatch_get(add_comment, "/post/(%d+)/addcomment")
 
 
 function add_nothing(web, id)
@@ -108,6 +76,21 @@ end
 itvision:dispatch_get(add_nothing, "/nothing/(%d+)")
 
 
+function add(web, post_id)
+   local input = web.imput
+   --return web:redirect(web:link("/post/" .. post_id))
+   return render_add(web, post_id, web.input.user)
+end
+
+itvision:dispatch_post(add, "/add/(%d+)")
+
+
+function form_input(web)
+   return render_input(web)
+end
+
+itvision:dispatch_get(form_input, "/input")
+
 -- views
 
 function render_layout(inner_html)
@@ -123,8 +106,6 @@ function render_itvision()
    for i,v in ipairs(a) do
       s = s.."[ "..v.app_id.." + "..v.object_id.." ] <p>"
    end
---[[
-]]
    return p.itvision"Hello World!"..s
 end
 
@@ -140,6 +121,45 @@ end
 function render_nothing(web, id, app)
    return render_layout(p.itvision"Hello Nothing!"..id.." :: "..app.app_id.." :: "..app.type)
 end
+
+function render_add(web, post_id, user)
+   return render_layout(p.itvision((web.input.greeting or "Hello ") .. post_id .." & ".. user))
+end
+
+function render_input(web)
+   local res = {}
+
+   res[#res + 1] = form{
+      name = "input",
+      method = "post",
+      action = web:link("/add/30"),
+
+      p{ "NAME:", input{ type="text", name="user", value = "Daniel" },
+         br(),
+
+         "form_email:", br(), input{ type="text", name="email",
+         --value = web.input.email },
+         value = web.prefix },
+         br(),
+         "form_url:", br(), input{ type="text", name="url",
+         --value = web.input.url },
+         value = web.real_path },
+         br(),
+         "Comentarion:", br(), err_msg,
+         textarea{ name="comment", rows="10", cols="60", web.input.comment },
+         br(),
+         em(" *italics* "),
+         strong(" **bold** "),
+         " [" .. a{ href="/url", "link" } .. "](http://url) ",
+         br(),
+
+         input.button{ type="submit", value="Enviar" }
+      }
+   }
+   res[#res + 1] = p.itvision "INPUT"
+   return render_layout(res)
+end
+
 
 orbit.htmlify(itvision, "render_.+")
 
