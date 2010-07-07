@@ -5,12 +5,20 @@ local conf = require "config"
 local strgs = {}
 strgs.pt_BR = {
 	user_group_name = "Nome do grupo",
-	application = "Aplica&ccedil;&atilde;o"
+	application = "Aplica&ccedil;&atilde;o",
+	show = "Mostrar",
+	add = "Adicionar",
+	edit = "Editar",
+	remove = "Remover",
 }
 
 strgs.us = {
 	user_group_name = "Group name",
-	application = "Aplication"
+	application = "Application",
+	show = "Show",
+	add = "Add",
+	edit = "Edit",
+	remove = "Remove",
 }
 
 strings = strgs[config.language]

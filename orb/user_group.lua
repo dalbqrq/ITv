@@ -14,14 +14,14 @@ local env = luasql[database.driver]()
 mapper.conn = env:connect(database.dbname, database.dbuser, database.dbpass)
 mapper.driver = database.driver
 
+local ac = require "model_access"
 local ru = require "model_rules"
-local ac = require "model_rules"
 
 -- models
 
-apps = itvision:model "apps"
-user = itvision:model "user"
-user_group = itvision:model "user_group"
+local apps = itvision:model "apps"
+local user = itvision:model "user"
+local user_group = itvision:model "user_group"
 
 function apps:select_apps(app_id)
    local clause = ""
@@ -47,10 +47,22 @@ function user_group:select_user_group(user_group_id)
    return self:find_all(clause)
 end
 
+function user_group:select_user_group_app(user_group_id)
+   local clause = "ug.root_app = ap.app_id"
+   if user_group_id then
+      clause = "and ug.user_group_id = "..user_group_id
+   end
+   local tables = "itvision_user_group ug, itvision_apps ap"
+   local cols = "ap.name, ap.type, ug.name as ugname, user_group_id"
+   local res = ac.select (tables, clause, "", cols) 
+
+   return res
+end
+
 -- controllers
 
 function list(web)
-   local ug = user_group:select_user_group()
+   local ug = user_group:select_user_group_app()
    return render_list(web, ug)
 end
 
@@ -58,7 +70,7 @@ itvision:dispatch_get(list, "/", "/list")
 
 
 function show(web, user_group_id)
-   local ug = user_group:select_user_group(user_group_id)
+   local ug = user_group:select_user_group_app(user_group_id)
    return render_show(web, ug)
 end
 
@@ -82,48 +94,6 @@ end
 
 itvision:dispatch_post(insert, "/insert")
 
-
---[[
-function add(web, id)
-   local input = web.input
-   id=3
-
-   if string.find(input.app_id, "^%s*$") then
-      return render_nothing(web, id, true)
-   else
-      local app_list = app_list:new()
-      app_list.app_id = tonumber(id)
-      --app_list.body = input.comment
-   end
-
-
-   --return web:redirect(web:link("/nothing/" .. id))
-   local app_list = app_list:new()
-   app_list.app_id = tonumber(id)
-   app_list.type = "srv"
-   return render_nothing(web, id, app_list)
-end
-
---itvision:dispatch_get(add_nothing, "/nothing/(%d+)/addnothing")
-itvision:dispatch_get(add_nothing, "/nothing/(%d+)")
-
-
-function add(web, post_id)
-   local input = web.imput
-   --return web:redirect(web:link("/post/" .. post_id))
-   return render_add(web, post_id, web.input.user)
-end
-
-itvision:dispatch_post(add, "/add/(%d+)")
-
-
-function form_input(web)
-   return render_input(web)
-end
-
-itvision:dispatch_get(form_input, "/input")
-]]--
-
 -- views
 
 function render_layout(inner_html)
@@ -145,22 +115,29 @@ function render_list(web, ug)
    
    for i, v in ipairs(ug) do
       rows[#rows + 1] = tr{ 
+         td{ v.ugname },
          td{ v.name },
-         td{ v.root_app }
+         td{ a{ href= web:link("/remove/"..v.user_group_id), strings.remove} },
+         td{ a{ href= web:link("/edit/"..v.user_group_id), strings.edit} },
+         td{ a{ href= web:link("/show/"..v.user_group_id), strings.show} },
       }
    end
 
-   local res = H("table") { border=1, frame="border",
+   local res = H("table") { border=1, cellpadding=1,
       thead{ 
          tr{ 
              th{ strings.user_group_name }, 
-             th{ strings.application }
+             th{ strings.application },
+             th{ "." },
+             th{ "." },
+             th{ "." }
          }
       },
       tbody{
          rows
       }
    }
+   res = res ..  a{ href= web:link("/add"), strings.add}
    return render_layout(res)
 end
 
@@ -176,8 +153,17 @@ function render_add(web, ap)
    local ap_list = {} 
    local s = ""
 
+--[[
+   if string.find(input.app_id, "^%s*$") then
+      return render_nothing(web, id, true)
+   else
+      local app_list = app_list:new()
+      app_list.app_id = tonumber(id)
+   end
+]]
+
    for i, v in ipairs(ap) do
-         ap_list[#ap_list + 1] = H("option") { value = v.app_id, label = v.name }
+         ap_list[#ap_list + 1] = H("option") { value = v.app_id, label = v.name, v.name }
    end
 
    res[#res + 1] = form{
