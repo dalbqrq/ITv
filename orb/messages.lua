@@ -8,6 +8,7 @@ strgs.pt_BR = {
 	application = "Aplica&ccedil;&atilde;o",
 	type = "Tipo",
 	show = "Mostrar",
+	list = "Listar",
 	add = "Adicionar",
 	edit = "Editar",
 	remove = "Remover",
@@ -18,6 +19,7 @@ strgs.us = {
 	application = "Application",
 	type = "Type",
 	show = "Show",
+	list = "List",
 	add = "Add",
 	edit = "Edit",
 	remove = "Remove",
@@ -29,19 +31,37 @@ strings = strgs[config.language]
 local err_msg = {} 
 err_msg.pt_BR = {
 	[1] = "Origen não encontrada.",
-	[2] = "Aplicação inserida na árvore de aplicações."
+	[2] = "Aplicação inserida na árvore de aplicações.",
+	[3] = "Grupo de Usuário não encontrado.",
 }
 
 err_msg.us = {
 	[1] = "Unknown origin.",
-	[2] = "Application inserted on applications tree."
+	[2] = "Application inserted on applications tree.",
+	[3] = "User Group not found.",
 }
 
 
-err_msg = err_msg[config.language]
+--err_msg = err_msg[config.language]
+
+function html_accent(str)
+	local res = str
+	res = string.gsub(res,"ã", "&atilde;")
+	res = string.gsub(res,"õ", "&otilde;")
+	res = string.gsub(res,"ç", "&ccedil;")
+	res = string.gsub(res,"á", "&aacute;")
+	res = string.gsub(res,"é", "&eacute;")
+	res = string.gsub(res,"í", "&iacute;")
+	res = string.gsub(res,"ó", "&oacute;")
+	res = string.gsub(res,"ú", "&uacute;")
+	res = string.gsub(res,"â", "&acirc;")
+	res = string.gsub(res,"ê", "&ecirc;")
+	res = string.gsub(res,"ô", "&ocirc;")
+	return res
+end
 
 function error_message (idx)
-	return err_msg[conf.language][idx]
+	return html_accent(err_msg[conf.language][idx])
 end
 
 ----------------------------- DATE ----------------------------------

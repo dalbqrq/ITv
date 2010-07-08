@@ -49,7 +49,6 @@ end
 
 function user_group:select_user_group_app(user_group_id)
    local clause = "ug.root_app = ap.app_id"
-   user_group_id = nil
 
    if user_group_id then
       clause = clause.." and ug.user_group_id = "..tostring(user_group_id)
@@ -117,9 +116,9 @@ function render_list(web, ug)
    
    for i, v in ipairs(ug) do
       rows[#rows + 1] = tr{ 
+         --td{ v.user_group_id },
          td{ v.ugname },
          td{ v.name },
-         --td{ v.user_group_id },
          td{ a{ href= web:link("/remove/"..v.user_group_id), strings.remove} },
          td{ a{ href= web:link("/edit/"..v.user_group_id), strings.edit} },
          td{ a{ href= web:link("/show/"..v.user_group_id), strings.show} },
@@ -129,9 +128,9 @@ function render_list(web, ug)
    local res = H("table") { border=1, cellpadding=1,
       thead{ 
          tr{ 
+             --th{ "user_group_id" },
              th{ strings.user_group_name }, 
              th{ strings.application },
-             --th{ "user_group_id" },
              th{ "." },
              th{ "." },
              th{ "." }
@@ -146,18 +145,29 @@ function render_list(web, ug)
 end
 
 
-function render_show(web, ug, ug_id)
-   local res = H("table") { border=1, cellpadding=1,
-      tbody{
-         tr{ td{ strings.user_group_name }, td{ ug.ugname } },
-         tr{ td{ strings.type }, td{ ug.type } },
-         tr{ td{ strings.application }, td{ ug.name } },
+function render_show(web, ug)
+   ug = ug[1]
+   if ug then
+      local res = H("table") { border=1, cellpadding=1,
+         tbody{
+            --tr{ td{ "id" }, td{ ug.user_group_id } },
+            tr{ td{ strings.user_group_name }, td{ ug.ugname } },
+            tr{ td{ strings.type }, td{ ug.type } },
+            tr{ td{ strings.application }, td{ ug.name } },
+         }
       }
-   }
-   res = res ..  a{ href= web:link("/add"), strings.add}
-   res = res ..  ug_id .." "..tostring(#ug)
-   --res = res ..  a{ href= web:link("/remove/"..ug.user_group_id), strings.remove}
-   --res = res ..  a{ href= web:link("/edit/"..ug.user_group_id), strings.edit}
+      res = res ..  a{ href= web:link("/add"), strings.add} .." "
+      res = res ..  a{ href= web:link("/remove/"..ug.user_group_id), strings.remove} .." "
+      res = res ..  a{ href= web:link("/edit/"..ug.user_group_id), strings.edit}
+      res = res .. "Um"
+   else
+      res = { error_message(3),
+         p(),
+         a{ href= web:link("/list"), strings.list}, " ",
+         a{ href= web:link("/add"), strings.add}, " ", "Dois",
+      }
+   end
+
    return render_layout(res)
 end
 
