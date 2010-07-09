@@ -112,7 +112,7 @@ end
 function delete (table_, cond_)
    local db = connect ()
    local cond = set_cond (cond_)
-   assert ( db:update (table_, cond_))
+   assert ( db:delete (table_, cond_))
    db:close ()
 end
 

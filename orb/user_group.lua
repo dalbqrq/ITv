@@ -4,9 +4,10 @@ require "orbit"
 
 module("itvision", package.seeall, orbit.new)
 
--- configs
+-- configs ------------------------------------------------------------
 
 require "config"
+require "util"
 
 local database = config.db
 require("luasql." .. database.driver)
@@ -17,7 +18,7 @@ mapper.driver = database.driver
 local ac = require "model_access"
 local ru = require "model_rules"
 
--- models
+-- models ------------------------------------------------------------
 
 local apps = itvision:model "apps"
 local user = itvision:model "user"
@@ -42,25 +43,30 @@ end
 function user_group:select_user_group(user_group_id)
    local clause = ""
    if user_group_id then
-      clause = "user_group_id = "..user_group_id
+      clause = "id = "..user_group_id
    end
-   return self:find_all(clause)
+   --return self:find_all(clause)
+   return self:find(user_group_id)
+end
+
+function user_group:uniq(user_group_id)
+   return self:find(user_group_id)
 end
 
 function user_group:select_user_group_app(user_group_id)
    local clause = "ug.root_app = ap.app_id"
 
    if user_group_id then
-      clause = clause.." and ug.user_group_id = "..tostring(user_group_id)
+      clause = clause.." and ug.id = "..tostring(user_group_id)
    end
    local tables = "itvision_user_group ug, itvision_apps ap"
-   local cols = "ap.name as name, ap.type as type, ug.name as ugname, user_group_id, ap.app_id as app_id"
+   local cols = "ap.name as name, ap.type as type, ug.name as ugname, ug.id, ap.app_id as app_id"
    local res = ac.select (tables, clause, "", cols) 
 
    return res
 end
 
--- controllers
+-- controllers ------------------------------------------------------------
 
 function list(web)
    local ug = user_group:select_user_group_app()
@@ -86,6 +92,24 @@ end
 
 itvision:dispatch_get(edit, "/edit/(%d+)")
 
+function update(web, user_group_id)
+   local ug = {}
+   if user_group_id then
+      local tables = "itvision_user_group"
+      local clause = "id = "..user_group_id
+      --user_group:new()
+      ug.name = web.input.name
+      ug.root_app = web.input.root_app
+
+      ac.update (tables, ug, clause) 
+   end
+
+   return web:redirect(web:link("/list"))
+end
+
+itvision:dispatch_post(update, "/update/(%d+)")
+
+
 
 function add(web)
    local ap = apps:select_apps()
@@ -94,19 +118,49 @@ end
 
 itvision:dispatch_get(add, "/add")
 
-
 function insert(web)
    user_group:new()
    --user_group.name = web.input.name
    user_group.name = web.input.name
    user_group.root_app = web.input.root_app
+   user_group.instance_id = config.db.instance_id
    user_group:save()
    return web:redirect(web:link("/list"))
 end
 
 itvision:dispatch_post(insert, "/insert")
 
--- views
+
+function remove(web, user_group_id)
+   return render_remove(web, user_group_id)
+   --delete(web, user_group_id)
+--[[
+   if user_group_id then
+      local clause = "id = "..user_group_id
+      local tables = "itvision_user_group"
+      ac.delete (tables, clause) 
+   end
+
+   return web:redirect(web:link("/list"))
+]]
+end
+
+itvision:dispatch_get(remove, "/remove/(%d+)")
+
+function delete(web, user_group_id)
+   if user_group_id then
+      local clause = "id = "..user_group_id
+      local tables = "itvision_user_group"
+      ac.delete (tables, clause) 
+   end
+
+   return web:redirect(web:link("/list"))
+end
+
+itvision:dispatch_get(delete, "/delete/(%d+)")
+
+
+-- views ------------------------------------------------------------
 
 function render_layout(inner_html)
    return html{
@@ -115,17 +169,16 @@ function render_layout(inner_html)
    }
 end
 
-
 function render_list(web, ug)
    local rows = {}
    
    for i, v in ipairs(ug) do
       rows[#rows + 1] = tr{ 
          --td{ v.user_group_id },
-         td{ a{ href= web:link("/show/"..v.user_group_id), v.ugname} },
+         td{ a{ href= web:link("/show/"..v.id), v.ugname} },
          td{ v.name },
-         td{ a{ href= web:link("/remove/"..v.user_group_id), strings.remove} },
-         td{ a{ href= web:link("/edit/"..v.user_group_id), strings.edit} },
+         td{ a{ href= web:link("/remove/"..v.id), strings.remove} },
+         td{ a{ href= web:link("/edit/"..v.id), strings.edit} },
       }
    end
 
@@ -161,8 +214,8 @@ function render_show(web, ug)
          }
       } }
       res[#res+1] =  a{ href= web:link("/add"), strings.add} .." "
-      res[#res+1] =  a{ href= web:link("/remove/"..ug.user_group_id), strings.remove} .." "
-      res[#res+1] =  a{ href= web:link("/edit/"..ug.user_group_id), strings.edit} .." "
+      res[#res+1] =  a{ href= web:link("/remove/"..ug.id), strings.remove} .." "
+      res[#res+1] =  a{ href= web:link("/edit/"..ug.id), strings.edit} .." "
       res[#res+1] =  a{ href= web:link("/list"), strings.list} .." "
    else
       res = { error_message(3),
@@ -187,7 +240,7 @@ function render_add(web, ap, edit)
    if edit then
       edit = edit[1]
       val = edit.ugname
-      url = "/insert"
+      url = "/update/"..edit.id
    else
       url = "/insert"
    end
@@ -223,6 +276,67 @@ function render_add(web, ap, edit)
       input.button{ type="reset", value=strings.reset },
    }
    res[#res + 1] = a{ href= web:link("/list"), strings.list}
+
+   return render_layout(res)
+end
+
+
+function render_remove(web, ug)
+   local res = {}
+   local url = ""
+
+   if ug then
+      url = web:link("/delete/"..ug)
+      label = "Ok"
+      question = "Apagar?"
+   end
+
+
+--[[
+<html>
+<head>
+<script type="text/javascript">
+<!--
+function confirmation() {
+	var answer = confirm("Leave tizag.com?")
+	if (answer){
+		alert("Bye bye!")
+		window.location = "http://www.google.com/";
+	}
+	else{
+		alert("Thanks for sticking around!")
+	}
+}
+//-->
+</script>
+</head>
+<body>
+<form>
+<input type="button" onclick="confirmation()" value="Leave Tizag.com">
+</form>
+</body>
+</html>
+]]
+
+   res[#res + 1] = form{
+      name = "confirm",
+      type = "button",
+      onclick = "confirmation('"..question.."','"..url.."')",
+      value = label,
+   }
+--[[
+      input.button{ type="submit", value=strings.send }, " ",
+      input.button{ type="reset", value=strings.reset },
+
+      action = web:link(url),
+      strings.user_group_name..": ", input{ type="text", name="name", value = val }, 
+      br(),
+      strings.application..": ", H("select"){ name="root_app",  ap_list },
+      br(),
+      input.button{ type="submit", value=strings.send }, " ",
+      input.button{ type="reset", value=strings.reset },
+   }
+]]
 
    return render_layout(res)
 end

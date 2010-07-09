@@ -45,9 +45,28 @@ table.show = function (t)
 end
 
 
+table.dump = function (t)
+   local s = ""
+   local val = ""
+   if #t > 0 then
+      for _,row in ipairs(t) do
+         dump(row)
+      end
+   else
+      for field,val in pairs(t) do
+         if type(val) == "string" then
+            val = val:sub(1,60)
+         end
+	 s = s..field.."<"..type(val).."> = "..val
+      end
+      s = s.."-----"
+   end
+   return s
+end
+
 
 table.toString = function (t)
-   s = "{"
+   local s = "{"
    for i,v in pairs (t) do
       s = s .. "\n"
       if type(v) == "table" then
