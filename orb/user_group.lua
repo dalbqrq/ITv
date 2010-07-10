@@ -72,7 +72,6 @@ function list(web)
    local ug = user_group:select_user_group_app()
    return render_list(web, ug)
 end
-
 itvision:dispatch_get(list, "/", "/list")
 
 
@@ -80,7 +79,6 @@ function show(web, user_group_id)
    local ug = user_group:select_user_group_app(user_group_id)
    return render_show(web, ug)
 end
-
 itvision:dispatch_get(show, "/show/(%d+)")
 
 
@@ -89,8 +87,8 @@ function edit(web, user_group_id)
    local ug = user_group:select_user_group_app(user_group_id)
    return render_add(web, ap, ug)
 end
-
 itvision:dispatch_get(edit, "/edit/(%d+)")
+
 
 function update(web, user_group_id)
    local ug = {}
@@ -106,7 +104,6 @@ function update(web, user_group_id)
 
    return web:redirect(web:link("/list"))
 end
-
 itvision:dispatch_post(update, "/update/(%d+)")
 
 
@@ -115,37 +112,26 @@ function add(web)
    local ap = apps:select_apps()
    return render_add(web, ap)
 end
-
 itvision:dispatch_get(add, "/add")
+
 
 function insert(web)
    user_group:new()
-   --user_group.name = web.input.name
    user_group.name = web.input.name
    user_group.root_app = web.input.root_app
    user_group.instance_id = config.db.instance_id
    user_group:save()
    return web:redirect(web:link("/list"))
 end
-
 itvision:dispatch_post(insert, "/insert")
 
 
 function remove(web, user_group_id)
-   return render_remove(web, user_group_id)
-   --delete(web, user_group_id)
---[[
-   if user_group_id then
-      local clause = "id = "..user_group_id
-      local tables = "itvision_user_group"
-      ac.delete (tables, clause) 
-   end
-
-   return web:redirect(web:link("/list"))
-]]
+   local ug = user_group:select_user_group(user_group_id)
+   return render_remove(web, ug)
 end
-
 itvision:dispatch_get(remove, "/remove/(%d+)")
+
 
 function delete(web, user_group_id)
    if user_group_id then
@@ -156,33 +142,54 @@ function delete(web, user_group_id)
 
    return web:redirect(web:link("/list"))
 end
-
 itvision:dispatch_get(delete, "/delete/(%d+)")
 
 
 itvision:dispatch_static("/css/%.css", "/script/%.js")
 
+
 -- views ------------------------------------------------------------
 
-local scrt = [[
+--[[  ------- TIPs --------------
 
+How to Make a Text Link Submit A Form:
+http://www.thesitewizard.com/archive/textsubmit.shtml
 
-function confirmation(question, url) { 
-   var answer = confirm(question) 
-   if (answer){ 
-      //alert("The answer is OK!"); 
-      window.location = url;
-   } else { 
-      //alert("The answer is CANCEL!") 
-   } 
-} 
 ]]
 
+
+local scrt = [[
+   function confirmation(question, url) { 
+      var answer = confirm(question) 
+      if (answer){ 
+         //alert("The answer is OK!"); 
+         window.location = url;
+      } else { 
+         //alert("The answer is CANCEL!") 
+      } 
+   } 
+   ]]
+
+
 function do_button(web, label, url, question)
-   --return { form { action = web:link("/list"),  input { value = strings.list, type = "submit" } } }
-   --return { form = { action = web:link(url),  input = { value = label, type = "submit" } } }
-   return { form = { action = web:link("/list"),  input = { value = strings.list, type = "submit" } } }
+   --  NAO ESTAh FUNCIONANDO !!!!
+   return { form = { action = web:link(url),  input = { value = label, type = "submit" } } }
 end
+
+
+function button_form(label, btype, class)
+   class = class or "none"
+   return [[<div class="buttons"><button type="]]..btype..
+          [[" class="]]..class..[["> ]]..label..[[ </button> </div> ]]
+end
+
+
+function button_link(label, link, class)
+   class = class or "none"
+   return [[<div class="buttons"> <a href="]]..link..
+          [[" class="]]..class..[[">]]..label..[[ </a> </div>]]
+end
+
 
 function render_layout(inner_html)
    return html{
@@ -200,20 +207,27 @@ function render_layout(inner_html)
    }
 end
 
+
 function render_list(web, ug)
    local rows = {}
+   local res = {}
    
+   res[#res + 1] = p{ button_link(strings.add, web:link("/add")) }
+   res[#res + 1] = p{ br(), br() }
+
    for i, v in ipairs(ug) do
       rows[#rows + 1] = tr{ 
          --td{ v.user_group_id },
          td{ a{ href= web:link("/show/"..v.id), v.ugname} },
          td{ v.name },
-         td{ a{ href= web:link("/remove/"..v.id), strings.remove} },
-         td{ a{ href= web:link("/edit/"..v.id), strings.edit} },
+         --td{ a{ href= web:link("/remove/"..v.id), strings.remove} },
+         --td{ a{ href= web:link("/edit/"..v.id), strings.edit} },
+         td{ button_link(strings.remove, web:link("/remove/"..v.id), "negative") },
+         td{ button_link(strings.edit, web:link("/edit/"..v.id)) },
       }
    end
 
-   local res = H("table") { border=1, cellpadding=1,
+   res[#res + 1]  = H("table") { border=1, cellpadding=1,
       thead{ 
          tr{ 
              --th{ "user_group_id" },
@@ -227,7 +241,7 @@ function render_list(web, ug)
          rows
       }
    }
-   res = res ..  a{ href= web:link("/add"), strings.add}
+
    return render_layout(res)
 end
 
@@ -235,8 +249,28 @@ end
 function render_show(web, ug)
    ug = ug[1]
    local res = {}
+
+   -- LISTA DE OPERACOES
+   --[[ Duas opcoes nao utilizadas: a primeira com form e a segunda com link sem estilo css.
+   res[#res + 1] = form { action = web:link("/add"), input { value = strings.add, type = "submit" } }
+   res[#res + 1] = form { action = web:link("/remove/"..ug.id),input { value = strings.remove, type = "submit" } }
+   res[#res + 1] = form { action = web:link("/edit/"..ug.id),  input { value = strings.edit, type = "submit" } }
+   res[#res + 1] = form { action = web:link("/list"),  input { value = strings.list, type = "submit" } }
+
+   res[#res+1] =  a{ href= web:link("/add"), strings.add} .." "
+   res[#res+1] =  a{ href= web:link("/remove/"..ug.id), strings.remove} .." "
+   res[#res+1] =  a{ href= web:link("/edit/"..ug.id), strings.edit} .." "
+   res[#res+1] =  a{ href= web:link("/list"), strings.list} .." "
+   ]]
+
+   res[#res + 1] = p{ button_link(strings.add, web:link("/add")) }
+   res[#res + 1] = p{ button_link(strings.remove, web:link("/remove/"..ug.id)) }
+   res[#res + 1] = p{ button_link(strings.edit, web:link("/edit/"..ug.id)) }
+   res[#res + 1] = p{ button_link(strings.list, web:link("/list")) }
+   res[#res + 1] = p{ br(), br() }
+
    if ug then
-      res = { H("table") { border=1, cellpadding=1,
+      res[#res + 1] = { H("table") { border=1, cellpadding=1,
          tbody{
             --tr{ td{ "id" }, td{ ug.user_group_id } },
             tr{ th{ strings.user_group_name }, td{ ug.ugname } },
@@ -244,10 +278,6 @@ function render_show(web, ug)
             tr{ th{ strings.application }, td{ ug.name } },
          }
       } }
-      res[#res+1] =  a{ href= web:link("/add"), strings.add} .." "
-      res[#res+1] =  a{ href= web:link("/remove/"..ug.id), strings.remove} .." "
-      res[#res+1] =  a{ href= web:link("/edit/"..ug.id), strings.edit} .." "
-      res[#res+1] =  a{ href= web:link("/list"), strings.list} .." "
    else
       res = { error_message(3),
          p(),
@@ -276,15 +306,20 @@ function render_add(web, ap, edit)
       url = "/insert"
    end
 
-
---[[
+   --[[
    if string.find(input.app_id, "^%s*$") then
       return render_nothing(web, id, true)
    else
       local app_list = app_list:new()
       app_list.app_id = tonumber(id)
    end
-]]
+   ]]
+
+   -- LISTA DE OPERACOES 
+   --res[#res + 1] = form { action = web:link("/list"),  input { value = strings.list, type = "submit" } }
+   res[#res + 1] = p { button_link(strings.list, web:link("/list")) }
+   res[#res + 1] = p{ br(), br() }
+
    for i, v in ipairs(ap) do
       if edit and (tonumber(edit.app_id) == tonumber(v.app_id)) then
          sel = " selected"
@@ -302,15 +337,12 @@ function render_add(web, ap, edit)
       strings.user_group_name..": ", input{ type="text", name="name", value = val }, 
       br(),
       strings.application..": ", H("select"){ name="root_app",  ap_list },
-      br(),
-      input.button{ type="submit", value=strings.send }, " ",
-      input.button{ type="reset", value=strings.reset },
+      --br(),
+      --input.button{ type="submit", value=strings.send }, " ",
+      --input.button{ type="reset", value=strings.reset },
+      p{ button_form(strings.send, "submit", "positive") },
+      p{ button_form(strings.reset, "reset", "negative") },
    }
-   --res[#res + 1] = a{ href= web:link("/list"), strings.list}
-   --res[#res + 1] = form { action = web:link("/list"),  input { value = strings.list, type = "submit" } }
-   --res[#res + 1] = do_button(web, strings.list, "/list")
-   res[#res + 1] = do_button(web)
-   res[#res + 1] = "NONONO"
 
    return render_layout(res)
 end
@@ -321,30 +353,15 @@ function render_remove(web, ug)
    local url = ""
 
    if ug then
-      url = web:link("/delete/"..ug)
-      label = "Ok"
-      question = "Apagar?"
+      url_ok = web:link("/delete/"..ug.id)
+      url_cancel = web:link("/list")
    end
 
-   res[#res + 1] = form{ input {
-      name = "confirm",
-      --type = "button",
-      onclick = "confirmation('"..question.."','"..url.."')",
-      --value = label,
-   } }
---[[
-      input.button{ type="submit", value=strings.send }, " ",
-      input.button{ type="reset", value=strings.reset },
-
-      action = web:link(url),
-      strings.user_group_name..": ", input{ type="text", name="name", value = val }, 
-      br(),
-      strings.application..": ", H("select"){ name="root_app",  ap_list },
-      br(),
-      input.button{ type="submit", value=strings.send }, " ",
-      input.button{ type="reset", value=strings.reset },
+   res[#res + 1] = p{
+      "Voce tem certeza que deseja escluir a grupo de usuarios "..ug.name.."?",
+      p{ button_link("Sim", web:link(url_ok)) },
+      p{ button_link("Cancelar", web:link(url_cancel)) },
    }
-]]
 
    return render_layout(res)
 end
@@ -353,3 +370,5 @@ end
 orbit.htmlify(itvision, "render_.+")
 
 return _M
+
+
