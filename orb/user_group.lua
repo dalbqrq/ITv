@@ -8,15 +8,12 @@ module("itvision", package.seeall, orbit.new)
 
 require "config"
 require "util"
+require "view_utils"
 
-local database = config.db
-require("luasql." .. database.driver)
-local env = luasql[database.driver]()
-mapper.conn = env:connect(database.dbname, database.dbuser, database.dbpass)
-mapper.driver = database.driver
+mapper.conn, mapper.driver = config.setup_orbdb()
 
-local ac = require "model_access"
-local ru = require "model_rules"
+local ma = require "model_access"
+local mr = require "model_rules"
 
 -- models ------------------------------------------------------------
 
@@ -61,7 +58,7 @@ function user_group:select_user_group_app(user_group_id)
    end
    local tables = "itvision_user_group ug, itvision_apps ap"
    local cols = "ap.name as name, ap.type as type, ug.name as ugname, ug.id, ap.app_id as app_id"
-   local res = ac.select (tables, clause, "", cols) 
+   local res = ma.select (tables, clause, "", cols) 
 
    return res
 end
@@ -99,7 +96,7 @@ function update(web, user_group_id)
       ug.name = web.input.name
       ug.root_app = web.input.root_app
 
-      ac.update (tables, ug, clause) 
+      ma.update (tables, ug, clause) 
    end
 
    return web:redirect(web:link("/list"))
@@ -137,7 +134,7 @@ function delete(web, user_group_id)
    if user_group_id then
       local clause = "id = "..user_group_id
       local tables = "itvision_user_group"
-      ac.delete (tables, clause) 
+      ma.delete (tables, clause) 
    end
 
    return web:redirect(web:link("/list"))
@@ -149,64 +146,6 @@ itvision:dispatch_static("/css/%.css", "/script/%.js")
 
 
 -- views ------------------------------------------------------------
-
---[[  ------- TIPs --------------
-
-How to Make a Text Link Submit A Form:
-http://www.thesitewizard.com/archive/textsubmit.shtml
-
-]]
-
-
-local scrt = [[
-   function confirmation(question, url) { 
-      var answer = confirm(question) 
-      if (answer){ 
-         //alert("The answer is OK!"); 
-         window.location = url;
-      } else { 
-         //alert("The answer is CANCEL!") 
-      } 
-   } 
-   ]]
-
-
-function do_button(web, label, url, question)
-   --  NAO ESTAh FUNCIONANDO !!!!
-   return { form = { action = web:link(url),  input = { value = label, type = "submit" } } }
-end
-
-
-function button_form(label, btype, class)
-   class = class or "none"
-   return [[<div class="buttons"><button type="]]..btype..
-          [[" class="]]..class..[["> ]]..label..[[ </button> </div> ]]
-end
-
-
-function button_link(label, link, class)
-   class = class or "none"
-   return [[<div class="buttons"> <a href="]]..link..
-          [[" class="]]..class..[[">]]..label..[[ </a> </div>]]
-end
-
-
-function render_layout(inner_html)
-   return html{
-      head{ 
-         title("ITvision"),
-         meta{ ["http-equiv"] = "Content-Type",
-            content = "text/html; charset=utf-8" },
-         link{ rel = 'stylesheet', type = 'text/css', 
-            href = '/css/style.css', media = 'screen' },
-         --script{ type="text/javascript", src="http://itv/js/scripts.js" },
-         script{ type="text/javascript", scrt },
-
-      },
-      body{ inner_html }
-   }
-end
-
 
 function render_list(web, ug)
    local rows = {}
@@ -358,9 +297,9 @@ function render_remove(web, ug)
    end
 
    res[#res + 1] = p{
-      "Voce tem certeza que deseja escluir a grupo de usuarios "..ug.name.."?",
-      p{ button_link("Sim", web:link(url_ok)) },
-      p{ button_link("Cancelar", web:link(url_cancel)) },
+      "Voce tem certeza que deseja excluir o grupo de usuarios "..ug.name.."?",
+      p{ button_link(strings.yes, web:link(url_ok)) },
+      p{ button_link(strings.cancel, web:link(url_cancel)) },
    }
 
    return render_layout(res)

@@ -5,7 +5,7 @@ local conf = require "config"
 local strgs = {}
 strgs.pt_BR = {
 	user_group_name = "Nome do grupo",
-	application = "Aplica&ccedil;&atilde;o",
+	application = "Aplicação",
 	type = "Tipo",
 	show = "Mostrar",
 	list = "Listar",
@@ -14,6 +14,14 @@ strgs.pt_BR = {
 	remove = "Remover",
 	send = "Enviar",
 	reset = "Resetar",
+	yes = "Sim",
+	no = "Não",
+	cancel = "Cancelar",
+	login = "Login",
+	user = "Usuário",
+	group = "Grupo",
+	password = "Senha",
+	exclude_quest = "Voce tem certeza que deseja excluir a/o "
 }
 
 strgs.us = {
@@ -27,7 +35,16 @@ strgs.us = {
 	remove = "Remove",
 	send = "Send",
 	reset = "Reset",
+	yes = "Yes",
+	no = "No",
+	cancel = "Cancel",
+	login = "Login",
+	user = "User",
+	group = "Group",
+	password = "Password",
+	exclude_quest = "Are you sure you want to remove the "
 }
+
 
 strings = strgs[config.language]
 

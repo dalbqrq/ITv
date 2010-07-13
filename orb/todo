@@ -1,18 +1,20 @@
 DONE:
 itvision_user_group
+itvision_user
 
 TODO:
-itvision_user
-itvision_user_prefs
 itvision_manufacturer
 itvision_contract
 itvision_app_relat_type
-itvision_device
+itvision_config
+
+itvision_location_tree
 itvision_device_host
+itvision_device
 itvision_app_list
 itvision_app_relat
 itvision_app_tree
 itvision_apps
-itvision_config
-itvision_location_tree
 itvision_site_tree
+
+itvision_user_prefs
