@@ -62,8 +62,7 @@ itvision:dispatch_get(list, "/", "/list")
 function show(web, id)
    local A = user:select_user_and_group(id)
    return render_show(web, A)
-end
-itvision:dispatch_get(show, "/show/(%d+)")
+end itvision:dispatch_get(show, "/show/(%d+)")
 
 
 function edit(web, id)
@@ -81,7 +80,9 @@ function update(web, id)
       local clause = "user_id = "..id
       --A:new()
       A.login = web.input.login
-      A.password = web.input.password
+      if web.input.password ~= "?-^&" then
+         A.password = web.input.password
+      end
       A.user_group_id = web.input.user_group_id
       --A.user_prefs_id = web.input.user_prefs_id
       A.user_prefs_id = 0
@@ -104,7 +105,9 @@ itvision:dispatch_get(add, "/add")
 function insert(web)
    user:new()
    user.login = web.input.login
-   user.password = web.input.password
+   if web.input.password ~= "?-^&" then
+      user.password = web.input.password
+   end
    user.user_group_id = web.input.user_group_id
    --user.user_prefs_id = web.input.user_prefs_id
    user.user_prefs_id = 0
@@ -215,7 +218,8 @@ function render_add(web, A, edit)
    if edit then
       edit = edit[1]
       val1 = edit.login
-      val2 = edit.password
+      val2 = "?-^&"
+      pwd = edit.password
       url = "/update/"..edit.user_id
    else
       url = "/insert"
