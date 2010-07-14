@@ -216,6 +216,7 @@ function render_add(web, A, edit)
    res[#res + 1] = p { button_link(strings.list, web:link("/list")) }
    res[#res + 1] = p{ br(), br() }
 
+--[[
    for i, v in ipairs(A) do
       if edit and (tonumber(edit.app_id) == tonumber(v.app_id)) then
          sel = " selected"
@@ -225,6 +226,12 @@ function render_add(web, A, edit)
 
       A_list[#A_list + 1] = H("option"..sel) { value = v.app_id, label = v.name, v.name } 
    end
+]]
+
+   value_idx = "app_id"
+   label_idx = "names"
+   default_value = edit.app_id
+   A_list = select_option(A, value_idx, label_idx, default_value)
 
    res[#res + 1] = form{
       name = "input",

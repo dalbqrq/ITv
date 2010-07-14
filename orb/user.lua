@@ -1,7 +1,6 @@
 #!/usr/bin/env wsapi.cgi
 
 require "orbit"
-
 module("itvision", package.seeall, orbit.new)
 
 -- configs ------------------------------------------------------------
@@ -66,9 +65,8 @@ end itvision:dispatch_get(show, "/show/(%d+)")
 
 
 function edit(web, id)
-   local A = group:select_group()
-   local B = user:select_user(id)
-   return render_add(web, A, B)
+   local A = user:select_user(id)
+   return render_add(web, A)
 end
 itvision:dispatch_get(edit, "/edit/(%d+)")
 
@@ -96,8 +94,7 @@ itvision:dispatch_post(update, "/update/(%d+)")
 
 
 function add(web)
-   local A = group:select_group()
-   return render_add(web, A)
+   return render_add(web)
 end
 itvision:dispatch_get(add, "/add")
 
@@ -206,14 +203,13 @@ function render_show(web, A)
 end
 
 
-function render_add(web, A, edit)
+function render_add(web, edit)
    local res = {}
-   local A_list = {} 
    local s = ""
-   local sel = ""
    local val1 = ""
    local val2 = ""
    local url = ""
+   local default_value = ""
 
    if edit then
       edit = edit[1]
@@ -221,6 +217,7 @@ function render_add(web, A, edit)
       val2 = "?-^&"
       pwd = edit.password
       url = "/update/"..edit.user_id
+      default_value = edit.user_group_id
    else
       url = "/insert"
    end
@@ -238,24 +235,15 @@ function render_add(web, A, edit)
    res[#res + 1] = p{ button_link(strings.list, web:link("/list")) }
    res[#res + 1] = p{ br(), br() }
 
-   for i, v in ipairs(A) do
-      if edit and (tonumber(edit.user_group_id) == tonumber(v.id)) then
-         sel = " selected"
-      else 
-         sel = ""
-      end
-
-      A_list[#A_list + 1] = H("option"..sel) { value = v.id, label = v.name, v.name } 
-   end
-
    res[#res + 1] = form{
       name = "input",
       method = "post",
       action = web:link(url),
+
       strings.login..": ", input{ type="text", name="login", value = val1 },br(),
       strings.password..": ", input{ type="password", name="password", value = val2 },br(),
-      strings.group..": ", H("select"){ name="user_group_id",  A_list }, br(),
-      --strings.prefs..": ", H("select"){ name="user_profs_id",  B_list }, br(),
+      strings.group..": ", select_option("user_group_id", group:find_all(), "id", "name", default_value), br(),
+
       p{ button_form(strings.send, "submit", "positive") },
       p{ button_form(strings.reset, "reset", "negative") },
    }

@@ -19,9 +19,23 @@ strgs.pt_BR = {
 	cancel = "Cancelar",
 	login = "Login",
 	user = "Usuário",
+	name = "Nome",
 	group = "Grupo",
 	password = "Senha",
-	exclude_quest = "Voce tem certeza que deseja excluir a/o "
+	exclude_quest = "Voce tem certeza que deseja excluir a/o ",
+	manufacturer = "Fabricante",
+	company = "Empresa",
+	begins = "Início",
+	ends = "Fim",
+	description = "Descrição",
+	contract = "Contrato",
+	app_relat_type = "Tipo de relacionamento de aplicação",
+        version = "Versão",
+        created = "Criado",
+        updated = "Atualizado",
+        home_dir = "home_dir",
+        monitor_dir = "monitor_dir",
+        monitor_bp_dir = "monitor_bp_dir",
 }
 
 strgs.us = {
@@ -40,9 +54,23 @@ strgs.us = {
 	cancel = "Cancel",
 	login = "Login",
 	user = "User",
+	name = "Name",
 	group = "Group",
 	password = "Password",
-	exclude_quest = "Are you sure you want to remove the "
+	exclude_quest = "Are you sure you want to remove the ",
+	manufacturer = "Manufacturer",
+	company = "Company",
+	begins = "Begin",
+	ends = "End",
+	description = "Description",
+	contract = "Contract",
+	app_relat_type = "Aplication relation type",
+        version = "Version",
+        created = "Created",
+        updated = "Updated",
+        home_dir = "home_dir",
+        monitor_dir = "monitor_dir",
+        monitor_bp_dir = "monitor_bp_dir",
 }
 
 

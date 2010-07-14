@@ -113,7 +113,7 @@ pre{
 
 
 /*  -------------- forms -------------------------*/
-input, select{
+input, select, textarea{
   color:#000;
   font: bold 100%;
   background-color:#aaa;

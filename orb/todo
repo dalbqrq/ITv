@@ -1,13 +1,12 @@
 DONE:
 itvision_user_group
 itvision_user
-
-TODO:
 itvision_manufacturer
 itvision_contract
 itvision_app_relat_type
-itvision_config
+itvision_sysconfig
 
+TODO:
 itvision_location_tree
 itvision_device_host
 itvision_device

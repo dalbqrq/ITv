@@ -80,9 +80,8 @@ itvision:dispatch_get(show, "/show/(%d+)")
 
 
 function edit(web, user_group_id)
-   local ap = apps:select_apps()
    local ug = user_group:select_user_group_app(user_group_id)
-   return render_add(web, ap, ug)
+   return render_add(web, ug)
 end
 itvision:dispatch_get(edit, "/edit/(%d+)")
 
@@ -104,10 +103,8 @@ end
 itvision:dispatch_post(update, "/update/(%d+)")
 
 
-
 function add(web)
-   local ap = apps:select_apps()
-   return render_add(web, ap)
+   return render_add(web)
 end
 itvision:dispatch_get(add, "/add")
 
@@ -229,11 +226,9 @@ function render_show(web, ug)
 end
 
 
-function render_add(web, ap, edit)
+function render_add(web, edit)
    local res = {}
-   local ap_list = {} 
    local s = ""
-   local sel = ""
    local val = ""
    local url = ""
 
@@ -241,6 +236,7 @@ function render_add(web, ap, edit)
       edit = edit[1]
       val = edit.ugname
       url = "/update/"..edit.id
+      default_value = edit.app_id
    else
       url = "/insert"
    end
@@ -259,6 +255,11 @@ function render_add(web, ap, edit)
    res[#res + 1] = p { button_link(strings.list, web:link("/list")) }
    res[#res + 1] = p{ br(), br() }
 
+   --[[
+   local sel = ""
+   local ap_list = {} 
+   local ap = apps:find_all()
+
    for i, v in ipairs(ap) do
       if edit and (tonumber(edit.app_id) == tonumber(v.app_id)) then
          sel = " selected"
@@ -268,17 +269,21 @@ function render_add(web, ap, edit)
 
       ap_list[#ap_list + 1] = H("option"..sel) { value = v.app_id, label = v.name, v.name } 
    end
+   ]]--
 
    res[#res + 1] = form{
       name = "input",
       method = "post",
       action = web:link(url),
-      strings.user_group_name..": ", input{ type="text", name="name", value = val }, 
-      br(),
-      strings.application..": ", H("select"){ name="root_app",  ap_list },
-      --br(),
-      --input.button{ type="submit", value=strings.send }, " ",
-      --input.button{ type="reset", value=strings.reset },
+
+      strings.user_group_name..": ", input{ type="text", name="name", value = val }, br(),
+      strings.application..": ", select_option("root_app", apps:find_all(), "app_id", "name", default_value),br(),
+
+      --[[
+      strings.application..": ", H("select"){ name="root_app",  ap_list }, br(),
+      input.button{ type="submit", value=strings.send }, " ",
+      input.button{ type="reset", value=strings.reset },
+      ]]
       p{ button_form(strings.send, "submit", "positive") },
       p{ button_form(strings.reset, "reset", "negative") },
    }
