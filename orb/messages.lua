@@ -36,6 +36,8 @@ strgs.pt_BR = {
         home_dir = "home_dir",
         monitor_dir = "monitor_dir",
         monitor_bp_dir = "monitor_bp_dir",
+	root = "Raiz",
+	child_of = "Filho de",
 }
 
 strgs.us = {
@@ -71,6 +73,8 @@ strgs.us = {
         home_dir = "home_dir",
         monitor_dir = "monitor_dir",
         monitor_bp_dir = "monitor_bp_dir",
+	root = "Root",
+	child_of = "Child of",
 }
 
 
