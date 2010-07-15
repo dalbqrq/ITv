@@ -87,15 +87,15 @@ itvision:dispatch_get(edit, "/edit/(%d+)")
 
 
 function update(web, user_group_id)
-   local ug = {}
+   local A = {}
    if user_group_id then
       local tables = "itvision_user_group"
       local clause = "id = "..user_group_id
       --user_group:new()
-      ug.name = web.input.name
-      ug.root_app = web.input.root_app
+      A.name = web.input.name
+      A.root_app = web.input.root_app
 
-      ma.update (tables, ug, clause) 
+      ma.update (tables, A, clause) 
    end
 
    return web:redirect(web:link("/list"))

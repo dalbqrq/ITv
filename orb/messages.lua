@@ -38,6 +38,8 @@ strgs.pt_BR = {
         monitor_bp_dir = "monitor_bp_dir",
 	root = "Raiz",
 	child_of = "Filho de",
+	is_active = "Ativo",
+	service = "Serviço",
 }
 
 strgs.us = {
@@ -75,6 +77,8 @@ strgs.us = {
         monitor_bp_dir = "monitor_bp_dir",
 	root = "Root",
 	child_of = "Child of",
+	is_active = "Is active",
+	service = "Service",
 }
 
 
