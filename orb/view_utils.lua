@@ -13,6 +13,8 @@ require "orbit"
 module("itvision", package.seeall, orbit.new)
 require "cosmo"
 
+require "messages"
+
 local scrt = [[
    function confirmation(question, url) { 
       var answer = confirm(question) 
@@ -24,6 +26,11 @@ local scrt = [[
       } 
    } 
    ]]
+
+local NoOrYes = {
+      { id = 0, name = strings.no },
+      { id = 1, name = strings.yes },
+   }
 
 
 function do_button(web, label, url, question)
@@ -68,8 +75,19 @@ function select_option(name, T, value_idx, label_idx, default_value)
 
    olist[#olist + 1] = "<select name=\""..name.."\">"
    for i, v in ipairs(T) do
-      if default_value and (tonumber(default_value) == tonumber(v[value_idx])) then
-         selected = "selected"
+      --if default_value and (tonumber(default_value) == tonumber(v[value_idx])) then
+--[[
+      if default_value and ( (type(tonumber(default_value)) and 
+            tonumber(default_value) == tonumber(v[value_idx]) ) or
+            ( default_value == v[value_idx] ) ) then
+]]
+      if default_value then
+         if (type(tonumber(default_value)) and (tonumber(default_value) == tonumber(v[value_idx])) ) or
+            ( default_value == v[value_idx] ) then
+            selected = "selected"..default_value
+         else
+            selected = ""
+         end
       else
          selected = ""
       end

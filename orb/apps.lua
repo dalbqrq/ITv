@@ -55,7 +55,7 @@ function update(web, id)
       local clause = "app_id = "..id
       --A:new()
       A.name = web.input.name
-      A.type = web.input.type
+      A.type = web.input.tpe
       A.is_active = web.input.is_active
       --A.service_object_id = 0
 
@@ -76,7 +76,7 @@ itvision:dispatch_get(add, "/add")
 function insert(web)
    apps:new()
    apps.name = web.input.name
-   apps.type = web.input.type
+   apps.type = web.input.tpe
    apps.is_active = web.input.is_active
    --apps.service_object_id = 0
    apps.instance_id = config.db.instance_id
@@ -120,7 +120,7 @@ function render_list(web, A)
    for i, v in ipairs(A) do
       rows[#rows + 1] = tr{ 
          td{ a{ href= web:link("/show/"..v.app_id), v.name} },
-         td{ v.type },
+         td{ strings["logical_"..v.type] },
          td{ v.is_active },
          td{ (v.service_object_id or "_") },
          td{ button_link(strings.remove, web:link("/remove/"..v.app_id), "negative") },
@@ -194,10 +194,20 @@ function render_add(web, edit)
       val2 = edit.type
       val3 = edit.is_active
       url = "/update/"..edit.app_id
-      default_value = nil
+      default_val2 = val2
+      default_val3 = val3
    else
       url = "/insert"
+      default_val2 = "and"
+      default_val3 = 0
    end
+
+   local A = {
+      { tpe = "and", name = strings.logical_and },
+      { tpe = "or",  name = strings.logical_or },
+   }
+
+   local B = NoOrYes
 
    -- LISTA DE OPERACOES 
    res[#res + 1] = p{ button_link(strings.list, web:link("/list")) }
@@ -209,9 +219,8 @@ function render_add(web, edit)
       action = web:link(url),
 
       strings.name..": ", input{ type="text", name="name", value = val1 },br(),
-      strings.type..": ", input{ type="text", name="type", value = val2 },br(),
-      strings.is_active..": ", input{ type="text", name="is_active", value = val3 },br(),
-      --strings.service..": ", select_option("object_id", service:find_all(), "id", "name", default_value), br(),
+      strings.type..": ", select_option("tpe", A, "tpe", "name", default_val2), br(),
+      strings.is_active..": ", select_option("is_active", B, "id", "name", default_val3), br(),
 
       p{ button_form(strings.send, "submit", "positive") },
       p{ button_form(strings.reset, "reset", "negative") },

@@ -174,18 +174,22 @@ function render_add(web, edit)
       edit = edit[1]
       val1 = edit.name
       url = "/update/"..edit.location_tree_id
-      default_value = ......
+      --default_value = ......
    else
       url = "/insert"
-      default_value = ......
+      --default_value = ......
    end
 
    local t = {}
 
+--[[
    t[#t +1] = strings.root
-   for i,v in ipairs(location_tree.find_all()) do
+   for i,v in ipairs(location_tree:find_all()) do
       t[#t +1] = v
    end
+]]
+   --t = { [0] = strings.root }
+   t = location_tree:find_all()
 
    -- LISTA DE OPERACOES 
    res[#res + 1] = p{ button_link(strings.list, web:link("/list")) }
@@ -202,6 +206,7 @@ function render_add(web, edit)
       p{ button_form(strings.send, "submit", "positive") },
       p{ button_form(strings.reset, "reset", "negative") },
    }
+   p{ t.name }
 
    return render_layout(res)
 end

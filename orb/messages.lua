@@ -4,6 +4,10 @@ local conf = require "config"
 
 local strgs = {}
 strgs.pt_BR = {
+	no = "Não",
+	yes = "Sim",
+	logical_and = "E",
+	logical_or = "Ou",
 	user_group_name = "Nome do grupo",
 	application = "Aplicação",
 	type = "Tipo",
@@ -43,6 +47,10 @@ strgs.pt_BR = {
 }
 
 strgs.us = {
+	no = "No",
+	yes = "Yes",
+	logical_and = "And",
+	logical_or = "Or",
 	user_group_name = "Group name",
 	application = "Application",
 	type = "Type",
