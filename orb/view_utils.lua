@@ -10,7 +10,7 @@
 ]]
 
 require "orbit"
---module("itvision", package.seeall, orbit.new)
+module("itvision", package.seeall, orbit.new)
 require "cosmo"
 
 require "messages"

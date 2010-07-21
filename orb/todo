@@ -6,6 +6,9 @@ itvision_contract
 itvision_app_relat_type
 itvision_sysconfig
 
+DONE (with new config header):
+itvision_apps
+
 TODO:
 itvision_location_tree
 itvision_device_host
@@ -13,7 +16,6 @@ itvision_device
 itvision_app_list
 itvision_app_relat
 itvision_app_tree
-itvision_apps
 itvision_site_tree
 
 itvision_user_prefs

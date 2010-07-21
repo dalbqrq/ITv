@@ -89,6 +89,12 @@ function select_app_list (cond_, extra_, columns_)
 end
 
 
+function select_objects_app_list (cond_, extra_, columns_)
+   local content = m.select ("itvision_app_list", cond_, extra_, columns_)
+   return content
+end
+
+
 function insert_app_list (content_)
    local table_ = "itvision_app_list"
    m.insert (table_, content_)

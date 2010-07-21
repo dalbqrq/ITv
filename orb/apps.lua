@@ -1,22 +1,32 @@
 #!/usr/bin/env wsapi.cgi
 
-require "orbit"
-module("itvision", package.seeall, orbit.new)
-
 -- configs ------------------------------------------------------------
 
+require "orbit"
 require "config"
 require "util"
 require "view_utils"
 
-mapper.conn, mapper.driver = config.setup_orbdb()
 
+-- config direct access to db
 local ma = require "model_access"
 local mr = require "model_rules"
 
--- models ------------------------------------------------------------
 
+-- config ITVISION mvc app
+module("itvision", package.seeall, orbit.new)
+mapper.conn, mapper.driver = config.setup_orbdb()
 local apps = itvision:model "apps"
+
+
+-- config NAGIOS mvc app
+nagios = orbit.new()
+nagios.mapper.conn, nagios.mapper.driver = config.setup_orbdb()
+nagios.mapper.table_prefix = 'nagios_'
+local services = nagios:model "services"
+
+
+-- models ------------------------------------------------------------
 
 function apps:select_apps(id)
    local clause = ""
@@ -26,9 +36,6 @@ function apps:select_apps(id)
    return self:find_all(clause)
 end
 
---[[
-module("nagios", package.seeall, orbit.new)
-local services = nagios:model "services"
 
 function services:select_services(id)
    local clause = ""
@@ -37,7 +44,6 @@ function services:select_services(id)
    end
    return self:find_all(clause)
 end
-]]
 
 -- controllers ------------------------------------------------------------
 
@@ -70,7 +76,7 @@ function update(web, id)
       A.name = web.input.name
       A.type = web.input.type
       A.is_active = web.input.is_active
-      --A.service_object_id = 0
+      A.service_object_id = web.input.service_object_id
 
       ma.update (tables, A, clause) 
    end
@@ -91,7 +97,7 @@ function insert(web)
    apps.name = web.input.name
    apps.type = web.input.type
    apps.is_active = web.input.is_active
-   --apps.service_object_id = 0
+   app.service_object_id = web.input.service_object_id
    apps.instance_id = config.db.instance_id
    apps:save()
    return web:redirect(web:link("/list"))
@@ -126,16 +132,23 @@ itvision:dispatch_static("/css/%.css", "/script/%.js")
 function render_list(web, A)
    local rows = {}
    local res = {}
+   local svc = {}
    
    res[#res + 1] = p{ button_link(strings.add, web:link("/add")) }
    res[#res + 1] = p{ br(), br() }
 
    for i, v in ipairs(A) do
+      if v.service_object_id then
+         svc = services:select_services(v.service_object_id)[1].display_name
+      else
+         svc = "-"
+      end
+
       rows[#rows + 1] = tr{ 
          td{ a{ href= web:link("/show/"..v.app_id), v.name} },
          td{ strings["logical_"..v.type] },
          td{ NoOrYes[v.is_active+1].name },
-         td{ (v.service_object_id or "_") },
+         td{ svc },
          td{ button_link(strings.remove, web:link("/remove/"..v.app_id), "negative") },
          td{ button_link(strings.edit, web:link("/edit/"..v.app_id)) },
       }
@@ -172,12 +185,18 @@ function render_show(web, A)
    res[#res + 1] = p{ br(), br() }
 
    if A then
+      if A.service_object_id then
+         svc = services:select_services(A.service_object_id)[1].display_name
+      else
+         svc = "-"
+      end
+
       res[#res + 1] = { H("table") { border=1, cellpadding=1,
          tbody{
             tr{ th{ strings.name }, td{ A.name } },
-            tr{ th{ strings.type }, td{ A.type } },
-            tr{ th{ strings.is_active }, td{ A.is_active } },
-            tr{ th{ strings.service }, td{ A.service_object_id } },
+            tr{ th{ strings.type }, td{ strings["logical_"..A.type] } },
+            tr{ th{ strings.is_active }, td{ NoOrYes[A.is_active+1].name } },
+            tr{ th{ strings.service }, td{ svc } },
          }
       } }
    else
@@ -206,6 +225,7 @@ function render_add(web, edit)
       val1 = edit.name
       val2 = edit.type
       val3 = edit.is_active
+      val4 = edit.service_object_id
       url = "/update/"..edit.app_id
       default_val2 = val2
       default_val3 = val3
@@ -226,6 +246,9 @@ function render_add(web, edit)
 
       strings.name..": ", input{ type="text", name="name", value = val1 },br(),
       strings.type..": ", select_and_or("type", default_val2), br(),
+      --strings.service..": ", select_option("service_object_id", services:find_all(), "service_object_id", 
+      strings.service..": ", select_option("service_object_id", services:find_all(""), "service_object_id", 
+         "display_name", val4 ), br(),
       strings.is_active..": ", select_yes_no("is_active", default_val3), br(),
 
       p{ button_form(strings.send, "submit", "positive") },

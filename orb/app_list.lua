@@ -17,6 +17,7 @@ local mr = require "model_rules"
 module("itvision", package.seeall, orbit.new)
 mapper.conn, mapper.driver = config.setup_orbdb()
 local apps = itvision:model "apps"
+local list = itvision:model "app_list"
 
 
 -- config NAGIOS mvc app
@@ -29,6 +30,15 @@ local services = nagios:model "services"
 -- models ------------------------------------------------------------
 
 function apps:select_apps(id)
+   local clause = ""
+   if id then
+      clause = "app_id = "..id
+   end
+   return self:find_all(clause)
+end
+
+
+function list:select_app_list(id)
    local clause = ""
    if id then
       clause = "app_id = "..id
@@ -132,12 +142,10 @@ itvision:dispatch_static("/css/%.css", "/script/%.js")
 function render_list(web, A)
    local rows = {}
    local res = {}
+   local svc = {}
    
    res[#res + 1] = p{ button_link(strings.add, web:link("/add")) }
    res[#res + 1] = p{ br(), br() }
-
-local svc = {}
-local so = ""
 
    for i, v in ipairs(A) do
       if v.service_object_id then
@@ -179,6 +187,8 @@ end
 function render_show(web, A)
    A = A[1]
    local res = {}
+   local svc = {}
+   local lst = {}
 
    res[#res + 1] = p{ button_link(strings.add, web:link("/add")) }
    res[#res + 1] = p{ button_link(strings.remove, web:link("/remove/"..A.app_id)) }
@@ -187,12 +197,32 @@ function render_show(web, A)
    res[#res + 1] = p{ br(), br() }
 
    if A then
+      if A.service_object_id then
+         svc = services:select_services(A.service_object_id)[1].display_name
+         lst = mr.select_host_object(...
+      else
+         svc = "-"
+      end
+
+      -- app
       res[#res + 1] = { H("table") { border=1, cellpadding=1,
          tbody{
             tr{ th{ strings.name }, td{ A.name } },
-            tr{ th{ strings.type }, td{ A.type } },
-            tr{ th{ strings.is_active }, td{ A.is_active } },
-            tr{ th{ strings.service }, td{ A.service_object_id } },
+            tr{ th{ strings.type }, td{ strings["logical_"..A.type] } },
+            tr{ th{ strings.is_active }, td{ NoOrYes[A.is_active+1].name } },
+            tr{ th{ strings.service }, td{ svc } },
+         }
+      } }
+
+      
+
+      -- app_list
+      res[#res + 1] = { H("table") { border=1, cellpadding=1,
+         tbody{
+            tr{ th{ strings.name }, td{ A.name } },
+            tr{ th{ strings.type }, td{ strings["logical_"..A.type] } },
+            tr{ th{ strings.is_active }, td{ NoOrYes[A.is_active+1].name } },
+            tr{ th{ strings.service }, td{ svc } },
          }
       } }
    else
