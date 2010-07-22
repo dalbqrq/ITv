@@ -17,7 +17,7 @@ local mr = require "model_rules"
 module("itvision", package.seeall, orbit.new)
 mapper.conn, mapper.driver = config.setup_orbdb()
 local apps = itvision:model "apps"
-local list = itvision:model "app_list"
+local applist = itvision:model "app_list"
 
 
 -- config NAGIOS mvc app
@@ -38,7 +38,7 @@ function apps:select_apps(id)
 end
 
 
-function list:select_app_list(id)
+function applist:select_app_list(id)
    local clause = ""
    if id then
       clause = "app_id = "..id
@@ -57,11 +57,13 @@ end
 
 -- controllers ------------------------------------------------------------
 
-function list(web)
-   local A = apps:select_apps()
-   return render_list(web, A)
+function list(web, id)
+   local B = apps:select_apps()
+   if id == "/" then id = B[1].app_id end
+   local A = applist:select_app_list(id)
+   return render_list(web, A, B)
 end
-itvision:dispatch_get(list, "/", "/list")
+itvision:dispatch_get(list, "/", "/list/(%d+)")
 
 
 function show(web, id)
@@ -139,26 +141,45 @@ itvision:dispatch_static("/css/%.css", "/script/%.js")
 
 -- views ------------------------------------------------------------
 
-function render_list(web, A)
+
+function render_list(web, A, B)
    local rows = {}
    local res = {}
    local svc = {}
+
+
+str = [[<FORM>
+<SELECT ONCHANGE="location = this.options[this.selectedIndex].value;">
+<OPTION VALUE="/list/]]..B[1].app_id..[[">]]..B[1].name..[[
+<OPTION VALUE="/list/"]]..B[2].app_id..[[>]]..B[2].name..[[
+</SELECT>
+</FORM>]]
+
+   res[#res + 1] = p{ str };
+  
+   res[#res + 1] = p{ A[1].app_id };
+   res[#res + 1] = p{ strings.application..": ", select_option("app_id", B, "app_id", "name", A[1].app_id ), br(), }
    
    res[#res + 1] = p{ button_link(strings.add, web:link("/add")) }
    res[#res + 1] = p{ br(), br() }
 
+
+
    for i, v in ipairs(A) do
+--[[
       if v.service_object_id then
          svc = services:select_services(v.service_object_id)[1].display_name
       else
          svc = " -"
       end
+]]
 
       rows[#rows + 1] = tr{ 
-         td{ a{ href= web:link("/show/"..v.app_id), v.name} },
-         td{ strings["logical_"..v.type] },
-         td{ NoOrYes[v.is_active+1].name },
-         td{ svc },
+         td{ a{ href= web:link("/show/"..v.app_id), v.app_id} },
+         --td{ strings["logical_"..v.type] },
+         td{ v.type },
+         td{ v.object_id },
+
          td{ button_link(strings.remove, web:link("/remove/"..v.app_id), "negative") },
          td{ button_link(strings.edit, web:link("/edit/"..v.app_id)) },
       }
@@ -167,9 +188,8 @@ function render_list(web, A)
    res[#res + 1]  = H("table") { border=1, cellpadding=1,
       thead{ 
          tr{ 
-             th{ strings.name }, 
+             th{ strings.application }, 
              th{ strings.type },
-             th{ strings.is_active },
              th{ strings.service },
              th{ "." },
              th{ "." },
@@ -215,16 +235,18 @@ function render_show(web, A)
       } }
 
       
+      B = applist:select_app_list(A.app_id)
 
       -- app_list
       res[#res + 1] = { H("table") { border=1, cellpadding=1,
          tbody{
-            tr{ th{ strings.name }, td{ A.name } },
-            tr{ th{ strings.type }, td{ strings["logical_"..A.type] } },
-            tr{ th{ strings.is_active }, td{ NoOrYes[A.is_active+1].name } },
-            tr{ th{ strings.service }, td{ svc } },
+            tr{ th{ strings.name }, td{ B.app_id } },
+            --tr{ th{ strings.type }, td{ strings["logical_"..A.type] } },
+            tr{ th{ strings.type }, td{ B.type } },
+            tr{ th{ strings.service }, td{ B.object_id } },
          }
       } }
+
    else
       res = { error_message(3),
          p(),

@@ -62,13 +62,13 @@ function test_select1()
    for i, v in ipairs (t) do
       print ("->",v.object_id, v.service_id, v.display_name)
    end
-]]
    print ("----- USER_GROUP X APP-----")
-   t = m.select ("itvision_user_group ug, itvision_apps ap", "ug.root_app = ap.app_id and ug.user_group_id = 4", "", 
+   t = m.select ("itvision_user_group ug, itvision_apps ap", "ug.root_app = ap.app_id and ug.id = 4", "", 
       "ap.name, ap.type, ug.name as ugname" )
    for i, v in ipairs (t) do
       print ("->",v.name, v.type, v.ugname )
    end
+]]
    
 end
 
@@ -93,19 +93,20 @@ end
 
 
 --  imprime toda arvore de apps 
---[[ 
 root_id = r.select_root_app_tree()
 t = r.select_full_path_app_tree(root_id)
 print("FULL APP TREE")
 for i, v in ipairs(t) do
         print (v.app_tree_id, v.app_id)
 end
+
+table.show(t)
+--[[ 
 ]]
 
 
 print("\n--------------------------------------------------------\n")
 
-print(strings.user_group_name)
 
 
 --[[
