@@ -17,7 +17,7 @@ local mr = require "model_rules"
 module("itvision", package.seeall, orbit.new)
 mapper.conn, mapper.driver = config.setup_orbdb()
 local apps = itvision:model "apps"
-local applist = itvision:model "app_list"
+local app_list = itvision:model "app_list"
 
 
 -- config NAGIOS mvc app
@@ -38,7 +38,7 @@ function apps:select_apps(id)
 end
 
 
-function applist:select_app_list(id)
+function app_list:select_app_list(id)
    local clause = ""
    if id then
       clause = "app_id = "..id
@@ -60,7 +60,8 @@ end
 function list(web, id)
    local B = apps:select_apps()
    if id == "/" then id = B[1].app_id end
-   local A = applist:select_app_list(id)
+   --local A = app_list:select_app_list(id)
+   local A = mr.select_app_app_list_objects(id)
    return render_list(web, A, B)
 end
 itvision:dispatch_get(list, "/", "/list/(%d+)")
@@ -72,6 +73,7 @@ function show(web, id)
 end itvision:dispatch_get(show, "/show/(%d+)")
 
 
+--[[
 function edit(web, id)
    local A = apps:select_apps(id)
    return render_add(web, A)
@@ -96,26 +98,35 @@ function update(web, id)
    return web:redirect(web:link("/list"))
 end
 itvision:dispatch_post(update, "/update/(%d+)")
+]]
 
 
-function add(web)
-   local H = apps:select_apps(id)
-   local S = apps:select_apps(id)
-   local A = apps:select_apps(id)
-   return render_add(web)
+function add(web, id)
+   local H = mr.select_host_object()
+   local S = mr.select_service_object()
+   local A = mr.select_service_object(nil, nil, nil, true)
+   --local APPL = app_list:select_app_list(id)
+   local APPL = mr.select_app_app_list_objects(id)
+   return render_add(web, H, S, A, APPL, id)
 end
-itvision:dispatch_get(add, "/add")
+itvision:dispatch_get(add, "/add/(%d+)")
 
 
 function insert(web)
-   apps:new()
-   apps.name = web.input.name
-   apps.type = web.input.type
-   apps.is_active = web.input.is_active
-   app.service_object_id = web.input.service_object_id
-   apps.instance_id = config.db.instance_id
-   apps:save()
-   return web:redirect(web:link("/list"))
+   app_list:new()
+   app_list.app_id = web.input.app_id
+   app_list.type = web.input.type
+   app_list.instance_id = config.db.instance_id
+   if type(web.input.item) == "table" then
+      for i, v in ipairs(web.input.item) do
+         app_list.object_id = v
+      end
+   else
+      app_list.object_id = web.input.item
+   end
+
+   app_list:save()
+   return web:redirect(web:link("/add/"..app_list.app_id))
 end
 itvision:dispatch_post(insert, "/insert")
 
@@ -151,46 +162,46 @@ function render_list(web, A, B)
    local svc = {}
    local str = ""
    local selected = ""
-   local curr_app = 1
+   local curr_app = 0
 
    str = [[<FORM> <SELECT ONCHANGE="location = this.options[this.selectedIndex].value;">]]
    for i, v in ipairs(B) do
       url = web:link("/list/"..v.app_id)
-      if v.app_id == A[1].app_id then 
+      if tonumber(v.app_id) == tonumber(A[1].app_id) then 
          selected = " selected " 
          curr_app = i
       else 
-         selected = " " 
+         selected = " "
       end
       str = str .. [[<OPTION]]..selected..[[ VALUE="]]..url..[[">]]..v.name
    end
    str = str .. [[</SELECT> </FORM>]]
 
-      
+
    res[#res + 1] = p{ strings.application..": ", str };
    res[#res + 1] = p{ render_show(web, B[curr_app]) }
-   web.prefix = "/orb/app_list/"
-   res[#res + 1] = p{ button_link(strings.add, web:link("/add")) }
-   res[#res + 1] = p{ br(), br() }
 
+   web.prefix = "/orb/app_list"
+   res[#res + 1] = p{ button_link(strings.add, web:link("/add/"..A[1].app_id)) }
+   res[#res + 1] = p{ br(), br() }
+   res[#res + 1] = p{ render_table(web, A) }
+
+   return render_layout(res)
+end
+
+
+function render_table(web, A)
+   local res = {}
 
    for i, v in ipairs(A) do
---[[
-      if v.service_object_id then
-         svc = services:select_services(v.service_object_id)[1].display_name
-      else
-         svc = " -"
-      end
-]]
+      local obj = v.name1
+      if v.name2 then obj = obj.."@"..v.name2 end
 
       rows[#rows + 1] = tr{ 
-         td{ a{ href= web:link("/show/"..v.app_id), v.app_id} },
-         --td{ strings["logical_"..v.type] },
-         td{ v.type },
-         td{ v.object_id },
-
+         td{ a{ href= web:link("/show/"..v.app_id), v.app_name} },
+         td{ v.list_type },
+         td{ obj },
          td{ button_link(strings.remove, web:link("/remove/"..v.app_id..":"..v.object_id), "negative") },
-         --td{ button_link(strings.edit, web:link("/edit/"..v.app_id)) },
       }
    end
 
@@ -199,9 +210,8 @@ function render_list(web, A, B)
          tr{ 
              th{ strings.application }, 
              th{ strings.type },
-             th{ strings.service },
+             th{ strings.host.."@"..strings.service },
              th{ "." },
-             --th{ "." },
          }
       },
       tbody{
@@ -209,8 +219,7 @@ function render_list(web, A, B)
       }
    }
 
-
-   return render_layout(res)
+   return res
 end
 
 
@@ -247,7 +256,7 @@ function render_show(web, A)
       } }
 
 --[[
-      B = applist:select_app_list(A.app_id)
+      B = app_list:select_app_list(A.app_id)
 
       -- app_list
       res[#res + 1] = { H("table") { border=1, cellpadding=1,
@@ -268,40 +277,81 @@ function render_show(web, A)
       }
    end
 
-   return render_layout(res)
+   return res
 end
 
 
-function render_add(web)
+function render_add(web, H, S, A, APPL)
    local res = {}
+   local hst = {}
+   local svc = {}
+   local app = {}
+   local url = "/insert"
+   local list_size = 7
    local s = ""
-   local val1 = ""
-   local val2 = ""
-   local val3 = ""
-   local url = ""
-   local default_value = ""
+   local app_id = APPL[1].app_id
 
-   url = "/insert"
-   default_val2 = "and"
-   default_val3 = 0
+   local make_form = function(selopt)
+      return form{
+         name = "input",
+         method = "post",
+         action = web:link(url),
+         p{ selopt },
+         p{ button_form(strings.send, "submit", "positive") },
+         p{ button_form(strings.reset, "reset", "negative") },
+      }
+   end
+
 
    -- LISTA DE OPERACOES 
-   res[#res + 1] = p{ button_link(strings.list, web:link("/list")) }
+   res[#res + 1] = p{ button_link(strings.list, web:link("/list/"..app_id)) }
    res[#res + 1] = p{ br(), br() }
+   res[#res + 1] = p{ render_table(web, APPL) }
+   res[#res + 1] = p{ br() }
 
-   res[#res + 1] = form{
-      name = "input",
-      method = "post",
-      action = web:link(url),
+   -- LISTA DE HOSTS PARA SEREM INCLUIDOS ---------------------------------
+   s = [[<SELECT multiple size=]]..list_size..[[ NAME="item">]]
+   for i,v in ipairs(H) do
+     s = s..[[<OPTION VALUE="]]..v.object_id..[[">]]..v.name1
+   end
+   s = s..[[ </SELECT>
+      <INPUT TYPE=HIDDEN NAME="app_id" value="]]..app_id..[[">
+      <INPUT TYPE=HIDDEN NAME="type" value="hst"> ]]
+   hst = make_form(s)
 
-      strings.name..": ", input{ type="text", name="name", value = val1 },br(),
-      strings.type..": ", select_and_or("type", default_val2), br(),
-      strings.service..": ", select_option("service_object_id", services:find_all(""), "service_object_id", 
-         "display_name", val4 ), br(),
-      strings.is_active..": ", select_yes_no("is_active", default_val3), br(),
+   -- LISTA DE SERVICES PARA SEREM INCLUIDOS ---------------------------------
+   s = [[<SELECT multiple size=]]..list_size..[[ NAME="item">]]
+   for i,v in ipairs(S) do
+     s = s..[[<OPTION VALUE="]]..v.object_id..[[">]]..v.name1.."@"..v.name2
+   end
+   s = s..[[ </SELECT>
+      <INPUT TYPE=HIDDEN NAME="app_id" value="]]..app_id..[[">
+      <INPUT TYPE=HIDDEN NAME="type" value="svc"> ]]
+   svc = make_form(s)
 
-      p{ button_form(strings.send, "submit", "positive") },
-      p{ button_form(strings.reset, "reset", "negative") },
+   -- LISTA DE APPLIC PARA SEREM INCLUIDOS ---------------------------------
+   s = [[<SELECT multiple size=]]..list_size..[[ NAME="item">]]
+   for i,v in ipairs(A) do
+     s = s..[[<OPTION VALUE="]]..v.object_id..[[">]]..v.name2
+   end
+   s = s..[[ </SELECT>
+      <INPUT TYPE=HIDDEN NAME="app_id" value="]]..app_id..[[">
+      <INPUT TYPE=HIDDEN NAME="type" value="app"> ]]
+   app = make_form(s)
+
+
+   res[#res + 1] = [[<table border=1, cellpadding=1>]]
+   res[#res + 1] = {
+      thead{ tr{ 
+         th{ strings.host }, 
+         th{ strings.service }, 
+         th{ strings.application }, 
+      } },
+      tbody{ tr{
+         td{ hst },
+         td{ svc },
+         td{ app },
+      } },
    }
 
    return render_layout(res)

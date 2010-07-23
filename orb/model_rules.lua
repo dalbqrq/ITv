@@ -16,6 +16,7 @@ end
 
 function select_host_object (cond_, extra_, columns_)
    if cond_ then cond_ = " and "..cond_ else cond_ = "" end
+   cond_ = cond_ .. " and o.name1 NOT LIKE 'business_processes%' " -- retira "dummy hosts" criados pelo BP
    local content = m.select ("nagios_hosts h, nagios_objects o ", "h.host_object_id = o.object_id"..cond_,
       extra_, columns_)
    return content
@@ -40,9 +41,11 @@ function select_service (cond_, extra_, columns_, app)
 end
 
 
+-- Exemplo de uso: t = r.select_service_object (nil, nil, nil, true)
 function select_service_object (cond_, extra_, columns_, app)
    if app ~= nil then app = " = " else app = " <> " end
    if cond_ then cond_ = " and "..cond_ else cond_ = "" end
+   extra_ = "order by o.name1, o.name2" -- ignorando outros "extras" para ordenar pelo host. Pode ser melhorado!
    local bp_id = get_bp_id()
    local content = m.select ("nagios_services s, nagios_objects o ", 
       "s.service_object_id = o.object_id and s.check_command_object_id"..app..bp_id..cond_, 
@@ -94,6 +97,20 @@ function select_objects_app_list (cond_, extra_, columns_)
    return content
 end
 
+function select_app_app_list_objects (id)
+   local cond_ = "no.object_id = al.object_id and al.app_id = ap.app_id"
+   if id then
+      cond_ = cond_ .. " and ap.app_id = "..id
+   end
+   local tables_ = "nagios_objects no, itvision_app_list al, itvision_apps ap"
+   local columns_ = [[
+      no.object_id, no.objecttype_id, no.name1, no.name2,
+      al.type as list_type,
+      ap.app_id, ap.name as app_name, ap.type as app_type, ap.is_active, ap.service_object_id as service_id ]]
+   local extra_ = "order by ap.app_id, no.name1, no.name2"
+   local content = m.select (tables_, cond_, extra_, columns_)
+   return content
+end
 
 function insert_app_list (content_)
    local table_ = "itvision_app_list"

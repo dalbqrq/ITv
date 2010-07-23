@@ -56,6 +56,13 @@ function test_select1()
       print ("->",v.object_id, v.service_id, v.display_name, v.name1, v.name2)
    end
    
+
+   print ("----- SERVICES APP OBJECTS-----")
+   t = r.select_service_object (nil, nil, nil, true)
+   for i, v in ipairs (t) do
+      print ("->",v.object_id, v.service_id, v.display_name, v.name1, v.name2)
+   end
+   
    
 --[[
    print ("----- APPS OBJECTS -----")
