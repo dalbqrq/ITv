@@ -42,11 +42,12 @@ strgs.pt_BR = {
         home_dir = "home_dir",
         monitor_dir = "monitor_dir",
         monitor_bp_dir = "monitor_bp_dir",
-	root = "Raiz",
 	child_of = "Filho de",
 	is_active = "Ativo",
 	service = "Serviço",
 	all = "Todos(as)",
+	root = "Raiz",
+	location = "Localização",
 }
 
 strgs.us = {
@@ -88,11 +89,12 @@ strgs.us = {
         home_dir = "home_dir",
         monitor_dir = "monitor_dir",
         monitor_bp_dir = "monitor_bp_dir",
-	root = "Root",
 	child_of = "Child of",
 	is_active = "Is active",
 	service = "Service",
 	all = "All",
+	root = "Root",
+	location = "Location",
 }
 
 
@@ -104,12 +106,16 @@ err_msg.pt_BR = {
 	[1] = "Origen não encontrada.",
 	[2] = "Aplicação inserida na árvore de aplicações.",
 	[3] = "Grupo de Usuário não encontrado.",
+	[4] = "Preencher.",
+	[5] = "Localização inserida na árvore de localizações.",
 }
 
 err_msg.us = {
 	[1] = "Unknown origin.",
 	[2] = "Application inserted on applications tree.",
 	[3] = "User Group not found.",
+	[4] = "Fill this field.",
+	[5] = "Local inserted on local tree.",
 }
 
 

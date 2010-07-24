@@ -59,7 +59,6 @@ table.dump = function (t)
          end
 	 s = s..field.."<"..type(val).."> = "..val
       end
-      s = s.."-----"
    end
    return s
 end
