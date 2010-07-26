@@ -97,7 +97,7 @@ function insert(web)
    apps.name = web.input.name
    apps.type = web.input.type
    apps.is_active = web.input.is_active
-   app.service_object_id = web.input.service_object_id
+   --app.service_object_id = web.input.service_object_id
    apps.instance_id = config.db.instance_id
    apps:save()
    return web:redirect(web:link("/list"))
@@ -246,10 +246,12 @@ function render_add(web, edit)
 
       strings.name..": ", input{ type="text", name="name", value = val1 },br(),
       strings.type..": ", select_and_or("type", default_val2), br(),
-      --strings.service..": ", select_option("service_object_id", services:find_all(), "service_object_id", 
+--[[
       strings.service..": ", select_option("service_object_id", services:find_all(""), "service_object_id", 
          "display_name", val4 ), br(),
       strings.is_active..": ", select_yes_no("is_active", default_val3), br(),
+]]
+      "<INPUT TYPE=HIDDEN NAME=\"is_active\" value=\"0\">",
 
       p{ button_form(strings.send, "submit", "positive") },
       p{ button_form(strings.reset, "reset", "negative") },

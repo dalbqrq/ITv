@@ -64,14 +64,14 @@ function list(web, id)
    local B = apps:select_apps()
    if id == "/" then id = B[1].app_id end
    local A = mr.select_app_app_list_objects(id)
-   return render_list(web, A, B)
+   return render_list(web, A, B, id)
 end
 itvision:dispatch_get(list, "/", "/list/(%d+)")
 
 
 function show(web, id)
    local A = apps:select_apps(id)
-   return render_show(web, A)
+   return render_show(web, A, id)
 end itvision:dispatch_get(show, "/show/(%d+)")
 
 
@@ -137,20 +137,23 @@ itvision:dispatch_static("/css/%.css", "/script/%.js")
 -- views ------------------------------------------------------------
 
 
-function render_list(web, A, B)
+function render_list(web, A, B, app_id)
    local rows = {}
    local res = {}
    local svc = {}
    local str = ""
    local selected = ""
    local curr_app = 0
+   local sel_app = app_id
+
 
    str = [[<FORM> <SELECT ONCHANGE="location = this.options[this.selectedIndex].value;">]]
    for i, v in ipairs(B) do
       url = web:link("/list/"..v.app_id)
-      if tonumber(v.app_id) == tonumber(A[1].app_id) then 
+      if tonumber(v.app_id) == tonumber(app_id) then 
          selected = " selected " 
          curr_app = i
+         sel_app = v.app_id
       else 
          selected = " "
       end
@@ -160,10 +163,10 @@ function render_list(web, A, B)
 
 
    res[#res + 1] = p{ strings.application..": ", str };
-   res[#res + 1] = p{ render_show(web, B[curr_app]) }
+   res[#res + 1] = p{ render_show(web, B[curr_app], sel_app) }
 
    web.prefix = "/orb/app_list"
-   res[#res + 1] = p{ button_link(strings.add, web:link("/add/"..A[1].app_id)) }
+   res[#res + 1] = p{ button_link(strings.add, web:link("/add/"..app_id)) }
    res[#res + 1] = p{ br(), br() }
    res[#res + 1] = p{ render_table(web, A) }
 
@@ -204,7 +207,7 @@ function render_table(web, A)
 end
 
 
-function render_show(web, A)
+function render_show(web, A, app_id)
    --A = A[1]
    local res = {}
    local svc = {}
@@ -213,8 +216,8 @@ function render_show(web, A)
    web.prefix = "/orb/apps" 
 
    --res[#res + 1] = p{ button_link(strings.add, web:link("/add")) }
-   res[#res + 1] = p{ button_link(strings.remove, web:link("/remove/"..A.app_id)) }
-   res[#res + 1] = p{ button_link(strings.edit, web:link("/edit/"..A.app_id)) }
+   res[#res + 1] = p{ button_link(strings.remove, web:link("/remove/"..app_id)) }
+   res[#res + 1] = p{ button_link(strings.edit, web:link("/edit/"..app_id)) }
    res[#res + 1] = p{ button_link(strings.list, web:link("/list")) }
    res[#res + 1] = p{ br(), br() }
 
@@ -237,7 +240,7 @@ function render_show(web, A)
       } }
 
    else
-      res = { error_message(3),
+      res = { error_message(6),
          p(),
          a{ href= web:link("/list"), strings.list}, " ",
          a{ href= web:link("/add"), strings.add}, " ",
@@ -248,7 +251,7 @@ function render_show(web, A)
 end
 
 
-function render_add(web, H, S, A, APPL)
+function render_add(web, H, S, A, APPL, app_id)
    local res = {}
    local hst = {}
    local svc = {}
@@ -256,7 +259,10 @@ function render_add(web, H, S, A, APPL)
    local url = "/insert"
    local list_size = 7
    local s = ""
-   local app_id = APPL[1].app_id
+
+   --local app_id = 0
+
+   --if APPL[1] then app_id = APPL[1].app_id end
 
    local make_form = function(selopt)
       return form{

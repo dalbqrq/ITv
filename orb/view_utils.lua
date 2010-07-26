@@ -47,6 +47,22 @@ function button_link(label, link, class)
 end
 
 
+local menu = {}
+   menu[#menu + 1] = button_link("ARVORE APPS", "app_tree")
+   menu[#menu + 1] = button_link("APPS", "apps")
+   menu[#menu + 1] = button_link("APP LIST", "app_list")
+   menu[#menu + 1] = button_link("RELACIONAMENTOS", "app_relat")
+   menu[#menu + 1] = button_link("TIPO RELAC.", "app_relat_type")
+   menu[#menu + 1] = button_link("CONTRATOS", "contract")
+   menu[#menu + 1] = button_link("LOCALIZACAO", "location_tree")
+   menu[#menu + 1] = button_link("FABRICANTE", "manufacturer")
+   menu[#menu + 1] = button_link("USUARIO", "user")
+   menu[#menu + 1] = button_link("GRUPO", "user_group")
+   menu[#menu + 1] = button_link("SISTEMA", "sysconfig")
+   menu[#menu + 1] = "<br><br><br>"
+
+
+
 function render_layout(inner_html)
    return html{
       head{ 
@@ -59,7 +75,7 @@ function render_layout(inner_html)
          script{ type="text/javascript", scrt },
 
       },
-      body{ inner_html }
+      body{ menu, inner_html }
    }
 end
 

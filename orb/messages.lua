@@ -6,6 +6,7 @@ local strgs = {}
 strgs.pt_BR = {
 	no = "Não",
 	yes = "Sim",
+	ofthe = "do(a)",
 	logical_and = "E",
 	logical_or = "Ou",
 	user_group_name = "Nome do grupo",
@@ -20,8 +21,6 @@ strgs.pt_BR = {
 	remove = "Remover",
 	send = "Enviar",
 	reset = "Resetar",
-	yes = "Sim",
-	no = "Não",
 	cancel = "Cancelar",
 	login = "Login",
 	user = "Usuário",
@@ -36,6 +35,7 @@ strgs.pt_BR = {
 	description = "Descrição",
 	contract = "Contrato",
 	app_relat_type = "Tipo de relacionamento de aplicação",
+	relation = "Relacionamento",
         version = "Versão",
         created = "Criado",
         updated = "Atualizado",
@@ -53,12 +53,15 @@ strgs.pt_BR = {
 	origin = "Origem",	
 	destiny = "Destino",	
 	category = "Categoria",	
+	sonof = "filho de",	
+	parent = "Pai",	
 
 }
 
 strgs.us = {
 	no = "No",
 	yes = "Yes",
+	ofthe = "of the",
 	logical_and = "And",
 	logical_or = "Or",
 	user_group_name = "Group name",
@@ -73,8 +76,6 @@ strgs.us = {
 	remove = "Remove",
 	send = "Send",
 	reset = "Reset",
-	yes = "Yes",
-	no = "No",
 	cancel = "Cancel",
 	login = "Login",
 	user = "User",
@@ -89,6 +90,7 @@ strgs.us = {
 	description = "Description",
 	contract = "Contract",
 	app_relat_type = "Aplication relation type",
+	relation = "Relation",
         version = "Version",
         created = "Created",
         updated = "Updated",
@@ -106,6 +108,8 @@ strgs.us = {
 	origin = "Origin",	
 	destiny = "Destiny",	
 	category = "Category",	
+	sonof = "son of",	
+	parent = "Parent",	
 }
 
 
@@ -119,6 +123,7 @@ err_msg.pt_BR = {
 	[3] = "Grupo de Usuário não encontrado.",
 	[4] = "Preencher.",
 	[5] = "Localização inserida na árvore de localizações.",
+	[6] = "Lista não encontrada.",
 }
 
 err_msg.us = {
@@ -127,6 +132,7 @@ err_msg.us = {
 	[3] = "User Group not found.",
 	[4] = "Fill this field.",
 	[5] = "Local inserted on local tree.",
+	[6] = "List not found.",
 }
 
 

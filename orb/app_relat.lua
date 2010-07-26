@@ -40,12 +40,27 @@ function apps:select_apps(id)
 end
 
 
-function app_relat:select_app_relat(id)
+function app_relat:select_app_relat(id, from, to)
    local clause = ""
    if id then
       clause = "app_id = "..id
    end
+   if from and to then
+      if clause ~= "" then clause = clause.." and " end
+      clause = clause.." from_object_id = "..from.." and to_object_id = "..to 
+   end
    return self:find_all(clause)
+end
+
+
+function app_relat:delete_app_relat(id, from, to)
+   local clause = ""
+   if id and from and to then
+      clause = " app_id = "..id.." and from_object_id = "..from.." and to_object_id = "..to 
+   end
+   --self:find_all(clause)
+   --self:delete()
+   ma.delete("itvision_app_relat", clause)
 end
 
 
@@ -86,8 +101,6 @@ function list(web, id)
       if A[1] then id = A[1].app_id else id = nil end
    end
    local AR = mr.select_app_relat_object(id)
-   --local AL = mr.select_app_app_list_objects(id)
-   --local RT = app_relat_type:select_app_relat_type()
    return render_list(web, id, A, AR)
 end
 itvision:dispatch_get(list, "/", "/list/(%d+)")
@@ -96,7 +109,8 @@ itvision:dispatch_get(list, "/", "/list/(%d+)")
 function show(web, id)
    local A = app_relat:select_app_relat(id)
    return render_show(web, A)
-end itvision:dispatch_get(show, "/show/(%d+)")
+end 
+itvision:dispatch_get(show, "/show/(%d+)")
 
 
 function add(web, id)
@@ -129,24 +143,19 @@ end
 itvision:dispatch_post(insert, "/insert")
 
 
-function remove(web, app_id, obj_id)
-   local A = app_relat:select_app_relat(app_id)
-   local O = objects:select_objects(obj_id)
-   return render_remove(web, A, O)
+function remove(web, app_id, from, to)
+   local A = app_relat:select_app_relat(app_id, from, to)
+   local AR = mr.select_app_relat_object(id, from, to)
+   return render_remove(web, A, AR)
 end
-itvision:dispatch_get(remove, "/remove/(%d+):(%d+)")
+itvision:dispatch_get(remove, "/remove/(%d+):(%d+):(%d+)")
 
 
-function delete(web, app_id, obj_id)
-   if app_id and obj_id then
-      local clause = "app_id = "..app_id.." and object_id = "..obj_id
-      local tables = "itvision_app_list"
-      ma.delete (tables, clause) 
-   end
-
+function delete(web, app_id, from, to)
+   app_relat:delete_app_relat(app_id, from, to)
    return web:redirect(web:link("/list/"..app_id))
 end
-itvision:dispatch_get(delete, "/delete/(%d+):(%d+)")
+itvision:dispatch_get(delete, "/delete/(%d+):(%d+):(%d+)")
 
 
 itvision:dispatch_static("/css/%.css", "/script/%.js")
@@ -181,10 +190,9 @@ end
 function render_list(web, id, A, AR)
    local res = {}
 
-   res[#res + 1] = p{ render_selector(web, A, id, "/list/") }
    res[#res + 1] = p{ strings.application..": ", str };
+   res[#res + 1] = p{ render_selector(web, A, id, "/list/") }
    res[#res + 1] = p{ render_table(web, AR) }
-
    res[#res + 1] = p{ button_link(strings.add, web:link("/add/"..id)) }
 
    return render_layout(res)
@@ -195,27 +203,32 @@ function render_table(web, AR)
    local res = {}
 
    for i, v in ipairs(AR) do
-      local obj = v.name1
-      if v.name2 then obj = v.name2.."@"..obj end
+      local from = v.from_name1
+      local to = v.to_name1
+      if v.from_name2 then from = v.from_name2.."@"..from end
+      if v.to_name2 then to = v.to_name2.."@"..to end
+
+      if v.connection_type == "physical" then contype = strings.physical else contype = strings.logical end
 
       rows[#rows + 1] = tr{ 
-         td{ a{ href= web:link("/show/"..v.app_id), v.app_name} },
-         td{ align="center", v.to_name1 },
-         td{ align="center", v.name2 },
-         td{ align="center", v.list_type },
-         td{ align="right", obj },
-         --td{ button_link(strings.remove, web:link("/remove/"..v.app_id..":"..v.object_id), "negative") },
+         --td{ a{ href= web:link("/show/"..v.app_id), v.app_name} },
+         td{ align="center", from },
+         td{ align="center", v.rtype_name },
+         td{ align="center", to },
+         td{ align="right", contype },
+         td{ button_link(strings.remove, web:link("/remove/"..v.app_id..":"..v.from_object_id
+             ..":"..v.to_object_id), "negative") },
       }
    end
 
-   res[#res + 1]  = H("table") { border=1, cellpadding=1,
+   res[#res + 1] = H("table") { border=1, cellpadding=1,
       thead{ 
          tr{ 
-             th{ strings.application }, 
-             th{ "name1" },
-             th{ "name2" },
+             --th{ strings.application }, 
+             th{ strings.origin },
+             th{ strings.destiny },
              th{ strings.type },
-             th{ strings.service.."@"..strings.host },
+             th{ strings.category },
              th{ "." },
          }
       },
@@ -274,13 +287,12 @@ end
 
 function render_add(web, id, A, AR, AL, RT)
    local res = {}
+   local tab = {}
    local from, to, relat, categ
    local url = "/insert"
    local list_size = 7
 
-
    local make_form = function(selopt)
-
       return form{
          name = "input",
          method = "post",
@@ -290,14 +302,6 @@ function render_add(web, id, A, AR, AL, RT)
          p{ button_form(strings.reset, "reset", "negative") },
       }
    end
-
-
-   -- LISTA DE OPERACOES 
-   res[#res + 1] = p{ render_selector(web, A, id, "/add/") }
-   res[#res + 1] = p{ button_link(strings.list, web:link("/list/"..id)) }
-   res[#res + 1] = p{ br(), br() }
-   res[#res + 1] = p{ render_table(web, APPL) }
-   res[#res + 1] = p{ br() }
 
    -- LISTA APP ORIGEM DOS RELACIONAMENTO ---------------------------------
    if AL[1].object_id then
@@ -340,11 +344,10 @@ function render_add(web, id, A, AR, AL, RT)
    s = s..[[ </SELECT> ]]
    categ = s
 
-   id = [[ <INPUT TYPE=HIDDEN NAME="app_id" value="]]..id..[["> ]]
+   aid = [[ <INPUT TYPE=HIDDEN NAME="app_id" value="]]..id..[["> ]]
 
-
-   res[#res + 1] = [[<table border=1, cellpadding=1>]]
-   res[#res + 1] = {
+   tab[#tab + 1] = [[<table border=1, cellpadding=1>]]
+   tab[#tab + 1] = {
       thead{ tr{ 
          th{ strings.origin }, 
          th{ strings.type }, 
@@ -358,34 +361,43 @@ function render_add(web, id, A, AR, AL, RT)
          td{ to },
       } },
    }
+   tab[#tab + 1] = [[</table>]]..aid
 
-   res = make_form(res) 
+
+   -- LISTA DE OPERACOES 
+   res[#res + 1] = p{ strings.application..": ", str };
+   res[#res + 1] = p{ render_selector(web, A, id, "/add/") }
+   res[#res + 1] = p{ button_link(strings.list, web:link("/list/"..id)) }
+   res[#res + 1] = p{ br(), br() }
+   res[#res + 1] = p{ render_table(web, AR) }
+   res[#res + 1] = p{ br() }
+   res[#res + 1] = make_form(tab) 
 
    return render_layout(res)
 end
 
 
-function render_remove(web, A, O)
+function render_remove(web, A, AR)
    local res = {}
    local url = ""
 
    if A then
       A = A[1]
-      if O then
-         O = O[1]
-         if O.objecttype_id == 1 then
-            obj = O.name1
-         else 
-            obj = O.name2.."@"..O.name1
-         end
+      if AR then
+         AR = AR[1]
+         obj1 = AR.from_name1
+         if AR.from_name2 then obj1 = AR.from_name2.."@"..obj1 end
+         obj2 = AR.to_name1
+         if AR.to_name2 then obj2 = AR.to_name2.."@"..obj2 end
       end
-      url_ok = "/delete/"..A.app_id..":"..O.object_id
+      url_ok = "/delete/"..A.app_id..":"..AR.from_object_id..":"..AR.to_object_id
       url_cancel = "/list"
    end
 
    res[#res + 1] = p{
-      strings.exclude_quest.." o "..strings.host.."/"..strings.service.." "..obj.." da "..strings.application.." "..A.name.."?",
-      p{ button_link(strings.yes, web:link("/delete/"..A.app_id..":"..O.object_id)) },
+      strings.exclude_quest.." "..strings.relation.." \""..obj1.."->"..obj2.."\" "..strings.ofthe.." "
+         ..strings.application.." \""..A.name.."\"?",
+      p{ button_link(strings.yes, web:link("/delete/"..A.app_id..":"..AR.from_object_id..":"..AR.to_object_id)) },
       p{ button_link(strings.cancel, web:link("/list/"..A.app_id)) },
    }
 

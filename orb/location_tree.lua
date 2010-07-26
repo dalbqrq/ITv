@@ -271,7 +271,6 @@ function render_add(web, edit, err)
       p{ button_form(strings.send, "submit", "positive") },
       p{ button_form(strings.reset, "reset", "negative") },
    }
-   p{ t.name }
 
    return render_layout(res)
 end

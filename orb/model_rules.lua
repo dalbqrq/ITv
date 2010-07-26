@@ -128,18 +128,23 @@ function select_app_relat (cond_, extra_, columns_)
 end
 
 
-function select_app_relat_object (id)
-   local cond_ = [[ar.from_object_id = o1.object_id and ar.to_object_id = o2.object_id
-                  and ar.app_relat_type_id = rt.app_relat_type_id ]]
-   if id then cond_ = cond_ .. " and ar.app_id = "..id end
-   local tables_ = [[itvision_app_relat ar, nagios_objects o1, nagios_objects o2, 
-                     itvision_app_relat_type rt]]
-   local columns_ = [[o1.name1 as from_name1, o1.name2 as from_name1, 
-                    o2.name1 as to_name1, o2.name2 as to_name2,
-                    ar.from_object_id, ar.to_object_id,
-                    ar.app_id as app_id, ar.connection_type, ar.app_relat_type_id, 
-                    ar.app_relat_type_id = rt.app_relat_type_id ]]
+function select_app_relat_object (id, from, to)
+   local tables_  = [[itvision_app_relat ar, nagios_objects o1, nagios_objects o2, 
+                      itvision_app_relat_type rt, itvision_apps ap]]
+   local cond_    = [[ar.from_object_id = o1.object_id and 
+                      ar.to_object_id = o2.object_id and
+                      ar.app_relat_type_id = rt.app_relat_type_id and
+                      ar.app_id = ap.app_id ]]
+   local columns_ = [[o1.name1 as from_name1, o1.name2 as from_name2, 
+                      o2.name1 as to_name1, o2.name2 as to_name2,
+                      ar.from_object_id, ar.to_object_id,
+                      ar.app_id as app_id, ap.name as app_name, 
+                      ar.connection_type, ar.app_relat_type_id, 
+                      rt.name as rtype_name,
+                      ar.from_object_id, ar.to_object_id ]]
 
+   if id then cond_ = cond_ .. " and ar.app_id = "..id end
+   if from and to then cond_ = cond_  .. " and from_object_id = "..from.." and to_object_id = "..to end
    local content = m.select (tables_, cond_, extra_, columns_)
 
    return content
@@ -168,14 +173,10 @@ end
 function new_app_tree() -- Create table structure
    local content = {
       app_tree_id = 0,
+      instance_id = 0,
       lft = 0,
       rgt = 0,
-      app_list_id = "NULL",
-      app_tree_type = "NULL",
-      is_active = 0,
-      instance_id = 0,
-      service_id = "NULL",
-      name = ""
+      app_id = ""
    }
 
    return content
@@ -263,10 +264,13 @@ function select_full_path_app_tree (origin) -- Seleciona toda sub-arvore a patir
    origin = origin or root_id
    local content = {}
 
-   columns   = "node.app_tree_id, node.instance_id, node.lft, node.rgt, node.app_id"
-   tablename = "itvision_app_tree AS node, itvision_app_tree AS parent"
-   cond      = "node.lft BETWEEN parent.lft AND parent.rgt AND parent.app_tree_id = " .. origin
-   extra     = "ORDER BY node.lft"
+   columns   = [[node.app_tree_id, node.instance_id, node.lft, node.rgt, node.app_id, 
+                app.name, papp.app_id as papp_id, papp.name as pname]]
+   tablename = [[itvision_app_tree AS node, itvision_app_tree AS parent, 
+                itvision_apps as app, itvision_apps as papp]]
+   cond      = [[node.lft BETWEEN parent.lft AND parent.rgt AND parent.app_tree_id = ]] .. origin .. 
+               [[ AND node.app_id = app.app_id AND parent.app_id = papp.app_id]]
+   extra     = [[ORDER BY node.lft]]
 
    content = m.select (tablename, cond, extra, columns)
 
