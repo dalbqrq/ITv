@@ -34,7 +34,8 @@ r.insert_node_location_tree(l, arg[1], 1)
 
 ]]
 print("\n--------------------------------------------------------\n")
-test_select1()
+--test_select1()
+
 
 
 

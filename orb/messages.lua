@@ -55,6 +55,7 @@ strgs.pt_BR = {
 	category = "Categoria",	
 	sonof = "filho de",	
 	parent = "Pai",	
+	command = "Comando",	
 
 }
 
@@ -105,11 +106,12 @@ strgs.us = {
 	location = "Location",
 	physical = "Physical",
 	logical = "Logiclo",	
-	origin = "Origin",	
-	destiny = "Destiny",	
-	category = "Category",	
-	sonof = "son of",	
-	parent = "Parent",	
+	origin = "Origin",
+	destiny = "Destiny",
+	category = "Category",
+	sonof = "son of",
+	parent = "Parent",
+	command = "Comand",
 }
 
 

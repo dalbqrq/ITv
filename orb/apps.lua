@@ -134,6 +134,7 @@ function render_list(web, A)
    local res = {}
    local svc = {}
    
+   res[#res + 1] = p{ strings.application..": ", str };
    res[#res + 1] = p{ button_link(strings.add, web:link("/add")) }
    res[#res + 1] = p{ br(), br() }
 
