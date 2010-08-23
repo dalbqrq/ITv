@@ -19,17 +19,14 @@ local mr = require "model_rules"
 local ci = itvision:model "ci"
 
 function ci:select_ci(id)
-   local clause = ""
-   if id then
-      clause = "ci_id = "..id
-   end
-   return self:find_all(clause)
+
+   return mr:select_ci(id)
 end
 
 -- controllers ------------------------------------------------------------
 
 function list(web)
-   local A = ci:select_ci()
+   local A = ci:select_ci(0)
    return render_list(web, A)
 end
 itvision:dispatch_get(list, "/", "/list")
@@ -139,7 +136,15 @@ function render_list(web, A)
    for i, v in ipairs(A) do
       rows[#rows + 1] = tr{ 
          td{ a{ href= web:link("/show/"..v.ci_id), v.name} },
+         td{ v.alias },
+         td{ v.name1 },
+         td{ v.name2 },
+         td{ v.locat },
+         td{ v.is_active },
+         td{ v.company },
+         td{ v.manufac },
          td{ a{ href= web:link("/map/"..v.geotag), v.geotag} },
+         td{ v.sn },
          td{ v.obs },
          td{ button_link(strings.remove, web:link("/remove/"..v.ci_id), "negative") },
          td{ button_link(strings.edit, web:link("/edit/"..v.ci_id)) },
@@ -150,7 +155,16 @@ function render_list(web, A)
       thead{ 
          tr{ 
              th{ strings.name }, 
+             th{ "name" },
+             th{ "alias" },
+             th{ "name1" },
+             th{ "name2" },
+             th{ "locat" },
+             th{ "is_active" },
+             th{ "company" },
+             th{ "manufac" },
              th{ "Geotab" },
+             th{ "SN" },
              th{ "Obs" },
              th{ "." },
              th{ "." },

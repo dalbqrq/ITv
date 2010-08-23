@@ -131,6 +131,8 @@ function render_list(web, A)
       }
    }
 
+   res[#res+1] = p{ br(), 'PREFIX = ', web.prefix }
+
    return render_layout(res)
 end
 
@@ -192,6 +194,9 @@ function render_add(web, edit)
       p{ button_form(strings.send, "submit", "positive") },
       p{ button_form(strings.reset, "reset", "negative") },
    }
+
+   res[#res+1] = p{ br(), 'PREFIX = ', web.prefix }
+
 
    return render_layout(res)
 end

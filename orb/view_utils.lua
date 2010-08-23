@@ -28,7 +28,7 @@ local scrt = [[
    ]]
 
 function do_button(web, label, url, question)
-   -- TODO:  NAO ESTAh FUNCIONANDO !!!!
+   -- TODO: do_button() NAO ESTAh FUNCIONANDO !!!!
    return { form = { action = web:link(url),  input = { value = label, type = "submit" } } }
 end
 
@@ -48,19 +48,19 @@ end
 
 
 local menu = {}
-   menu[#menu + 1] = button_link("IC", "ci")
-   menu[#menu + 1] = button_link("ARVORE APPS", "app_tree")
-   menu[#menu + 1] = button_link("APPS", "apps")
-   menu[#menu + 1] = button_link("APP LIST", "app_list")
-   menu[#menu + 1] = button_link("RELAC.", "app_relat")
-   menu[#menu + 1] = button_link("TIPO RELAC.", "app_relat_type")
-   menu[#menu + 1] = button_link("CONTRATOS", "contract")
-   menu[#menu + 1] = button_link("LOCAL.", "location_tree")
-   menu[#menu + 1] = button_link("FABR.", "manufacturer")
-   menu[#menu + 1] = button_link("USUARIO", "user")
-   menu[#menu + 1] = button_link("GRUPO", "user_group")
-   menu[#menu + 1] = button_link("CHECK", "checkcmd")
-   menu[#menu + 1] = button_link("SIS.", "sysconfig")
+   menu[#menu + 1] = button_link("IC", "/orb/ci")
+   menu[#menu + 1] = button_link("ARVORE APPS", "/orb/app_tree")
+   menu[#menu + 1] = button_link("APPS", "/orb/apps")
+   menu[#menu + 1] = button_link("APP LIST", "/orb/app_list")
+   menu[#menu + 1] = button_link("RELAC.", "/orb/app_relat")
+   menu[#menu + 1] = button_link("TIPO RELAC.", "/orb/app_relat_type")
+   menu[#menu + 1] = button_link("CONTRATOS", "/orb/contract")
+   menu[#menu + 1] = button_link("LOCAL.", "/orb/location_tree")
+   menu[#menu + 1] = button_link("FABR.", "/orb/manufacturer")
+   menu[#menu + 1] = button_link("USUARIO", "/orb/user")
+   menu[#menu + 1] = button_link("GRUPO", "/orb/user_group")
+   menu[#menu + 1] = button_link("CHECK", "/orb/checkcmd")
+   menu[#menu + 1] = button_link("SIS.", "/orb/sysconfig")
 --[[
    menu[#menu + 1] = button_link("ARVORE APPS", "http://itv/orb/app_tree")
    menu[#menu + 1] = button_link("APPS", "http://itv/orb/apps")
