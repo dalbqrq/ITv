@@ -56,6 +56,7 @@ strgs.pt_BR = {
 	sonof = "filho de",	
 	parent = "Pai",	
 	command = "Comando",	
+	alias = "Alias",	
 
 }
 
@@ -111,7 +112,8 @@ strgs.us = {
 	category = "Category",
 	sonof = "son of",
 	parent = "Parent",
-	command = "Comand",
+	command = "Command",
+	alias = "Alias",	
 }
 
 

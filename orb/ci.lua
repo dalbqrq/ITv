@@ -113,8 +113,13 @@ function insert(web)
    else
       return web:redirect(web:link("/add/0"))
    end
-   ci.geotag = web.input.geotag
+   ci.alias = web.input.alias
+   ci.is_active = web.input.is_active
+   ci.location_tree_id = web.input.locat
+   ci.manufacturer = web.input.manufac
+   ci.sn = web.input.sn
    ci.obs = web.input.obs
+   ci.ci_parent_id = web.input.parent
 
    if tonumber(web.input.parent) > 0 then origin = web.input.parent end
    mr.insert_node_ci(ci, origin, 1)
@@ -246,16 +251,20 @@ end
 function render_add(web, ci, lo, ma, co, edit, err)
    local res = {}
    local s = ""
-   local val1, val2, val3, val4, mess, url
+   local val1, val2, val3, val4, val5, val6, val7, val8, mess, url
 
    if err == 0 then mess = error_message(4) else mess = "" end
 
    if edit then
       edit = edit[1]
       val1 = edit.name
-      val2 = edit.geotag
-      val3 = edit.obs
-      val4 = edit.ci_id
+      val2 = edit.alias
+      val3 = edit.location
+      val4 = edit.is_active
+      val5 = edit.manufacturer
+      val6 = edit.sn
+      val7 = edit.obs
+      val8 = edit.ci_id
       url = "/update/"..val4
    else
       url = "/insert"
@@ -276,17 +285,13 @@ function render_add(web, ci, lo, ma, co, edit, err)
       action = web:link(url),
 
       strings.name..": ", input{ type="text", name="name", value = val1 }, mess, br(),
-      strings.name.."_alias: ", input{ type="text", name="alias", value = val1 }, mess, br(),
-      strings.name.."1: ", input{ type="text", name="name1", value = val1 }, mess, br(),
-      strings.name.."2: ", input{ type="text", name="name2", value = val1 }, mess, br(),
-      "locat: ", select_option("parent", lo, "location_tree_id", "locat", val4), br(),
-      "is_active: ", select_yes_no("is active", 0),
-      "manufac: ", select_option("parent", ma, "manufacturer_id", "manufac", val4), br(),
-      "support: ", select_option("parent", co, "contract_id", "company", val4), br(),
-      "Geotag: ", input{ type="text", name="geotag", value = val2 }, br(),
-      "SN", input{ type="text", name="sn", value = val5 }, br(),
-      "Obs: ", input{ type="text", name="obs", value = val3 }, br(),
-      strings.child_of..": ", select_option("parent", t, "ci_id", "name", val4), br(),
+      strings.alias..": ", input{ type="text", name="alias", value = val2 }, mess, br(),
+      strings.is_active..": ", select_yes_no("is_active", val4), br(),
+      strings.location..": ", select_option("locat", lo, "location_tree_id", "name", val3), br(),
+      strings.manufacturer..": ", select_option("manufac", ma, "manufacturer_id", "name", val5), br(),
+      "SN", input{ type="text", name="sn", value = val6 }, br(),
+      "Obs: ", textarea{ name="obs", cols="50", rows="5", size="500", val7},br(),
+      strings.child_of..": ", select_option("parent", t, "ci_id", "name", val8), br(),
 
       p{ button_form(strings.send, "submit", "positive") },
       p{ button_form(strings.reset, "reset", "negative") },

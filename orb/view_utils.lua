@@ -97,6 +97,26 @@ end
 
 
 function select_option(name, T, value_idx, label_idx, default_value)
+--[[
+   Parametros:
+
+      name -> nome da variavel do form-html que serah recuperado pelo respectivo metodo 'controler'
+              tipicamete um metodo 'update' ou 'insert'  
+      T -> eh a tabela de tuplas com o campo que deve ser apresentado no 'select' do html
+      value_idx -> eh o indice (chave primaria) da tabela T
+      label_idx -> eh o nome do indice da coluna que deve ser apresentado na lista de opcoes
+      default_value -> eh a opcao (dentre as que estao na tabela T) que deve ser apresentada inicialmente 
+
+   Ex: T = {
+      { x_id = 101, name = "hardware", alias = "HW", type = 0, category = 9 },
+      { x_id = 102, name = "software", alias = "SW", type = 1, category = 6 },
+      { x_id = 103, name = "link",     alias = "LK", type = 5, category = 2 }  }
+
+      Para a tabela acima, uma tipica chamada desta funcao ficaria assim:
+
+      select_option("tipo", T, "x_id", "name", "link")
+      
+]]
    local olist = {}
 
    olist[#olist + 1] = "<select name=\""..name.."\">"
@@ -113,8 +133,16 @@ function select_option(name, T, value_idx, label_idx, default_value)
          selected = ""
       end
 
-      olist[#olist + 1] = "<option "..selected.." value=\""..v[value_idx].."\" label=\""..
-                          v[label_idx].."\">"..v[label_idx].."</option>"
+      local str= ""
+
+      str = str..v[value_idx]
+
+      str = str..v[label_idx]
+
+      str = str..selected
+
+      olist[#olist + 1] = "<option "..selected.." value=\""..v[value_idx].."\" label=\"".. 
+                           v[label_idx].."\">"..  v[label_idx].."</option>"
 
    end
    olist[#olist + 1] = "</select>"

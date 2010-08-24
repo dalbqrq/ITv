@@ -103,7 +103,7 @@ itvision:dispatch_static("/css/%.css", "/script/%.js")
 
 -- views ------------------------------------------------------------
 
-function render_list(web, A)
+function  ender_list(web, A)
    local rows = {}
    local res = {}
    
@@ -130,8 +130,6 @@ function render_list(web, A)
          rows
       }
    }
-
-   res[#res+1] = p{ br(), 'PREFIX = ', web.prefix }
 
    return render_layout(res)
 end
@@ -194,9 +192,6 @@ function render_add(web, edit)
       p{ button_form(strings.send, "submit", "positive") },
       p{ button_form(strings.reset, "reset", "negative") },
    }
-
-   res[#res+1] = p{ br(), 'PREFIX = ', web.prefix }
-
 
    return render_layout(res)
 end
