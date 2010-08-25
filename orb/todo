@@ -33,11 +33,11 @@ CONCEPTS DONE:
 
 CONCEPTS TODO:
 - Criar arvore de ICs. Para cada IC pode-se ter um ou mais IMs.
+- Mudar campo do IC de is_active para status (situacao)
 - Criar tabela de usuarios de contato. Ele podem ser associado a um IC, um IM ou a uma aplicacao.
    O tipo de contato pode variar.
 - Criar arvore de organizacao. Um IC pode pode estar associado ama localizacao e uma organizacao.
 - Criar a possibilidde de se criar campos na tabela cd IC.
 - Checagem distribuida - http://nagios.sourceforge.net/docs/1_0/distributed.html
-
 
 
