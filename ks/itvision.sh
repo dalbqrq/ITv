@@ -1,6 +1,7 @@
 #!/bin/bash
 
 user=itv
+dbpass=itv
 
 function insta() {
 	apt-get -y install $*
@@ -341,7 +342,7 @@ cd /usr/local
 wget https://forge.indepnet.net/attachments/download/635/glpi-0.78-RC2.tar.gz
 tar zxf glpi-0.78-RC2.tar.gz
 mv glpi servdesk
-cd deskdesk
+cd servdesk
 chown -R $user.$user *
 
 rootpass=$dbpass
@@ -355,8 +356,8 @@ echo "GRANT ALL PRIVILEGES ON *.* TO '$dbuser'@'192.168.8.1' WITH GRANT OPTION;"
 
 apt-get install php5-mysql
 cd /etc/apache2
-cp ~$user/itv/ks/servdesk.config site-available
-cd site-enabled
+cp ~$user/itv/ks/servdesk.conf sites-available
+cd sites-enabled
 ln -s ../sites-available/servdesk.conf  200-servdesk
 cd /usr/local/servdesk
 chmod 777 files/ config/
