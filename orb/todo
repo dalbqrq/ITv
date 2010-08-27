@@ -27,7 +27,11 @@ app_list.lua: ao clicar no nome da aplicacao para chamar "/show/:id" gera erro
 location_tree.lua: falha ao atualizar lft, rgt da tabela. implementar delete corretamente !
 location_tree.lua: falha ao atualizar lft, rgt da tabela. implementar update corretamente !
 
-CONCEPTS:
+
+
+CONCEPTS DONE:
+
+CONCEPTS TODO:
 - Criar arvore de ICs. Para cada IC pode-se ter um ou mais IMs.
 - Criar tabela de usuarios de contato. Ele podem ser associado a um IC, um IM ou a uma aplicacao.
    O tipo de contato pode variar.
