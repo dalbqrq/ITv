@@ -37,7 +37,7 @@ CONCEPTS TODO:
    O tipo de contato pode variar.
 - Criar arvore de organizacao. Um IC pode pode estar associado ama localizacao e uma organizacao.
 - Criar a possibilidde de se criar campos na tabela cd IC.
-
+- Checagem distribuida - http://nagios.sourceforge.net/docs/1_0/distributed.html
 
 
 
