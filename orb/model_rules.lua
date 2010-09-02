@@ -164,7 +164,7 @@ end
 
 
 ----------------------------- APP TREE ----------------------------------
-function select_ci (id)
+function select_ci (id_)
    local tables_  = [[itvision_ci ci, nagios_objects ob, itvision_ci_host ch,
                       itvision_location_tree lo, itvision_manufacturer ma,
                       itvision_contract co ]]
@@ -181,7 +181,8 @@ function select_ci (id)
                        ci.name as name, ci.alias as alias, ci.sn as sn ]]
                       
 
-   --if id then cond_ = cond_ .." and ci_id = ".. id end
+   id_ = tonumber(id_)
+   if id_ then cond_ = cond_ .." and ci_id = ".. id_ end
    local content = m.select (tables_, cond_, extra_, columns_)
 
    return content

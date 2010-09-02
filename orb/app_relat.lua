@@ -17,10 +17,9 @@ local mr = require "model_rules"
 module("itvision", package.seeall, orbit.new)
 mapper.conn, mapper.driver = config.setup_orbdb()
 local apps = itvision:model "apps"
-local app_relat = itvision:model "app_relat"
 local app_list = itvision:model "app_list"
+local app_relat = itvision:model "app_relat"
 local app_relat_type = itvision:model "app_relat_type"
-
 
 -- config NAGIOS mvc app
 nagios = orbit.new()

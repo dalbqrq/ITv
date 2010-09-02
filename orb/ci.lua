@@ -1,7 +1,6 @@
 #!/usr/bin/env wsapi.cgi
 
 require "orbit"
-module("itvision", package.seeall, orbit.new)
 
 -- configs ------------------------------------------------------------
 
@@ -9,24 +8,58 @@ require "config"
 require "util"
 require "view_utils"
 
-mapper.conn, mapper.driver = config.setup_orbdb()
-
 local ma = require "model_access"
 local mr = require "model_rules"
 
+
+-- config ITVISION mvc app
+module("itvision", package.seeall, orbit.new)
+mapper.conn, mapper.driver = config.setup_orbdb()
+local ci = itvision:model "ci"
+local contract = itvision:model "contract"
+local manufacturer = itvision:model "manufacturer"
+local location_tree = itvision:model "location_tree"
+
+-- config NAGIOS mvc app
+nagios = orbit.new()
+nagios.mapper.conn, nagios.mapper.driver = config.setup_orbdb()
+nagios.mapper.table_prefix = 'nagios_'
+local objects = nagios:model "objects"
+
+
 -- models ------------------------------------------------------------
 
-local ci = itvision:model "ci"
-
 function ci:select_ci(id)
+   if id then tonumber(id) end
 
    return mr:select_ci(id)
 end
 
+function contract:select_contract(id)
+   local clause = ""
+   if id then
+      clause = "contract_id = "..id
+   end
+   return self:find_all(clause)
+end
+
+function manufacturer:select_manufacturer(id)
+   local clause = ""
+   if id then
+      clause = "manufacturer_id = "..id
+   end
+   return self:find_all(clause)
+end
+
+function location_tree:select_location_tree(origin)
+   return mr.select_full_path_location_tree(origin)
+end
+
+
 -- controllers ------------------------------------------------------------
 
 function list(web)
-   local A = ci:select_ci(0)
+   local A = ci:select_ci(10)
    return render_list(web, A)
 end
 itvision:dispatch_get(list, "/", "/list")
@@ -61,10 +94,14 @@ end
 itvision:dispatch_post(update, "/update/(%d+)")
 
 
-function add(web, err)
-   return render_add(web, nil, err)
+function add(web)
+   local ci = ci:select_ci()
+   local lo = location_tree:select_location_tree()
+   local ma = manufacturer:select_manufacturer()
+   local co = contract:select_contract()
+   return render_add(web, ci, lo, ma, co)
 end
-itvision:dispatch_get(add, "/add", "/add/(%d+)")
+itvision:dispatch_get(add, "/add")
 
 
 function insert(web)
@@ -155,13 +192,12 @@ function render_list(web, A)
       thead{ 
          tr{ 
              th{ strings.name }, 
-             th{ "name" },
              th{ "alias" },
              th{ "name1" },
              th{ "name2" },
              th{ "locat" },
              th{ "is_active" },
-             th{ "company" },
+             th{ "support" },
              th{ "manufac" },
              th{ "Geotab" },
              th{ "SN" },
@@ -178,45 +214,6 @@ function render_list(web, A)
    return render_layout(res)
 end
 
-function render_map(web, lat, lon)
-
-    s = [[
-<html>
-<head>
-<META HTTP-EQUIV="Content-Type" CONTENT="text/html;charset=ISO-8859-1">
-<title>Exemplo de Google Maps API</title>
-<script src="http://maps.google.com/maps?file=api&v=2&key=#SUA CHAVE GOOGLE MAPS#" type="text/javascript"></script>
-<script type="text/javascript">
-   //<![CDATA[
-   
-   //função para carregar um mapa de Google. 
-   //Esta função é chamada quando a página termina de carregar. Evento onload
-   function load() {
-      //comprovamos se o navegador é compatível com os mapas de google
-      if (GBrowserIsCompatible()) {
-         //instanciamos um mapa com GMap, passando-lhe uma referência à camada ou <div> onde quisermos mostrar o mapa
-         var map = new GMap2(document.getElementById("map"));   
-         //centralizamos o mapa em uma latitude e longitude desejadas
-         map.setCenter(new GLatLng(]]..lat..[[,]]..lon..[[), 18);   
-         //adicionamos controles ao mapa, para interação com o usuário
-         map.setMapType(G_SATELLITE_MAP)
-         map.addControl(new GLargeMapControl());
-         map.addControl(new GMapTypeControl()); 
-         //daniel  map.addControl(new GOverviewMapControl()); ;
-      }
-   }
-   
-   //] ]>
-   </script>
-</head>
-<body onload="load()" onunload="GUnload()">
-<div id="map" style="width: 615px; height: 400px"></div>
-</body>
-</html>
-]]
-
-    return s
-end
 
 function render_show(web, A)
    A = A[1]
@@ -246,7 +243,7 @@ function render_show(web, A)
 end
 
 
-function render_add(web, edit, err)
+function render_add(web, ci, lo, ma, co, edit, err)
    local res = {}
    local s = ""
    local val1, val2, val3, val4, mess, url
@@ -264,9 +261,10 @@ function render_add(web, edit, err)
       url = "/insert"
    end
 
-   local t = ci:find_all()
-   local r = { name=strings.root, ci_id=0, obs = nil, geotag=nil}
-   table.insert(t, r)
+   --local t = ci:find_all()
+   --local r = { name=strings.root, ci_id=0, obs = nil, geotag=nil}
+   --table.insert(t, r)
+   local t = {}
 
    -- LISTA DE OPERACOES 
    res[#res + 1] = p{ button_link(strings.list, web:link("/list")) }
@@ -278,7 +276,15 @@ function render_add(web, edit, err)
       action = web:link(url),
 
       strings.name..": ", input{ type="text", name="name", value = val1 }, mess, br(),
+      strings.name.."_alias: ", input{ type="text", name="alias", value = val1 }, mess, br(),
+      strings.name.."1: ", input{ type="text", name="name1", value = val1 }, mess, br(),
+      strings.name.."2: ", input{ type="text", name="name2", value = val1 }, mess, br(),
+      "locat: ", select_option("parent", lo, "location_tree_id", "locat", val4), br(),
+      "is_active: ", select_yes_no("is active", 0),
+      "manufac: ", select_option("parent", ma, "manufacturer_id", "manufac", val4), br(),
+      "support: ", select_option("parent", co, "contract_id", "company", val4), br(),
       "Geotag: ", input{ type="text", name="geotag", value = val2 }, br(),
+      "SN", input{ type="text", name="sn", value = val5 }, br(),
       "Obs: ", input{ type="text", name="obs", value = val3 }, br(),
       strings.child_of..": ", select_option("parent", t, "ci_id", "name", val4), br(),
 
