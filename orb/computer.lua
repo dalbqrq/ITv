@@ -1,48 +1,61 @@
 #!/usr/bin/env wsapi.cgi
 
-require "orbit"
-module("itvision", package.seeall, orbit.new)
-
 -- configs ------------------------------------------------------------
 
+require "orbit"
 require "config"
 require "util"
 require "view_utils"
 
-mapper.conn, mapper.driver = config.setup_orbdb()
 
+-- config direct access to db
 local ma = require "model_access"
 local mr = require "model_rules"
 
+
+-- config ITVISION mvc app
+module("itvision", package.seeall, orbit.new)
+mapper.conn, mapper.driver = config.setup_db(config.db)
+local ci = itvision:model "ci"
+
+
+-- config GLPI mvc app
+glpi = orbit.new()
+--glpi.mapper.conn, glpi.mapper.driver = config.setup_db(config.servdesk_db)
+glpi.mapper.conn, glpi.mapper.driver = config.setup_sddb()
+glpi.mapper.table_prefix = 'glpi_'
+local computer = glpi:model "computers"
+
+
+
 -- models ------------------------------------------------------------
 
-local manufacturer = itvision:model "manufacturer"
-
-function manufacturer:select_manufacturer(id)
+function computer:select_computer(id)
    local clause = ""
    if id then
-      clause = "manufacturer_id = "..id
+      clause = "id = "..id
    end
-   return self:find_all(clause)
+   --return self:find_all(clause)
+   return ma.select( "glpi_computers" )
 end
 
 -- controllers ------------------------------------------------------------
 
 function list(web)
-   local A = manufacturer:select_manufacturer()
+   local A = computer:select_computer()
    return render_list(web, A)
 end
 itvision:dispatch_get(list, "/", "/list")
 
 
 function show(web, id)
-   local A = manufacturer:select_manufacturer(id)
+   local A = computer:select_computer(id)
    return render_show(web, A)
 end itvision:dispatch_get(show, "/show/(%d+)")
 
 
 function edit(web, id)
-   local A = manufacturer:select_manufacturer(id)
+   local A = computer:select_computer(id)
    return render_add(web, A)
 end
 itvision:dispatch_get(edit, "/edit/(%d+)")
@@ -51,8 +64,8 @@ itvision:dispatch_get(edit, "/edit/(%d+)")
 function update(web, id)
    local A = {}
    if id then
-      local tables = "itvision_manufacturer"
-      local clause = "manufacturer_id = "..id
+      local tables = "itvision_computer"
+      local clause = "computer_id = "..id
       --A:new()
       A.name = web.input.name
 
@@ -71,16 +84,16 @@ itvision:dispatch_get(add, "/add")
 
 
 function insert(web)
-   manufacturer:new()
-   manufacturer.name = web.input.name
-   manufacturer:save()
+   computer:new()
+   computer.name = web.input.name
+   computer:save()
    return web:redirect(web:link("/list"))
 end
 itvision:dispatch_post(insert, "/insert")
 
 
 function remove(web, id)
-   local A = manufacturer:select_manufacturer(id)
+   local A = computer:select_computer(id)
    return render_remove(web, A)
 end
 itvision:dispatch_get(remove, "/remove/(%d+)")
@@ -88,8 +101,8 @@ itvision:dispatch_get(remove, "/remove/(%d+)")
 
 function delete(web, id)
    if id then
-      local clause = "manufacturer_id = "..id
-      local tables = "itvision_manufacturer"
+      local clause = "computer_id = "..id
+      local tables = "itvision_computer"
       ma.delete (tables, clause) 
    end
 
@@ -112,9 +125,9 @@ function  render_list(web, A)
 
    for i, v in ipairs(A) do
       rows[#rows + 1] = tr{ 
-         td{ a{ href= web:link("/show/"..v.manufacturer_id), v.name} },
-         td{ button_link(strings.remove, web:link("/remove/"..v.manufacturer_id), "negative") },
-         td{ button_link(strings.edit, web:link("/edit/"..v.manufacturer_id)) },
+         td{ a{ href= web:link("/show/"..v.id), v.name} },
+         td{ button_link(strings.remove, web:link("/remove/"..v.id), "negative") },
+         td{ button_link(strings.edit, web:link("/edit/"..v.id)) },
       }
    end
 
@@ -140,8 +153,8 @@ function render_show(web, A)
    local res = {}
 
    res[#res + 1] = p{ button_link(strings.add, web:link("/add")) }
-   res[#res + 1] = p{ button_link(strings.remove, web:link("/remove/"..A.manufacturer_id)) }
-   res[#res + 1] = p{ button_link(strings.edit, web:link("/edit/"..A.manufacturer_id)) }
+   res[#res + 1] = p{ button_link(strings.remove, web:link("/remove/"..A.computer_id)) }
+   res[#res + 1] = p{ button_link(strings.edit, web:link("/edit/"..A.computer_id)) }
    res[#res + 1] = p{ button_link(strings.list, web:link("/list")) }
    res[#res + 1] = p{ br(), br() }
 
@@ -173,7 +186,7 @@ function render_add(web, edit)
    if edit then
       edit = edit[1]
       val1 = edit.name
-      url = "/update/"..edit.manufacturer_id
+      url = "/update/"..edit.computer_id
    else
       url = "/insert"
    end
@@ -203,13 +216,13 @@ function render_remove(web, A)
 
    if A then
       A = A[1]
-      url_ok = web:link("/delete/"..A.manufacturer_id)
+      url_ok = web:link("/delete/"..A.computer_id)
       url_cancel = web:link("/list")
    end
 
    res[#res + 1] = p{
       --"Voce tem certeza que deseja excluir o usuario "..A.name.."?",
-      strings.exclude_quest.." "..strings.manufacturer.." "..A.name.."?",
+      strings.exclude_quest.." "..strings.computer.." "..A.name.."?",
       p{ button_link(strings.yes, web:link(url_ok)) },
       p{ button_link(strings.cancel, web:link(url_cancel)) },
    }

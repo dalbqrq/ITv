@@ -70,7 +70,10 @@ img.download {vertical-align:middle;}
 #inner{ 
  margin:0px;
  width:100%;
+/* daniel - retirada da altura fixa do site
  height: 550px;
+ height: 950px;
+*/
  background-color: #ffffff; /* color of the content column */
  } /* The ie/pc pecularity */ 
 
@@ -88,7 +91,9 @@ img.download {vertical-align:middle;}
 #content{ 
  position: relative; 
  margin: 0px; 
+/* daniel - retirada da altura fixa do site
  height: 550px;
+*/
  }
 
 p{

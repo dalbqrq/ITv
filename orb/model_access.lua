@@ -30,7 +30,8 @@ local objecttype = {
 
 
 function connect ()
-   local c = config.db
+   --local c = config.db
+   local c = config.servdesk_db
    return dado.connect (c.dbname, c.dbuser, c.dbpass, c.driver)
 end
 

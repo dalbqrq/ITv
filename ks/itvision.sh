@@ -74,7 +74,7 @@ unzip luagraph-1.0.2-2.src.rock
 tar zxf luagraph-1.0.2.tar.gz
 cd luagraph-1.0.2
 mv config config.orig
-cp ~itv/itv/ks/luagraph-config .
+cp ~$user/itv/ks/luagraph-config .
 make
 make install
 make webbook
@@ -166,10 +166,10 @@ cd /usr/local/src/nagios-business-process-addon-0.9.5
 make all
 make install
 mv /usr/local/monitor/share/side.php /usr/local/monitor/side.php.orig
-cp ~itv/itv/ks/side.php /usr/local/monitor/share
+cp ~$user/itv/ks/side.php /usr/local/monitor/share
 chown -R $user.$user /usr/local/monitor/share
 \rm -rf /usr/local/monitorbp/etc/*
-tar ~itv/itv/ks/bp-cfg.tgz -C /usr/local/monitorbp/etc
+tar ~$user/itv/ks/bp-cfg.tgz -C /usr/local/monitorbp/etc
 cat << EOF > /etc/default/ndoutils
 ENABLE_NDOUTILS=1
 DAEMON_OPTS="-c /usr/local/monitor/etc/ndo2db.cfg"
@@ -189,7 +189,7 @@ chmod 755 /usr/local/bin/reset-bp
 # APACHE
 #
 cd /etc/apache2/
-cp ~itv/itv/ks/itvision.conf ./sites-available
+cp ~$user/itv/ks/itvision.conf ./sites-available
 cd ./sites-enabled
 rm -f ./000-default
 sed -i -e "s/Nagios/ITVision Monitor/g" ../sites-available/nagios.conf
@@ -334,6 +334,37 @@ restart stunnel4
 
 
 
+# --------------------------------------------------
+# GLPI
+#
+cd /usr/local
+wget https://forge.indepnet.net/attachments/download/635/glpi-0.78-RC2.tar.gz
+tar zxf glpi-0.78-RC2.tar.gz
+mv glpi servdesk
+cd deskdesk
+chown -R $user.$user *
+
+rootpass=$dbpass
+dbuser=servdesk
+dbpass=servdesk
+echo "CREATE DATABASE $dbuser;" | mysql -u root --password=$rootpass
+echo "CREATE USER '$dbuser'@'localhost' IDENTIFIED BY '$dbpass';" | mysql -u root --password=$rootpass mysql
+echo "GRANT ALL PRIVILEGES ON *.* TO '$dbuser'@'localhost' WITH GRANT OPTION;" | mysql -u root --password=$rootpass mysql
+echo "GRANT ALL PRIVILEGES ON *.* TO '$dbuser'@'192.168.8.1' WITH GRANT OPTION;" | mysql -u root --password=$rootpass mysql
+
+
+apt-get install php5-mysql
+cd /etc/apache2
+cp ~$user/itv/ks/servdesk.config site-available
+cd site-enabled
+ln -s ../sites-available/servdesk.conf  200-servdesk
+cd /usr/local/servdesk
+chmod 777 files/ config/
+invoke-rc.d apache2 restart
+
+# Para remover o logo do glpi
+# comentar a linha 1297 (que contem a string 'fd_logo.png') do arquivo
+# /usr/local/servdesk/css/styles.css
 
 
 # --------------------------------------------------
