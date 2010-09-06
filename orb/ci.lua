@@ -32,7 +32,8 @@ local objects = nagios:model "objects"
 function ci:select_ci(id)
    if id then tonumber(id) end
 
-   return mr:select_ci(id)
+   local A, B = mr:select_ci(id)
+   return A, B
 end
 
 function contract:select_contract(id)
@@ -59,8 +60,8 @@ end
 -- controllers ------------------------------------------------------------
 
 function list(web)
-   local A = ci:select_ci(10)
-   return render_list(web, A)
+   local A, B = ci:select_ci()
+   return render_list(web, A, B)
 end
 itvision:dispatch_get(list, "/", "/list")
 
@@ -105,9 +106,8 @@ itvision:dispatch_get(add, "/add")
 
 
 function insert(web)
-   local origin
-   --ci:new()
-   ci = mr.new_ci()
+   ci:new()
+   --ci = mr.new_ci()
    if web.input.name then
       ci.name = web.input.name
    else
@@ -120,12 +120,10 @@ function insert(web)
    ci.sn = web.input.sn
    ci.obs = web.input.obs
    ci.ci_parent_id = web.input.parent
-
-   if tonumber(web.input.parent) > 0 then origin = web.input.parent end
-   mr.insert_node_ci(ci, origin, 1)
+   ci.instance_id = config.db.instance_id
+   ci:save()
 
    return web:redirect(web:link("/list"))
-   --return render_table(web, ci)
 end
 itvision:dispatch_post(insert, "/insert")
 
@@ -168,7 +166,7 @@ function render_table(web, t)
 end
 
 
-function render_list(web, A)
+function render_list(web, A, B)
    local rows = {}
    local res = {}
    
@@ -179,6 +177,9 @@ function render_list(web, A)
       rows[#rows + 1] = tr{ 
          td{ a{ href= web:link("/show/"..v.ci_id), v.name} },
          td{ v.alias },
+         td{ v.location_tree_id },
+         td{ v.manufacturer_id },
+--[[
          td{ v.name1 },
          td{ v.name2 },
          td{ v.locat },
@@ -186,9 +187,10 @@ function render_list(web, A)
          td{ v.company },
          td{ v.manufac },
          td{ a{ href= web:link("/map/"..v.geotag), v.geotag} },
-         td{ v.sn },
          td{ v.obs },
-         td{ button_link(strings.remove, web:link("/remove/"..v.ci_id), "negative") },
+]]
+         td{ v.sn },
+         -- CI nao pode ser removido! td{ button_link(strings.remove, web:link("/remove/"..v.ci_id), "negative") },
          td{ button_link(strings.edit, web:link("/edit/"..v.ci_id)) },
       }
    end
@@ -198,6 +200,9 @@ function render_list(web, A)
          tr{ 
              th{ strings.name }, 
              th{ "alias" },
+             th{ "locat" },
+             th{ "fabric" },
+--[[
              th{ "name1" },
              th{ "name2" },
              th{ "locat" },
@@ -205,9 +210,10 @@ function render_list(web, A)
              th{ "support" },
              th{ "manufac" },
              th{ "Geotab" },
-             th{ "SN" },
              th{ "Obs" },
-             th{ "." },
+]]
+             th{ "SN" },
+             -- CI nao pode ser removido!! th{ "." },
              th{ "." },
          }
       },
@@ -215,6 +221,8 @@ function render_list(web, A)
          rows
       }
    }
+
+   res[#res + 1] = P {B}
 
    return render_layout(res)
 end

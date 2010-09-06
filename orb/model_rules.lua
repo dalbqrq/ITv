@@ -163,29 +163,26 @@ function insert_app_relat (content_)
 end
 
 
------------------------------ APP TREE ----------------------------------
+----------------------------- CI - CONFIG ITEM ----------------------------------
 function select_ci (id_)
-   local tables_  = [[itvision_ci ci, nagios_objects ob, itvision_ci_host ch,
-                      itvision_location_tree lo, itvision_manufacturer ma,
-                      itvision_contract co ]]
-   local cond_    = [[ ci.ci_id = ch.ci_id and ch.host_object_id = ob.object_id and
-                       ch.instance_id = ob.instance_id and 
-                       ci.instance_id = ch.instance_id and
-                       ci.location_tree_id = lo.location_tree_id and
-                       ci.contact_id = lo.location_tree_id and
-                       ci.manufacturer_id = ma.manufacturer_id ]]
 
-   local columns_ = [[ ob.name1 as name1, ob.name2 as name2, ob.is_active as is_active,
-                       lo.name as locat, lo.obs as obs, lo.geotag as geotag,
-                       co.company as company, ma.name as manufac,
-                       ci.name as name, ci.alias as alias, ci.sn as sn ]]
-                      
+--   local tables_  = [[ itvision_ci ci, itvision_location_tree lo, itvision_manufacturer ma ]]
+--   local cond_    = [[ ci.location_tree_id = lo.location_tree_id and
+--                       ci.manufacturer_id = ma.manufacturer_id ]]
+--   local columns_ = [[ lo.name as locat, lo.obs as obs, lo.geotag as geotag,
+--                       ci.is_active as is_active,
+--                       ma.name as manufac,
+--                       ci.name as name, ci.alias as alias, ci.sn as sn ]]
+   local tables_  = [[ itvision_ci ci ]]
+   local cond_    = nil
+   local columns_ = nil
 
    id_ = tonumber(id_)
-   if id_ then cond_ = cond_ .." and ci_id = ".. id_ end
+--   if id_ then cond_ = cond_ .." and ci_id = ".. id_ end
    local content = m.select (tables_, cond_, extra_, columns_)
 
-   return content
+ --  local B = "select "..columns_.." from "..tables_.." where "..cond_
+   return content, nil
 end  
 
 ----------------------------- APP TREE ----------------------------------

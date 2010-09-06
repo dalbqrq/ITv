@@ -49,6 +49,7 @@ end
 
 local menu = {}
    menu[#menu + 1] = button_link("IC", "/orb/ci")
+   menu[#menu + 1] = button_link("COMP", "/orb/computer")
    menu[#menu + 1] = button_link("ARVORE APPS", "/orb/app_tree")
    menu[#menu + 1] = button_link("APPS", "/orb/apps")
    menu[#menu + 1] = button_link("APP LIST", "/orb/app_list")
