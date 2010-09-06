@@ -2,7 +2,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"  "http://www.w3.org/TR/html4/loose.dtd">
 <head>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-  <title>ITvision Database Model - Table Details</title>
+  <title>ITvision Model Report - Table Details</title>
   <link rel="stylesheet" type="text/css" media="screen" href="basic.css">
 </head>
   
@@ -103,7 +103,7 @@
     </tr>
 
     <tr>
-      <td class="subitem_table_field">FK</td>
+      <td class="subitem_table_field"></td>
       <td class="subitem_table_field">app_id</td>
       <td class="subitem_table_field">INT</td>
       <td class="subitem_table_field">Yes</td>
@@ -112,7 +112,7 @@
     </tr>
 
     <tr>
-      <td class="subitem_table_field">FK</td>
+      <td class="subitem_table_field"></td>
       <td class="subitem_table_field">instance_id</td>
       <td class="subitem_table_field">SMALLINT(6)</td>
       <td class="subitem_table_field">Yes</td>
@@ -121,7 +121,7 @@
     </tr>
 
     <tr>
-      <td class="subitem_table_field">PK</td>
+      <td class="subitem_table_field"></td>
       <td class="subitem_table_field">object_id</td>
       <td class="subitem_table_field">INT(11)</td>
       <td class="subitem_table_field">Yes</td>
@@ -132,7 +132,7 @@
     <tr>
       <td class="subitem_table_field"></td>
       <td class="subitem_table_field">type</td>
-      <td class="subitem_table_field">ENUM('and','or','hst','svc')</td>
+      <td class="subitem_table_field">ENUM('app','hst','svc')</td>
       <td class="subitem_table_field">Yes</td>
       <td class="subitem_table_field"></td>
       <td class="subitem_table_field"></td>
@@ -152,18 +152,6 @@
       <td class="subitem_table_head">Type</td>
       <td class="subitem_table_head">Kind</td>
       <td class="subitem_table_head">Comment</td>
-    </tr>
-
-    <tr>
-      <td class="subitem_table_field">PRIMARY</td>
-      <td class="subitem_table_field"><table border="0" cellpadding="2" cellspacing="0" width="100%">
-
-        </table></td>
-      <td class="subitem_table_field">Yes</td>
-      <td class="subitem_table_field">No</td>
-      <td class="subitem_table_field">PRIMARY</td>
-      <td class="subitem_table_field"></td>
-      <td class="subitem_table_field"></td>
     </tr>
 
     <tr>
@@ -194,7 +182,7 @@
 
     <tr>
       <td class="subitem_table_field">fk_app_id2</td>
-      <td class="subitem_table_field">Identifying</td>
+      <td class="subitem_table_field">Non-Identifying</td>
       <td class="subitem_table_field">itvision_apps</td>
       <td class="subitem_table_field">itvision_app_list</td>
       <td class="subitem_table_field">1:n</td>
@@ -215,7 +203,7 @@
   <div class="subitem_header">DDL script</div>
   <table class="subitems_table" border="0" cellpadding="2" cellspacing="" width="100%">
     <tr>
-      <td class="ddl_field"><pre><span class="syntax_default"></span><span class="syntax_major_keyword">CREATE</span><span class="syntax_default">  </span><span class="syntax_major_keyword">TABLE</span><span class="syntax_default"> </span><span class="syntax_major_keyword">IF</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">EXISTS</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`ndoutils`</span><span class="syntax_operator">.</span><span class="syntax_quoted_identifier">`itvision_app_list`</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`app_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">INT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">SMALLINT</span><span class="syntax_operator">(</span><span class="syntax_number">6</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`object_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">INT</span><span class="syntax_operator">(</span><span class="syntax_number">11</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`type`</span><span class="syntax_default"> </span><span class="syntax_identifier">ENUM</span><span class="syntax_operator">(</span><span class="syntax_single_quoted_string">'and'</span><span class="syntax_operator">,</span><span class="syntax_single_quoted_string">'or'</span><span class="syntax_operator">,</span><span class="syntax_single_quoted_string">'hst'</span><span class="syntax_operator">,</span><span class="syntax_single_quoted_string">'svc'</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_major_keyword">PRIMARY</span><span class="syntax_default"> </span><span class="syntax_major_keyword">KEY</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`object_id`</span><span class="syntax_operator">,</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`app_id`</span><span class="syntax_operator">,</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_major_keyword">INDEX</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`fk_app_id2`</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`app_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">ASC</span><span class="syntax_operator">,</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">ASC</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_major_keyword">CONSTRAINT</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`fk_app_id2`</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">FOREIGN</span><span class="syntax_default"> </span><span class="syntax_major_keyword">KEY</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`app_id`</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_default"> </span><span class="syntax_operator">)</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">REFERENCES</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`ndoutils`</span><span class="syntax_operator">.</span><span class="syntax_quoted_identifier">`itvision_apps`</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`app_id`</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_default"> </span><span class="syntax_operator">)</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">ON</span><span class="syntax_default"> </span><span class="syntax_major_keyword">DELETE</span><span class="syntax_default"> </span><span class="syntax_identifier">NO</span><span class="syntax_default"> </span><span class="syntax_identifier">ACTION</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">ON</span><span class="syntax_default"> </span><span class="syntax_major_keyword">UPDATE</span><span class="syntax_default"> </span><span class="syntax_identifier">NO</span><span class="syntax_default"> </span><span class="syntax_identifier">ACTION</span><span class="syntax_operator">)</span><span class="syntax_default"><br /></span><span class="syntax_identifier">ENGINE</span><span class="syntax_default"> </span><span class="syntax_operator">=</span><span class="syntax_default"> </span><span class="syntax_identifier">InnoDB</span><span class="syntax_default"><br /></span><span class="syntax_major_keyword">DEFAULT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">CHARACTER</span><span class="syntax_default"> </span><span class="syntax_major_keyword">SET</span><span class="syntax_default"> </span><span class="syntax_operator">=</span><span class="syntax_default"> </span><span class="syntax_identifier">latin1</span><span class="syntax_default"><br /></span><span class="syntax_procedure_keyword">COMMENT</span><span class="syntax_default"> </span><span class="syntax_operator">=</span><span class="syntax_default"> </span><span class="syntax_single_quoted_string">'Application list'</span></pre></td>
+      <td class="ddl_field"><pre><span class="syntax_default"></span><span class="syntax_major_keyword">CREATE</span><span class="syntax_default">  </span><span class="syntax_major_keyword">TABLE</span><span class="syntax_default"> </span><span class="syntax_major_keyword">IF</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">EXISTS</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`ndoutils`</span><span class="syntax_operator">.</span><span class="syntax_quoted_identifier">`itvision_app_list`</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`app_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">INT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">SMALLINT</span><span class="syntax_operator">(</span><span class="syntax_number">6</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`object_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">INT</span><span class="syntax_operator">(</span><span class="syntax_number">11</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`type`</span><span class="syntax_default"> </span><span class="syntax_identifier">ENUM</span><span class="syntax_operator">(</span><span class="syntax_single_quoted_string">'app'</span><span class="syntax_operator">,</span><span class="syntax_single_quoted_string">'hst'</span><span class="syntax_operator">,</span><span class="syntax_single_quoted_string">'svc'</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_major_keyword">INDEX</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`fk_app_id2`</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`app_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">ASC</span><span class="syntax_operator">,</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">ASC</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_major_keyword">CONSTRAINT</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`fk_app_id2`</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">FOREIGN</span><span class="syntax_default"> </span><span class="syntax_major_keyword">KEY</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`app_id`</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_default"> </span><span class="syntax_operator">)</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">REFERENCES</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`ndoutils`</span><span class="syntax_operator">.</span><span class="syntax_quoted_identifier">`itvision_apps`</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`app_id`</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_default"> </span><span class="syntax_operator">)</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">ON</span><span class="syntax_default"> </span><span class="syntax_major_keyword">DELETE</span><span class="syntax_default"> </span><span class="syntax_identifier">NO</span><span class="syntax_default"> </span><span class="syntax_identifier">ACTION</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">ON</span><span class="syntax_default"> </span><span class="syntax_major_keyword">UPDATE</span><span class="syntax_default"> </span><span class="syntax_identifier">NO</span><span class="syntax_default"> </span><span class="syntax_identifier">ACTION</span><span class="syntax_operator">)</span><span class="syntax_default"><br /></span><span class="syntax_identifier">ENGINE</span><span class="syntax_default"> </span><span class="syntax_operator">=</span><span class="syntax_default"> </span><span class="syntax_identifier">InnoDB</span><span class="syntax_default"><br /></span><span class="syntax_major_keyword">DEFAULT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">CHARACTER</span><span class="syntax_default"> </span><span class="syntax_major_keyword">SET</span><span class="syntax_default"> </span><span class="syntax_operator">=</span><span class="syntax_default"> </span><span class="syntax_identifier">latin1</span><span class="syntax_default"><br /></span><span class="syntax_procedure_keyword">COMMENT</span><span class="syntax_default"> </span><span class="syntax_operator">=</span><span class="syntax_default"> </span><span class="syntax_single_quoted_string">'Application list'</span></pre></td>
     </tr>
   </table>
 
@@ -9154,18 +9142,10 @@
     </tr>
 
     <tr>
-      <td class="subitem_table_field">fk_instance_id3</td>
-      <td class="subitem_table_field">Non-Identifying</td>
-      <td class="subitem_table_field">nagios_instances</td>
-      <td class="subitem_table_field">itvision_device</td>
-      <td class="subitem_table_field">1:n</td>
-    </tr>
-
-    <tr>
       <td class="subitem_table_field">fk_instance_id</td>
       <td class="subitem_table_field">Non-Identifying</td>
       <td class="subitem_table_field">nagios_instances</td>
-      <td class="subitem_table_field">itvision_device_host</td>
+      <td class="subitem_table_field">itvision_ci_host</td>
       <td class="subitem_table_field">1:n</td>
     </tr>
 
@@ -9905,7 +9885,7 @@
       <td class="subitem_table_field">fk_object_id2</td>
       <td class="subitem_table_field">Non-Identifying</td>
       <td class="subitem_table_field">nagios_objects</td>
-      <td class="subitem_table_field">itvision_device_host</td>
+      <td class="subitem_table_field">itvision_ci_host</td>
       <td class="subitem_table_field">1:n</td>
     </tr>
 
@@ -16181,7 +16161,7 @@
     <tr>
       <td class="subitem_table_field"></td>
       <td class="subitem_table_field">geotag</td>
-      <td class="subitem_table_field">VARCHAR(15)</td>
+      <td class="subitem_table_field">VARCHAR(25)</td>
       <td class="subitem_table_field">No</td>
       <td class="subitem_table_field"></td>
       <td class="subitem_table_field"></td>
@@ -16257,14 +16237,6 @@
       <td class="subitem_table_field">1:n</td>
     </tr>
 
-    <tr>
-      <td class="subitem_table_field">fk_location_tree_id2</td>
-      <td class="subitem_table_field">Non-Identifying</td>
-      <td class="subitem_table_field">itvision_location_tree</td>
-      <td class="subitem_table_field">itvision_device</td>
-      <td class="subitem_table_field">1:n</td>
-    </tr>
-
   </table>
 
 
@@ -16280,14 +16252,14 @@
   <div class="subitem_header">DDL script</div>
   <table class="subitems_table" border="0" cellpadding="2" cellspacing="" width="100%">
     <tr>
-      <td class="ddl_field"><pre><span class="syntax_default"></span><span class="syntax_major_keyword">CREATE</span><span class="syntax_default">  </span><span class="syntax_major_keyword">TABLE</span><span class="syntax_default"> </span><span class="syntax_major_keyword">IF</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">EXISTS</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`ndoutils`</span><span class="syntax_operator">.</span><span class="syntax_quoted_identifier">`itvision_location_tree`</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`location_tree_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">INT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_identifier">AUTO_INCREMENT</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">SMALLINT</span><span class="syntax_operator">(</span><span class="syntax_number">6</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`lft`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">INT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`rgt`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">INT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`name`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">VARCHAR</span><span class="syntax_operator">(</span><span class="syntax_number">45</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`obs`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">VARCHAR</span><span class="syntax_operator">(</span><span class="syntax_number">145</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`geotag`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">VARCHAR</span><span class="syntax_operator">(</span><span class="syntax_number">15</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_major_keyword">PRIMARY</span><span class="syntax_default"> </span><span class="syntax_major_keyword">KEY</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`location_tree_id`</span><span class="syntax_operator">,</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_major_keyword">INDEX</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`fk_instance_id2`</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">ASC</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_major_keyword">CONSTRAINT</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`fk_instance_id2`</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">FOREIGN</span><span class="syntax_default"> </span><span class="syntax_major_keyword">KEY</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_default"> </span><span class="syntax_operator">)</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">REFERENCES</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`ndoutils`</span><span class="syntax_operator">.</span><span class="syntax_quoted_identifier">`nagios_instances`</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_default"> </span><span class="syntax_operator">)</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">ON</span><span class="syntax_default"> </span><span class="syntax_major_keyword">DELETE</span><span class="syntax_default"> </span><span class="syntax_identifier">NO</span><span class="syntax_default"> </span><span class="syntax_identifier">ACTION</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">ON</span><span class="syntax_default"> </span><span class="syntax_major_keyword">UPDATE</span><span class="syntax_default"> </span><span class="syntax_identifier">NO</span><span class="syntax_default"> </span><span class="syntax_identifier">ACTION</span><span class="syntax_operator">)</span><span class="syntax_default"><br /></span><span class="syntax_identifier">ENGINE</span><span class="syntax_default"> </span><span class="syntax_operator">=</span><span class="syntax_default"> </span><span class="syntax_identifier">InnoDB</span><span class="syntax_default"><br /></span><span class="syntax_major_keyword">DEFAULT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">CHARACTER</span><span class="syntax_default"> </span><span class="syntax_major_keyword">SET</span><span class="syntax_default"> </span><span class="syntax_operator">=</span><span class="syntax_default"> </span><span class="syntax_identifier">latin1</span><span class="syntax_default"><br /></span><span class="syntax_procedure_keyword">COMMENT</span><span class="syntax_default"> </span><span class="syntax_operator">=</span><span class="syntax_default"> </span><span class="syntax_single_quoted_string">'Location schema for sites and configuration itens'</span></pre></td>
+      <td class="ddl_field"><pre><span class="syntax_default"></span><span class="syntax_major_keyword">CREATE</span><span class="syntax_default">  </span><span class="syntax_major_keyword">TABLE</span><span class="syntax_default"> </span><span class="syntax_major_keyword">IF</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">EXISTS</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`ndoutils`</span><span class="syntax_operator">.</span><span class="syntax_quoted_identifier">`itvision_location_tree`</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`location_tree_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">INT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_identifier">AUTO_INCREMENT</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">SMALLINT</span><span class="syntax_operator">(</span><span class="syntax_number">6</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`lft`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">INT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`rgt`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">INT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`name`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">VARCHAR</span><span class="syntax_operator">(</span><span class="syntax_number">45</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`obs`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">VARCHAR</span><span class="syntax_operator">(</span><span class="syntax_number">145</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`geotag`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">VARCHAR</span><span class="syntax_operator">(</span><span class="syntax_number">25</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_major_keyword">PRIMARY</span><span class="syntax_default"> </span><span class="syntax_major_keyword">KEY</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`location_tree_id`</span><span class="syntax_operator">,</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_major_keyword">INDEX</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`fk_instance_id2`</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">ASC</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_major_keyword">CONSTRAINT</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`fk_instance_id2`</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">FOREIGN</span><span class="syntax_default"> </span><span class="syntax_major_keyword">KEY</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_default"> </span><span class="syntax_operator">)</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">REFERENCES</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`ndoutils`</span><span class="syntax_operator">.</span><span class="syntax_quoted_identifier">`nagios_instances`</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_default"> </span><span class="syntax_operator">)</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">ON</span><span class="syntax_default"> </span><span class="syntax_major_keyword">DELETE</span><span class="syntax_default"> </span><span class="syntax_identifier">NO</span><span class="syntax_default"> </span><span class="syntax_identifier">ACTION</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">ON</span><span class="syntax_default"> </span><span class="syntax_major_keyword">UPDATE</span><span class="syntax_default"> </span><span class="syntax_identifier">NO</span><span class="syntax_default"> </span><span class="syntax_identifier">ACTION</span><span class="syntax_operator">)</span><span class="syntax_default"><br /></span><span class="syntax_identifier">ENGINE</span><span class="syntax_default"> </span><span class="syntax_operator">=</span><span class="syntax_default"> </span><span class="syntax_identifier">InnoDB</span><span class="syntax_default"><br /></span><span class="syntax_major_keyword">DEFAULT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">CHARACTER</span><span class="syntax_default"> </span><span class="syntax_major_keyword">SET</span><span class="syntax_default"> </span><span class="syntax_operator">=</span><span class="syntax_default"> </span><span class="syntax_identifier">latin1</span><span class="syntax_default"><br /></span><span class="syntax_procedure_keyword">COMMENT</span><span class="syntax_default"> </span><span class="syntax_operator">=</span><span class="syntax_default"> </span><span class="syntax_single_quoted_string">'Location schema for sites and configuration itens'</span></pre></td>
     </tr>
   </table>
 
   </div>
 
   <a name="Table_66">
-    <div class="table_header">Table itvision_device <div class="small_text">(67/74)</div></div>
+    <div class="table_header">Table itvision_manufacturer <div class="small_text">(67/74)</div></div>
   </a>
   <div class="table_body">
 	
@@ -16366,75 +16338,23 @@
     </tr>
 
     <tr>
-      <td class="subitem_table_field">PK</td>
-      <td class="subitem_table_field">device_id</td>
-      <td class="subitem_table_field">INT</td>
-      <td class="subitem_table_field">Yes</td>
-      <td class="subitem_table_field"></td>
-      <td class="subitem_table_field"></td>
-    </tr>
-
-    <tr>
-      <td class="subitem_table_field">FK</td>
-      <td class="subitem_table_field">instance_id</td>
-      <td class="subitem_table_field">SMALLINT(6)</td>
-      <td class="subitem_table_field">Yes</td>
-      <td class="subitem_table_field"></td>
-      <td class="subitem_table_field"></td>
-    </tr>
-
-    <tr>
-      <td class="subitem_table_field">FK</td>
-      <td class="subitem_table_field">location_tree_id</td>
-      <td class="subitem_table_field">INT</td>
-      <td class="subitem_table_field">Yes</td>
-      <td class="subitem_table_field"></td>
-      <td class="subitem_table_field"></td>
-    </tr>
-
-    <tr>
       <td class="subitem_table_field"></td>
       <td class="subitem_table_field">name</td>
       <td class="subitem_table_field">VARCHAR(45)</td>
-      <td class="subitem_table_field">No</td>
+      <td class="subitem_table_field">Yes</td>
       <td class="subitem_table_field"></td>
-      <td class="subitem_table_field"></td>
+      <td class="subitem_table_field">Nome do fabricante
+</td>
     </tr>
 
     <tr>
-      <td class="subitem_table_field"></td>
-      <td class="subitem_table_field">alias</td>
-      <td class="subitem_table_field">VARCHAR(45)</td>
-      <td class="subitem_table_field">No</td>
-      <td class="subitem_table_field"></td>
-      <td class="subitem_table_field"></td>
-    </tr>
-
-    <tr>
-      <td class="subitem_table_field"></td>
-      <td class="subitem_table_field">sn</td>
-      <td class="subitem_table_field">VARCHAR(45)</td>
-      <td class="subitem_table_field">No</td>
-      <td class="subitem_table_field"></td>
-      <td class="subitem_table_field"></td>
-    </tr>
-
-    <tr>
-      <td class="subitem_table_field">FK</td>
+      <td class="subitem_table_field">PK</td>
       <td class="subitem_table_field">manufacturer_id</td>
       <td class="subitem_table_field">INT</td>
       <td class="subitem_table_field">Yes</td>
       <td class="subitem_table_field"></td>
-      <td class="subitem_table_field"></td>
-    </tr>
-
-    <tr>
-      <td class="subitem_table_field">FK</td>
-      <td class="subitem_table_field">contract_id</td>
-      <td class="subitem_table_field">INT</td>
-      <td class="subitem_table_field">Yes</td>
-      <td class="subitem_table_field"></td>
-      <td class="subitem_table_field"></td>
+      <td class="subitem_table_field">chave primaria de identificacao do fabricante
+</td>
     </tr>
 
   </table>
@@ -16465,284 +16385,23 @@
       <td class="subitem_table_field"></td>
     </tr>
 
-    <tr>
-      <td class="subitem_table_field">fk_instance_id3</td>
-      <td class="subitem_table_field"><table border="0" cellpadding="2" cellspacing="0" width="100%">
-
-        </table></td>
-      <td class="subitem_table_field">No</td>
-      <td class="subitem_table_field">No</td>
-      <td class="subitem_table_field">INDEX</td>
-      <td class="subitem_table_field"></td>
-      <td class="subitem_table_field"></td>
-    </tr>
-
-    <tr>
-      <td class="subitem_table_field">fk_location_tree_id2</td>
-      <td class="subitem_table_field"><table border="0" cellpadding="2" cellspacing="0" width="100%">
-
-        </table></td>
-      <td class="subitem_table_field">No</td>
-      <td class="subitem_table_field">No</td>
-      <td class="subitem_table_field">INDEX</td>
-      <td class="subitem_table_field"></td>
-      <td class="subitem_table_field"></td>
-    </tr>
-
-    <tr>
-      <td class="subitem_table_field">fk_manufacturer_id1</td>
-      <td class="subitem_table_field"><table border="0" cellpadding="2" cellspacing="0" width="100%">
-
-        </table></td>
-      <td class="subitem_table_field">No</td>
-      <td class="subitem_table_field">No</td>
-      <td class="subitem_table_field">INDEX</td>
-      <td class="subitem_table_field"></td>
-      <td class="subitem_table_field"></td>
-    </tr>
-
-    <tr>
-      <td class="subitem_table_field">fk_contract_id1</td>
-      <td class="subitem_table_field"><table border="0" cellpadding="2" cellspacing="0" width="100%">
-
-        </table></td>
-      <td class="subitem_table_field">No</td>
-      <td class="subitem_table_field">No</td>
-      <td class="subitem_table_field">INDEX</td>
-      <td class="subitem_table_field"></td>
-      <td class="subitem_table_field"></td>
-    </tr>
-
-  </table>
-
-
-  <div class="subitem_header">Relationships</div>
-  
-  <table class="subitems_table" border="0" cellpadding="2" cellspacing="" width="100%">
-    <tr>
-      <td class="subitem_table_head">Relationship Name</td>
-      <td class="subitem_table_head">Relationship Type</td>
-      <td class="subitem_table_head">Parent Table</td>
-      <td class="subitem_table_head">Child Table</td>
-      <td class="subitem_table_head">Card.</td>
-    </tr>
-
-    <tr>
-      <td class="subitem_table_field">fk_instance_id3</td>
-      <td class="subitem_table_field">Identifying</td>
-      <td class="subitem_table_field">nagios_instances</td>
-      <td class="subitem_table_field">itvision_device</td>
-      <td class="subitem_table_field">1:n</td>
-    </tr>
-
-    <tr>
-      <td class="subitem_table_field">fk_location_tree_id2</td>
-      <td class="subitem_table_field">Identifying</td>
-      <td class="subitem_table_field">itvision_location_tree</td>
-      <td class="subitem_table_field">itvision_device</td>
-      <td class="subitem_table_field">1:n</td>
-    </tr>
-
-    <tr>
-      <td class="subitem_table_field">fk_manufacturer_id1</td>
-      <td class="subitem_table_field">Identifying</td>
-      <td class="subitem_table_field">itvision_manufacturer</td>
-      <td class="subitem_table_field">itvision_device</td>
-      <td class="subitem_table_field">1:n</td>
-    </tr>
-
-    <tr>
-      <td class="subitem_table_field">fk_contract_id1</td>
-      <td class="subitem_table_field">Identifying</td>
-      <td class="subitem_table_field">itvision_contract</td>
-      <td class="subitem_table_field">itvision_device</td>
-      <td class="subitem_table_field">1:n</td>
-    </tr>
-
   </table>
 
 
 
-  <div class="subitem_header">Table Comments</div>
-  <table class="subitems_table" border="0" cellpadding="2" cellspacing="" width="100%">
-    <tr>
-      <td class="subitem_table_field">Devices that have an ethernet interface</td>
-    </tr>
-  </table>
 
 
   <div class="subitem_header">DDL script</div>
   <table class="subitems_table" border="0" cellpadding="2" cellspacing="" width="100%">
     <tr>
-      <td class="ddl_field"><pre><span class="syntax_default"></span><span class="syntax_major_keyword">CREATE</span><span class="syntax_default">  </span><span class="syntax_major_keyword">TABLE</span><span class="syntax_default"> </span><span class="syntax_major_keyword">IF</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">EXISTS</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`ndoutils`</span><span class="syntax_operator">.</span><span class="syntax_quoted_identifier">`itvision_device`</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`device_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">INT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_identifier">AUTO_INCREMENT</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">SMALLINT</span><span class="syntax_operator">(</span><span class="syntax_number">6</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`location_tree_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">INT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`name`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">VARCHAR</span><span class="syntax_operator">(</span><span class="syntax_number">45</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`alias`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">VARCHAR</span><span class="syntax_operator">(</span><span class="syntax_number">45</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`sn`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">VARCHAR</span><span class="syntax_operator">(</span><span class="syntax_number">45</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`manufacturer_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">INT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`contract_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">INT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_major_keyword">PRIMARY</span><span class="syntax_default"> </span><span class="syntax_major_keyword">KEY</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`device_id`</span><span class="syntax_operator">,</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_operator">,</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`location_tree_id`</span><span class="syntax_operator">,</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`manufacturer_id`</span><span class="syntax_operator">,</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`contract_id`</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_major_keyword">INDEX</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`fk_instance_id3`</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">ASC</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_major_keyword">INDEX</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`fk_location_tree_id2`</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`location_tree_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">ASC</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_major_keyword">INDEX</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`fk_manufacturer_id1`</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`manufacturer_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">ASC</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_major_keyword">INDEX</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`fk_contract_id1`</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`contract_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">ASC</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_major_keyword">CONSTRAINT</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`fk_instance_id3`</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">FOREIGN</span><span class="syntax_default"> </span><span class="syntax_major_keyword">KEY</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_default"> </span><span class="syntax_operator">)</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">REFERENCES</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`ndoutils`</span><span class="syntax_operator">.</span><span class="syntax_quoted_identifier">`nagios_instances`</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_default"> </span><span class="syntax_operator">)</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">ON</span><span class="syntax_default"> </span><span class="syntax_major_keyword">DELETE</span><span class="syntax_default"> </span><span class="syntax_identifier">NO</span><span class="syntax_default"> </span><span class="syntax_identifier">ACTION</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">ON</span><span class="syntax_default"> </span><span class="syntax_major_keyword">UPDATE</span><span class="syntax_default"> </span><span class="syntax_identifier">NO</span><span class="syntax_default"> </span><span class="syntax_identifier">ACTION</span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_major_keyword">CONSTRAINT</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`fk_location_tree_id2`</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">FOREIGN</span><span class="syntax_default"> </span><span class="syntax_major_keyword">KEY</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`location_tree_id`</span><span class="syntax_default"> </span><span class="syntax_operator">)</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">REFERENCES</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`ndoutils`</span><span class="syntax_operator">.</span><span class="syntax_quoted_identifier">`itvision_location_tree`</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`location_tree_id`</span><span class="syntax_default"> </span><span class="syntax_operator">)</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">ON</span><span class="syntax_default"> </span><span class="syntax_major_keyword">DELETE</span><span class="syntax_default"> </span><span class="syntax_identifier">NO</span><span class="syntax_default"> </span><span class="syntax_identifier">ACTION</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">ON</span><span class="syntax_default"> </span><span class="syntax_major_keyword">UPDATE</span><span class="syntax_default"> </span><span class="syntax_identifier">NO</span><span class="syntax_default"> </span><span class="syntax_identifier">ACTION</span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_major_keyword">CONSTRAINT</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`fk_manufacturer_id1`</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">FOREIGN</span><span class="syntax_default"> </span><span class="syntax_major_keyword">KEY</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`manufacturer_id`</span><span class="syntax_default"> </span><span class="syntax_operator">)</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">REFERENCES</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`ndoutils`</span><span class="syntax_operator">.</span><span class="syntax_quoted_identifier">`itvision_manufacturer`</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`manufacturer_id`</span><span class="syntax_default"> </span><span class="syntax_operator">)</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">ON</span><span class="syntax_default"> </span><span class="syntax_major_keyword">DELETE</span><span class="syntax_default"> </span><span class="syntax_major_keyword">CASCADE</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">ON</span><span class="syntax_default"> </span><span class="syntax_major_keyword">UPDATE</span><span class="syntax_default"> </span><span class="syntax_major_keyword">CASCADE</span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_major_keyword">CONSTRAINT</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`fk_contract_id1`</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">FOREIGN</span><span class="syntax_default"> </span><span class="syntax_major_keyword">KEY</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`contract_id`</span><span class="syntax_default"> </span><span class="syntax_operator">)</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">REFERENCES</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`ndoutils`</span><span class="syntax_operator">.</span><span class="syntax_quoted_identifier">`itvision_contract`</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`contract_id`</span><span class="syntax_default"> </span><span class="syntax_operator">)</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">ON</span><span class="syntax_default"> </span><span class="syntax_major_keyword">DELETE</span><span class="syntax_default"> </span><span class="syntax_major_keyword">CASCADE</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">ON</span><span class="syntax_default"> </span><span class="syntax_major_keyword">UPDATE</span><span class="syntax_default"> </span><span class="syntax_major_keyword">CASCADE</span><span class="syntax_operator">)</span><span class="syntax_default"><br /></span><span class="syntax_identifier">ENGINE</span><span class="syntax_default"> </span><span class="syntax_operator">=</span><span class="syntax_default"> </span><span class="syntax_identifier">InnoDB</span><span class="syntax_default"><br /></span><span class="syntax_major_keyword">DEFAULT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">CHARACTER</span><span class="syntax_default"> </span><span class="syntax_major_keyword">SET</span><span class="syntax_default"> </span><span class="syntax_operator">=</span><span class="syntax_default"> </span><span class="syntax_identifier">latin1</span><span class="syntax_default"><br /></span><span class="syntax_procedure_keyword">COMMENT</span><span class="syntax_default"> </span><span class="syntax_operator">=</span><span class="syntax_default"> </span><span class="syntax_single_quoted_string">'Devices that have an ethernet interface'</span></pre></td>
+      <td class="ddl_field"><pre><span class="syntax_default"></span><span class="syntax_major_keyword">CREATE</span><span class="syntax_default">  </span><span class="syntax_major_keyword">TABLE</span><span class="syntax_default"> </span><span class="syntax_major_keyword">IF</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">EXISTS</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`ndoutils`</span><span class="syntax_operator">.</span><span class="syntax_quoted_identifier">`itvision_manufacturer`</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`name`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">VARCHAR</span><span class="syntax_operator">(</span><span class="syntax_number">45</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_procedure_keyword">COMMENT</span><span class="syntax_default"> </span><span class="syntax_single_quoted_string">'Nome do fabricante\n'</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`manufacturer_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">INT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_identifier">AUTO_INCREMENT</span><span class="syntax_default"> </span><span class="syntax_procedure_keyword">COMMENT</span><span class="syntax_default"> </span><span class="syntax_single_quoted_string">'chave primaria de identificacao do fabricante\n'</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_major_keyword">PRIMARY</span><span class="syntax_default"> </span><span class="syntax_major_keyword">KEY</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`manufacturer_id`</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_operator">)</span><span class="syntax_default"><br /></span><span class="syntax_identifier">ENGINE</span><span class="syntax_default"> </span><span class="syntax_operator">=</span><span class="syntax_default"> </span><span class="syntax_identifier">InnoDB</span><span class="syntax_default"><br /></span><span class="syntax_major_keyword">DEFAULT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">CHARACTER</span><span class="syntax_default"> </span><span class="syntax_major_keyword">SET</span><span class="syntax_default"> </span><span class="syntax_operator">=</span><span class="syntax_default"> </span><span class="syntax_identifier">latin1</span></pre></td>
     </tr>
   </table>
 
   </div>
 
   <a name="Table_67">
-    <div class="table_header">Table itvision_manufacturer <div class="small_text">(68/74)</div></div>
-  </a>
-  <div class="table_body">
-	
-	<!-- Table properties -->
-	<div class="subitem_header">Table Properties</div>
-  <table class="subitems_table" border="0" cellpadding="2" cellspacing="0" width="100%">
-     <colgroup>
-        <col width="20%" />
-        <col width="*" />
-        <col width="20%" />
-        <col width="*" />
-     </colgroup>
-    <tr>
-      <td class="details-property-name">Average Row Length</td>
-      <td class="details-property-value"><span class="report_na_entry">n/a</span></td>
-      <td class="details-property-name">Use Check Sum</td>
-      <td class="details-property-value">no</td>
-    </tr>
-    <tr>
-      <td class="details-property-name">Connection String</td>
-      <td class="details-property-value"><span class="report_na_entry">n/a</span></td>
-      <td class="details-property-name">Default Character Set</td>
-      <td class="details-property-value">latin1</td>
-    </tr>
-    <tr>
-      <td class="details-property-name">Default Collation</td>
-      <td class="details-property-value"><span class="report_na_entry">n/a</span></td>
-      <td class="details-property-name">Delay Key Updates</td>
-      <td class="details-property-value">no</td>
-    </tr>
-    <tr>
-      <td class="details-property-name">Minimal Row Count</td>
-      <td class="details-property-value"><span class="report_na_entry">n/a</span></td>
-      <td class="details-property-name">Maximum Row Count</td>
-      <td class="details-property-value"><span class="report_na_entry">n/a</span></td>
-    </tr>
-    <tr>
-      <td class="details-property-name">Union Tables</td>
-      <td class="details-property-value"><span class="report_na_entry">n/a</span></td>
-      <td class="details-property-name">Merge Method</td>
-      <td class="details-property-value"><span class="report_na_entry">n/a</span></td>
-    </tr>
-    <tr>
-      <td class="details-property-name">Pack Keys</td>
-      <td class="details-property-value"><span class="report_na_entry">n/a</span></td>
-      <td class="details-property-name">Has Password</td>
-      <td class="details-property-value">no</td>
-    </tr>
-    <tr>
-      <td class="details-property-name">Data Directory</td>
-      <td class="details-property-value"><span class="report_na_entry">n/a</span></td>
-      <td class="details-property-name">Index Directory</td>
-      <td class="details-property-value"><span class="report_na_entry">n/a</span></td>
-    </tr>
-    <tr>
-      <td class="details-property-name">Engine</td>
-      <td class="details-property-value">InnoDB</td>
-      <td class="details-property-name">Row Format</td>
-      <td class="details-property-value"><span class="report_na_entry">n/a</span></td>
-    </tr>
-  </table>
-
-
-	
-
-  <div class="subitem_header">Columns</div>
-  
-  <table class="subitems_table" border="0" cellpadding="2" cellspacing="0" width="100%">
-    <tr>
-      <td class="subitem_table_head">Key</td>
-      <td class="subitem_table_head">Column Name</td>
-      <td class="subitem_table_head">Datatype</td>
-      <td class="subitem_table_head">Not Null</td>
-      <td class="subitem_table_head">Default</td>
-      <td class="subitem_table_head">Comment</td>
-    </tr>
-
-    <tr>
-      <td class="subitem_table_field">PK</td>
-      <td class="subitem_table_field">manufacturer_id</td>
-      <td class="subitem_table_field">INT</td>
-      <td class="subitem_table_field">Yes</td>
-      <td class="subitem_table_field"></td>
-      <td class="subitem_table_field"></td>
-    </tr>
-
-    <tr>
-      <td class="subitem_table_field"></td>
-      <td class="subitem_table_field">name</td>
-      <td class="subitem_table_field">VARCHAR(45)</td>
-      <td class="subitem_table_field">Yes</td>
-      <td class="subitem_table_field"></td>
-      <td class="subitem_table_field"></td>
-    </tr>
-
-  </table>
-
-
-  <div class="subitem_header">Indices</div>
-  
-  <table class="subitems_table" border="0" cellpadding="2" cellspacing="0" width="100%">
-    <tr>
-      <td class="subitem_table_head">Index Name</td>
-      <td class="subitem_table_head">Columns</td>
-      <td class="subitem_table_head">Primary</td>
-      <td class="subitem_table_head">Unique</td>
-      <td class="subitem_table_head">Type</td>
-      <td class="subitem_table_head">Kind</td>
-      <td class="subitem_table_head">Comment</td>
-    </tr>
-
-    <tr>
-      <td class="subitem_table_field">PRIMARY</td>
-      <td class="subitem_table_field"><table border="0" cellpadding="2" cellspacing="0" width="100%">
-
-        </table></td>
-      <td class="subitem_table_field">Yes</td>
-      <td class="subitem_table_field">No</td>
-      <td class="subitem_table_field">PRIMARY</td>
-      <td class="subitem_table_field"></td>
-      <td class="subitem_table_field"></td>
-    </tr>
-
-  </table>
-
-
-  <div class="subitem_header">Relationships</div>
-  
-  <table class="subitems_table" border="0" cellpadding="2" cellspacing="" width="100%">
-    <tr>
-      <td class="subitem_table_head">Relationship Name</td>
-      <td class="subitem_table_head">Relationship Type</td>
-      <td class="subitem_table_head">Parent Table</td>
-      <td class="subitem_table_head">Child Table</td>
-      <td class="subitem_table_head">Card.</td>
-    </tr>
-
-    <tr>
-      <td class="subitem_table_field">fk_manufacturer_id1</td>
-      <td class="subitem_table_field">Non-Identifying</td>
-      <td class="subitem_table_field">itvision_manufacturer</td>
-      <td class="subitem_table_field">itvision_device</td>
-      <td class="subitem_table_field">1:n</td>
-    </tr>
-
-  </table>
-
-
-
-
-  <div class="subitem_header">DDL script</div>
-  <table class="subitems_table" border="0" cellpadding="2" cellspacing="" width="100%">
-    <tr>
-      <td class="ddl_field"><pre><span class="syntax_default"></span><span class="syntax_major_keyword">CREATE</span><span class="syntax_default">  </span><span class="syntax_major_keyword">TABLE</span><span class="syntax_default"> </span><span class="syntax_major_keyword">IF</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">EXISTS</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`ndoutils`</span><span class="syntax_operator">.</span><span class="syntax_quoted_identifier">`itvision_manufacturer`</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`manufacturer_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">INT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_identifier">AUTO_INCREMENT</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`name`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">VARCHAR</span><span class="syntax_operator">(</span><span class="syntax_number">45</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_major_keyword">PRIMARY</span><span class="syntax_default"> </span><span class="syntax_major_keyword">KEY</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`manufacturer_id`</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_operator">)</span><span class="syntax_default"><br /></span><span class="syntax_identifier">ENGINE</span><span class="syntax_default"> </span><span class="syntax_operator">=</span><span class="syntax_default"> </span><span class="syntax_identifier">InnoDB</span><span class="syntax_default"><br /></span><span class="syntax_major_keyword">DEFAULT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">CHARACTER</span><span class="syntax_default"> </span><span class="syntax_major_keyword">SET</span><span class="syntax_default"> </span><span class="syntax_operator">=</span><span class="syntax_default"> </span><span class="syntax_identifier">latin1</span></pre></td>
-    </tr>
-  </table>
-
-  </div>
-
-  <a name="Table_68">
-    <div class="table_header">Table itvision_contract <div class="small_text">(69/74)</div></div>
+    <div class="table_header">Table itvision_contract <div class="small_text">(68/74)</div></div>
   </a>
   <div class="table_body">
 	
@@ -16896,27 +16555,6 @@
   </table>
 
 
-  <div class="subitem_header">Relationships</div>
-  
-  <table class="subitems_table" border="0" cellpadding="2" cellspacing="" width="100%">
-    <tr>
-      <td class="subitem_table_head">Relationship Name</td>
-      <td class="subitem_table_head">Relationship Type</td>
-      <td class="subitem_table_head">Parent Table</td>
-      <td class="subitem_table_head">Child Table</td>
-      <td class="subitem_table_head">Card.</td>
-    </tr>
-
-    <tr>
-      <td class="subitem_table_field">fk_contract_id1</td>
-      <td class="subitem_table_field">Non-Identifying</td>
-      <td class="subitem_table_field">itvision_contract</td>
-      <td class="subitem_table_field">itvision_device</td>
-      <td class="subitem_table_field">1:n</td>
-    </tr>
-
-  </table>
-
 
 
 
@@ -16929,8 +16567,8 @@
 
   </div>
 
-  <a name="Table_69">
-    <div class="table_header">Table itvision_device_host <div class="small_text">(70/74)</div></div>
+  <a name="Table_68">
+    <div class="table_header">Table itvision_ci_host <div class="small_text">(69/74)</div></div>
   </a>
   <div class="table_body">
 	
@@ -17010,7 +16648,7 @@
 
     <tr>
       <td class="subitem_table_field">PK</td>
-      <td class="subitem_table_field">device_host_id</td>
+      <td class="subitem_table_field">ci_host_id</td>
       <td class="subitem_table_field">INT(11)</td>
       <td class="subitem_table_field">Yes</td>
       <td class="subitem_table_field"></td>
@@ -17036,9 +16674,9 @@
     </tr>
 
     <tr>
-      <td class="subitem_table_field">PK</td>
-      <td class="subitem_table_field">device_id</td>
-      <td class="subitem_table_field">INT(11)</td>
+      <td class="subitem_table_field">FK</td>
+      <td class="subitem_table_field">ci_id</td>
+      <td class="subitem_table_field">INT</td>
       <td class="subitem_table_field">Yes</td>
       <td class="subitem_table_field"></td>
       <td class="subitem_table_field"></td>
@@ -17097,7 +16735,7 @@
     </tr>
 
     <tr>
-      <td class="subitem_table_field">fk_device_id1</td>
+      <td class="subitem_table_field">fk_config_item1</td>
       <td class="subitem_table_field"><table border="0" cellpadding="2" cellspacing="0" width="100%">
 
         </table></td>
@@ -17126,7 +16764,7 @@
       <td class="subitem_table_field">fk_instance_id</td>
       <td class="subitem_table_field">Identifying</td>
       <td class="subitem_table_field">nagios_instances</td>
-      <td class="subitem_table_field">itvision_device_host</td>
+      <td class="subitem_table_field">itvision_ci_host</td>
       <td class="subitem_table_field">1:n</td>
     </tr>
 
@@ -17134,7 +16772,15 @@
       <td class="subitem_table_field">fk_object_id2</td>
       <td class="subitem_table_field">Identifying</td>
       <td class="subitem_table_field">nagios_objects</td>
-      <td class="subitem_table_field">itvision_device_host</td>
+      <td class="subitem_table_field">itvision_ci_host</td>
+      <td class="subitem_table_field">1:n</td>
+    </tr>
+
+    <tr>
+      <td class="subitem_table_field">fk_config_item1</td>
+      <td class="subitem_table_field">Identifying</td>
+      <td class="subitem_table_field">itvision_ci</td>
+      <td class="subitem_table_field">itvision_ci_host</td>
       <td class="subitem_table_field">1:n</td>
     </tr>
 
@@ -17153,14 +16799,14 @@
   <div class="subitem_header">DDL script</div>
   <table class="subitems_table" border="0" cellpadding="2" cellspacing="" width="100%">
     <tr>
-      <td class="ddl_field"><pre><span class="syntax_default"></span><span class="syntax_major_keyword">CREATE</span><span class="syntax_default">  </span><span class="syntax_major_keyword">TABLE</span><span class="syntax_default"> </span><span class="syntax_major_keyword">IF</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">EXISTS</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`ndoutils`</span><span class="syntax_operator">.</span><span class="syntax_quoted_identifier">`itvision_device_host`</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`device_host_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">INT</span><span class="syntax_operator">(</span><span class="syntax_number">11</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_identifier">AUTO_INCREMENT</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">SMALLINT</span><span class="syntax_operator">(</span><span class="syntax_number">6</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`host_object_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">INT</span><span class="syntax_operator">(</span><span class="syntax_number">11</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`device_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">INT</span><span class="syntax_operator">(</span><span class="syntax_number">11</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_major_keyword">PRIMARY</span><span class="syntax_default"> </span><span class="syntax_major_keyword">KEY</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`device_host_id`</span><span class="syntax_operator">,</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_operator">,</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`host_object_id`</span><span class="syntax_operator">,</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`device_id`</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_major_keyword">INDEX</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`fk_instance_id`</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">ASC</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_major_keyword">INDEX</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`fk_object_id2`</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`host_object_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">ASC</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_major_keyword">INDEX</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`fk_device_id1`</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`device_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">ASC</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_major_keyword">CONSTRAINT</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`fk_instance_id`</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">FOREIGN</span><span class="syntax_default"> </span><span class="syntax_major_keyword">KEY</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_default"> </span><span class="syntax_operator">)</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">REFERENCES</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`ndoutils`</span><span class="syntax_operator">.</span><span class="syntax_quoted_identifier">`nagios_instances`</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_default"> </span><span class="syntax_operator">)</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">ON</span><span class="syntax_default"> </span><span class="syntax_major_keyword">DELETE</span><span class="syntax_default"> </span><span class="syntax_identifier">NO</span><span class="syntax_default"> </span><span class="syntax_identifier">ACTION</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">ON</span><span class="syntax_default"> </span><span class="syntax_major_keyword">UPDATE</span><span class="syntax_default"> </span><span class="syntax_identifier">NO</span><span class="syntax_default"> </span><span class="syntax_identifier">ACTION</span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_major_keyword">CONSTRAINT</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`fk_object_id2`</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">FOREIGN</span><span class="syntax_default"> </span><span class="syntax_major_keyword">KEY</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`host_object_id`</span><span class="syntax_default"> </span><span class="syntax_operator">)</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">REFERENCES</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`ndoutils`</span><span class="syntax_operator">.</span><span class="syntax_quoted_identifier">`nagios_objects`</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`object_id`</span><span class="syntax_default"> </span><span class="syntax_operator">)</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">ON</span><span class="syntax_default"> </span><span class="syntax_major_keyword">DELETE</span><span class="syntax_default"> </span><span class="syntax_identifier">NO</span><span class="syntax_default"> </span><span class="syntax_identifier">ACTION</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">ON</span><span class="syntax_default"> </span><span class="syntax_major_keyword">UPDATE</span><span class="syntax_default"> </span><span class="syntax_identifier">NO</span><span class="syntax_default"> </span><span class="syntax_identifier">ACTION</span><span class="syntax_operator">)</span><span class="syntax_default"><br /></span><span class="syntax_identifier">ENGINE</span><span class="syntax_default"> </span><span class="syntax_operator">=</span><span class="syntax_default"> </span><span class="syntax_identifier">InnoDB</span><span class="syntax_default"><br /></span><span class="syntax_major_keyword">DEFAULT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">CHARACTER</span><span class="syntax_default"> </span><span class="syntax_major_keyword">SET</span><span class="syntax_default"> </span><span class="syntax_operator">=</span><span class="syntax_default"> </span><span class="syntax_identifier">latin1</span><span class="syntax_default"><br /></span><span class="syntax_major_keyword">COLLATE</span><span class="syntax_default"> </span><span class="syntax_operator">=</span><span class="syntax_default"> </span><span class="syntax_identifier">latin1_swedish_ci</span><span class="syntax_default"><br /></span><span class="syntax_procedure_keyword">COMMENT</span><span class="syntax_default"> </span><span class="syntax_operator">=</span><span class="syntax_default"> </span><span class="syntax_single_quoted_string">'Group hosts (ethernet interfaces) into one device'</span></pre></td>
+      <td class="ddl_field"><pre><span class="syntax_default"></span><span class="syntax_major_keyword">CREATE</span><span class="syntax_default">  </span><span class="syntax_major_keyword">TABLE</span><span class="syntax_default"> </span><span class="syntax_major_keyword">IF</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">EXISTS</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`ndoutils`</span><span class="syntax_operator">.</span><span class="syntax_quoted_identifier">`itvision_ci_host`</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`ci_host_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">INT</span><span class="syntax_operator">(</span><span class="syntax_number">11</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_identifier">AUTO_INCREMENT</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">SMALLINT</span><span class="syntax_operator">(</span><span class="syntax_number">6</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`host_object_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">INT</span><span class="syntax_operator">(</span><span class="syntax_number">11</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`ci_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">INT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_major_keyword">PRIMARY</span><span class="syntax_default"> </span><span class="syntax_major_keyword">KEY</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`ci_host_id`</span><span class="syntax_operator">,</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_operator">,</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`host_object_id`</span><span class="syntax_operator">,</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`ci_id`</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_major_keyword">INDEX</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`fk_instance_id`</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">ASC</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_major_keyword">INDEX</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`fk_object_id2`</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`host_object_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">ASC</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_major_keyword">INDEX</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`fk_config_item1`</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`ci_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">ASC</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_major_keyword">CONSTRAINT</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`fk_instance_id`</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">FOREIGN</span><span class="syntax_default"> </span><span class="syntax_major_keyword">KEY</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_default"> </span><span class="syntax_operator">)</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">REFERENCES</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`ndoutils`</span><span class="syntax_operator">.</span><span class="syntax_quoted_identifier">`nagios_instances`</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_default"> </span><span class="syntax_operator">)</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">ON</span><span class="syntax_default"> </span><span class="syntax_major_keyword">DELETE</span><span class="syntax_default"> </span><span class="syntax_identifier">NO</span><span class="syntax_default"> </span><span class="syntax_identifier">ACTION</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">ON</span><span class="syntax_default"> </span><span class="syntax_major_keyword">UPDATE</span><span class="syntax_default"> </span><span class="syntax_identifier">NO</span><span class="syntax_default"> </span><span class="syntax_identifier">ACTION</span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_major_keyword">CONSTRAINT</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`fk_object_id2`</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">FOREIGN</span><span class="syntax_default"> </span><span class="syntax_major_keyword">KEY</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`host_object_id`</span><span class="syntax_default"> </span><span class="syntax_operator">)</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">REFERENCES</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`ndoutils`</span><span class="syntax_operator">.</span><span class="syntax_quoted_identifier">`nagios_objects`</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`object_id`</span><span class="syntax_default"> </span><span class="syntax_operator">)</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">ON</span><span class="syntax_default"> </span><span class="syntax_major_keyword">DELETE</span><span class="syntax_default"> </span><span class="syntax_identifier">NO</span><span class="syntax_default"> </span><span class="syntax_identifier">ACTION</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">ON</span><span class="syntax_default"> </span><span class="syntax_major_keyword">UPDATE</span><span class="syntax_default"> </span><span class="syntax_identifier">NO</span><span class="syntax_default"> </span><span class="syntax_identifier">ACTION</span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_major_keyword">CONSTRAINT</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`fk_config_item1`</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">FOREIGN</span><span class="syntax_default"> </span><span class="syntax_major_keyword">KEY</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`ci_id`</span><span class="syntax_default"> </span><span class="syntax_operator">)</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">REFERENCES</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`ndoutils`</span><span class="syntax_operator">.</span><span class="syntax_quoted_identifier">`itvision_ci`</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`ci_id`</span><span class="syntax_default"> </span><span class="syntax_operator">)</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">ON</span><span class="syntax_default"> </span><span class="syntax_major_keyword">DELETE</span><span class="syntax_default"> </span><span class="syntax_identifier">NO</span><span class="syntax_default"> </span><span class="syntax_identifier">ACTION</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">ON</span><span class="syntax_default"> </span><span class="syntax_major_keyword">UPDATE</span><span class="syntax_default"> </span><span class="syntax_identifier">NO</span><span class="syntax_default"> </span><span class="syntax_identifier">ACTION</span><span class="syntax_operator">)</span><span class="syntax_default"><br /></span><span class="syntax_identifier">ENGINE</span><span class="syntax_default"> </span><span class="syntax_operator">=</span><span class="syntax_default"> </span><span class="syntax_identifier">InnoDB</span><span class="syntax_default"><br /></span><span class="syntax_major_keyword">DEFAULT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">CHARACTER</span><span class="syntax_default"> </span><span class="syntax_major_keyword">SET</span><span class="syntax_default"> </span><span class="syntax_operator">=</span><span class="syntax_default"> </span><span class="syntax_identifier">latin1</span><span class="syntax_default"><br /></span><span class="syntax_major_keyword">COLLATE</span><span class="syntax_default"> </span><span class="syntax_operator">=</span><span class="syntax_default"> </span><span class="syntax_identifier">latin1_swedish_ci</span><span class="syntax_default"><br /></span><span class="syntax_procedure_keyword">COMMENT</span><span class="syntax_default"> </span><span class="syntax_operator">=</span><span class="syntax_default"> </span><span class="syntax_single_quoted_string">'Group hosts (ethernet interfaces) into one device'</span></pre></td>
     </tr>
   </table>
 
   </div>
 
-  <a name="Table_70">
-    <div class="table_header">Table itvision_sysconfig <div class="small_text">(71/74)</div></div>
+  <a name="Table_69">
+    <div class="table_header">Table itvision_sysconfig <div class="small_text">(70/74)</div></div>
   </a>
   <div class="table_body">
 	
@@ -17393,8 +17039,8 @@
 
   </div>
 
-  <a name="Table_71">
-    <div class="table_header">Table itvision_apps <div class="small_text">(72/74)</div></div>
+  <a name="Table_70">
+    <div class="table_header">Table itvision_apps <div class="small_text">(71/74)</div></div>
   </a>
   <div class="table_body">
 	
@@ -17626,8 +17272,8 @@
 
   </div>
 
-  <a name="Table_72">
-    <div class="table_header">Table itvision_app_relat_type <div class="small_text">(73/74)</div></div>
+  <a name="Table_71">
+    <div class="table_header">Table itvision_app_relat_type <div class="small_text">(72/74)</div></div>
   </a>
   <div class="table_body">
 	
@@ -17816,8 +17462,8 @@
 
   </div>
 
-  <a name="Table_73">
-    <div class="table_header">Table itvision_user_prefs <div class="small_text">(74/74)</div></div>
+  <a name="Table_72">
+    <div class="table_header">Table itvision_user_prefs <div class="small_text">(73/74)</div></div>
   </a>
   <div class="table_body">
 	
@@ -18001,6 +17647,239 @@
   <table class="subitems_table" border="0" cellpadding="2" cellspacing="" width="100%">
     <tr>
       <td class="ddl_field"><pre><span class="syntax_default"></span><span class="syntax_major_keyword">CREATE</span><span class="syntax_default">  </span><span class="syntax_major_keyword">TABLE</span><span class="syntax_default"> </span><span class="syntax_major_keyword">IF</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">EXISTS</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`ndoutils`</span><span class="syntax_operator">.</span><span class="syntax_quoted_identifier">`itvision_user_prefs`</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`user_prefs_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">INT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`root_app`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">INT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">SMALLINT</span><span class="syntax_operator">(</span><span class="syntax_number">6</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_major_keyword">PRIMARY</span><span class="syntax_default"> </span><span class="syntax_major_keyword">KEY</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`user_prefs_id`</span><span class="syntax_operator">,</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_major_keyword">INDEX</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`fk_instance_id9`</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">ASC</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_major_keyword">CONSTRAINT</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`fk_instance_id9`</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">FOREIGN</span><span class="syntax_default"> </span><span class="syntax_major_keyword">KEY</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_default"> </span><span class="syntax_operator">)</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">REFERENCES</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`ndoutils`</span><span class="syntax_operator">.</span><span class="syntax_quoted_identifier">`nagios_instances`</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_default"> </span><span class="syntax_operator">)</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">ON</span><span class="syntax_default"> </span><span class="syntax_major_keyword">DELETE</span><span class="syntax_default"> </span><span class="syntax_identifier">NO</span><span class="syntax_default"> </span><span class="syntax_identifier">ACTION</span><span class="syntax_default"><br />    </span><span class="syntax_major_keyword">ON</span><span class="syntax_default"> </span><span class="syntax_major_keyword">UPDATE</span><span class="syntax_default"> </span><span class="syntax_identifier">NO</span><span class="syntax_default"> </span><span class="syntax_identifier">ACTION</span><span class="syntax_operator">)</span><span class="syntax_default"><br /></span><span class="syntax_identifier">ENGINE</span><span class="syntax_default"> </span><span class="syntax_operator">=</span><span class="syntax_default"> </span><span class="syntax_identifier">InnoDB</span><span class="syntax_default"><br /></span><span class="syntax_major_keyword">DEFAULT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">CHARACTER</span><span class="syntax_default"> </span><span class="syntax_major_keyword">SET</span><span class="syntax_default"> </span><span class="syntax_operator">=</span><span class="syntax_default"> </span><span class="syntax_identifier">latin1</span></pre></td>
+    </tr>
+  </table>
+
+  </div>
+
+  <a name="Table_73">
+    <div class="table_header">Table itvision_ci <div class="small_text">(74/74)</div></div>
+  </a>
+  <div class="table_body">
+	
+	<!-- Table properties -->
+	<div class="subitem_header">Table Properties</div>
+  <table class="subitems_table" border="0" cellpadding="2" cellspacing="0" width="100%">
+     <colgroup>
+        <col width="20%" />
+        <col width="*" />
+        <col width="20%" />
+        <col width="*" />
+     </colgroup>
+    <tr>
+      <td class="details-property-name">Average Row Length</td>
+      <td class="details-property-value"><span class="report_na_entry">n/a</span></td>
+      <td class="details-property-name">Use Check Sum</td>
+      <td class="details-property-value">no</td>
+    </tr>
+    <tr>
+      <td class="details-property-name">Connection String</td>
+      <td class="details-property-value"><span class="report_na_entry">n/a</span></td>
+      <td class="details-property-name">Default Character Set</td>
+      <td class="details-property-value">latin1</td>
+    </tr>
+    <tr>
+      <td class="details-property-name">Default Collation</td>
+      <td class="details-property-value"><span class="report_na_entry">n/a</span></td>
+      <td class="details-property-name">Delay Key Updates</td>
+      <td class="details-property-value">no</td>
+    </tr>
+    <tr>
+      <td class="details-property-name">Minimal Row Count</td>
+      <td class="details-property-value"><span class="report_na_entry">n/a</span></td>
+      <td class="details-property-name">Maximum Row Count</td>
+      <td class="details-property-value"><span class="report_na_entry">n/a</span></td>
+    </tr>
+    <tr>
+      <td class="details-property-name">Union Tables</td>
+      <td class="details-property-value"><span class="report_na_entry">n/a</span></td>
+      <td class="details-property-name">Merge Method</td>
+      <td class="details-property-value"><span class="report_na_entry">n/a</span></td>
+    </tr>
+    <tr>
+      <td class="details-property-name">Pack Keys</td>
+      <td class="details-property-value"><span class="report_na_entry">n/a</span></td>
+      <td class="details-property-name">Has Password</td>
+      <td class="details-property-value">no</td>
+    </tr>
+    <tr>
+      <td class="details-property-name">Data Directory</td>
+      <td class="details-property-value"><span class="report_na_entry">n/a</span></td>
+      <td class="details-property-name">Index Directory</td>
+      <td class="details-property-value"><span class="report_na_entry">n/a</span></td>
+    </tr>
+    <tr>
+      <td class="details-property-name">Engine</td>
+      <td class="details-property-value">InnoDB</td>
+      <td class="details-property-name">Row Format</td>
+      <td class="details-property-value"><span class="report_na_entry">n/a</span></td>
+    </tr>
+  </table>
+
+
+	
+
+  <div class="subitem_header">Columns</div>
+  
+  <table class="subitems_table" border="0" cellpadding="2" cellspacing="0" width="100%">
+    <tr>
+      <td class="subitem_table_head">Key</td>
+      <td class="subitem_table_head">Column Name</td>
+      <td class="subitem_table_head">Datatype</td>
+      <td class="subitem_table_head">Not Null</td>
+      <td class="subitem_table_head">Default</td>
+      <td class="subitem_table_head">Comment</td>
+    </tr>
+
+    <tr>
+      <td class="subitem_table_field">PK</td>
+      <td class="subitem_table_field">ci_id</td>
+      <td class="subitem_table_field">INT</td>
+      <td class="subitem_table_field">Yes</td>
+      <td class="subitem_table_field"></td>
+      <td class="subitem_table_field"></td>
+    </tr>
+
+    <tr>
+      <td class="subitem_table_field">PK</td>
+      <td class="subitem_table_field">instance_id</td>
+      <td class="subitem_table_field">SMALLINT(6)</td>
+      <td class="subitem_table_field">Yes</td>
+      <td class="subitem_table_field"></td>
+      <td class="subitem_table_field"></td>
+    </tr>
+
+    <tr>
+      <td class="subitem_table_field"></td>
+      <td class="subitem_table_field">name</td>
+      <td class="subitem_table_field">VARCHAR(45)</td>
+      <td class="subitem_table_field">No</td>
+      <td class="subitem_table_field"></td>
+      <td class="subitem_table_field"></td>
+    </tr>
+
+    <tr>
+      <td class="subitem_table_field"></td>
+      <td class="subitem_table_field">alias</td>
+      <td class="subitem_table_field">VARCHAR(45)</td>
+      <td class="subitem_table_field">No</td>
+      <td class="subitem_table_field"></td>
+      <td class="subitem_table_field"></td>
+    </tr>
+
+    <tr>
+      <td class="subitem_table_field"></td>
+      <td class="subitem_table_field">sn</td>
+      <td class="subitem_table_field">VARCHAR(45)</td>
+      <td class="subitem_table_field">No</td>
+      <td class="subitem_table_field"></td>
+      <td class="subitem_table_field"></td>
+    </tr>
+
+    <tr>
+      <td class="subitem_table_field"></td>
+      <td class="subitem_table_field">contact_id</td>
+      <td class="subitem_table_field">INT</td>
+      <td class="subitem_table_field">No</td>
+      <td class="subitem_table_field"></td>
+      <td class="subitem_table_field"></td>
+    </tr>
+
+    <tr>
+      <td class="subitem_table_field"></td>
+      <td class="subitem_table_field">manufacturer_id</td>
+      <td class="subitem_table_field">INT</td>
+      <td class="subitem_table_field">No</td>
+      <td class="subitem_table_field"></td>
+      <td class="subitem_table_field"></td>
+    </tr>
+
+    <tr>
+      <td class="subitem_table_field"></td>
+      <td class="subitem_table_field">location_tree_id</td>
+      <td class="subitem_table_field">INT</td>
+      <td class="subitem_table_field">No</td>
+      <td class="subitem_table_field"></td>
+      <td class="subitem_table_field"></td>
+    </tr>
+
+    <tr>
+      <td class="subitem_table_field"></td>
+      <td class="subitem_table_field">ci_parent_id</td>
+      <td class="subitem_table_field">INT</td>
+      <td class="subitem_table_field">No</td>
+      <td class="subitem_table_field"></td>
+      <td class="subitem_table_field"></td>
+    </tr>
+
+    <tr>
+      <td class="subitem_table_field"></td>
+      <td class="subitem_table_field">obs</td>
+      <td class="subitem_table_field">TEXT</td>
+      <td class="subitem_table_field">No</td>
+      <td class="subitem_table_field"></td>
+      <td class="subitem_table_field"></td>
+    </tr>
+
+  </table>
+
+
+  <div class="subitem_header">Indices</div>
+  
+  <table class="subitems_table" border="0" cellpadding="2" cellspacing="0" width="100%">
+    <tr>
+      <td class="subitem_table_head">Index Name</td>
+      <td class="subitem_table_head">Columns</td>
+      <td class="subitem_table_head">Primary</td>
+      <td class="subitem_table_head">Unique</td>
+      <td class="subitem_table_head">Type</td>
+      <td class="subitem_table_head">Kind</td>
+      <td class="subitem_table_head">Comment</td>
+    </tr>
+
+    <tr>
+      <td class="subitem_table_field">PRIMARY</td>
+      <td class="subitem_table_field"><table border="0" cellpadding="2" cellspacing="0" width="100%">
+
+        </table></td>
+      <td class="subitem_table_field">Yes</td>
+      <td class="subitem_table_field">No</td>
+      <td class="subitem_table_field">PRIMARY</td>
+      <td class="subitem_table_field"></td>
+      <td class="subitem_table_field"></td>
+    </tr>
+
+  </table>
+
+
+  <div class="subitem_header">Relationships</div>
+  
+  <table class="subitems_table" border="0" cellpadding="2" cellspacing="" width="100%">
+    <tr>
+      <td class="subitem_table_head">Relationship Name</td>
+      <td class="subitem_table_head">Relationship Type</td>
+      <td class="subitem_table_head">Parent Table</td>
+      <td class="subitem_table_head">Child Table</td>
+      <td class="subitem_table_head">Card.</td>
+    </tr>
+
+    <tr>
+      <td class="subitem_table_field">fk_config_item1</td>
+      <td class="subitem_table_field">Non-Identifying</td>
+      <td class="subitem_table_field">itvision_ci</td>
+      <td class="subitem_table_field">itvision_ci_host</td>
+      <td class="subitem_table_field">1:n</td>
+    </tr>
+
+  </table>
+
+
+
+
+  <div class="subitem_header">DDL script</div>
+  <table class="subitems_table" border="0" cellpadding="2" cellspacing="" width="100%">
+    <tr>
+      <td class="ddl_field"><pre><span class="syntax_default"></span><span class="syntax_major_keyword">CREATE</span><span class="syntax_default">  </span><span class="syntax_major_keyword">TABLE</span><span class="syntax_default"> </span><span class="syntax_major_keyword">IF</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">EXISTS</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`ndoutils`</span><span class="syntax_operator">.</span><span class="syntax_quoted_identifier">`itvision_ci`</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`ci_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">INT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_identifier">AUTO_INCREMENT</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">SMALLINT</span><span class="syntax_operator">(</span><span class="syntax_number">6</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NOT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`name`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">VARCHAR</span><span class="syntax_operator">(</span><span class="syntax_number">45</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`alias`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">VARCHAR</span><span class="syntax_operator">(</span><span class="syntax_number">45</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`sn`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">VARCHAR</span><span class="syntax_operator">(</span><span class="syntax_number">45</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`contact_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">INT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`manufacturer_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">INT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`location_tree_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">INT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`ci_parent_id`</span><span class="syntax_default"> </span><span class="syntax_major_keyword">INT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_quoted_identifier">`obs`</span><span class="syntax_default"> </span><span class="syntax_identifier">TEXT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">NULL</span><span class="syntax_default"> </span><span class="syntax_operator">,</span><span class="syntax_default"><br />  </span><span class="syntax_major_keyword">PRIMARY</span><span class="syntax_default"> </span><span class="syntax_major_keyword">KEY</span><span class="syntax_default"> </span><span class="syntax_operator">(</span><span class="syntax_quoted_identifier">`ci_id`</span><span class="syntax_operator">,</span><span class="syntax_default"> </span><span class="syntax_quoted_identifier">`instance_id`</span><span class="syntax_operator">)</span><span class="syntax_default"> </span><span class="syntax_operator">)</span><span class="syntax_default"><br /></span><span class="syntax_identifier">ENGINE</span><span class="syntax_default"> </span><span class="syntax_operator">=</span><span class="syntax_default"> </span><span class="syntax_identifier">InnoDB</span><span class="syntax_default"><br /></span><span class="syntax_major_keyword">DEFAULT</span><span class="syntax_default"> </span><span class="syntax_major_keyword">CHARACTER</span><span class="syntax_default"> </span><span class="syntax_major_keyword">SET</span><span class="syntax_default"> </span><span class="syntax_operator">=</span><span class="syntax_default"> </span><span class="syntax_identifier">latin1</span></pre></td>
     </tr>
   </table>
 
