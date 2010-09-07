@@ -11,6 +11,7 @@ require "view_utils"
 -- config direct access to db
 local ma = require "model_access"
 local mr = require "model_rules"
+ma.set_db(config.servdesk_db)
 
 
 -- config ITVISION mvc app
