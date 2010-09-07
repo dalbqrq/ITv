@@ -7,6 +7,7 @@ require "messages"
 local dado = require "dado"
 local inst = " instance_id = "..config.db.instance_id
 local cond = ""
+local db = config.db -- the default db config is the ndoutils (nagios) db
 
 local objecttype = {
    [1] = "Host",
@@ -28,11 +29,15 @@ local objecttype = {
 
 ----------------------------- CONFIG ----------------------------------
 
+function set_db (db_)
+    db = db_
+end
+
 
 function connect ()
-   --local c = config.db
-   local c = config.servdesk_db
-   return dado.connect (c.dbname, c.dbuser, c.dbpass, c.driver)
+   --local db = config.db
+   --local db = config.servdesk_db
+   return dado.connect (db.dbname, db.dbuser, db.dbpass, db.driver)
 end
 
 
