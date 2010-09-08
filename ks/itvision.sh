@@ -1,6 +1,7 @@
 #!/bin/bash
 
 user=itv
+dbpass=itv
 
 function insta() {
 	apt-get -y install $*
@@ -341,7 +342,7 @@ cd /usr/local
 wget https://forge.indepnet.net/attachments/download/635/glpi-0.78-RC2.tar.gz
 tar zxf glpi-0.78-RC2.tar.gz
 mv glpi servdesk
-cd deskdesk
+cd servdesk
 chown -R $user.$user *
 
 rootpass=$dbpass
@@ -351,12 +352,14 @@ echo "CREATE DATABASE $dbuser;" | mysql -u root --password=$rootpass
 echo "CREATE USER '$dbuser'@'localhost' IDENTIFIED BY '$dbpass';" | mysql -u root --password=$rootpass mysql
 echo "GRANT ALL PRIVILEGES ON *.* TO '$dbuser'@'localhost' WITH GRANT OPTION;" | mysql -u root --password=$rootpass mysql
 echo "GRANT ALL PRIVILEGES ON *.* TO '$dbuser'@'192.168.8.1' WITH GRANT OPTION;" | mysql -u root --password=$rootpass mysql
+# Altera base de dados do glpi
+echo "ALTER TABLE `servdesk`.`glpi_locations` ADD COLUMN `geotag` VARCHAR(25) NULL DEFAULT NULL;" | mysql -u root --password=$rootpass mysql
 
 
 apt-get install php5-mysql
 cd /etc/apache2
-cp ~$user/itv/ks/servdesk.config site-available
-cd site-enabled
+cp ~$user/itv/ks/servdesk.conf sites-available
+cd sites-enabled
 ln -s ../sites-available/servdesk.conf  200-servdesk
 cd /usr/local/servdesk
 chmod 777 files/ config/
@@ -365,6 +368,7 @@ invoke-rc.d apache2 restart
 # Para remover o logo do glpi
 # comentar a linha 1297 (que contem a string 'fd_logo.png') do arquivo
 # /usr/local/servdesk/css/styles.css
+
 
 
 # --------------------------------------------------
