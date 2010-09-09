@@ -351,7 +351,13 @@ dbpass=servdesk
 echo "CREATE DATABASE $dbuser;" | mysql -u root --password=$rootpass
 echo "CREATE USER '$dbuser'@'localhost' IDENTIFIED BY '$dbpass';" | mysql -u root --password=$rootpass mysql
 echo "GRANT ALL PRIVILEGES ON *.* TO '$dbuser'@'localhost' WITH GRANT OPTION;" | mysql -u root --password=$rootpass mysql
-echo "GRANT ALL PRIVILEGES ON *.* TO '$dbuser'@'192.168.8.1' WITH GRANT OPTION;" | mysql -u root --password=$rootpass mysql
+#adiciona acesso a partir de outra maquina (machine)
+machine=192.168.8.1
+echo "GRANT ALL PRIVILEGES ON *.* TO '$dbuser'@'$machine' WITH GRANT OPTION;" | mysql -u root --password=$rootpass mysql
+#
+# Altera base de dados do ndoutils
+echo "ALTER TABLE `ndoutils`.`nagios_objects` ADD COLUMN `ci_id` INT(11) NULL DEFAULT NULL;" | mysql -u root --password=$rootpass mysql
+echo "ALTER TABLE `ndoutils`.`nagios_objects` ADD COLUMN `ci_type_id` INT(11) NULL DEFAULT NULL;" | mysql -u root --password=$rootpass mysql
 # Altera base de dados do glpi
 echo "ALTER TABLE `servdesk`.`glpi_locations` ADD COLUMN `geotag` VARCHAR(25) NULL DEFAULT NULL;" | mysql -u root --password=$rootpass mysql
 
