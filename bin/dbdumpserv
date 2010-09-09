@@ -1,0 +1,5 @@
+#!/bin/bash
+
+d=`date "+%Y-%m-%d"`
+
+mysqldump -u servdesk --password='servdesk' --add-drop-table servdesk > /usr/local/itvision/ks/servdesk-$d.sql
