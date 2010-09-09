@@ -39,5 +39,28 @@ CONCEPTS TODO:
 - Criar arvore de organizacao. Um IC pode pode estar associado ama localizacao e uma organizacao.
 - Criar a possibilidde de se criar campos na tabela cd IC.
 - Checagem distribuida - http://nagios.sourceforge.net/docs/1_0/distributed.html
+- Construir criar metodos de acesso para:
+
+  app		-> glpi_users	(gerar business process)
+   ic_list -> ic_type
+   ic_relat -> relat_type
+  app_tree
+  system
+  check_config
+  check_host 	-> glpi_users
+		-> glpi_computers -> glpi_networkports
+		-> glpi_peripherals -> glpi_networkports
+		-> glpi_metworkequipment -> glpi_networkports
+  check_service	-> glpi_softwareversion -> glpi_software
+		-> glpi_softwareversion -> glpi_computersoftwareversion -> glpi_computers
+  contacts	-> glpi_users
+  alert_group	-> glpi_group, ndoutils_group(?)
+  login		-> glpi_users
+
+ 
+
+
+
+
 
 
