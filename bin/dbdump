@@ -1,3 +1,5 @@
 #!/bin/bash
 
-mysqldump -u ndoutils --password='itv' --add-drop-table ndoutils > /usr/local/itvision/ks/ndoutils.sql
+d=`date "+%Y-%m-%d"`
+
+mysqldump -u ndoutils --password='itv' --add-drop-table ndoutils > /usr/local/itvision/ks/ndoutils-$d.sql
