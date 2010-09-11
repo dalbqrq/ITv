@@ -358,8 +358,9 @@ for machine in $machines; do
 done
 #
 # Altera base de dados do ndoutils
-echo "ALTER TABLE nagios_objects ADD COLUMN ci_id INT(11) NULL DEFAULT NULL;" | mysql -u root --password=$rootpass ndoutils
-echo "ALTER TABLE nagios_objects ADD COLUMN ci_type_id INT(11) NULL DEFAULT NULL;" | mysql -u root --password=$rootpass ndoutils
+echo "ALTER TABLE nagios_hosts ADD COLUMN networkport_id INT(11) NULL DEFAULT NULL;" | mysql -u root --password=$rootpass ndoutils
+echo "ALTER TABLE nagios_services ADD COLUMN softwareversion_id INT(11) NULL DEFAULT NULL;" | mysql -u root --password=$rootpass ndoutils
+echo "ALTER TABLE nagios_services ADD COLUMN networkport_id INT(11) NULL DEFAULT NULL;" | mysql -u root --password=$rootpass ndoutils
 # Altera base de dados do glpi
 echo "ALTER TABLE glpi_locations ADD COLUMN geotag VARCHAR(25) NULL DEFAULT NULL;" | mysql -u root --password=$rootpass servdesk
 
