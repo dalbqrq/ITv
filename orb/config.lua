@@ -11,7 +11,6 @@ db = {
 
 
 language = "pt_BR"
-
 monitor_dir = "/usr/local/monitor"
 monitor_script = "/etc/init.d/nagios"
 monitor_bp_script = "/etc/init.d/ndoutils"
@@ -26,19 +25,40 @@ function setup_orbdb()
 	return env:connect(database.dbname, database.dbuser, database.dbpass), database.driver
 end
 
-function setup_sddb() 
-	local database = config.servdesk_db
-	require("luasql." .. database.driver)
-	local env = luasql[database.driver]()
 
-	return env:connect(database.dbname, database.dbuser, database.dbpass), database.driver
+function make_model( app, model )
+	module("ap", package.seeall,orbit.new)
+
+	m = orbit.new()
+	m.mapper.conn, m.mapper.driver = config.setup_orbdb()
+	m.mapper.table_prefix = model..'_'
+
+	return m
 end
 
-function setup_db(conf_) 
-	local database = conf_
-	require("luasql." .. database.driver)
-	local env = luasql[database.driver]()
+itvision = nil
+nagios = nil
+glpi = nil
 
-	return env:connect(database.dbname, database.dbuser, database.dbpass), database.driver
+function set_models(applic)
+	itvision = make_model ( applic, 'itvision' )
+	nagios = make_model ( applic, 'nagios' )
+	glpi = make_model ( applic, 'nagios' )
 end
+
+
+-- config ITVISION mvc app
+--[[
+module("ap", package.seeall,orbit.new)
+
+itvision = orbit.new()
+itvision.mapper.conn, itvision.mapper.driver = config.setup_orbdb()
+itvision.mapper.table_prefix = 'itvision_'
+apps = itvision:model "app"
+
+nagios = orbit.new()
+nagios.mapper.conn, nagios.mapper.driver = config.setup_orbdb()
+nagios.mapper.table_prefix = 'nagios_'
+services = nagios:model "services"
+]]
 

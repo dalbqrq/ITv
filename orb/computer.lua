@@ -16,13 +16,13 @@ ma.set_db(config.servdesk_db)
 
 -- config ITVISION mvc app
 module("itvision", package.seeall, orbit.new)
-mapper.conn, mapper.driver = config.setup_db(config.db)
+mapper.conn, mapper.driver = config.setup_orbdb(config.db)
 local ci = itvision:model "ci"
 
 
 -- config GLPI mvc app
 glpi = orbit.new()
---glpi.mapper.conn, glpi.mapper.driver = config.setup_db(config.servdesk_db)
+--glpi.mapper.conn, glpi.mapper.driver = config.setup_orbdb(config.servdesk_db)
 glpi.mapper.conn, glpi.mapper.driver = config.setup_sddb()
 glpi.mapper.table_prefix = 'glpi_'
 local computer = glpi:model "computers"
