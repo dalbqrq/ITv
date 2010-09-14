@@ -30,7 +30,7 @@ function app:select_apps_and_B(id)
    end
    local tables = "itvision_app A, itvision_B B"
    local cols = "A.name as name, A.type as type, B.name as B_name, B.id, A.id as A_id"
-   local res = ma.select (tables, clause, "", cols) 
+   local res = Model.select (tables, clause, "", cols) 
 
    return res
 end
@@ -68,7 +68,7 @@ function update(web, id)
       A.name = web.input.name
       --...
 
-      ma.update (tables, A, clause) 
+      Model.update (tables, A, clause) 
    end
 
    return web:redirect(web:link("/list"))
@@ -87,7 +87,7 @@ function insert(web)
    A:new()
    A.name = web.input.name
    --A.root_app = web.input.root_app
-   A.instance_id = config.db.instance_id
+   A.instance_id = Model.db.instance_id
    A:save()
    return web:redirect(web:link("/list"))
 end
@@ -105,7 +105,7 @@ function delete(web, id)
    if id then
       local clause = "id = "..id
       local tables = "itvision_app"
-      ma.delete (tables, clause) 
+      Model.delete (tables, clause) 
    end
 
    return web:redirect(web:link("/list"))

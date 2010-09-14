@@ -107,7 +107,7 @@ function insert(web)
    user_group:new()
    user_group.name = web.input.name
    user_group.root_app = web.input.root_app
-   user_group.instance_id = config.db.instance_id
+   user_group.instance_id = Model.db.instance_id
    user_group:save()
    return web:redirect(web:link("/list"))
 end

@@ -101,7 +101,7 @@ end
 function insert (table_, content_)
    local db = connect ()
    if content_.instance_id then 
-      content_.instance_id = config.db.instance_id -- nao insere outras instancias
+      content_.instance_id = Model.db.instance_id -- nao insere outras instancias
    end
    assert ( db:insert (table_, content_))
    db:close ()
@@ -112,7 +112,7 @@ function update (table_, content_, cond_)
    local db = connect ()
    --cond_ = set_cond (cond_)
    if content_.instance_id then 
-      --content_.instance_id = config.db.instance_id -- nao insere outras instancias
+      --content_.instance_id = Model.db.instance_id -- nao insere outras instancias
       content_.instance_id = nil
    end
    assert ( db:update (table_, content_, cond_))

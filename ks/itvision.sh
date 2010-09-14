@@ -65,6 +65,8 @@ luarocks install cosmo
 #luarocks install luagraph
 #luarocks install wsapi-xavante
 #luarocks install markdown
+sed -i '/^#/ a\
+. /usr/local/itvision/bin/lua_path' /usr/bin/wsapi.cgi
 
 #
 # luagraph - install manually instead of using luarocks that with problems

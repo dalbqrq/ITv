@@ -40,8 +40,8 @@ function user:select_user_and_group(id)
    end
    local tables = "itvision_user A, itvision_user_group B"
    --local cols = "B.name as name, B.type as type, A.login as login, B.id, A.id as A_id"
-   --local res = ma.select (tables, clause, "", cols) 
-   local res = ma.select (tables, clause) 
+   --local res = Model.select (tables, clause, "", cols) 
+   local res = Model.select (tables, clause) 
 
    return res
 end
@@ -84,7 +84,7 @@ function update(web, id)
       --A.user_prefs_id = web.input.user_prefs_id
       A.user_prefs_id = 0
 
-      ma.update (tables, A, clause) 
+      Model.update (tables, A, clause) 
    end
 
    return web:redirect(web:link("/list"))
@@ -107,7 +107,7 @@ function insert(web)
    user.user_group_id = web.input.user_group_id
    --user.user_prefs_id = web.input.user_prefs_id
    user.user_prefs_id = 0
-   user.instance_id = config.db.instance_id
+   user.instance_id = Model.db.instance_id
    user:save()
    return web:redirect(web:link("/list"))
 end
@@ -125,7 +125,7 @@ function delete(web, id)
    if id then
       local clause = "user_id = "..id
       local tables = "itvision_user"
-      ma.delete (tables, clause) 
+      Model.delete (tables, clause) 
    end
 
    return web:redirect(web:link("/list"))

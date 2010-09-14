@@ -9,7 +9,7 @@ require "Model"
 module(Model.name, package.seeall,orbit.new)
 
 local app = Model.itvision:model "app"
-local app_objects = Model.itvision:model "app_objects"
+local app_object = Model.itvision:model "app_object"
 local app_relat = Model.itvision:model "app_relat"
 local app_relat_type = Model.itvision:model "app_relat_type"
 local objects = Model.nagios:model "objects"
@@ -46,11 +46,11 @@ function app_relat:delete_app_relat(id, from, to)
    end
    --self:find_all(clause)
    --self:delete()
-   ma.delete("itvision_app_relat", clause)
+   Model.delete("itvision_app_relat", clause)
 end
 
 
-function app_objects:select_app_objects(id)
+function app_object:select_app_objects(id)
    local clause = ""
    if id then
       clause = "app_id = "..id
@@ -84,19 +84,19 @@ end
 function list(web, id)
    local A = app:select_apps()
    if id == "/" then 
-      if A[1] then id = A[1].app_id else id = nil end
+      if A[1] then id = A[1].id else id = nil end
    end
    local AR = Model.select_app_relat_object(id)
    return render_list(web, id, A, AR)
 end
-itvision:dispatch_get(list, "/", "/list/(%d+)")
+ITvision:dispatch_get(list, "/", "/list/(%d+)")
 
 
 function show(web, id)
    local A = app_relat:select_app_relat(id)
    return render_show(web, A)
 end 
-itvision:dispatch_get(show, "/show/(%d+)")
+ITvision:dispatch_get(show, "/show/(%d+)")
 
 
 function add(web, id)
@@ -105,11 +105,11 @@ function add(web, id)
       if A[1] then id = A[1].app_id else id = nil end
    end
    local AR = Model.select_app_relat_object(id)
-   local AL = Model.select_app_app_objects_objects(id)
+   local AL = Model.select_app_app_objects(id)
    local RT = app_relat_type:select_app_relat_type()
    return render_add(web, id, A, AR, AL, RT)
 end
-itvision:dispatch_get(add, "/add/(%d+)")
+ITvision:dispatch_get(add, "/add/(%d+)")
 
 
 function insert(web)
@@ -118,15 +118,14 @@ function insert(web)
    app_relat.app_id = web.input.app_id
    app_relat.from_object_id = web.input.from
    app_relat.to_object_id = web.input.to
-   app_relat.connection_type = web.input.categ
-   app_relat.instance_id = config.db.instance_id
+   app_relat.instance_id = Model.db.instance_id
    app_relat.app_relat_type_id = web.input.relat
 
    app_relat:save()
 
    return web:redirect(web:link("/add/"..app_relat.app_id))
 end
-itvision:dispatch_post(insert, "/insert")
+ITvision:dispatch_post(insert, "/insert")
 
 
 function remove(web, app_id, from, to)
@@ -134,17 +133,17 @@ function remove(web, app_id, from, to)
    local AR = Model.select_app_relat_object(id, from, to)
    return render_remove(web, A, AR)
 end
-itvision:dispatch_get(remove, "/remove/(%d+):(%d+):(%d+)")
+ITvision:dispatch_get(remove, "/remove/(%d+):(%d+):(%d+)")
 
 
 function delete(web, app_id, from, to)
    app_relat:delete_app_relat(app_id, from, to)
    return web:redirect(web:link("/list/"..app_id))
 end
-itvision:dispatch_get(delete, "/delete/(%d+):(%d+):(%d+)")
+ITvision:dispatch_get(delete, "/delete/(%d+):(%d+):(%d+)")
 
 
-itvision:dispatch_static("/css/%.css", "/script/%.js")
+ITvision:dispatch_static("/css/%.css", "/script/%.js")
 
 
 -- views ------------------------------------------------------------
@@ -158,8 +157,8 @@ function render_selector(web, A, id, path)
 
    str = [[<FORM> <SELECT ONCHANGE="location = this.options[this.selectedIndex].value;">]]
    for i, v in ipairs(A) do
-      url = web:link(path..v.app_id)
-      if tonumber(v.app_id) == tonumber(id) then 
+      url = web:link(path..v.id)
+      if tonumber(v.id) == tonumber(id) then 
          selected = " selected " 
          curr_app = i
       else 
@@ -201,7 +200,6 @@ function render_table(web, AR)
          td{ align="center", from },
          td{ align="center", v.rtype_name },
          td{ align="center", to },
-         td{ align="right", contype },
          td{ button_link(strings.remove, web:link("/remove/"..v.app_id..":"..v.from_object_id
              ..":"..v.to_object_id), "negative") },
       }
@@ -212,9 +210,8 @@ function render_table(web, AR)
          tr{ 
              --th{ strings.application }, 
              th{ strings.origin },
-             th{ strings.destiny },
              th{ strings.type },
-             th{ strings.category },
+             th{ strings.destiny },
              th{ "." },
          }
       },
@@ -274,7 +271,7 @@ end
 function render_add(web, id, A, AR, AL, RT)
    local res = {}
    local tab = {}
-   local from, to, relat, categ
+   local from, to, relat
    local url = "/insert"
    local list_size = 7
 
@@ -318,17 +315,10 @@ function render_add(web, id, A, AR, AL, RT)
    -- LISTA TIPOS DE RELACIONAMENTO  ---------------------------------
    s = [[<SELECT multiple size=]]..list_size..[[ NAME="relat">]]
    for i,v in ipairs(RT) do
-     s = s..[[<OPTION VALUE="]]..v.app_relat_type_id..[[">]]..v.name
+     s = s..[[<OPTION VALUE="]]..v.id..[[">]]..v.name
    end
    s = s..[[ </SELECT> ]]
    relat = s
-
-   -- LISTA CATEGORIA DE RELACIONAMENTO  ---------------------------------
-   s = [[<SELECT multiple size=]]..list_size..[[ NAME="categ">]]
-   s = s..[[<OPTION VALUE="physical">]]..strings.physical
-   s = s..[[<OPTION VALUE="logical">]]..strings.logical
-   s = s..[[ </SELECT> ]]
-   categ = s
 
    aid = [[ <INPUT TYPE=HIDDEN NAME="app_id" value="]]..id..[["> ]]
 
@@ -337,13 +327,11 @@ function render_add(web, id, A, AR, AL, RT)
       thead{ tr{ 
          th{ strings.origin }, 
          th{ strings.type }, 
-         th{ strings.category }, 
          th{ strings.destiny }, 
       } },
       tbody{ tr{
          td{ from },
          td{ relat },
-         td{ categ },
          td{ to },
       } },
    }

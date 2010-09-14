@@ -132,15 +132,25 @@ function select_option(name, T, value_idx, label_idx, default_value)
 
 end
 
+NoOrYes = {
+      { id = 0, name = strings.no },
+      { id = 1, name = strings.yes },
+   }
+
 AndOrOr = {
    { id = "and", name = strings.logical_and },
    { id = "or",  name = strings.logical_or },
 }
 
-NoOrYes = {
-      { id = 0, name = strings.no },
-      { id = 1, name = strings.yes },
-   }
+PhysicalOrLogical = {
+   { id = "physical", name = strings.physical },
+   { id = "logical",  name = strings.logical},
+}
+
+
+function select_yes_no(name, default)
+   return select_option(name, NoOrYes, "id", "name", default)
+end
 
 
 function select_and_or(name, default)
@@ -148,8 +158,8 @@ function select_and_or(name, default)
 end
 
 
-function select_yes_no(name, default)
-   return select_option(name, NoOrYes, "id", "name", default)
+function select_physical_logical(name, default)
+   return select_option(name, PhysicalOrLogical, "id", "name", default)
 end
 
 
