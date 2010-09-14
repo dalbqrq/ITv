@@ -151,6 +151,13 @@ function render_list(web, A)
       }
    }
 
+   res[#res + 1] = p{ br(), br() }
+   res[#res + 1] = p{ "Remove todas as entradas das tabelas app, app_tree, app_relat,  app_object e app_relat_type: " }
+   web.prefix = "/orb/initialization"
+   res[#res + 1] = p{ button_link(strings.remove, web:link("/remove")) }
+   web.prefix = "/orb/system"
+   res[#res + 1] = p{ br(), br() }
+
    return render_layout(res)
 end
 

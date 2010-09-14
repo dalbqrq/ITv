@@ -1,11 +1,60 @@
+#!/usr/bin/env wsapi.cgi
 
+-- includes & defs ------------------------------------------------------
+require "util"
+require "view_utils"
+
+require "orbit"
 require "Model"
+module(Model.name, package.seeall,orbit.new)
 
 
------------------------------ INICIALIZACOES ----------------------------------
+-- models ------------------------------------------------------------
+
+function remove_all_apps()
+
+   Model.delete("itvision_app_object")
+   Model.delete("itvision_app_relat")
+   Model.delete("itvision_app")
+   Model.delete("itvision_app_tree")
+   Model.delete("itvision_app_relat_type")
+   Model.delete("itvision_sysconfig")
+   return true
+end
+
+
+
+
+-- controllers ------------------------------------------------------------
+
+function list(web)
+   return render_list(web)
+end
+ITvision:dispatch_get(list, "/", "/list")
+
+
+function remove(web)
+   return render_remove(web)
+end 
+ITvision:dispatch_get(remove, "/remove")
+
+
+function delete(web)
+   remove_all_apps()
+   init_config ()
+   init_app_relat_type ()
+   init_app_tree()
+   return web:redirect(web:link("/list"))
+end 
+ITvision:dispatch_get(delete, "/delete")
+
+ITvision:dispatch_static("/css/%.css", "/script/%.js")
+
+
+-- INICIALIZACOES ---------------
 
 function init_config () --  inicia tabela itvision_config
-   local content = Model.query ("itvision_config", nil, nil, "config_id")
+   local content = Model.query ("itvision_sysconfig", nil, nil, "sysconfig_id")
 
    if content[1] == nil then
       content = {}
@@ -14,8 +63,10 @@ function init_config () --  inicia tabela itvision_config
       content.updated = "now()"
       content.version = "0.9"
       content.home_dir  = "/usr/local/itvision"
+      content.monitor_dir  = "/usr/local/monitor"
+      content.monitor_bp_dir  = "/usr/local/monitorbp"
 
-      Model.insert("itvision_config", content)
+      Model.insert("itvision_sysconfig", content)
       return true
    else
       return false
@@ -124,18 +175,20 @@ function init_app_tree() --  inicia tabela itvision_app_tree com app da propria 
    t.app_id = app2[1].id
    t.instance_id = Model.db.instance_id
    t.object_id = app[1].service_object_id 
-   t.type = 'and'
+   t.type = 'app'
    app_lst = Model.insert_app_object(t)
 
    -- inclui aplicacao raiz na arvore que ainda deve estar vazia
    tree = {}
-   tree.app_id = app2[1].app_id
+   tree.app_id = app2[1].id
+   tree.instance_id = Model.db.instance_id
    res, msg = Model.insert_node_app_tree(tree)
 
    -- agora, inclui a app ITvision abaixo da raiz
    root_id = Model.select_root_app_tree()
    tree = {}
-   tree.app_id = app1[1].app_id
+   tree.app_id = app1[1].id
+   tree.instance_id = Model.db.instance_id
    res, msg = Model.insert_node_app_tree(tree, root_id, 1)
 
    return true
@@ -143,4 +196,40 @@ function init_app_tree() --  inicia tabela itvision_app_tree com app da propria 
 end
 
 
+-- views ------------------------------------------------------------
+
+function render_list(web)
+   res = {}
+
+   res[#res + 1] = p{ button_link(strings.remove, web:link("/remove")) }
+   res[#res + 1] = p{ br(), br() }
+
+   return render_layout(res)
+end
+
+function render_remove(web)
+
+   local res = {}
+   local url = ""
+
+   if A then
+      A = A[1]
+      url_ok = web:link("/delete")
+      url_cancel = web:link("/list")
+   end
+
+   res[#res + 1] = p{
+      "Remove todas as entradas das tabelas app, app_tree, app_relat,  app_object e app_relat_type?",
+      p{ button_link(strings.yes, web:link(url_ok)) }
+   }
+   res[#res + 1] = p{ button_link(strings.cancel, web:link(url_cancel)) }
+
+   return render_layout(res)
+
+end
+
+
+orbit.htmlify(ITvision, "render_.+")
+
+return _M
 
