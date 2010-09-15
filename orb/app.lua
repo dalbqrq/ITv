@@ -122,7 +122,7 @@ function activate(web, id, flag)
 
       local A = app:select_apps(id)
       local O = select_app_app_objects(id)
-      activate_app(A, O)
+      activate_app(A, O, flag)
 
       Model.update (tables, cols, clause) 
    end

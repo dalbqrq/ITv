@@ -54,11 +54,11 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 -- INICIALIZACOES ---------------
 
 function init_config () --  inicia tabela itvision_config
-   local content = Model.query ("itvision_sysconfig", nil, nil, "sysconfig_id")
+   local content = Model.query ("itvision_sysconfig", nil, nil, "id")
 
    if content[1] == nil then
       content = {}
-      content.sysconfig_id = 1
+      content.id = 1
       content.instance_id = Model.db.instance_id 
       content.created = "now()"
       content.updated = "now()"

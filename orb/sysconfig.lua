@@ -19,7 +19,7 @@ local sysconfig = Model.itvision:model "sysconfig"
 function sysconfig:select_sysconfig(id)
    local clause = ""
    if id then
-      clause = "sysconfig_id = "..id
+      clause = "id = "..id
    end
    return self:find_all(clause)
 end
@@ -50,7 +50,7 @@ function update(web, id)
    local sysconfig = {}
    if id then
       local tables = "itvision_sysconfig"
-      local clause = "sysconfig_id = "..id
+      local clause = "id = "..id
       --sysconfig:new()
       sysconfig.version = web.input.version
       sysconfig.created = web.input.created
@@ -98,7 +98,7 @@ ITvision:dispatch_get(remove, "/remove/(%d+)")
 
 function delete(web, id)
    if id then
-      local clause = "sysconfig_id = "..id
+      local clause = "id = "..id
       local tables = "itvision_sysconfig"
       Model.delete (tables, clause) 
    end
@@ -106,6 +106,20 @@ function delete(web, id)
    return web:redirect(web:link("/list"))
 end
 ITvision:dispatch_get(delete, "/delete/(%d+)")
+
+
+function reset_monitor(web)
+   os.reset_monitor()
+   return web:redirect(web:link("/list"))
+end
+ITvision:dispatch_get(reset_monitor, "/reset_monitor")
+
+
+function reset_monitor_db(web)
+   os.reset_monitor_db()
+   return web:redirect(web:link("/list"))
+end
+ITvision:dispatch_get(reset_monitor_db, "/reset_monitor_db")
 
 
 ITvision:dispatch_static("/css/%.css", "/script/%.js")
@@ -122,14 +136,14 @@ function render_list(web, A)
 
    for i, v in ipairs(A) do
       rows[#rows + 1] = tr{ 
-         td{ a{ href= web:link("/show/"..v.sysconfig_id), v.version} },
+         td{ a{ href= web:link("/show/"..v.id), v.version} },
          td{ v.created },
          td{ v.updated },
          td{ v.home_dir },
          td{ v.monitor_dir },
          td{ v.monitor_bp_dir },
-         td{ button_link(strings.remove, web:link("/remove/"..v.sysconfig_id), "negative") },
-         td{ button_link(strings.edit, web:link("/edit/"..v.sysconfig_id)) },
+         td{ button_link(strings.remove, web:link("/remove/"..v.id), "negative") },
+         td{ button_link(strings.edit, web:link("/edit/"..v.id)) },
       }
    end
 
@@ -150,11 +164,20 @@ function render_list(web, A)
          rows
       }
    }
-
+   res[#res + 1] = p{ br(), "<hr>", br() }
+   res[#res + 1] = p{ "Monitor" } 
+   res[#res + 1] = p{ button_link("Reset Monitor", web:link("/reset_monitor")) }
    res[#res + 1] = p{ br(), br() }
+
+   res[#res + 1] = p{ br(), "<hr>", br() }
+   res[#res + 1] = p{ "Database Monitor" } 
+   res[#res + 1] = p{ button_link("Reset DB monitor", web:link("/reset_monitor_db")) }
+   res[#res + 1] = p{ br(), br() }
+
+   res[#res + 1] = p{ br(), "<hr>", br() }
    res[#res + 1] = p{ "Remove todas as entradas das tabelas app, app_tree, app_relat,  app_object e app_relat_type: " }
    web.prefix = "/orb/initialization"
-   res[#res + 1] = p{ button_link(strings.remove, web:link("/remove")) }
+   res[#res + 1] = p{ button_link("Reset Database", web:link("/remove")) }
    web.prefix = "/orb/system"
    res[#res + 1] = p{ br(), br() }
 
@@ -167,8 +190,8 @@ function render_show(web, A)
    local res = {}
 
    res[#res + 1] = p{ button_link(strings.add, web:link("/add")) }
-   res[#res + 1] = p{ button_link(strings.remove, web:link("/remove/"..A.sysconfig_id)) }
-   res[#res + 1] = p{ button_link(strings.edit, web:link("/edit/"..A.sysconfig_id)) }
+   res[#res + 1] = p{ button_link(strings.remove, web:link("/remove/"..A.id)) }
+   res[#res + 1] = p{ button_link(strings.edit, web:link("/edit/"..A.id)) }
    res[#res + 1] = p{ button_link(strings.list, web:link("/list")) }
    res[#res + 1] = p{ br(), br() }
 
@@ -210,7 +233,7 @@ function render_add(web, edit)
       val4 = edit.home_dir
       val5 = edit.monitor_dir
       val6 = edit.monitor_bp_dir
-      url = "/update/"..edit.sysconfig_id
+      url = "/update/"..edit.id
    else
       url = "/insert"
    end
@@ -244,7 +267,7 @@ function render_remove(web, A)
 
    if A then
       A = A[1]
-      url_ok = web:link("/delete/"..A.sysconfig_id)
+      url_ok = web:link("/delete/"..A.id)
       url_cancel = web:link("/list")
    end
 

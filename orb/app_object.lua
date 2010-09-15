@@ -179,7 +179,7 @@ function render_table(web, A)
 
       rows[#rows + 1] = tr{ 
          td{ a{ href= web:link("/show/"..v.app_id), v.app_name} },
-         td{ align="center", v.list_type },
+         td{ align="center", v.obj_type },
          td{ align="right", obj },
          td{ button_link(strings.remove, web:link("/remove/"..v.app_id..":"..v.object_id), "negative") },
       }
