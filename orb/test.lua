@@ -1,5 +1,5 @@
 local m = require "model_access"
-local r = require "model_rules"
+local r = require "model_itvision"
 
 require "initialization"
 require "messages"

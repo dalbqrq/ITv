@@ -2,8 +2,6 @@
 require "Model"
 require "util"
 require "messages"
-
---local m = require "model_access"
 require "model_access"
 
 

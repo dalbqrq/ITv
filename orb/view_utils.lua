@@ -55,6 +55,7 @@ local menu = {}
    menu[#menu + 1] = button_link("APP LIST", "/orb/app_object")
    menu[#menu + 1] = button_link("APP RELAC", "/orb/app_relat")
    menu[#menu + 1] = button_link("TIPO RELAC", "/orb/app_relat_type")
+   menu[#menu + 1] = button_link("PROBE", "/orb/probe")
    menu[#menu + 1] = button_link("USUARIO", "/orb/user")
    menu[#menu + 1] = button_link("GRUPO", "/orb/user_group")
    menu[#menu + 1] = button_link("CHECK CMDS", "/orb/checkcmd")

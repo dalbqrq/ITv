@@ -156,10 +156,10 @@ function render_list(web, A, B, app_id)
 
    res[#res + 1] = p{ strings.application..": ", str };
    if sel_app ~= nil then 
-      web.prefix = "/orb/app_object"
 
       res[#res + 1] = p{ render_show(web, B[curr_app], sel_app) }
 
+      web.prefix = "/orb/app_object"
       res[#res + 1] = p{ button_link(strings.add, web:link("/add/"..app_id)) }
       res[#res + 1] = p{ br(), br() }
       res[#res + 1] = p{ render_table(web, A) }
