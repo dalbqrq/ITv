@@ -1,9 +1,9 @@
 
 menu_itens = {
-	{ 1, "Monitor", "../../fig1.html" },
-	{ 2, "Lógico", "../../fig1.html" },
-	{ 2, "Físico", "../../fig2.html" },
-	{ 2, "Relatórios", "../../blank.html" },
+	{ 1, "Monitor", "/fig1.html" },
+	{ 2, "Lógico", "/fig1.html" },
+	{ 2, "Físico", "/fig2.html" },
+	{ 2, "Relatórios", "/blank.html" },
 	{ 2, "Árvore", "/orb/app_tree" },
 	{ 2, "Aplicações", "/orb/app" },
 	{ 2, "Lista Aplicações", "/orb/app_object" },
