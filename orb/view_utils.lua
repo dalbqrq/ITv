@@ -186,7 +186,8 @@ end
 
 ]]
 function render_content_header(name, link)
-   return div { id='c_ssmenu2', ul{ 
+   -- p{ ..., "" } usado para dar um espaco antes de comecar o proximo elemento html
+   return p{ div { id='c_ssmenu2', ul{ 
          li{ a{href='/servdesk/front/computer.php', class='here', title="'"..name.."'", name} },
          li{ "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" },
          li{ a{ href='/servdesk/front/setup.templates.php?itemtype=Computer&amp;add=1',
@@ -195,7 +196,7 @@ function render_content_header(name, link)
              img{ src='/servdesk/pics/menu_search.png', title='Pesquisar', alt='Pesquisar' } } },
          li{ a{ href='/servdesk/front/setup.templates.php?itemtype=Computer&amp;add=0',
              img{ src='/servdesk/pics/menu_addtemplate.png', title="Gerenciar modelos", alt="Gerenciar modelos" } } }
-         } }
+         } }, "" }
 
 end
 

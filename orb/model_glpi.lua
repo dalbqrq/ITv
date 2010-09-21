@@ -57,7 +57,7 @@ function select_ci_ports (type_, cond_, extra_, columns_)
          n.itemtype as n_itemype,
          n.logical_number as n_logical_number,
          n.name as n_name,
-         n.ipi as n_ip
+         n.ip as n_ip
 
    ]]
 

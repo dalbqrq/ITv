@@ -175,10 +175,10 @@ end
 function render_list(web, id, A, AR)
    local res = {}
 
-   res[#res + 1] = p{ strings.application..": ", str };
+   --res[#res + 1] = p{ strings.application..": ", str };
    res[#res + 1] = p{ render_selector(web, A, id, "/list/") }
    res[#res + 1] = p{ render_table(web, AR) }
-   if id then res[#res + 1] = p{ button_link(strings.add, web:link("/add/"..id)) } end
+   --if id then res[#res + 1] = p{ button_link(strings.add, web:link("/add/"..id)) } end
 
    return render_layout(res)
 end
@@ -195,7 +195,7 @@ function render_table(web, AR)
 
       if v.connection_type == "physical" then contype = strings.physical else contype = strings.logical end
 
-      rows[#rows + 1] = tr{ 
+      rows[#rows + 1] = tr{ class='tab_bg_1',
          --td{ a{ href= web:link("/show/"..v.app_id), v.app_name} },
          td{ align="center", from },
          td{ align="center", v.rtype_name },
@@ -205,9 +205,10 @@ function render_table(web, AR)
       }
    end
 
-   res[#res + 1] = H("table") { border=1, cellpadding=1,
+   res[#res + 1] = render_content_header("Relacionamentos de um Applicação")
+   res[#res + 1] = H("table") { border="0", class="tab_cadrehov",
       thead{ 
-         tr{ 
+         tr{ class="tab_bg_2",
              --th{ strings.application }, 
              th{ strings.origin },
              th{ strings.type },

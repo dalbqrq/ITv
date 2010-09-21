@@ -139,22 +139,25 @@ function render_list(web, A)
    local rows = {}
    local res = {}
    
+--[[
    res[#res + 1] = p{ button_link(strings.add, web:link("/add")) }
    res[#res + 1] = p{ br(), br() }
+]]
 
    for i, v in ipairs(A) do
-      rows[#rows + 1] = tr{ 
+      rows[#rows + 1] = tr{ class='tab_bg_1',
          td{ a{ href= web:link("/show/"..v.app_id), v.name} },
          td{ strings.sonof },
          td{ a{ href= web:link("/show/"..v.papp_id), v.pname} },
-         td{ button_link(strings.remove, web:link("/remove/"..v.app_tree_id), "negative") },
-         td{ button_link(strings.edit, web:link("/edit/"..v.app_tree_id)) },
+         td{ button_link(strings.remove, web:link("/remove/"..v.id), "negative") },
+         td{ button_link(strings.edit, web:link("/edit/"..v.id)) },
       }
    end
 
-   res[#res + 1]  = H("table") { border=1, cellpadding=1,
+   res[#res + 1] = render_content_header("Árvore de Applicação")
+   res[#res + 1]  = H("table") { border="0", class="tab_cadrehov",
       thead{ 
-         tr{ 
+         tr{ class="tab_bg_2",
              th{ strings.name }, 
              th{ "." },
              th{ strings.parent }, 

@@ -21,19 +21,11 @@ end
 ITvision:dispatch_get(list, "/(%d+)")
 
 
-ITvision:dispatch_static("/css/%.css", "/script/%.js")
-
-
 -- views ------------------------------------------------------------
 
 function render_list(web, item)
    local res = {}
    
---[[
-   res[#res + 1] = p{ "daniel" } 
-
-   return render_layout(res)
-]]
    menu = make_menu()
    iframe = make_iframe(item)
 
@@ -44,8 +36,6 @@ function render_list(web, item)
    res[#res + 1] = foot
 
    return render_index(res)
---[[
-]]
 end
 
 

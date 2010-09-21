@@ -107,11 +107,13 @@ function render_list(web, A)
    local rows = {}
    local res = {}
    
+--[[
    res[#res + 1] = p{ button_link(strings.add, web:link("/add")) }
    res[#res + 1] = p{ br(), br() }
+]]
 
    for i, v in ipairs(A) do
-      rows[#rows + 1] = tr{ 
+      rows[#rows + 1] = tr{ class='tab_bg_1',
          td{ a{ href= web:link("/show/"..v.id), v.name} },
          td{ strings[v.type] },
          td{ button_link(strings.remove, web:link("/remove/"..v.id), "negative") },
@@ -119,9 +121,10 @@ function render_list(web, A)
       }
    end
 
-   res[#res + 1]  = H("table") { border=1, cellpadding=1,
+   res[#res + 1]  = render_content_header("Tipo de Relacionamento")
+   res[#res + 1]  = H("table") { border="0", class="tab_cadrehov",
       thead{ 
-         tr{ 
+         tr{ class="tab_bg_2",
              th{ strings.name }, 
              th{ strings.type }, 
              th{ "." },
@@ -141,14 +144,17 @@ function render_show(web, A)
    A = A[1]
    local res = {}
 
+--[[
    res[#res + 1] = p{ button_link(strings.add, web:link("/add")) }
    res[#res + 1] = p{ button_link(strings.remove, web:link("/remove/"..A.id)) }
    res[#res + 1] = p{ button_link(strings.edit, web:link("/edit/"..A.id)) }
    res[#res + 1] = p{ button_link(strings.list, web:link("/list")) }
    res[#res + 1] = p{ br(), br() }
+]]
 
    if A then
-      res[#res + 1] = { H("table") { border=1, cellpadding=1,
+      render_content_header("Tipo de Relacionamento")
+      res[#res + 1] = { H("table") { border="0", class="tab_cadrehov",
          tbody{
             tr{ th{ strings.name }, td{ A.name } },
             tr{ th{ strings.type }, td{ A.type } },
