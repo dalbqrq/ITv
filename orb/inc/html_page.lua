@@ -46,14 +46,14 @@ function make_menu()
       name = v[2]
 
       if o_level < n_level and i > 1 then
-         s = s .. "\n<ul>\n"
+         s = s .. "\n\t\t<ul>\n"
       elseif o_level > n_level and i > 1 then
-         s = s .. "</li>\n</ul>\n</li>\n"
+         s = s .. "</li>\n\t\t</ul>\n\t\t</li>\n"
       elseif i > 1 then
          s = s .. "</li>\n"
       end
 
-      s = s .. "<li><a href=\""..i.."\" >"..name.."</a>"
+      s = s .. "\t\t<li><a href=\""..i.."\" >"..name.."</a>"
       o_level = n_level
 
    end
@@ -68,7 +68,7 @@ function make_iframe(item)
 
    link = menu_itens[item][3]
 
-   s = "\t\t\t<iframe src =\""..link.."\" width=\"100%\" height=\"200%\" align=\"center\" \n"
+   s = "\t\t\t<iframe src =\""..link.."\" width=\"100%\" height=\"70%\" align=\"center\" \n"
    s = s.. "\t\t\tframeborder=\"0\" scrolling=\"no\">"
    s = s.. "\t\t\t</iframe>"
 
@@ -76,10 +76,12 @@ function make_iframe(item)
 
 end
 
-head = [[
+--[[
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <!-- Corporate Perfect by TemplatesPerfect.com -->
+]]
+head = [[
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
 <title>ITvision</title>
@@ -109,20 +111,20 @@ body = [[
 	<div id="page">
 		<div class="box1">
 <!--
-			<h1>Welcome to my website </h1>
-			<p>Lorem ipsum dolor </p>
+			<h1>Welcome to my website </h1> <p>Lorem ipsum dolor </p>
 -->
 ]]
 
 
 foot = [[
+
 		</div>
 	</div>
-	<div style="clear: both;">&nbsp;</div>
 </div>
+<div style="clear: both;">&nbsp;</div>
 <div id="footer">
 	<p>&copy;&nbsp;desenvolvido pela Verto</p>
 </div>
 </body>
-</html>
 ]]
+--</html>
