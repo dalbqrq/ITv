@@ -1,7 +1,7 @@
 #!/usr/bin/env wsapi.cgi
 
-require "apps"
+require "ap"
 
-return itvision
+return ap
 
 
