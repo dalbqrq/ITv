@@ -41,27 +41,6 @@ function button_form(label, btype, class)
 end
 
 
-function button_link(label, link, class)
-   class = class or "none"
-   return [[<div class="buttons"> <a href="]]..link..
-          [[" class="]]..class..[[">]]..label..[[ </a> </div>]]
-end
-
-
-local menu = {}
-   menu[#menu + 1] = button_link("ARVORE APPS", "/orb/app_tree")
-   menu[#menu + 1] = button_link("APPS", "/orb/app")
-   menu[#menu + 1] = button_link("APP LIST", "/orb/app_object")
-   menu[#menu + 1] = button_link("APP RELAC", "/orb/app_relat")
-   menu[#menu + 1] = button_link("TIPO RELAC", "/orb/app_relat_type")
-   menu[#menu + 1] = button_link("PROBE", "/orb/probe")
-   menu[#menu + 1] = button_link("USUARIO", "/orb/user")
-   menu[#menu + 1] = button_link("GRUPO", "/orb/user_group")
-   menu[#menu + 1] = button_link("CHECK CMDS", "/orb/checkcmd")
-   menu[#menu + 1] = button_link("SISTEMA", "/orb/sysconfig")
-   menu[#menu + 1] = "<br><br><br><p><br><p> "
-
-
 
 --[[ 
   Cada entrada da tabela menu_item é uma tabela com os seguintes campos:
@@ -98,7 +77,7 @@ menu_itens = {
 	{ 1, "Monitor", "/fig1.html" },
 	{ 2, "Lógico", "/fig1.html" },
 	{ 2, "Físico", "/fig2.html" },
-	{ 2, "Relatórios", "/blank.html" },
+	{ 2, "Checagem", "/orb/probe" },
 	{ 2, "Árvore", "/orb/app_tree" },
 	{ 2, "Aplicações", "/orb/app" },
 	{ 2, "Lista Aplicações", "/orb/app_object" },
@@ -137,7 +116,6 @@ function make_menu(link_at_level_1)
    local s = ""
 
    for i, v in ipairs(menu_itens) do
-
       local level = v[1]
       local name  = v[2]
       local link  = v[3]
@@ -194,21 +172,15 @@ function render_layout(inner_html)
          meta{ ["http-equiv"] = "Content-Type", content = "text/html; charset=utf-8" },
          link{ rel = 'stylesheet', type = 'text/css', href = '/css/style.css', media = 'screen' },
          link{ href="/css/glpi_styles.css", media="screen", rel="stylesheet", type="text/css" },
-         --script{ type="text/javascript", src="http://itv/js/scripts.js" },
          script{ type="text/javascript", src=scrpt },
-
       },
-      -- aqui ia o menu criado manualmente pela lista criada acima
-      -- body{ menu, inner_html }
-      --body{ div{ id='menu_navigate', inner_html } }
       body{ inner_html }
    }
 end
 
 
-function select_option(name, T, value_idx, label_idx, default_value)
 --[[
-   Parametros:
+   Parametros da funcao "select_option()" definida abaixo:
 
       name -> nome da variavel do form-html que serah recuperado pelo respectivo metodo 'controler'
               tipicamete um metodo 'update' ou 'insert'  
@@ -225,8 +197,8 @@ function select_option(name, T, value_idx, label_idx, default_value)
       Para a tabela acima, uma tipica chamada desta funcao ficaria assim:
 
       select_option("tipo", T, "x_id", "name", "link")
-      
 ]]
+function select_option(name, T, value_idx, label_idx, default_value)
    local olist = {}
 
    olist[#olist + 1] = "<select name=\""..name.."\">"
@@ -289,24 +261,6 @@ function select_physical_logical(name, default)
 end
 
 
---[[
-
-<div id='c_ssmenu2' >
-<ul>
-        <li> <a href='/servdesk/front/computer.php' class='here' title='Computadores' >Computadores </a> </li>
-        <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </li>
-        <li> <a href='/servdesk/front/setup.templates.php?itemtype=Computer&amp;add=1'>
-                <img src='/servdesk/pics/menu_add.png' title='Adicionar' alt='Adicionar'></a> </li>
-        <li> <a href='/servdesk/front/computer.php'>
-                <img src='/servdesk/pics/menu_search.png' title='Pesquisar' alt='Pesquisar'> </a> </li>
-        <li> <a href='/servdesk/front/setup.templates.php?itemtype=Computer&amp;add=0' >
-                <img title="Gerenciar modelos..." alt="Gerenciar modelos..." src='/servdesk/pics/menu_addtemplate.png' 
-> </a> </li>
-
-</ul>
-</div>
-
-]]
 function render_content_header(name, add, list)
    -- p{ ..., "" } usado para dar um espaco antes de comecar o proximo elemento html
    return p{ div{ id='menu_navigate', div { id='c_ssmenu2', ul{ 
@@ -322,8 +276,8 @@ function render_content_header(name, add, list)
 
 end
 
-function render_map(web, lat, lon)
 
+function render_map(web, lat, lon)
     s = [[
 <html>
 <head>
@@ -362,4 +316,26 @@ function render_map(web, lat, lon)
 
     return s
 end
+
+
+-- ESTE MODO DE FAZER MENU ESTAh OBSOLETO --
+function button_link(label, link, class)
+   class = class or "none"
+   return [[<div class="buttons"> <a href="]]..link..
+          [[" class="]]..class..[[">]]..label..[[ </a> </div>]]
+end
+
+-- ESTE MODO DE FAZER MENU ESTAh OBSOLETO --
+local menu = {}
+   menu[#menu + 1] = button_link("ARVORE APPS", "/orb/app_tree")
+   menu[#menu + 1] = button_link("APPS", "/orb/app")
+   menu[#menu + 1] = button_link("APP LIST", "/orb/app_object")
+   menu[#menu + 1] = button_link("APP RELAC", "/orb/app_relat")
+   menu[#menu + 1] = button_link("TIPO RELAC", "/orb/app_relat_type")
+   menu[#menu + 1] = button_link("PROBE", "/orb/probe")
+   menu[#menu + 1] = button_link("USUARIO", "/orb/user")
+   menu[#menu + 1] = button_link("GRUPO", "/orb/user_group")
+   menu[#menu + 1] = button_link("CHECK CMDS", "/orb/checkcmd")
+   menu[#menu + 1] = button_link("SISTEMA", "/orb/sysconfig")
+   menu[#menu + 1] = "<br><br><br><p><br><p> "
 

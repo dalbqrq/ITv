@@ -236,10 +236,10 @@ end
 
 
 function os.reset_monitor()
-   os.capture("/usr/sbin/invoke-rc.d nagios restart")
+   return os.capture("/usr/sbin/invoke-rc.d nagios restart")
 end
 
 
 function os.reset_monitor_db()
-   os.capture("/usr/sbin/invoke-rc.d ndoutils restart")
+   return os.capture("/usr/sbin/invoke-rc.d ndoutils restart")
 end

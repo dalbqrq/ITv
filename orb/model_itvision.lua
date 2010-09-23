@@ -65,6 +65,39 @@ function select_service_app_object (cond_, extra_, columns_)
 end
 
 
+----------------------------- NAGIOS X ITVISION X GLPI ----------------------------------
+
+function select_ci_monitor (w_wo, itemtype)
+    --[[
+      select c.id, n.id as nid, c.name, n.ip, n.itemtype 
+      from glpi_networkports n, glpi_computers c 
+      where c.id = n.items_id and itemtype="Computer"
+         and not exists (select 1 from itvision_monitor m where m.networkport_id = n.id);
+   ]]
+
+end
+
+function select_ci_with_monitor ()
+
+end
+
+
+function select_ci_without_monitor ()
+end
+
+
+function select_version_monitor(w_wo)
+end
+
+
+function select_version_with_monitor ()
+end
+
+
+function select_version_without_monitor ()
+end
+
+
 ----------------------------- APP ----------------------------------
 
 function select_app (cond_, extra_, columns_)

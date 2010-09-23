@@ -54,7 +54,7 @@ function select_ci_ports (type_, cond_, extra_, columns_)
          c.comment as c_comment,
          c.locations_id as c_locations_id,
          c.states_id as c_states_id,
-         n.itemtype as n_itemype,
+         n.itemtype as n_itemtype,
          n.logical_number as n_logical_number,
          n.name as n_name,
          n.ip as n_ip

@@ -2,7 +2,7 @@
 
 -- includes & defs ------------------------------------------------------
 require "util"
-require "subsys_util"
+require "monitor_util"
 require "view_utils"
 
 require "orbit"

@@ -2,7 +2,7 @@
 
 -- includes & defs ------------------------------------------------------
 require "util"
-require "subsys_util"
+require "monitor_util"
 require "view_utils"
 
 require "orbit"
@@ -154,9 +154,9 @@ function render_list(web, C)
 
    for i, v in ipairs(C) do
       rows[#rows + 1] = tr{ 
-         td{ a{ href= web:link("/show/"..v.id), v.name} },
-         td{ v.ip },
-         td{ v.itemtype },
+         td{ a{ href= web:link("/show/"..v.c_id), v.c_name} },
+         td{ v.n_ip },
+         td{ v.n_itemtype },
       }
    end
 
