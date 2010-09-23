@@ -8,25 +8,16 @@ require "util"
 require "view_utils"
 
 
+-- config ITVISION mvc app
+module("ap", package.seeall,orbit.new)
+config.set_models("ap")
+
+local apps = config.itvision:model "app"
+local services = config.nagios:model "services"
+
 -- config direct access to db
 local ma = require "model_access"
 local mr = require "model_rules"
-
-
--- config ITVISION mvc app
-module("ap", package.seeall,orbit.new)
-
-itvision = orbit.new()
-itvision.mapper.conn, itvision.mapper.driver = config.setup_orbdb()
-itvision.mapper.table_prefix = 'itvision_'
-local apps = itvision:model "app"
-
-
-nagios = orbit.new()
-nagios.mapper.conn, nagios.mapper.driver = config.setup_orbdb()
-nagios.mapper.table_prefix = 'nagios_'
-local services = nagios:model "services"
-
 
 -- models ------------------------------------------------------------
 
