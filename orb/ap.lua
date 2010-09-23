@@ -19,7 +19,7 @@ module("ap", package.seeall,orbit.new)
 itvision = orbit.new()
 itvision.mapper.conn, itvision.mapper.driver = config.setup_orbdb()
 itvision.mapper.table_prefix = 'itvision_'
-local apps = itvision:model "apps"
+local apps = itvision:model "app"
 
 
 nagios = orbit.new()

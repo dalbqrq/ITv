@@ -9,6 +9,15 @@ db = {
 	--conn_data = { dbname, dbuser, dbpass }
 }
 
+servdesk_db = {
+	instance_id = 1,
+ 	dbname = "servdesk", 
+	dbuser = "servdesk", 
+	dbpass = "servdesk", 
+	driver = "mysql",
+	--conn_data = { dbname, dbuser, dbpass }
+}
+
 
 language = "pt_BR"
 

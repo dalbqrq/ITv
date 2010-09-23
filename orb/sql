@@ -1,83 +1,23 @@
-SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
-SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
-SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL';
-
-ALTER TABLE `ndoutils`.`itvision_app_object` 
-  ADD CONSTRAINT `fk_app_id6`
-  FOREIGN KEY (`app_id` )
-  REFERENCES `ndoutils`.`itvision_app` (`id` )
-  ON DELETE CASCADE
-  ON UPDATE CASCADE;
-
-ALTER TABLE `ndoutils`.`itvision_app_relat_type` DROP COLUMN `app_relat_type_id` , DROP COLUMN `instance_id` , ADD COLUMN `id` INT(11) NOT NULL  FIRST 
-, DROP INDEX `fk_instance_id5` 
-, DROP PRIMARY KEY 
-, ADD PRIMARY KEY (`id`) ;
-
-ALTER TABLE `ndoutils`.`itvision_app_relat` DROP COLUMN `connection_type` , ADD COLUMN `id` INT(11) NOT NULL AUTO_INCREMENT  AFTER `app_id` , 
-  ADD CONSTRAINT `fk_id1`
-  FOREIGN KEY (`app_relat_type_id` )
-  REFERENCES `ndoutils`.`itvision_app_relat_type` (`id` )
-  ON DELETE NO ACTION
-  ON UPDATE NO ACTION, 
-  ADD CONSTRAINT `fk_id2`
-  FOREIGN KEY (`app_id` )
-  REFERENCES `ndoutils`.`itvision_app` (`id` )
-  ON DELETE NO ACTION
-  ON UPDATE NO ACTION, 
-  ADD CONSTRAINT `fk_instance_id12`
-  FOREIGN KEY (`instance_id` )
-  REFERENCES `ndoutils`.`nagios_instances` (`instance_id` )
-  ON DELETE NO ACTION
-  ON UPDATE NO ACTION, 
-  ADD CONSTRAINT `fk_object_id7`
-  FOREIGN KEY (`from_object_id` )
-  REFERENCES `ndoutils`.`nagios_objects` (`object_id` )
-  ON DELETE NO ACTION
-  ON UPDATE NO ACTION, 
-  ADD CONSTRAINT `fk_object_id8`
-  FOREIGN KEY (`to_object_id` )
-  REFERENCES `ndoutils`.`nagios_objects` (`object_id` )
-  ON DELETE NO ACTION
-  ON UPDATE NO ACTION
-, ADD INDEX `fk_id1` (`app_relat_type_id` ASC) 
-, ADD INDEX `fk_id2` (`app_id` ASC) 
-, ADD INDEX `fk_instance_id12` (`instance_id` ASC) 
-, ADD INDEX `fk_object_id7` (`from_object_id` ASC) 
-, ADD INDEX `fk_object_id8` (`to_object_id` ASC) 
-, DROP INDEX `fk_app_id3` 
-, DROP INDEX `fk_app_relat_type_id1` 
-, DROP INDEX `fk_object_id4` 
-, DROP INDEX `fk_object_id5` 
-, DROP PRIMARY KEY 
-, ADD PRIMARY KEY (`id`) , COMMENT = '' ;
-
-ALTER TABLE `ndoutils`.`itvision_app_tree` DROP COLUMN `app_tree_id` , ADD COLUMN `id` INT(11) NOT NULL AUTO_INCREMENT  FIRST , CHANGE COLUMN `lft` `lft` INT(11) NOT NULL  , CHANGE COLUMN `rgt` `rgt` INT(11) NOT NULL  , 
-  ADD CONSTRAINT `fk_app_id5`
-  FOREIGN KEY (`app_id` )
-  REFERENCES `ndoutils`.`itvision_app` (`id` )
-  ON DELETE CASCADE
-  ON UPDATE CASCADE, 
-  ADD CONSTRAINT `fk_instance_id16`
-  FOREIGN KEY (`instance_id` )
-  REFERENCES `ndoutils`.`nagios_instances` (`instance_id` )
-  ON DELETE NO ACTION
-  ON UPDATE NO ACTION
-, ADD INDEX `fk_app_id5` (`app_id` ASC) 
-, ADD INDEX `fk_instance_id16` (`instance_id` ASC) 
-, DROP INDEX `fk_app_id1` 
-, DROP INDEX `fk_instance_id4` 
-, DROP PRIMARY KEY 
-, ADD PRIMARY KEY (`id`) , COMMENT = '' ;
-
-ALTER TABLE `ndoutils`.`itvision_site_tree` 
-DROP INDEX `fk_location_tree_id1` 
-, DROP PRIMARY KEY 
-, ADD PRIMARY KEY (`site_tree_id`, `instance_id`) ;
 
 
-SET SQL_MODE=@OLD_SQL_MODE;
-SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
-SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+-- -----------------------------------------------------
+-- Table `ndoutils`.`itvision_app_list`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `ndoutils`.`itvision_app` ;
+
+CREATE  TABLE IF NOT EXISTS `ndoutils`.`itvision_app` (
+  `id` INT(11) NOT NULL ,
+  `instance_id` SMALLINT(6) NOT NULL ,
+  `name` VARCHAR(45) NULL DEFAULT NULL ,
+  PRIMARY KEY (`id`) ,
+  INDEX `fk_id4` (`id` ASC) ,
+  CONSTRAINT `fk_instance_id17`
+    FOREIGN KEY (`instance_id` )
+    REFERENCES `ndoutils`.`nagios_instances` (`instance_id` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = latin1
+COMMENT = 'Application';
 
 
