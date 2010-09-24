@@ -1,47 +1,33 @@
 #!/usr/bin/env wsapi.cgi
 
--- configs ------------------------------------------------------------
-
-require "orbit"
-require "config"
+-- includes & defs ------------------------------------------------------
 require "util"
 require "view_utils"
 
+require "orbit"
+require "Model"
+module(Model.name, package.seeall,orbit.new)
 
--- config direct access to db
-local ma = require "model_access"
-local mr = require "model_rules"
-
-
--- config ITVISION mvc app
-module("itvision", package.seeall, orbit.new)
-mapper.conn, mapper.driver = config.setup_orbdb()
-local apps = itvision:model "apps"
-local app_list = itvision:model "app_list"
-
-
--- config NAGIOS mvc app
-nagios = orbit.new()
-nagios.mapper.conn, nagios.mapper.driver = config.setup_orbdb()
-nagios.mapper.table_prefix = 'nagios_'
-local objects = nagios:model "objects"
+local app = Model.itvision:model "app"
+local app_object = Model.itvision:model "app_object"
+local objects = Model.nagios:model "objects"
 
 
 -- models ------------------------------------------------------------
 
-function apps:select_apps(id)
+function app:select_apps(id)
    local clause = ""
    if id then
-      clause = "app_id = "..id
+      clause = "id = "..id
    end
    return self:find_all(clause)
 end
 
 
-function app_list:select_app_list(id)
+function app_object:select_app_object(id)
    local clause = ""
    if id then
-      clause = "app_id = "..id
+      clause = "id = "..id
    end
    return self:find_all(clause)
 end
@@ -61,54 +47,54 @@ end
 -- controllers ------------------------------------------------------------
 
 function list(web, id)
-   local B = apps:select_apps()
+   local B = app:select_apps()
    if id == "/" then id = B[1].app_id end
-   local A = mr.select_app_app_list_objects(id)
+   local A = Model.select_app_app_objects(id)
    return render_list(web, A, B, id)
 end
-itvision:dispatch_get(list, "/", "/list/(%d+)")
+ITvision:dispatch_get(list, "/", "/list/(%d+)")
 
 
 function show(web, id)
    local A = apps:select_apps(id)
    return render_show(web, A, id)
-end itvision:dispatch_get(show, "/show/(%d+)")
+end ITvision:dispatch_get(show, "/show/(%d+)")
 
 
 function add(web, id)
    local H = mr.select_host_object()
    local S = mr.select_service_object()
    local A = mr.select_service_object(nil, nil, nil, true)
-   local APPL = mr.select_app_app_list_objects(id)
+   local APPL = Model.select_app_app_objects(id)
    return render_add(web, H, S, A, APPL, id)
 end
-itvision:dispatch_get(add, "/add/(%d+)")
+ITvision:dispatch_get(add, "/add/(%d+)")
 
 
 -- TODO: problema na inclusão de multiplos itens
 function insert(web)
-   app_list:new()
+   app_object:new()
 local r = ""
    if type(web.input.item) == "table" then
       for i, v in ipairs(web.input.item) do
-         app_list.app_id = web.input.app_id
-         app_list.type = web.input.type
-         app_list.instance_id = config.db.instance_id
-         app_list.object_id = v
-         app_list:save()
+         app_object.app_id = web.input.app_id
+         app_object.type = web.input.type
+         app_object.instance_id = config.db.instance_id
+         app_object.object_id = v
+         app_object:save()
 r = r.."|"..v
       end
    else
-      app_list.app_id = web.input.app_id
-      app_list.type = web.input.type
-      app_list.instance_id = config.db.instance_id
-      app_list.object_id = web.input.item
-      app_list:save()
+      app_object.app_id = web.input.app_id
+      app_object.type = web.input.type
+      app_object.instance_id = config.db.instance_id
+      app_object.object_id = web.input.item
+      app_object:save()
    end
 
-   return web:redirect(web:link("/add/"..app_list.app_id))
+   return web:redirect(web:link("/add/"..app_object.app_id))
 end
-itvision:dispatch_post(insert, "/insert")
+ITvision:dispatch_post(insert, "/insert")
 
 
 function remove(web, app_id, obj_id)
@@ -116,22 +102,22 @@ function remove(web, app_id, obj_id)
    local O = objects:select_objects(obj_id)
    return render_remove(web, A, O)
 end
-itvision:dispatch_get(remove, "/remove/(%d+):(%d+)")
+ITvision:dispatch_get(remove, "/remove/(%d+):(%d+)")
 
 
 function delete(web, app_id, obj_id)
    if app_id and obj_id then
       local clause = "app_id = "..app_id.." and object_id = "..obj_id
-      local tables = "itvision_app_list"
+      local tables = "itvision_app_object"
       ma.delete (tables, clause) 
    end
 
    return web:redirect(web:link("/list/"..app_id))
 end
-itvision:dispatch_get(delete, "/delete/(%d+):(%d+)")
+ITvision:dispatch_get(delete, "/delete/(%d+):(%d+)")
 
 
-itvision:dispatch_static("/css/%.css", "/script/%.js")
+ITvision:dispatch_static("/css/%.css", "/script/%.js")
 
 
 -- views ------------------------------------------------------------
@@ -149,8 +135,8 @@ function render_list(web, A, B, app_id)
 
    str = [[<FORM> <SELECT ONCHANGE="location = this.options[this.selectedIndex].value;">]]
    for i, v in ipairs(B) do
-      url = web:link("/list/"..v.app_id)
-      if tonumber(v.app_id) == tonumber(app_id) then 
+      url = web:link("/list/"..v.id)
+      if tonumber(v.id) == tonumber(app_id) then 
          selected = " selected " 
          curr_app = i
          sel_app = v.app_id
@@ -165,7 +151,7 @@ function render_list(web, A, B, app_id)
    res[#res + 1] = p{ strings.application..": ", str };
    res[#res + 1] = p{ render_show(web, B[curr_app], sel_app) }
 
-   web.prefix = "/orb/app_list"
+   web.prefix = "/orb/app_object"
    res[#res + 1] = p{ button_link(strings.add, web:link("/add/"..app_id)) }
    res[#res + 1] = p{ br(), br() }
    res[#res + 1] = p{ render_table(web, A) }
@@ -182,10 +168,10 @@ function render_table(web, A)
       if v.name2 then obj = v.name2.."@"..obj end
 
       rows[#rows + 1] = tr{ 
-         td{ a{ href= web:link("/show/"..v.app_id), v.app_name} },
+         td{ a{ href= web:link("/show/"..v.id), v.app_name} },
          td{ align="center", v.list_type },
          td{ align="right", obj },
-         td{ button_link(strings.remove, web:link("/remove/"..v.app_id..":"..v.object_id), "negative") },
+         td{ button_link(strings.remove, web:link("/remove/"..v.id..":"..v.object_id), "negative") },
       }
    end
 
@@ -359,7 +345,7 @@ function render_remove(web, A, O)
 end
 
 
-orbit.htmlify(itvision, "render_.+")
+orbit.htmlify(ITvision, "render_.+")
 
 return _M
 

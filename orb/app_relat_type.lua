@@ -1,22 +1,20 @@
 #!/usr/bin/env wsapi.cgi
 
-require "orbit"
-module("itvision", package.seeall, orbit.new)
-
--- configs ------------------------------------------------------------
-
-require "config"
+-- includes & defs ------------------------------------------------------
 require "util"
 require "view_utils"
 
-mapper.conn, mapper.driver = config.setup_orbdb()
+require "orbit"
+require "Model"
+module(Model.name, package.seeall,orbit.new)
 
-local ma = require "model_access"
-local mr = require "model_rules"
+local app = Model.ITvision:model "app"
+local services = Model.nagios:model "services"
+local app_relat_type = Model.ITvision:model "app_relat_type"
+
 
 -- models ------------------------------------------------------------
 
-local app_relat_type = itvision:model "app_relat_type"
 
 function app_relat_type:select_app_relat_type(id)
    local clause = ""
@@ -32,20 +30,20 @@ function list(web)
    local A = app_relat_type:select_app_relat_type()
    return render_list(web, A)
 end
-itvision:dispatch_get(list, "/", "/list")
+ITvision:dispatch_get(list, "/", "/list")
 
 
 function show(web, id)
    local A = app_relat_type:select_app_relat_type(id)
    return render_show(web, A)
-end itvision:dispatch_get(show, "/show/(%d+)")
+end ITvision:dispatch_get(show, "/show/(%d+)")
 
 
 function edit(web, id)
    local A = app_relat_type:select_app_relat_type(id)
    return render_add(web, A)
 end
-itvision:dispatch_get(edit, "/edit/(%d+)")
+ITvision:dispatch_get(edit, "/edit/(%d+)")
 
 
 function update(web, id)
@@ -56,18 +54,18 @@ function update(web, id)
       --A:new()
       A.name = web.input.name
 
-      ma.update (tables, A, clause) 
+      Model.update (tables, A, clause) 
    end
 
    return web:redirect(web:link("/list"))
 end
-itvision:dispatch_post(update, "/update/(%d+)")
+ITvision:dispatch_post(update, "/update/(%d+)")
 
 
 function add(web)
    return render_add(web)
 end
-itvision:dispatch_get(add, "/add")
+ITvision:dispatch_get(add, "/add")
 
 
 function insert(web)
@@ -77,29 +75,29 @@ function insert(web)
    app_relat_type:save()
    return web:redirect(web:link("/list"))
 end
-itvision:dispatch_post(insert, "/insert")
+ITvision:dispatch_post(insert, "/insert")
 
 
 function remove(web, id)
    local A = app_relat_type:select_app_relat_type(id)
    return render_remove(web, A)
 end
-itvision:dispatch_get(remove, "/remove/(%d+)")
+ITvision:dispatch_get(remove, "/remove/(%d+)")
 
 
 function delete(web, id)
    if id then
       local clause = "app_relat_type_id = "..id
       local tables = "itvision_app_relat_type"
-      ma.delete (tables, clause) 
+      Model.delete (tables, clause) 
    end
 
    return web:redirect(web:link("/list"))
 end
-itvision:dispatch_get(delete, "/delete/(%d+)")
+ITvision:dispatch_get(delete, "/delete/(%d+)")
 
 
-itvision:dispatch_static("/css/%.css", "/script/%.js")
+ITvision:dispatch_static("/css/%.css", "/script/%.js")
 
 
 -- views ------------------------------------------------------------
@@ -219,7 +217,7 @@ function render_remove(web, A)
 end
 
 
-orbit.htmlify(itvision, "render_.+")
+orbit.htmlify(ITvision, "render_.+")
 
 return _M
 

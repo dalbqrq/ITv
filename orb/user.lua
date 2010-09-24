@@ -1,23 +1,20 @@
 #!/usr/bin/env wsapi.cgi
 
-require "orbit"
-module("itvision", package.seeall, orbit.new)
+-- includes & defs ------------------------------------------------------
 
--- configs ------------------------------------------------------------
-
-require "config"
 require "util"
 require "view_utils"
 
-mapper.conn, mapper.driver = config.setup_orbdb()
+require "orbit"
+require "Model"
+module(Model.name, package.seeall,orbit.new)
 
-local ma = require "model_access"
-local mr = require "model_rules"
+local user = Model.itvision:model "user"
+local group = Model.itvision:model "user_group"
+
+
 
 -- models ------------------------------------------------------------
-
-local user = itvision:model "user"
-local group = itvision:model "user_group"
 
 function user:select_user(id)
    local clause = ""
@@ -49,26 +46,28 @@ function user:select_user_and_group(id)
    return res
 end
 
+
 -- controllers ------------------------------------------------------------
 
 function list(web)
    local A = user:select_user_and_group()
    return render_list(web, A)
 end
-itvision:dispatch_get(list, "/", "/list")
+ITvision:dispatch_get(list, "/", "/list")
 
 
 function show(web, id)
    local A = user:select_user_and_group(id)
    return render_show(web, A)
-end itvision:dispatch_get(show, "/show/(%d+)")
+end 
+ITvision:dispatch_get(show, "/show/(%d+)")
 
 
 function edit(web, id)
    local A = user:select_user(id)
    return render_add(web, A)
 end
-itvision:dispatch_get(edit, "/edit/(%d+)")
+ITvision:dispatch_get(edit, "/edit/(%d+)")
 
 
 function update(web, id)
@@ -90,13 +89,13 @@ function update(web, id)
 
    return web:redirect(web:link("/list"))
 end
-itvision:dispatch_post(update, "/update/(%d+)")
+ITvision:dispatch_post(update, "/update/(%d+)")
 
 
 function add(web)
    return render_add(web)
 end
-itvision:dispatch_get(add, "/add")
+ITvision:dispatch_get(add, "/add")
 
 
 function insert(web)
@@ -112,14 +111,14 @@ function insert(web)
    user:save()
    return web:redirect(web:link("/list"))
 end
-itvision:dispatch_post(insert, "/insert")
+ITvision:dispatch_post(insert, "/insert")
 
 
 function remove(web, id)
    local A = user:select_user(id)
    return render_remove(web, A)
 end
-itvision:dispatch_get(remove, "/remove/(%d+)")
+ITvision:dispatch_get(remove, "/remove/(%d+)")
 
 
 function delete(web, id)
@@ -131,10 +130,10 @@ function delete(web, id)
 
    return web:redirect(web:link("/list"))
 end
-itvision:dispatch_get(delete, "/delete/(%d+)")
+ITvision:dispatch_get(delete, "/delete/(%d+)")
 
 
-itvision:dispatch_static("/css/%.css", "/script/%.js")
+ITvision:dispatch_static("/css/%.css", "/script/%.js")
 
 
 -- views ------------------------------------------------------------
@@ -273,7 +272,7 @@ function render_remove(web, A)
 end
 
 
-orbit.htmlify(itvision, "render_.+")
+orbit.htmlify(ITvision, "render_.+")
 
 return _M
 

@@ -1,14 +1,15 @@
+module (..., package.seeall);
 
-require "Model"
+require "config"
 require "util"
 require "messages"
 
-local db = Model.db
 local dado = require "dado"
-local inst = " instance_id = "..db.instance_id
-local cond = nil
+local inst = " instance_id = "..config.db.instance_id
+local cond = ""
+local db = config.db -- the default db config is the ndoutils (nagios) db
 
-objecttype = {
+local objecttype = {
    [1] = "Host",
    [2] = "Service",
    [3] = "Host group",
@@ -30,17 +31,17 @@ objecttype = {
 
 function set_db (db_)
     db = db_
-    inst = " instance_id = "..db_.instance_id
 end
 
 
 function connect ()
+   --local db = config.db
+   --local db = config.servdesk_db
    return dado.connect (db.dbname, db.dbuser, db.dbpass, db.driver)
 end
 
 
 function select_columns (table_) -- Retorna tabela com nome dos campos de uma tabela sql
-   local db = connect ()
    local content = {}
    local cur = assert ( db:assertexec ("show columns from "..table_))
    local row = cur:fetch ({}, "a")
@@ -75,8 +76,7 @@ function set_cond (cond_) -- include instance condition
 end
 
 
---function select (table_, cond_, extra_, columns_)
-function query (table_, cond_, extra_, columns_)
+function select (table_, cond_, extra_, columns_)
    local db = connect ()
    local cond = set_cond (cond_)
    if not columns_ then columns_ = "*" end

@@ -1,39 +1,34 @@
 #!/usr/bin/env wsapi.cgi
 
-require "orbit"
-
-module("itvision", package.seeall, orbit.new)
-
--- configs ------------------------------------------------------------
-
-require "config"
+-- includes & defs ------------------------------------------------------
 require "util"
 require "view_utils"
 
-mapper.conn, mapper.driver = config.setup_orbdb()
+require "orbit"
+require "Model"
+module(Model.name, package.seeall,orbit.new)
 
-local ma = require "model_access"
-local mr = require "model_rules"
+local app = Model.itvision:model "app"
+
 
 -- models ------------------------------------------------------------
 
-local apps = itvision:model "apps"
 
-function apps:select_apps(id)
+function app:select_apps(id)
    local clause = ""
    if id then
-      clause = "app_id = "..id
+      clause = "id = "..id
    end
    return self:find_all(clause)
 end
 
-function apps:select_apps_and_B(id)
+function app:select_apps_and_B(id)
    local clause = "apps.id = B.id"
 
    if id then
       clause = clause.." and apps.id = "..tostring(id)
    end
-   local tables = "itvision_apps A, itvision_B B"
+   local tables = "itvision_app A, itvision_B B"
    local cols = "A.name as name, A.type as type, B.name as B_name, B.id, A.id as A_id"
    local res = ma.select (tables, clause, "", cols) 
 
@@ -43,31 +38,31 @@ end
 -- controllers ------------------------------------------------------------
 
 function list(web)
-   local A = apps:select_apps()
+   local A = app:select_apps()
    return render_list(web, A)
 end
-itvision:dispatch_get(list, "/", "/list")
+ITvision:dispatch_get(list, "/", "/list")
 
 
 function show(web, id)
-   local A = apps:select_apps(id)
+   local A = app:select_apps(id)
    return render_show(web, A)
 end
-itvision:dispatch_get(show, "/show/(%d+)")
+ITvision:dispatch_get(show, "/show/(%d+)")
 
 
 function edit(web, id)
-   local A = apps:select_apps()
-   local B = apps:select_apps_and_B(id)
+   local A = app:select_apps()
+   local B = app:select_apps_and_B(id)
    return render_add(web, A, B)
 end
-itvision:dispatch_get(edit, "/edit/(%d+)")
+ITvision:dispatch_get(edit, "/edit/(%d+)")
 
 
 function update(web, id)
    local A = {}
    if id then
-      local tables = "itvision_apps"
+      local tables = "itvision_app"
       local clause = "id = "..id
       --A:new()
       A.name = web.input.name
@@ -78,14 +73,14 @@ function update(web, id)
 
    return web:redirect(web:link("/list"))
 end
-itvision:dispatch_post(update, "/update/(%d+)")
+ITvision:dispatch_post(update, "/update/(%d+)")
 
 
 function add(web)
-   local A = apps:select_apps()
+   local A = app:select_apps()
    return render_add(web, A)
 end
-itvision:dispatch_get(add, "/add")
+ITvision:dispatch_get(add, "/add")
 
 
 function insert(web)
@@ -96,29 +91,29 @@ function insert(web)
    A:save()
    return web:redirect(web:link("/list"))
 end
-itvision:dispatch_post(insert, "/insert")
+ITvision:dispatch_post(insert, "/insert")
 
 
 function remove(web, id)
-   local A = apps:select_apps(id)
+   local A = app:select_apps(id)
    return render_remove(web, A)
 end
-itvision:dispatch_get(remove, "/remove/(%d+)")
+ITvision:dispatch_get(remove, "/remove/(%d+)")
 
 
 function delete(web, id)
    if id then
       local clause = "id = "..id
-      local tables = "itvision_apps"
+      local tables = "itvision_app"
       ma.delete (tables, clause) 
    end
 
    return web:redirect(web:link("/list"))
 end
-itvision:dispatch_get(delete, "/delete/(%d+)")
+ITvision:dispatch_get(delete, "/delete/(%d+)")
 
 
-itvision:dispatch_static("/css/%.css", "/script/%.js")
+ITvision:dispatch_static("/css/%.css", "/script/%.js")
 
 
 -- views ------------------------------------------------------------
@@ -267,7 +262,7 @@ function render_remove(web, A)
 end
 
 
-orbit.htmlify(itvision, "render_.+")
+orbit.htmlify(ITvision, "render_.+")
 
 return _M
 

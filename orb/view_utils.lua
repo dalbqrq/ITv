@@ -9,11 +9,13 @@
 
 ]]
 
-require "orbit"
-module("ap", package.seeall, orbit.new)
 require "cosmo"
+require "orbit"
+require "Model"
+module(Model.name, package.seeall, orbit.new)
 
 require "messages"
+
 
 local scrt = [[
    function confirmation(question, url) { 
@@ -48,34 +50,15 @@ end
 
 
 local menu = {}
-   menu[#menu + 1] = button_link("IC", "/orb/ci")
-   menu[#menu + 1] = button_link("COMP", "/orb/computer")
    menu[#menu + 1] = button_link("ARVORE APPS", "/orb/app_tree")
-   menu[#menu + 1] = button_link("APPS", "/orb/apps")
-   menu[#menu + 1] = button_link("APP LIST", "/orb/app_list")
-   menu[#menu + 1] = button_link("RELAC.", "/orb/app_relat")
-   menu[#menu + 1] = button_link("TIPO RELAC.", "/orb/app_relat_type")
-   menu[#menu + 1] = button_link("CONTRATOS", "/orb/contract")
-   menu[#menu + 1] = button_link("LOCAL.", "/orb/location_tree")
-   menu[#menu + 1] = button_link("FABR.", "/orb/manufacturer")
+   menu[#menu + 1] = button_link("APPS", "/orb/app")
+   menu[#menu + 1] = button_link("APP LIST", "/orb/app_object")
+   menu[#menu + 1] = button_link("APP RELAC", "/orb/app_relat")
+   menu[#menu + 1] = button_link("TIPO RELAC", "/orb/app_relat_type")
    menu[#menu + 1] = button_link("USUARIO", "/orb/user")
    menu[#menu + 1] = button_link("GRUPO", "/orb/user_group")
-   menu[#menu + 1] = button_link("CHECK", "/orb/checkcmd")
-   menu[#menu + 1] = button_link("SIS.", "/orb/sysconfig")
---[[
-   menu[#menu + 1] = button_link("ARVORE APPS", "http://itv/orb/app_tree")
-   menu[#menu + 1] = button_link("APPS", "http://itv/orb/apps")
-   menu[#menu + 1] = button_link("APP LIST", "http://itv/orb/app_list")
-   menu[#menu + 1] = button_link("RELACIONAMENTOS", "http://itiv/orb/app_relat")
-   menu[#menu + 1] = button_link("TIPO RELAC.", "http://itiv/orb/app_relat_type")
-   menu[#menu + 1] = button_link("CONTRATOS", "http://itiv/orb/contract")
-   menu[#menu + 1] = button_link("LOCALIZACAO", "http://itiv/orb/location_tree")
-   menu[#menu + 1] = button_link("FABRICANTE", "http://itiv/orb/manufacturer")
-   menu[#menu + 1] = button_link("USUARIO", "http://itiv/orb/user")
-   menu[#menu + 1] = button_link("GRUPO", "http://itiv/orb/user_group")
-   menu[#menu + 1] = button_link("CHECK", "http://itiv/orb/checkcmd")
-   menu[#menu + 1] = button_link("SISTEMA", "http://itiv/orb/sysconfig")
-]]
+   menu[#menu + 1] = button_link("CHECK CMDS", "/orb/checkcmd")
+   menu[#menu + 1] = button_link("SISTEMA", "/orb/sysconfig")
    menu[#menu + 1] = "<br><br><br><p><br><p> "
 
 
@@ -135,11 +118,8 @@ function select_option(name, T, value_idx, label_idx, default_value)
       end
 
       local str= ""
-
       str = str..v[value_idx]
-
       str = str..v[label_idx]
-
       str = str..selected
 
       olist[#olist + 1] = "<option "..selected.." value=\""..v[value_idx].."\" label=\"".. 
@@ -189,7 +169,8 @@ function render_map(web, lat, lon)
    function load() {
       //comprovamos se o navegador é compatível com os mapas de google
       if (GBrowserIsCompatible()) {
-         //instanciamos um mapa com GMap, passando-lhe uma referência à camada ou <div> onde quisermos mostrar o mapa
+         //instanciamos um mapa com GMap, passando-lhe uma referência à camada 
+         // ou <div> onde quisermos mostrar o mapa
          var map = new GMap2(document.getElementById("map"));   
          //centralizamos o mapa em uma latitude e longitude desejadas
          map.setCenter(new GLatLng(]]..lat..[[,]]..lon..[[), 18);   

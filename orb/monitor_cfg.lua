@@ -1,9 +1,7 @@
 
-local m = require "model_access"
-local r = require "model_rules"
-
 require "config"
 require "util"
+require "Model"
 
 local cfg_dir = config.monitor_dir.."/etc/itvision/"
 
@@ -19,17 +17,17 @@ end
 ----------------------------- SYSTEM MANTEINANCE ----------------------------------
 
 function restart_monitor ()
-   m.execute ( "LOCK TABLE itvision_app_tree WRITE" )
+   Model.execute ( "LOCK TABLE itvision_app_tree WRITE" )
    --local cmd = os.capture (config.monitor_script.." restart", 1)
-   m.execute ( "UNLOCK TABLES" )
+   Model.execute ( "UNLOCK TABLES" )
    return cmd
 end
 
 
 function restart_monitor_bp ()
-   m.execute ( "LOCK TABLE itvision_app_tree WRITE" )
+   Model.execute ( "LOCK TABLE itvision_app_tree WRITE" )
    local cmd = os.capture (config.monitor_bp_script.." restart", 1)
-   m.execute ( "UNLOCK TABLES" )
+   Model.execute ( "UNLOCK TABLES" )
    return cmd
 end
 
@@ -38,7 +36,7 @@ end
 
 function insert_host_cfg_file (hostname, alias, ip)
    if not  ( hostname and alias and ip ) then return false end
-   local content = m.select("nagios_objects",nil, nil, "max(object_id)+1 as id")
+   local content = Model.query("nagios_objects",nil, nil, "max(object_id)+1 as id")
    local text = [[
 define host{
         use]].."\t\t"..[[linux-server
@@ -58,7 +56,7 @@ end
 
 function insert_service_cfg_file (display_name, hostname, check_cmd)
    if not  ( display_name and hostname and check_cmd ) then return false end
-   local content = m.select("nagios_objects",nil, nil, "max(object_id)+1 as id")
+   local content = Model.query("nagios_objects",nil, nil, "max(object_id)+1 as id")
    local text = [[
 define service{
         use]].."\t\t\t"..[[linux-server 
