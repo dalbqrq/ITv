@@ -48,7 +48,7 @@ end
 
 function list(web, id)
    local B = app:select_apps()
-   if id == "/" then id = B[1].app_id end
+   if id == "/" then id = B[1].id end
    local A = Model.select_app_app_objects(id)
    return render_list(web, A, B, id)
 end
@@ -56,15 +56,15 @@ ITvision:dispatch_get(list, "/", "/list/(%d+)")
 
 
 function show(web, id)
-   local A = apps:select_apps(id)
+   local A = app:select_apps(id)
    return render_show(web, A, id)
 end ITvision:dispatch_get(show, "/show/(%d+)")
 
 
 function add(web, id)
-   local H = mr.select_host_object()
-   local S = mr.select_service_object()
-   local A = mr.select_service_object(nil, nil, nil, true)
+   local H = Model.select_host_object()
+   local S = Model.select_service_object()
+   local A = Model.select_service_object(nil, nil, nil, true)
    local APPL = Model.select_app_app_objects(id)
    return render_add(web, H, S, A, APPL, id)
 end
@@ -74,20 +74,20 @@ ITvision:dispatch_get(add, "/add/(%d+)")
 -- TODO: problema na inclusão de multiplos itens
 function insert(web)
    app_object:new()
-local r = ""
+--local r = ""
    if type(web.input.item) == "table" then
       for i, v in ipairs(web.input.item) do
          app_object.app_id = web.input.app_id
          app_object.type = web.input.type
-         app_object.instance_id = config.db.instance_id
+         app_object.instance_id = Model.db.instance_id
          app_object.object_id = v
          app_object:save()
-r = r.."|"..v
+--r = r.."|"..v
       end
    else
       app_object.app_id = web.input.app_id
       app_object.type = web.input.type
-      app_object.instance_id = config.db.instance_id
+      app_object.instance_id = Model.db.instance_id
       app_object.object_id = web.input.item
       app_object:save()
    end
@@ -98,7 +98,7 @@ ITvision:dispatch_post(insert, "/insert")
 
 
 function remove(web, app_id, obj_id)
-   local A = apps:select_apps(app_id)
+   local A = app:select_apps(app_id)
    local O = objects:select_objects(obj_id)
    return render_remove(web, A, O)
 end
@@ -109,7 +109,7 @@ function delete(web, app_id, obj_id)
    if app_id and obj_id then
       local clause = "app_id = "..app_id.." and object_id = "..obj_id
       local tables = "itvision_app_object"
-      ma.delete (tables, clause) 
+      Model.delete (tables, clause) 
    end
 
    return web:redirect(web:link("/list/"..app_id))
@@ -139,7 +139,7 @@ function render_list(web, A, B, app_id)
       if tonumber(v.id) == tonumber(app_id) then 
          selected = " selected " 
          curr_app = i
-         sel_app = v.app_id
+         sel_app = v.id
       else 
          selected = " "
       end
@@ -168,10 +168,10 @@ function render_table(web, A)
       if v.name2 then obj = v.name2.."@"..obj end
 
       rows[#rows + 1] = tr{ 
-         td{ a{ href= web:link("/show/"..v.id), v.app_name} },
+         td{ a{ href= web:link("/show/"..v.app_id), v.app_name} },
          td{ align="center", v.list_type },
          td{ align="right", obj },
-         td{ button_link(strings.remove, web:link("/remove/"..v.id..":"..v.object_id), "negative") },
+         td{ button_link(strings.remove, web:link("/remove/"..v.app_id..":"..v.object_id), "negative") },
       }
    end
 
@@ -199,7 +199,7 @@ function render_show(web, A, app_id)
    local svc = {}
    local lst = {}
 
-   web.prefix = "/orb/apps" 
+   web.prefix = "/orb/app" 
 
    --res[#res + 1] = p{ button_link(strings.add, web:link("/add")) }
    res[#res + 1] = p{ button_link(strings.remove, web:link("/remove/"..app_id)) }
@@ -209,7 +209,7 @@ function render_show(web, A, app_id)
 
    if A then
       if A.service_object_id then
-         --lst = mr.select_host_object(...
+         --lst = Model.select_host_object(...
          svc = "-to change-"
       else
          svc = "-nonono-"
@@ -247,7 +247,6 @@ function render_add(web, H, S, A, APPL, app_id)
    local s = ""
 
    --local app_id = 0
-
    --if APPL[1] then app_id = APPL[1].app_id end
 
    local make_form = function(selopt)
@@ -331,14 +330,14 @@ function render_remove(web, A, O)
             obj = O.name2.."@"..O.name1
          end
       end
-      url_ok = "/delete/"..A.app_id..":"..O.object_id
+      url_ok = "/delete/"..A.id..":"..O.object_id
       url_cancel = "/list"
    end
 
    res[#res + 1] = p{
       strings.exclude_quest.." o "..strings.host.."/"..strings.service.." "..obj.." da "..strings.application.." "..A.name.."?",
-      p{ button_link(strings.yes, web:link("/delete/"..A.app_id..":"..O.object_id)) },
-      p{ button_link(strings.cancel, web:link("/list/"..A.app_id)) },
+      p{ button_link(strings.yes, web:link("/delete/"..A.id..":"..O.object_id)) },
+      p{ button_link(strings.cancel, web:link("/list/"..A.id)) },
    }
 
    return render_layout(res)

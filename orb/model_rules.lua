@@ -134,14 +134,14 @@ function select_app_relat_object (id, from, to)
                       itvision_app_relat_type rt, itvision_app ap]]
    local cond_    = [[ar.from_object_id = o1.object_id and 
                       ar.to_object_id = o2.object_id and
-                      ar.app_relat_type_id = rt.app_relat_type_id and
-                      ar.app_id = ap.app_id ]]
+                      ar.app_relat_type_id = rt.id and
+                      ar.app_id = ap.id ]]
    local columns_ = [[o1.name1 as from_name1, o1.name2 as from_name2, 
                       o2.name1 as to_name1, o2.name2 as to_name2,
                       ar.from_object_id, ar.to_object_id,
                       ar.app_id as app_id, ap.name as app_name, 
-                      ar.connection_type, ar.app_relat_type_id, 
-                      rt.name as rtype_name,
+                      ar.app_relat_type_id, 
+                      rt.name as rtype_name, rt.type as rtype_type,
                       ar.from_object_id, ar.to_object_id ]]
 
    if id then cond_ = cond_ .. " and ar.app_id = "..id end

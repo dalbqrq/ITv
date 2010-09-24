@@ -8,9 +8,9 @@ require "orbit"
 require "Model"
 module(Model.name, package.seeall,orbit.new)
 
-local app = Model.ITvision:model "app"
+local app = Model.itvision:model "app"
 local services = Model.nagios:model "services"
-local app_relat_type = Model.ITvision:model "app_relat_type"
+local app_relat_type = Model.itvision:model "app_relat_type"
 
 
 -- models ------------------------------------------------------------
@@ -19,7 +19,7 @@ local app_relat_type = Model.ITvision:model "app_relat_type"
 function app_relat_type:select_app_relat_type(id)
    local clause = ""
    if id then
-      clause = "app_relat_type_id = "..id
+      clause = "id = "..id
    end
    return self:find_all(clause)
 end
@@ -50,9 +50,10 @@ function update(web, id)
    local A = {}
    if id then
       local tables = "itvision_app_relat_type"
-      local clause = "app_relat_type_id = "..id
+      local clause = "id = "..id
       --A:new()
       A.name = web.input.name
+      A.type = web.input.type
 
       Model.update (tables, A, clause) 
    end
@@ -70,8 +71,9 @@ ITvision:dispatch_get(add, "/add")
 
 function insert(web)
    app_relat_type:new()
-   app_relat_type.instance_id = config.db.instance_id
+   -- app_relat_type.instance_id = Model.db.instance_id
    app_relat_type.name = web.input.name
+   app_relat_type.type = web.input.type
    app_relat_type:save()
    return web:redirect(web:link("/list"))
 end
@@ -87,7 +89,7 @@ ITvision:dispatch_get(remove, "/remove/(%d+)")
 
 function delete(web, id)
    if id then
-      local clause = "app_relat_type_id = "..id
+      local clause = "id = "..id
       local tables = "itvision_app_relat_type"
       Model.delete (tables, clause) 
    end
@@ -111,9 +113,10 @@ function render_list(web, A)
 
    for i, v in ipairs(A) do
       rows[#rows + 1] = tr{ 
-         td{ a{ href= web:link("/show/"..v.app_relat_type_id), v.name} },
-         td{ button_link(strings.remove, web:link("/remove/"..v.app_relat_type_id), "negative") },
-         td{ button_link(strings.edit, web:link("/edit/"..v.app_relat_type_id)) },
+         td{ a{ href= web:link("/show/"..v.id), v.name} },
+         td{ strings[v.type] },
+         td{ button_link(strings.remove, web:link("/remove/"..v.id), "negative") },
+         td{ button_link(strings.edit, web:link("/edit/"..v.id)) },
       }
    end
 
@@ -121,6 +124,7 @@ function render_list(web, A)
       thead{ 
          tr{ 
              th{ strings.name }, 
+             th{ strings.type }, 
              th{ "." },
              th{ "." },
          }
@@ -139,8 +143,8 @@ function render_show(web, A)
    local res = {}
 
    res[#res + 1] = p{ button_link(strings.add, web:link("/add")) }
-   res[#res + 1] = p{ button_link(strings.remove, web:link("/remove/"..A.app_relat_type_id)) }
-   res[#res + 1] = p{ button_link(strings.edit, web:link("/edit/"..A.app_relat_type_id)) }
+   res[#res + 1] = p{ button_link(strings.remove, web:link("/remove/"..A.id)) }
+   res[#res + 1] = p{ button_link(strings.edit, web:link("/edit/"..A.id)) }
    res[#res + 1] = p{ button_link(strings.list, web:link("/list")) }
    res[#res + 1] = p{ br(), br() }
 
@@ -148,6 +152,7 @@ function render_show(web, A)
       res[#res + 1] = { H("table") { border=1, cellpadding=1,
          tbody{
             tr{ th{ strings.name }, td{ A.name } },
+            tr{ th{ strings.type }, td{ A.type } },
          }
       } }
    else
@@ -172,8 +177,10 @@ function render_add(web, edit)
    if edit then
       edit = edit[1]
       val1 = edit.name
-      url = "/update/"..edit.app_relat_type_id
+      val2 = edit.type
+      url = "/update/"..edit.id
    else
+      val2 = "logical"
       url = "/insert"
    end
 
@@ -186,7 +193,8 @@ function render_add(web, edit)
       method = "post",
       action = web:link(url),
 
-      strings.name..": ", input{ type="text", name="name", value = val1 },br(),
+      strings.name..": ", input{ type="text", name="name", value = val1 },br(), 
+      strings.type..": ", select_physical_logical("type", val2), br(),
 
       p{ button_form(strings.send, "submit", "positive") },
       p{ button_form(strings.reset, "reset", "negative") },
@@ -202,7 +210,7 @@ function render_remove(web, A)
 
    if A then
       A = A[1]
-      url_ok = web:link("/delete/"..A.app_relat_type_id)
+      url_ok = web:link("/delete/"..A.id)
       url_cancel = web:link("/list")
    end
 

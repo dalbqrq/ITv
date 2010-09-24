@@ -13,7 +13,7 @@ local services = Model.nagios:model "services"
 
 -- models ------------------------------------------------------------
 
-function app:select_app(id)
+function app:select_apps(id)
    local clause = ""
    if id then
       clause = "id = "..id
@@ -34,21 +34,21 @@ end
 -- controllers ------------------------------------------------------------
 
 function list(web)
-   local A = app:select_app()
+   local A = app:select_apps()
    return render_list(web, A)
 end
 ITvision:dispatch_get(list, "/", "/list")
 
 
 function show(web, id)
-   local A = apps:select_apps(id)
+   local A = app:select_apps(id)
    return render_show(web, A)
 end 
 ITvision:dispatch_get(show, "/show/(%d+)")
 
 
 function edit(web, id)
-   local A = apps:select_apps(id)
+   local A = app:select_apps(id)
    return render_add(web, A)
 end
 ITvision:dispatch_get(edit, "/edit/(%d+)")
@@ -79,20 +79,20 @@ ITvision:dispatch_get(add, "/add")
 
 
 function insert(web)
-   apps:new()
-   apps.name = web.input.name
-   apps.type = web.input.type
-   apps.is_active = web.input.is_active
+   app:new()
+   app.name = web.input.name
+   app.type = web.input.type
+   app.is_active = web.input.is_active
    --app.service_object_id = web.input.service_object_id
-   apps.instance_id = Model.db.instance_id
-   apps:save()
+   app.instance_id = Model.db.instance_id
+   app:save()
    return web:redirect(web:link("/list"))
 end
 ITvision:dispatch_post(insert, "/insert")
 
 
 function remove(web, id)
-   local A = apps:select_apps(id)
+   local A = app:select_apps(id)
    return render_remove(web, A)
 end
 ITvision:dispatch_get(remove, "/remove/(%d+)")
