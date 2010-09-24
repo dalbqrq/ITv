@@ -1,7 +1,0 @@
-#!/usr/bin/env wsapi.cgi
-
-require "app_list"
-
-return itvision
-
-

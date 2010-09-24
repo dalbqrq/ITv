@@ -1,30 +1,24 @@
 #!/usr/bin/env wsapi.cgi
 
-require "orbit"
-
-module("itvision", package.seeall, orbit.new)
-
--- configs ------------------------------------------------------------
-
-require "config"
+-- includes & defs ------------------------------------------------------
 require "util"
 require "view_utils"
 
-mapper.conn, mapper.driver = config.setup_orbdb()
+require "orbit"
+require "Model"
+module(Model.name, package.seeall,orbit.new)
 
-local ma = require "model_access"
-local mr = require "model_rules"
+local app = Model.itvision:model "app"
+local user = Model.itvision:model "user"
+local user_group = Model.itvision:model "user_group"
+
 
 -- models ------------------------------------------------------------
 
-local apps = itvision:model "apps"
-local user = itvision:model "user"
-local user_group = itvision:model "user_group"
-
-function apps:select_apps(app_id)
+function app:select_apps(app_id)
    local clause = ""
    if app_id then
-      clause = "app_id = "..app_id
+      clause = "id = "..app_id
    end
    return self:find_all(clause)
 end
@@ -51,14 +45,14 @@ function user_group:uniq(user_group_id)
 end
 
 function user_group:select_user_group_app(user_group_id)
-   local clause = "ug.root_app = ap.app_id"
+   local clause = "ug.root_app = ap.id"
 
    if user_group_id then
       clause = clause.." and ug.id = "..tostring(user_group_id)
    end
-   local tables = "itvision_user_group ug, itvision_apps ap"
-   local cols = "ap.name as name, ap.type as type, ug.name as ugname, ug.id, ap.app_id as app_id"
-   local res = ma.select (tables, clause, "", cols) 
+   local tables = "itvision_user_group ug, itvision_app ap"
+   local cols = "ap.name as name, ap.type as type, ug.name as ugname, ug.id, ap.id as app_id"
+   local res = Model.select (tables, clause, "", cols) 
 
    return res
 end
@@ -69,21 +63,21 @@ function list(web)
    local ug = user_group:select_user_group_app()
    return render_list(web, ug)
 end
-itvision:dispatch_get(list, "/", "/list")
+ITvision:dispatch_get(list, "/", "/list")
 
 
 function show(web, user_group_id)
    local ug = user_group:select_user_group_app(user_group_id)
    return render_show(web, ug)
 end
-itvision:dispatch_get(show, "/show/(%d+)")
+ITvision:dispatch_get(show, "/show/(%d+)")
 
 
 function edit(web, user_group_id)
    local ug = user_group:select_user_group_app(user_group_id)
    return render_add(web, ug)
 end
-itvision:dispatch_get(edit, "/edit/(%d+)")
+ITvision:dispatch_get(edit, "/edit/(%d+)")
 
 
 function update(web, user_group_id)
@@ -95,18 +89,18 @@ function update(web, user_group_id)
       A.name = web.input.name
       A.root_app = web.input.root_app
 
-      ma.update (tables, A, clause) 
+      Model.update (tables, A, clause) 
    end
 
    return web:redirect(web:link("/list"))
 end
-itvision:dispatch_post(update, "/update/(%d+)")
+ITvision:dispatch_post(update, "/update/(%d+)")
 
 
 function add(web)
    return render_add(web)
 end
-itvision:dispatch_get(add, "/add")
+ITvision:dispatch_get(add, "/add")
 
 
 function insert(web)
@@ -117,29 +111,29 @@ function insert(web)
    user_group:save()
    return web:redirect(web:link("/list"))
 end
-itvision:dispatch_post(insert, "/insert")
+ITvision:dispatch_post(insert, "/insert")
 
 
 function remove(web, user_group_id)
    local ug = user_group:select_user_group(user_group_id)
    return render_remove(web, ug)
 end
-itvision:dispatch_get(remove, "/remove/(%d+)")
+ITvision:dispatch_get(remove, "/remove/(%d+)")
 
 
 function delete(web, user_group_id)
    if user_group_id then
       local clause = "id = "..user_group_id
       local tables = "itvision_user_group"
-      ma.delete (tables, clause) 
+      Model.delete (tables, clause) 
    end
 
    return web:redirect(web:link("/list"))
 end
-itvision:dispatch_get(delete, "/delete/(%d+)")
+ITvision:dispatch_get(delete, "/delete/(%d+)")
 
 
-itvision:dispatch_static("/css/%.css", "/script/%.js")
+ITvision:dispatch_static("/css/%.css", "/script/%.js")
 
 
 -- views ------------------------------------------------------------
@@ -258,7 +252,7 @@ function render_add(web, edit)
    --[[
    local sel = ""
    local ap_list = {} 
-   local ap = apps:find_all()
+   local ap = app:find_all()
 
    for i, v in ipairs(ap) do
       if edit and (tonumber(edit.app_id) == tonumber(v.app_id)) then
@@ -277,7 +271,7 @@ function render_add(web, edit)
       action = web:link(url),
 
       strings.user_group_name..": ", input{ type="text", name="name", value = val }, br(),
-      strings.application..": ", select_option("root_app", apps:find_all(), "app_id", "name", default_value),br(),
+      strings.application..": ", select_option("root_app", app:find_all(), "app_id", "name", default_value),br(),
 
       --[[
       strings.application..": ", H("select"){ name="root_app",  ap_list }, br(),
@@ -311,7 +305,7 @@ function render_remove(web, ug)
 end
 
 
-orbit.htmlify(itvision, "render_.+")
+orbit.htmlify(ITvision, "render_.+")
 
 return _M
 

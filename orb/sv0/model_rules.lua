@@ -1,16 +1,15 @@
+module (..., package.seeall);
 
-require "Model"
-require "util"
 require "messages"
+require "util"
 
---local m = require "model_access"
-require "model_access"
+local m = require "model_access"
 
 
 ----------------------------- HOSTS ----------------------------------
 
 function select_host (cond_, extra_, columns_) 
-   local content = query ("nagios_hosts", cond_, extra_, columns_)
+   local content = m.select ("nagios_hosts", cond_, extra_, columns_)
    return content
 end
 
@@ -18,7 +17,7 @@ end
 function select_host_object (cond_, extra_, columns_)
    if cond_ then cond_ = " and "..cond_ else cond_ = "" end
    cond_ = cond_ .. " and o.name1 NOT LIKE 'business_processes%' " -- retira "dummy hosts" criados pelo BP
-   local content = query ("nagios_hosts h, nagios_objects o ", "h.host_object_id = o.object_id"..cond_,
+   local content = m.select ("nagios_hosts h, nagios_objects o ", "h.host_object_id = o.object_id"..cond_,
       extra_, columns_)
    return content
 end
@@ -27,7 +26,7 @@ end
 ----------------------------- SERVICES ----------------------------------
 
 function get_bp_id () -- usado para selecionar os 'services' que sao aplicacoes
-   local content = query ("nagios_objects", "name1 = 'check_bp_status'", extra_, columns_)
+   local content = m.select ("nagios_objects", "name1 = 'check_bp_status'", extra_, columns_)
    return content[1].object_id
 end
 
@@ -36,19 +35,19 @@ function select_service (cond_, extra_, columns_, app)
    if app ~= nil then app = " = " else app = " <> " end
    if cond_ ~= nil then cond_ = " and "..cond_ else cond_ = "" end
    local bp_id = get_bp_id()
-   local content = query ("nagios_services", "check_command_object_id"..app..bp_id..cond_, 
+   local content = m.select ("nagios_services", "check_command_object_id"..app..bp_id..cond_, 
       extra_, columns_)
    return content
 end
 
 
--- Exemplo de uso: t = select_service_object (nil, nil, nil, true)
+-- Exemplo de uso: t = r.select_service_object (nil, nil, nil, true)
 function select_service_object (cond_, extra_, columns_, app)
    if app ~= nil then app = " = " else app = " <> " end
    if cond_ then cond_ = " and "..cond_ else cond_ = "" end
    extra_ = "order by o.name1, o.name2" -- ignorando outros "extras" para ordenar pelo host. Pode ser melhorado!
    local bp_id = get_bp_id()
-   local content = query ("nagios_services s, nagios_objects o ", 
+   local content = m.select ("nagios_services s, nagios_objects o ", 
       "s.service_object_id = o.object_id and s.check_command_object_id"..app..bp_id..cond_, 
       extra_, columns_)
    return content
@@ -70,16 +69,16 @@ end
 ----------------------------- APP ----------------------------------
 
 function select_app (cond_, extra_, columns_)
-   local content = query ("itvision_app", cond_, extra_, columns_)
+   local content = m.select ("itvision_apps", cond_, extra_, columns_)
    return content
 end
 
 
 function insert_app (content_)
-   local table_ = "itvision_app"
-   insert (table_, content_)
+   local table_ = "itvision_apps"
+   m.insert (table_, content_)
    
-   local content = query (table_, "name = '"..content_.name.."'")
+   local content = m.select(table_, "name = '"..content_.name.."'")
    
    return content
 end
@@ -87,35 +86,35 @@ end
 
 ----------------------------- APP LIST ----------------------------------
 
-function select_app_object (cond_, extra_, columns_)
-   local content = query ("itvision_app_object", cond_, extra_, columns_)
+function select_app_list (cond_, extra_, columns_)
+   local content = m.select ("itvision_app_list", cond_, extra_, columns_)
    return content
 end
 
 
-function select_objects_app_object (cond_, extra_, columns_)
-   local content = query ("itvision_app_object", cond_, extra_, columns_)
+function select_objects_app_list (cond_, extra_, columns_)
+   local content = m.select ("itvision_app_list", cond_, extra_, columns_)
    return content
 end
 
-function select_app_app_objects (id)
-   local cond_ = "no.object_id = al.object_id and al.app_id = ap.id"
+function select_app_app_list_objects (id)
+   local cond_ = "no.object_id = al.object_id and al.app_id = ap.app_id"
    if id then
-      cond_ = cond_ .. " and ap.id = "..id
+      cond_ = cond_ .. " and ap.app_id = "..id
    end
-   local tables_ = "nagios_objects no, itvision_app_object al, itvision_app ap"
-   local columns_ = [[ no.object_id, no.objecttype_id, no.name1, no.name2, al.type as list_type, ap.id as 
-	app_id, ap.name as app_name, ap.type as app_type, ap.is_active, ap.service_object_id as service_id ]]
+   local tables_ = "nagios_objects no, itvision_app_list al, itvision_apps ap"
+   local columns_ = [[ no.object_id, no.objecttype_id, no.name1, no.name2, al.type as list_type,
+      ap.app_id, ap.name as app_name, ap.type as app_type, ap.is_active, ap.service_object_id as service_id ]]
    --local extra_ = "order by ap.app_id, no.name1, no.name2"
-   local content = query (tables_, cond_, extra_, columns_)
+   local content = m.select (tables_, cond_, extra_, columns_)
    return content
 end
 
-function insert_app_object (content_)
-   local table_ = "itvision_app_object"
-   insert (table_, content_)
+function insert_app_list (content_)
+   local table_ = "itvision_app_list"
+   m.insert (table_, content_)
    
-   local content = query (table_, "app_id = '"..content_.app_id.."'")
+   local content = m.select(table_, "app_id = '"..content_.app_id.."'")
    
    return content
 end
@@ -124,14 +123,14 @@ end
 ----------------------------- APP RELAT ----------------------------------
 
 function select_app_relat (cond_, extra_, columns_)
-   local content = query ("itvision_app_relat", cond_, extra_, columns_)
+   local content = m.select ("itvision_app_relat", cond_, extra_, columns_)
    return content
 end
 
 
 function select_app_relat_object (id, from, to)
    local tables_  = [[itvision_app_relat ar, nagios_objects o1, nagios_objects o2, 
-                      itvision_app_relat_type rt, itvision_app ap]]
+                      itvision_app_relat_type rt, itvision_apps ap]]
    local cond_    = [[ar.from_object_id = o1.object_id and 
                       ar.to_object_id = o2.object_id and
                       ar.app_relat_type_id = rt.app_relat_type_id and
@@ -146,7 +145,7 @@ function select_app_relat_object (id, from, to)
 
    if id then cond_ = cond_ .. " and ar.app_id = "..id end
    if from and to then cond_ = cond_  .. " and from_object_id = "..from.." and to_object_id = "..to end
-   local content = query (tables_, cond_, extra_, columns_)
+   local content = m.select (tables_, cond_, extra_, columns_)
 
    return content
 end
@@ -154,9 +153,9 @@ end
 
 function insert_app_relat (content_)
    local table_ = "itvision_app_relat"
-   insert (table_, content_)
+   m.insert (table_, content_)
    
-   local content = query (table_, "app_id = "..content_.app_id.." and "..
+   local content = m.select(table_, "app_id = "..content_.app_id.." and "..
       "from_object_id = "..content_.from_object_id..
       " and to_object_id = "..content_.to_object_id)
    
@@ -180,7 +179,7 @@ function select_ci (id_)
 
    id_ = tonumber(id_)
 --   if id_ then cond_ = cond_ .." and ci_id = ".. id_ end
-   local content = query (tables_, cond_, extra_, columns_)
+   local content = m.select (tables_, cond_, extra_, columns_)
 
  --  local B = "select "..columns_.." from "..tables_.." where "..cond_
    return content, nil
@@ -195,7 +194,7 @@ end
 
 function new_app_tree() -- Create table structure
    local content = {
-      id = 0,
+      app_tree_id = 0,
       instance_id = 0,
       lft = 0,
       rgt = 0,
@@ -217,7 +216,7 @@ function insert_node_app_tree(content_, origin_, position_) -- Inclui novo noh
 
    if origin_ then
       -- usuario deu a origem, entao verifica se ela existe
-      content = query ("itvision_app_tree", "id = ".. origin_)
+      content = m.select ("itvision_app_tree", "app_tree_id = ".. origin_)
    else
       -- usuario disse que é a primeira entrada. Isto eh verdade ou a arvore jah existe?
       root_id, content = select_root_app_tree()
@@ -258,24 +257,23 @@ function insert_node_app_tree(content_, origin_, position_) -- Inclui novo noh
    content_.lft    = newLft
    content_.rgt    = newRgt
 
-   execute ( "LOCK TABLE itvision_app_tree WRITE" )
+   m.execute ( "LOCK TABLE itvision_app_tree WRITE" )
    if origin_ then
-      -- devido a set do tipo "lft = lft + 2" tive que usar execute() e nao update()
-      execute("update itvision_app_tree set lft = lft + 2 where "..condLft)
-      execute("update itvision_app_tree set rgt = rgt + 2 where "..condRgt)
+      -- devido a set do tipo "lft = lft + 2" tive que usar m.execute() e nao m.update()
+      m.execute("update itvision_app_tree set lft = lft + 2 where "..condLft)
+      m.execute("update itvision_app_tree set rgt = rgt + 2 where "..condRgt)
    end
-   insert  ( "itvision_app_tree", content_)
-   execute ( "UNLOCK TABLES" )
+   m.insert  ( "itvision_app_tree", content_)
+   m.execute ( "UNLOCK TABLES" )
 
    return true, error_message(2) 
 end
 
 
 function select_root_app_tree () -- Seleciona o noh raiz da arvore
-   --local root = select ("itvision_app_tree", "lft = 1")
-   local root = query ("itvision_app_tree", "lft = 1")
+   local root = m.select ("itvision_app_tree", "lft = 1")
    if root[1] then
-      return root[1].id, root
+      return root[1].app_tree_id, root
    else
       return nil, nil
    end
@@ -286,18 +284,17 @@ function select_full_path_app_tree (origin) -- Seleciona toda sub-arvore a patir
    local root_id, root = {}
    root_id, root = select_root_app_tree()
    origin = origin or root_id
-   origin = origin or 0 -- se mesmo assim origin eh nulo, entao seta o valor como 0 (zero)
    local content = {}
 
-   columns   = [[node.id, node.instance_id, node.lft, node.rgt, node.app_id, 
-                app.name, papp.id as papp_id, papp.name as pname]]
+   columns   = [[node.app_tree_id, node.instance_id, node.lft, node.rgt, node.app_id, 
+                app.name, papp.app_id as papp_id, papp.name as pname]]
    tablename = [[itvision_app_tree AS node, itvision_app_tree AS parent, 
-                itvision_app as app, itvision_app as papp]]
-   cond      = [[node.lft BETWEEN parent.lft AND parent.rgt AND parent.id = ]] .. origin .. 
-               [[ AND node.app_id = app.id AND parent.app_id = papp.id]]
+                itvision_apps as app, itvision_apps as papp]]
+   cond      = [[node.lft BETWEEN parent.lft AND parent.rgt AND parent.app_tree_id = ]] .. origin .. 
+               [[ AND node.app_id = app.app_id AND parent.app_id = papp.app_id]]
    extra     = [[ORDER BY node.lft]]
 
-   content = query (tablename, cond, extra, columns)
+   content = m.select (tablename, cond, extra, columns)
 
    return content
 end
@@ -311,7 +308,7 @@ function select_leaf_nodes_app_tree () -- Seleciona todas as folhas da arvore
    cond      = "rgt = lft + 1"
    extra     = "ORDER BY lft"
 
-   content = query (tablename, cond, extra, columns)
+   content = m.select (tablename, cond, extra, columns)
 
    return content
 end
@@ -324,12 +321,12 @@ function select_simple_path_app_tree (origin) -- Seleciona um unico caminho part
    origin = origin or root_id
    local content = {}
 
-   columns   = "parent.id, parent.instance_id, parent.lft, parent.rgt, parent.app_id"
+   columns   = "parent.app_tree_id, parent.instance_id, parent.lft, parent.rgt, parent.app_id"
    tablename = "itvision_app_tree AS node, itvision_app_tree AS parent"
-   cond      = "node.lft BETWEEN parent.lft AND parent.rgt AND node.id = " .. origin
+   cond      = "node.lft BETWEEN parent.lft AND parent.rgt AND node.app_tree_id = " .. origin
    extra     = "ORDER BY parent.lft"
 
-   content = query (tablename, cond, extra, columns)
+   content = m.select (tablename, cond, extra, columns)
 
    return content
 end
@@ -341,13 +338,13 @@ function select_depth_app_tree (origin) -- Seleciona a profundidade de cada noh
    origin = origin or root_id
    local content = {}
 
-   columns   = [[ node.id, node.instance_id, node.lft, node.rgt, node.app_id, 
-            (COUNT(parent.id) - 1) AS depth ]]
+   columns   = [[ node.app_tree_id, node.instance_id, node.lft, node.rgt, node.app_id, 
+            (COUNT(parent.app_tree_id) - 1) AS depth ]]
    tablename = "itvision_app_tree AS node, itvision_app_tree AS parent"
-   cond      = "node.lft BETWEEN parent.lft AND parent.rgt AND node.id = " .. origin
-   extra     = "GROUP BY node.id ORDER BY parent.lft"
+   cond      = "node.lft BETWEEN parent.lft AND parent.rgt AND node.app_tree_id = " .. origin
+   extra     = "GROUP BY node.app_tree_id ORDER BY parent.lft"
 
-   content = query (tablename, cond, extra, columns)
+   content = m.select (tablename, cond, extra, columns)
 
    return content
 end
@@ -360,22 +357,22 @@ function select_depth_subtree_app_tree (origin) -- Seleciona a profundidade de c
    origin = origin or root_id
    local content = {}
 
-   columns   = [[ node.id, node.instance_id, node.lft, node.rgt, node.app_id,
-            (COUNT(parent.id) - (sub_tree.depth + 1)) AS depth ]]
+   columns   = [[ node.app_tree_id, node.instance_id, node.lft, node.rgt, node.app_id,
+            (COUNT(parent.app_tree_id) - (sub_tree.depth + 1)) AS depth ]]
    tablename = [[ itvision_app_tree AS node, itvision_app_tree AS parent, itvision_app_tree AS sub_parent
-            (   SELECT node.id, (COUNT(parent.id) - 1) AS depth
+            (   SELECT node.app_tree_id, (COUNT(parent.app_tree_id) - 1) AS depth
             FROM itvision_app_tree AS node, itvision_app_tree AS parent
             WHERE node.lft BETWEEN parent.lft AND parent.rgt
-            AND node.id = ]] .. origin .. [[
-            GROUP BY node.id
+            AND node.app_tree_id = ]] .. origin .. [[
+            GROUP BY node.app_tree_id
             ORDER BY node.lft
             ) AS sub_tree ]]
    cond      = [[ node.lft BETWEEN parent.lft AND parent.rgt
             AND node.lft BETWEEN sub_parent.lft AND sub_parent.rgt
-            AND sub_parent.id = sub_tree.id ]]
-   extra     = "GROUP BY node.id ORDER BY node.lft"
+            AND sub_parent.app_tree_id = sub_tree.app_tree_id ]]
+   extra     = "GROUP BY node.app_tree_id ORDER BY node.lft"
 
-   content = query (tablename, cond, extra, columns)
+   content = m.select (tablename, cond, extra, columns)
 
    return content
 end
@@ -387,24 +384,24 @@ function select_subrdinates_app_tree (origin) -- Encontra o noh subordinado imed
    origin = origin or root_id
    local content = {}
 
-   columns   = [[ node.id, node.instance_id, node.lft, node.rgt, node.app_id,
-            (COUNT(parent.id) - (sub_tree.depth + 1)) AS depth ]]
+   columns   = [[ node.app_tree_id, node.instance_id, node.lft, node.rgt, node.app_id,
+            (COUNT(parent.app_tree_id) - (sub_tree.depth + 1)) AS depth ]]
    tablename = [[ itvision_app_tree AS node, itvision_app_tree AS parent, itvision_app_tree AS sub_parent
-            (   SELECT node.id, (COUNT(parent.id) - 1) AS depth
+            (   SELECT node.app_tree_id, (COUNT(parent.app_tree_id) - 1) AS depth
             FROM itvision_app_tree AS node,
             itvision_app_tree AS parent
             WHERE node.lft BETWEEN parent.lft AND parent.rgt
-            AND node.id = ]] .. origin .. [[
-            GROUP BY node.id
+            AND node.app_tree_id = ]] .. origin .. [[
+            GROUP BY node.app_tree_id
             ORDER BY node.lft
             ) AS sub_tree ]]
    cond      = [[ node.lft BETWEEN parent.lft AND parent.rgt
             AND node.lft BETWEEN sub_parent.lft AND sub_parent.rgt
-            AND sub_parent.id = sub_tree.id ]]
-   extra     = [[ GROUP BY node.id HAVING depth <= 1 ORDER BY node.lft ]]
+            AND sub_parent.app_tree_id = sub_tree.app_tree_id ]]
+   extra     = [[ GROUP BY node.app_tree_id HAVING depth <= 1 ORDER BY node.lft ]]
 
 
-   content = query (tablename, cond, extra, columns)
+   content = m.select (tablename, cond, extra, columns)
 
    return content
 end
@@ -458,7 +455,7 @@ function insert_node_location_tree(content_, origin_, position_) -- Inclui novo 
 --print("position = "..position_)
    if origin_ then
       -- usuario deu a origem, entao verifica se ela existe
-      content = query ("itvision_location_tree", "location_tree_id = ".. origin_)
+      content = m.select ("itvision_location_tree", "location_tree_id = ".. origin_)
 --print("origin = "..origin_)
    else
       -- usuario disse que é a primeira entrada. Isto eh verdade ou a arvore jah existe?
@@ -506,23 +503,23 @@ function insert_node_location_tree(content_, origin_, position_) -- Inclui novo 
    content_.lft    = newLft
    content_.rgt    = newRgt
 
-   execute ( "LOCK TABLE itvision_location_tree WRITE" )
+   m.execute ( "LOCK TABLE itvision_location_tree WRITE" )
    if origin_ then
-      -- devido a set do tipo "lft = lft + 2" tive que usar execute() e nao update()
-      execute("update itvision_location_tree set lft = lft + 2 where "..condLft)
-      execute("update itvision_location_tree set rgt = rgt + 2 where "..condRgt)
+      -- devido a set do tipo "lft = lft + 2" tive que usar m.execute() e nao m.update()
+      m.execute("update itvision_location_tree set lft = lft + 2 where "..condLft)
+      m.execute("update itvision_location_tree set rgt = rgt + 2 where "..condRgt)
 --print("update itvision_location_tree set lft = lft + 2 where "..condLft)
 --print("update itvision_location_tree set rgt = rgt + 2 where "..condRgt)
    end
-   insert  ( "itvision_location_tree", content_)
-   execute ( "UNLOCK TABLES" )
+   m.insert  ( "itvision_location_tree", content_)
+   m.execute ( "UNLOCK TABLES" )
 
    return true, error_message(5) 
 end
 
 
 function select_root_location_tree () -- Seleciona o noh raiz da arvore
-   local root = query ("itvision_location_tree", "lft = 1")
+   local root = m.select ("itvision_location_tree", "lft = 1")
    if root[1] then
       return root[1].location_tree_id, root
    else
@@ -542,7 +539,7 @@ function select_full_path_location_tree (origin) -- Seleciona toda sub-arvore a 
    cond      = "node.lft BETWEEN parent.lft AND parent.rgt AND parent.location_tree_id = " .. origin
    extra     = "ORDER BY node.lft"
 
-   content = query (tablename, cond, extra, columns)
+   content = m.select (tablename, cond, extra, columns)
 
    return content
 end
@@ -556,7 +553,7 @@ function select_leaf_nodes_location_tree () -- Seleciona todas as folhas da arvo
    cond      = "rgt = lft + 1"
    extra     = "ORDER BY lft"
 
-   content = query (tablename, cond, extra, columns)
+   content = m.select (tablename, cond, extra, columns)
 
    return content
 end
@@ -574,7 +571,7 @@ function select_simple_path_location_tree (origin) -- Seleciona um unico caminho
    cond      = "node.lft BETWEEN parent.lft AND parent.rgt AND node.location_tree_id = " .. origin
    extra     = "ORDER BY parent.lft"
 
-   content = query (tablename, cond, extra, columns)
+   content = m.select (tablename, cond, extra, columns)
 
    return content
 end
@@ -592,7 +589,7 @@ function select_depth_location_tree (origin) -- Seleciona a profundidade de cada
    cond      = "node.lft BETWEEN parent.lft AND parent.rgt AND node.location_tree_id = " .. origin
    extra     = "GROUP BY node.location_tree_id ORDER BY parent.lft"
 
-   content = query (tablename, cond, extra, columns)
+   content = m.select (tablename, cond, extra, columns)
 
    return content
 end
@@ -620,7 +617,7 @@ function select_depth_subtree_location_tree (origin) -- Seleciona a profundidade
             AND sub_parent.location_tree_id = sub_tree.location_tree_id ]]
    extra     = "GROUP BY node.location_tree_id ORDER BY node.lft"
 
-   content = query (tablename, cond, extra, columns)
+   content = m.select (tablename, cond, extra, columns)
 
    return content
 end
@@ -649,7 +646,7 @@ function select_subrdinates_location_tree (origin) -- Encontra o noh subordinado
    extra     = [[ GROUP BY node.location_tree_id HAVING depth <= 1 ORDER BY node.lft ]]
 
 
-   content = query (tablename, cond, extra, columns)
+   content = m.select (tablename, cond, extra, columns)
 
    return content
 end

@@ -1,39 +1,26 @@
 #!/usr/bin/env wsapi.cgi
 
--- configs ------------------------------------------------------------
-
-require "orbit"
-require "config"
+-- includes & defs ------------------------------------------------------
 require "util"
 require "view_utils"
 
+require "orbit"
+require "Model"
+module(Model.name, package.seeall,orbit.new)
 
--- config direct access to db
-local ma = require "model_access"
-local mr = require "model_rules"
-
-
--- config ITVISION mvc app
-module("itvision", package.seeall, orbit.new)
-mapper.conn, mapper.driver = config.setup_orbdb()
-local apps = itvision:model "apps"
-local app_list = itvision:model "app_list"
-local app_relat = itvision:model "app_relat"
-local app_relat_type = itvision:model "app_relat_type"
-
--- config NAGIOS mvc app
-nagios = orbit.new()
-nagios.mapper.conn, nagios.mapper.driver = config.setup_orbdb()
-nagios.mapper.table_prefix = 'nagios_'
-local objects = nagios:model "objects"
+local app = Model.itvision:model "app"
+local app_objects = Model.itvision:model "app_objects"
+local app_relat = Model.itvision:model "app_relat"
+local app_relat_type = Model.itvision:model "app_relat_type"
+local objects = Model.nagios:model "objects"
 
 
 -- models ------------------------------------------------------------
 
-function apps:select_apps(id)
+function app:select_apps(id)
    local clause = ""
    if id then
-      clause = "app_id = "..id
+      clause = "id = "..id
    end
    return self:find_all(clause)
 end
@@ -63,7 +50,7 @@ function app_relat:delete_app_relat(id, from, to)
 end
 
 
-function app_list:select_app_list(id)
+function app_objects:select_app_objects(id)
    local clause = ""
    if id then
       clause = "app_id = "..id
@@ -95,11 +82,11 @@ end
 -- controllers ------------------------------------------------------------
 
 function list(web, id)
-   local A = apps:select_apps()
+   local A = app:select_apps()
    if id == "/" then 
       if A[1] then id = A[1].app_id else id = nil end
    end
-   local AR = mr.select_app_relat_object(id)
+   local AR = Model.select_app_relat_object(id)
    return render_list(web, id, A, AR)
 end
 itvision:dispatch_get(list, "/", "/list/(%d+)")
@@ -113,12 +100,12 @@ itvision:dispatch_get(show, "/show/(%d+)")
 
 
 function add(web, id)
-   local A = apps:select_apps()
+   local A = app:select_apps()
    if id == "/" then 
       if A[1] then id = A[1].app_id else id = nil end
    end
-   local AR = mr.select_app_relat_object(id)
-   local AL = mr.select_app_app_list_objects(id)
+   local AR = Model.select_app_relat_object(id)
+   local AL = Model.select_app_app_objects_objects(id)
    local RT = app_relat_type:select_app_relat_type()
    return render_add(web, id, A, AR, AL, RT)
 end
@@ -144,7 +131,7 @@ itvision:dispatch_post(insert, "/insert")
 
 function remove(web, app_id, from, to)
    local A = app_relat:select_app_relat(app_id, from, to)
-   local AR = mr.select_app_relat_object(id, from, to)
+   local AR = Model.select_app_relat_object(id, from, to)
    return render_remove(web, A, AR)
 end
 itvision:dispatch_get(remove, "/remove/(%d+):(%d+):(%d+)")
@@ -257,7 +244,7 @@ function render_show(web, A)
    if A then
       if A.service_object_id then
          svc = services:select_services(A.service_object_id)[1].display_name
-         --lst = mr.select_host_object(...
+         --lst = Model.select_host_object(...
       else
          svc = "-nonono-"
       end
@@ -404,7 +391,7 @@ function render_remove(web, A, AR)
 end
 
 
-orbit.htmlify(itvision, "render_.+")
+orbit.htmlify(ITvision, "render_.+")
 
 return _M
 
