@@ -32,7 +32,7 @@ RELACIONAR O CMDB DO GLPI AS TABELAS QUE DEFINEM UMA MONITORACAO. ELAS TEM O SEG
 
 
 /* computer X networkports */
-select c.id, n.id as nid, c.name, n.ip, n.itemtype from glpi_networkports n, glpi_computers c where c.id = n.items_id and itemtype="Computer";
+select c.id, n.id as nid, c.name, n.ip, n.itemtype from glpi_networkports n, glpi_computers c where c.id = n.items_id and n.itemtype = "Computer";
 
 
 /* hosts X networkports */
@@ -47,16 +47,16 @@ update nagios_hosts set networkports_id=3 where alias='Metzler';
 select host_id, config_type, alias, display_name, host_object_id from nagios_hosts, nagios_objects where host_object_id = object_id;
 
 /* networkport with nagios_object using monitor - if "without" remove "not" from query */
-select * from glpi_networkports n where itemtype="Computer" and not exists (select 1 from itvision_monitor m where m.networkports_id = n.id);
+select * from glpi_networkports n where n.itemtype = "Computer" and not exists (select 1 from itvision_monitor m where m.networkports_id = n.id);
 
 
 /* networkport X computer with nagios_object using monitor - if "without" remove "not" from query */
-select c.id, n.id as nid, c.name, n.ip, n.itemtype from glpi_networkports n, glpi_computers c where c.id = n.items_id and itemtype="Computer"
+select c.id, n.id as nid, c.name, n.ip, n.itemtype from glpi_networkports n, glpi_computers c where c.id = n.items_id and n.itemtype = "Computer"
        and not exists (select 1 from itvision_monitor m where m.networkports_id = n.id);
 
 
 /* networkport X computer with nagios_object using monitor - if "without" remove "not" from query */
-select c.id, n.id as nid, c.name, n.ip, n.itemtype from glpi_networkports n, glpi_computers c where c.id = n.items_id and itemtype="Computer"
+select c.id, n.id as nid, c.name, n.ip, n.itemtype from glpi_networkports n, glpi_computers c where c.id = n.items_id and n.itemtype = "Computer"
        and not exists (select 1 from itvision_monitor m where m.networkports_id = n.id);
 
 
@@ -77,7 +77,7 @@ ASSIM PRIMEIRO VAMOS FAZER AS QUERIES PARA VERIFICAR SE AS CLAUSULAS CONDICIONAI
 select * 
 from glpi_computers c, glpi_networkports n
 where 
-     itemtype="Computer" and
+     n.itemtype = "Computer" and
      c.id = n.items_id and 
      not exists (select 1 from glpi_computers_softwareversions csv where c.id = csv.computers_id) and
      not exists (select 1 from itvision_monitor m where m.networkports_id = n.id);
@@ -89,7 +89,7 @@ where
 select * 
 from glpi_computers c, glpi_networkports n, glpi_computers_softwareversions csv, glpi_softwareversions sv, glpi_softwares s
 where 
-     itemtype="Computer" and
+     n.itemtype = "Computer" and
      c.id = n.items_id and 
      c.id = csv.computers_id and
      csv.softwareversions_id = sv.id and
@@ -219,7 +219,7 @@ null	as m_type
 
 from glpi_computers c, glpi_networkports n
 where 
-     itemtype="Computer" and
+     n.itemtype = "Computer" and
      c.id = n.items_id and 
      not exists (select 1 from glpi_computers_softwareversions csv where c.id = csv.computers_id) and
      not exists (select 1 from itvision_monitor m where m.networkports_id = n.id);
@@ -300,7 +300,7 @@ null	as m_type
 
 from glpi_computers c, glpi_networkports n, glpi_computers_softwareversions csv, glpi_softwareversions sv, glpi_softwares s
 where 
-     itemtype="Computer" and
+     n.itemtype = "Computer" and
      c.id = n.items_id and 
      c.id = csv.computers_id and
      csv.softwareversions_id = sv.id and
@@ -384,6 +384,7 @@ m.type			as m_type
 from glpi_computers c, glpi_networkports n,
      nagios_objects o, nagios_hosts hst, nagios_services svc, itvision_monitor m
 where
+     n.itemtype = "Computer" and
      c.id = n.items_id and 
      n.id = m.networkports_id and
      m.host_object_id = o.object_id and
@@ -463,6 +464,7 @@ m.type			as m_type
 from glpi_computers c, glpi_networkports n,
      nagios_objects o, itvision_monitor m
 where
+     n.itemtype = "Computer" and
      c.id = n.items_id and 
      n.id = m.networkports_id and
      not exists (select 1 from glpi_computers_softwareversions csv where c.id = csv.computers_id);
@@ -543,6 +545,7 @@ m.type			as m_type
 from glpi_computers c, glpi_networkports n, glpi_computers_softwareversions csv, glpi_softwareversions sv, glpi_softwares s,
      nagios_objects o, nagios_hosts hst, nagios_services svc, itvision_monitor m
 where
+     n.itemtype = "Computer" and
      c.id = n.items_id and 
      c.id = csv.computers_id and
      csv.softwareversions_id = sv.id and

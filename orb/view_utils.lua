@@ -9,8 +9,6 @@
 
 ]]
 
-require "cosmo"
-require "orbit"
 require "Model"
 module(Model.name, package.seeall, orbit.new)
 
@@ -176,6 +174,38 @@ function render_layout(inner_html)
       },
       body{ inner_html }
    }
+end
+
+
+function render_table_(t)
+   --local res = {}
+   --local row = {}
+   --local hea = {}
+   local i, j, v, w
+
+   for i, v in ipairs(t) do
+      for j, w in ipairs(v) do
+         if i == 1 then
+            col[#col+1] = th{ align="center", w }
+--            s = s.. "<th align=\"center\">".. w .."</tr>"
+         else
+            col[#col+1] = td{ w }
+--            s = s.. "<td>" .. w .."</td>"
+         end
+
+      end
+
+      if i == 1 then
+         hea         = tr{ class="tab_bg_1", col }
+--         hea         = "<tr class=\"tab_bg_1\">".. col .."</tr>"
+      else
+         row[#row+1] = tr{ class='tab_bg_1', col }
+--         row         = "<tr class=\"tab_bg_1\">".. col .."</tr>"
+      end
+   end
+
+   return html{ H("table") { border="0", class="tab_cadrehov", thead{ hea }, tbody{ row } } }
+
 end
 
 
