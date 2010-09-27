@@ -71,7 +71,6 @@ ITvision:dispatch_get(add, "/add")
 
 function insert(web)
    app_relat_type:new()
-   -- app_relat_type.instance_id = Model.db.instance_id
    app_relat_type.name = web.input.name
    app_relat_type.type = web.input.type
    app_relat_type:save()

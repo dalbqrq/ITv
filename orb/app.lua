@@ -18,8 +18,7 @@ function app:select_apps(id)
    if id then
       clause = "id = "..id
    end
-   --return self:find_all(clause)
-   return Model.query("itvision_app")
+   return self:find_all(clause)
 end
 
 

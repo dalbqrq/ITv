@@ -178,7 +178,7 @@ function render_list(web, id, A, AR)
    res[#res + 1] = p{ strings.application..": ", str };
    res[#res + 1] = p{ render_selector(web, A, id, "/list/") }
    res[#res + 1] = p{ render_table(web, AR) }
-   res[#res + 1] = p{ button_link(strings.add, web:link("/add/"..id)) }
+   if id then res[#res + 1] = p{ button_link(strings.add, web:link("/add/"..id)) } end
 
    return render_layout(res)
 end

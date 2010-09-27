@@ -48,7 +48,7 @@ end
 
 function list(web, id)
    local B = app:select_apps()
-   if id == "/" then id = B[1].id end
+   if (id == "/") and (B[1] ~= nil)  then id = B[1].id else id = nil end
    local A = Model.select_app_app_objects(id)
    return render_list(web, A, B, id)
 end
@@ -149,12 +149,15 @@ function render_list(web, A, B, app_id)
 
 
    res[#res + 1] = p{ strings.application..": ", str };
-   res[#res + 1] = p{ render_show(web, B[curr_app], sel_app) }
+   if sel_app ~= nil then 
+   	web.prefix = "/orb/app_object"
 
-   web.prefix = "/orb/app_object"
-   res[#res + 1] = p{ button_link(strings.add, web:link("/add/"..app_id)) }
-   res[#res + 1] = p{ br(), br() }
-   res[#res + 1] = p{ render_table(web, A) }
+   	res[#res + 1] = p{ render_show(web, B[curr_app], sel_app) }
+
+   	res[#res + 1] = p{ button_link(strings.add, web:link("/add/"..app_id)) }
+   	res[#res + 1] = p{ br(), br() }
+   	res[#res + 1] = p{ render_table(web, A) }
+    end
 
    return render_layout(res)
 end

@@ -1,5 +1,6 @@
 module("Model", package.seeall)
 
+require "orbit"
 require "config"
 
 name = config.app_name

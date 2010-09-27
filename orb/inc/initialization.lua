@@ -9,7 +9,7 @@ function init_config () --  inicia tabela itvision_config
 
    if content[1] == nil then
       content = {}
-      content.instance_id = config.db.instance_id 
+      content.instance_id = Model.db.instance_id 
       content.created = "now()"
       content.updated = "now()"
       content.version = "0.9"
@@ -29,10 +29,16 @@ function init_app_relat_type ()
 
    if content[1] == nil then
       t.name = "roda em"
+      t.type = "physical"
       Model.insert ("itvision_app_relat_type", t)
       t.name = "conectado a"
+      t.type = "physical"
+      Model.insert ("itvision_app_relat_type", t)
+      t.name = "usa"
+      t.type = "logical"
       Model.insert ("itvision_app_relat_type", t)
       t.name = "faz backup em"
+      t.type = "logical"
       Model.insert ("itvision_app_relat_type", t)
    end
 
@@ -56,6 +62,7 @@ function init_app_tree() --  inicia tabela itvision_app_tree com app da propria 
    -- aplicacao de controle do proprio ITvision local
    t = {}
    t.name = "ITvision"
+   t.instance_id = Model.db.instance_id
    t.type = "and"
    app1 = Model.insert_app(t)
 
@@ -64,10 +71,11 @@ function init_app_tree() --  inicia tabela itvision_app_tree com app da propria 
    -- localhost
    hst = Model.select_host_object("alias = 'localhost'")
    t = {}
-   t.app_id = app1[1].app_id
+   t.app_id = app1[1].id
    t.object_id = hst[1].host_object_id
    t.type = 'hst'
-   app_lst = Model.insert_app_list(t)
+   t.instance_id = Model.db.instance_id
+   app_lst = Model.insert_app_object(t)
 
 
    -- servicos SSH, PING e HTTP
@@ -75,21 +83,22 @@ function init_app_tree() --  inicia tabela itvision_app_tree com app da propria 
          hst[1].host_object_id)
    for i, v in ipairs(svc) do
       t = {}
-      t.app_id = app1[1].app_id
+      t.app_id = app1[1].id
       t.object_id = svc[i].service_object_id
       t.type = 'svc'
-      app_lst = Model.insert_app_list(t)
+      t.instance_id = Model.db.instance_id
+      app_lst = Model.insert_app_object(t)
    
       -- relacionamentos
       rt = {}
       rt = Model.query ("itvision_app_relat_type", "name = 'roda em'")
       if rt[1] then
          t = {}
-         t.app_id = app1[1].app_id
+         t.app_id = app1[1].id
+         t.instance_id = Model.db.instance_id
+         t.app_relat_type_id = rt[1].id
          t.from_object_id = svc[i].service_object_id
          t.to_object_id = hst[1].host_object_id
-         t.connection_type = 'physical'
-         t.app_relat_type_id = rt[1].app_relat_type_id
          app_rel = Model.insert_app_relat(t)
       end
    end
@@ -97,13 +106,14 @@ function init_app_tree() --  inicia tabela itvision_app_tree com app da propria 
 
 
    -- Deve-se criar a config do servico "bp" da aplicacao "ITvision" e recuperar 
-   -- o object_id desta para a inclusao da mesma na tabela itvision_app_list da
+   -- o object_id desta para a inclusao da mesma na tabela itvision_app_object da
    -- aplicacao da INSTSTANCIA que serah criada abaixo
 
    -- aplicacao raiz do instancia
    t = {}
-   ins = Model.query("nagios_instances", "instance_id = "..config.db.instance_id)
+   ins = Model.query("nagios_instances", "instance_id = "..Model.db.instance_id)
    t.name = ins[1].instance_name
+   t.instance_id = Model.db.instance_id
    t.type = "and"
    app2 = Model.insert_app(t)
 
@@ -111,10 +121,11 @@ function init_app_tree() --  inicia tabela itvision_app_tree com app da propria 
    -- o primeiro IM da aplicacao raiz eh a aplicacao ITvision
    app = Model.select_service_app_object("display_name = 'basic_app'")-- TODO: deve ser bp criado acima!
    t = {}
-   t.app_id = app2[1].app_id
+   t.app_id = app2[1].id
+   t.instance_id = Model.db.instance_id
    t.object_id = app[1].service_object_id 
    t.type = 'and'
-   app_lst = Model.insert_app_list(t)
+   app_lst = Model.insert_app_object(t)
 
    -- inclui aplicacao raiz na arvore que ainda deve estar vazia
    tree = {}
@@ -130,5 +141,6 @@ function init_app_tree() --  inicia tabela itvision_app_tree com app da propria 
    return true
 
 end
+
 
 
