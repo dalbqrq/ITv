@@ -249,7 +249,7 @@ function render_remove(web, A)
    end
 
    res[#res + 1] = p{
-      strings.exclude_quest.." "..strings.sysconfig.." "..A.version.."?",
+      strings.exclude_quest.." sysconfig "..A.version.."?",
       p{ button_link(strings.yes, web:link(url_ok)) },
       p{ button_link(strings.cancel, web:link(url_cancel)) },
    }

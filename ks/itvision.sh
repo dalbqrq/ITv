@@ -177,7 +177,7 @@ cat << EOF > /etc/default/ndoutils
 ENABLE_NDOUTILS=1
 DAEMON_OPTS="-c /usr/local/monitor/etc/ndo2db.cfg"
 EOF
-cat << EOF > /usr/local/bin
+cat << EOF > /usr/local/bin/reset-bp
 #!/bin/bash
 
 /usr/local/monitorbp/bin/bp_cfg2service_cfg.pl
