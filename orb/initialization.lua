@@ -58,6 +58,7 @@ function init_config () --  inicia tabela itvision_config
 
    if content[1] == nil then
       content = {}
+      content.sysconfig_id = 1
       content.instance_id = Model.db.instance_id 
       content.created = "now()"
       content.updated = "now()"
