@@ -103,7 +103,7 @@ function select_app_app_list_objects (id)
       cond_ = cond_ .. " and ap.app_id = "..id
    end
    local tables_ = "nagios_objects no, itvision_app_list al, itvision_apps ap"
-   local columns_ = [[ no.object_id, no.objecttype_id, no.name1, no.name2, al.type as list_type,
+   local columns_ = [[ no.object_id, no.objecttype_id, no.name1, no.name2, al.type as obj_type,
       ap.app_id, ap.name as app_name, ap.type as app_type, ap.is_active, ap.service_object_id as service_id ]]
    --local extra_ = "order by ap.app_id, no.name1, no.name2"
    local content = m.select (tables_, cond_, extra_, columns_)

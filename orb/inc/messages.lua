@@ -57,6 +57,8 @@ strgs.pt_BR = {
 	parent = "Pai",	
 	command = "Comando",	
 	alias = "Alias",	
+	activate = "Ativar",	
+	deactivate = "Desativar",	
 
 }
 
@@ -114,6 +116,8 @@ strgs.us = {
 	parent = "Parent",
 	command = "Command",
 	alias = "Alias",	
+	activate = "Activate",	
+	deactivate = "Deactivate",	
 }
 
 

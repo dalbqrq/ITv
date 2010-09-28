@@ -48,7 +48,11 @@ end
 
 function list(web, id)
    local B = app:select_apps()
-   if (id == "/") and (B[1] ~= nil)  then id = B[1].id else id = nil end
+   --if (id == "/") and (B[1] ~= nil)  then id = B[1].id else id = nil end
+   if type(tonumber(id)) ~= "number" then
+      if id == "/" and B[1] ~= nil then id = B[1].id else id = nil end
+   end
+
    local A = Model.select_app_app_objects(id)
    return render_list(web, A, B, id)
 end
@@ -58,7 +62,8 @@ ITvision:dispatch_get(list, "/", "/list/(%d+)")
 function show(web, id)
    local A = app:select_apps(id)
    return render_show(web, A, id)
-end ITvision:dispatch_get(show, "/show/(%d+)")
+end 
+ITvision:dispatch_get(show, "/show/(%d+)")
 
 
 function add(web, id)
@@ -112,6 +117,7 @@ function delete(web, app_id, obj_id)
       Model.delete (tables, clause) 
    end
 
+   web.prefix = "/orb/app_object"
    return web:redirect(web:link("/list/"..app_id))
 end
 ITvision:dispatch_get(delete, "/delete/(%d+):(%d+)")
@@ -150,13 +156,13 @@ function render_list(web, A, B, app_id)
 
    res[#res + 1] = p{ strings.application..": ", str };
    if sel_app ~= nil then 
-   	web.prefix = "/orb/app_object"
+      web.prefix = "/orb/app_object"
 
-   	res[#res + 1] = p{ render_show(web, B[curr_app], sel_app) }
+      res[#res + 1] = p{ render_show(web, B[curr_app], sel_app) }
 
-   	res[#res + 1] = p{ button_link(strings.add, web:link("/add/"..app_id)) }
-   	res[#res + 1] = p{ br(), br() }
-   	res[#res + 1] = p{ render_table(web, A) }
+      res[#res + 1] = p{ button_link(strings.add, web:link("/add/"..app_id)) }
+      res[#res + 1] = p{ br(), br() }
+      res[#res + 1] = p{ render_table(web, A) }
     end
 
    return render_layout(res)
@@ -169,10 +175,11 @@ function render_table(web, A)
    for i, v in ipairs(A) do
       local obj = v.name1
       if v.name2 then obj = v.name2.."@"..obj end
+      web.prefix = "/orb/app_object"
 
       rows[#rows + 1] = tr{ 
          td{ a{ href= web:link("/show/"..v.app_id), v.app_name} },
-         td{ align="center", v.list_type },
+         td{ align="center", v.obj_type },
          td{ align="right", obj },
          td{ button_link(strings.remove, web:link("/remove/"..v.app_id..":"..v.object_id), "negative") },
       }

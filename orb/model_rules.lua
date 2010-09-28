@@ -104,7 +104,7 @@ function select_app_app_objects (id)
       cond_ = cond_ .. " and ap.id = "..id
    end
    local tables_ = "nagios_objects no, itvision_app_object al, itvision_app ap"
-   local columns_ = [[ no.object_id, no.objecttype_id, no.name1, no.name2, al.type as list_type, ap.id as 
+   local columns_ = [[ no.object_id, no.objecttype_id, no.name1, no.name2, al.type as obj_type, ap.id as 
 	app_id, ap.name as app_name, ap.type as app_type, ap.is_active, ap.service_object_id as service_id ]]
    --local extra_ = "order by ap.app_id, no.name1, no.name2"
    local content = query (tables_, cond_, extra_, columns_)
@@ -163,28 +163,6 @@ function insert_app_relat (content_)
    return content
 end
 
-
------------------------------ CI - CONFIG ITEM ----------------------------------
-function select_ci (id_)
-
---   local tables_  = [[ itvision_ci ci, itvision_location_tree lo, itvision_manufacturer ma ]]
---   local cond_    = [[ ci.location_tree_id = lo.location_tree_id and
---                       ci.manufacturer_id = ma.manufacturer_id ]]
---   local columns_ = [[ lo.name as locat, lo.obs as obs, lo.geotag as geotag,
---                       ci.is_active as is_active,
---                       ma.name as manufac,
---                       ci.name as name, ci.alias as alias, ci.sn as sn ]]
-   local tables_  = [[ itvision_ci ci ]]
-   local cond_    = nil
-   local columns_ = nil
-
-   id_ = tonumber(id_)
---   if id_ then cond_ = cond_ .." and ci_id = ".. id_ end
-   local content = query (tables_, cond_, extra_, columns_)
-
- --  local B = "select "..columns_.." from "..tables_.." where "..cond_
-   return content, nil
-end  
 
 ----------------------------- APP TREE ----------------------------------
 --[[

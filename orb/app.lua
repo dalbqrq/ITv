@@ -2,14 +2,17 @@
 
 -- includes & defs ------------------------------------------------------
 require "util"
+require "subsys_util"
 require "view_utils"
 
 require "orbit"
 require "Model"
 module(Model.name, package.seeall,orbit.new)
 
-local app = Model.itvision:model "app"
-local services = Model.nagios:model "services"
+local app        = Model.itvision:model "app"
+local app_object = Model.itvision:model "app_object"
+local hosts      = Model.nagios:model "hosts"
+local services   = Model.nagios:model "services"
 
 -- models ------------------------------------------------------------
 
@@ -109,6 +112,25 @@ end
 ITvision:dispatch_get(delete, "/delete/(%d+)")
 
 
+function activate(web, id, flag)
+   if flag == "0" then flag = 1 else flag = 0 end
+   local cols = {}
+   if id then
+      local clause = "id = "..id
+      local tables = "itvision_app"
+      cols.is_active = flag
+
+      local A = app:select_apps(id)
+      local O = select_app_app_objects(id)
+      activate_app(A, O, flag)
+
+      Model.update (tables, cols, clause) 
+   end
+   return web:redirect(web:link("/list"))
+end
+ITvision:dispatch_get(activate, "/activate/(%d+):(%d+)")
+
+
 ITvision:dispatch_static("/css/%.css", "/script/%.js")
 
 
@@ -130,6 +152,12 @@ function render_list(web, A)
          svc = "-"
       end
 
+      if v.is_active == "0" then
+         stract = strings.activate
+      else
+         stract = strings.deactivate
+      end
+
       rows[#rows + 1] = tr{ 
          td{ a{ href= web:link("/show/"..v.id), v.name} },
          td{ strings["logical_"..v.type] },
@@ -137,6 +165,7 @@ function render_list(web, A)
          --td{ svc },
          td{ button_link(strings.remove, web:link("/remove/"..v.id), "negative") },
          td{ button_link(strings.edit, web:link("/edit/"..v.id)) },
+         td{ button_link(stract, web:link("/activate/"..v.id..":"..v.is_active)) },
       }
    end
 
@@ -146,7 +175,7 @@ function render_list(web, A)
              th{ strings.name }, 
              th{ strings.type },
              th{ strings.is_active },
-             --th{ strings.service },
+             th{ "." },
              th{ "." },
              th{ "." },
          }

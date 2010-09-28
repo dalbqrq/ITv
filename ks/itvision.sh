@@ -137,8 +137,8 @@ chown -R $user.$user /usr/local/monitor/etc /etc/init.d/nagios
 sed -i.orig -e "s,NagiosLockDir=/var/lock/subsys,NagiosLockDir=\${prefix}/var,g" \
 	-e "s,su - \$NagiosUser -c \",,g" \
 	-e "s,NagiosRetentionFile\",NagiosRetentionFile,g" /etc/init.d/nagios
-
-
+chmod g+rw /usr/local/monitor/var/*
+[ -f /etc/apache2/conf.d/nagios3.conf ] && mv /etc/apache2/conf.d/nagios3.conf /etc/apache2/conf.d/nagios3.conf_
 
 # --------------------------------------------------
 # NDO UTILS - Nagios
@@ -147,6 +147,7 @@ sed -i.orig -e "s,NagiosLockDir=/var/lock/subsys,NagiosLockDir=\${prefix}/var,g"
 insta ndoutils-nagios3-mysql ndoutils-common ndoutils-doc
 update-rc.d nagios3 disable
 sed -i -e 's/nagios/$user/g' /etc/init.d/ndoutils
+echo "user=www-data" >> /etc/default/ndoutils
 #
 # CORRIGIR ESTAS CONFIGS
 #
@@ -177,7 +178,7 @@ cat << EOF > /etc/default/ndoutils
 ENABLE_NDOUTILS=1
 DAEMON_OPTS="-c /usr/local/monitor/etc/ndo2db.cfg"
 EOF
-cat << EOF > /usr/local/bin
+cat << EOF > /usr/local/bin/reset-bp
 #!/bin/bash
 
 /usr/local/monitorbp/bin/bp_cfg2service_cfg.pl
@@ -185,7 +186,11 @@ mv /usr/local/monitor/etc/services-bp.cfg /usr/local/monitor/etc/objects
 sudo invoke-rc.d nagios restart
 EOF
 chmod 755 /usr/local/bin/reset-bp
-
+# cria areas para os arquivos de config do BP e do Nagios
+mkdir -p /usr/local/monitor/etc/{"apps","hosts","services"}
+mkdir -p /usr/local/monitorbp/etc/app
+chmod 775  /usr/local/monitor/etc/{"apps","hosts","services"}
+chmod 775  /usr/local/monitorbp/etc/app
 
 
 # --------------------------------------------------
