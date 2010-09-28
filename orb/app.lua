@@ -3,7 +3,7 @@
 -- includes & defs ------------------------------------------------------
 require "util"
 require "monitor_util"
-require "view_utils"
+require "View"
 
 require "orbit"
 require "Model"
@@ -141,11 +141,7 @@ function render_list(web, A)
    local res = {}
    local svc = {}
    
---[[
-   res[#res + 1] = p{ strings.application..": ", str };
-   res[#res + 1] = p{ button_link(strings.add, web:link("/add")) }
-   res[#res + 1] = p{ br(), br() }
-]]
+   res[#res + 1] = render_content_header("Applicação", web:link("/add"), web:link("/list"))
 
    for i, v in ipairs(A) do
       if v.service_object_id then
@@ -171,7 +167,6 @@ function render_list(web, A)
       }
    end
 
-   res[#res + 1] = render_content_header("Applicação", web:link("/add"), web:link("/list"))
    res[#res + 1] = H("table") { border="0", class="tab_cadrehov",
       thead{ 
          tr{ class="tab_bg_2", 

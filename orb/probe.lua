@@ -3,7 +3,7 @@
 -- includes & defs ------------------------------------------------------
 require "util"
 require "monitor_util"
-require "view_utils"
+require "View"
 
 require "orbit"
 require "Model"
@@ -43,7 +43,7 @@ end
 -- controllers ------------------------------------------------------------
 
 function list(web)
-   local C = computers:select_ci_ports("Computer")
+   local C = Model.select_monitors()
    return render_list(web, C)
 end
 ITvision:dispatch_get(list, "/", "/list")
@@ -144,34 +144,24 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 -- views ------------------------------------------------------------
 
 function render_list(web, C)
-   local rows = {}
+   local row = {}
    local res = {}
-   local svc = {}
    
-   res[#res + 1] = p{ strings.application..": ", str };
-   res[#res + 1] = p{ button_link(strings.add, web:link("/add")) }
-   res[#res + 1] = p{ br(), br() }
+   local header =  { strings.name, "IP", strings.service, strings.type, 
+      strings.command, "." }
 
    for i, v in ipairs(C) do
-      rows[#rows + 1] = tr{ 
-         td{ a{ href= web:link("/show/"..v.c_id), v.c_name} },
-         td{ v.n_ip },
-         td{ v.n_itemtype },
-      }
+      row[#row + 1] = { 
+         a{ href= web:link("/show/"..v.c_id), v.c_name}, 
+         v.n_ip, 
+         v.svc_display_name,
+         v.n_itemtype,
+         v.svc_check_command_object_id,
+         a{ href= web:link("/show/"..v.c_id..":"), strings.add} }
    end
 
-   res[#res + 1]  = H("table") { border=1, cellpadding=1,
-      thead{ 
-         tr{ 
-             th{ strings.name }, 
-             th{ "IP" }, 
-             th{ strings.type }, 
-         }
-      },
-      tbody{
-         rows
-      }
-   }
+   res[#res+1] = render_content_header("Checagem", web:link("/add"), web:link("/list"))
+   res[#res+1] = render_table(row, header)
 
    return render_layout(res)
 end

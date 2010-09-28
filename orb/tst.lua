@@ -1,7 +1,7 @@
 #!/usr/bin/env wsapi.cgi
 
 -- includes & defs ------------------------------------------------------
-require "view_utils"
+require "View"
 require "Model"
 module(Model.name, package.seeall,orbit.new)
 
@@ -10,6 +10,7 @@ local comp = Model.glpi:model "computers"
 -- models ------------------------------------------------------------
 
 
+--[[
 function comp:select_comps()
    local q = {}
    local q1 = query_1()
@@ -24,11 +25,12 @@ function comp:select_comps()
 
    return q
 end
+]]
 
 -- controllers ------------------------------------------------------------
 
 function list(web)
-   local comps = comp:select_comps()
+   local comps = Model.select_monitors()
    return render_list(web, comps)
 end
 ITvision:dispatch_get(list, "/")
@@ -51,36 +53,10 @@ function render_list(web, c)
       { "Q", "B", "C" },
       { "g", "i", "z" },
       { "e", "p", "a" },
-      { "j", "b", "q" },
+      { "j", "b", "q<br>t<br>g" },
    }
 
-   local res = {}
-   local row = {}
-   local hea = {}
-   local col = {}
-   local i, j, v, w
-
-   for i, v in ipairs(t) do
-      for j, w in ipairs(v) do
-         if i == 1 then
-            col[#col+1] = th{ align="center", w }
-         else
-            col[#col+1] = td{ align="center", w }
-         end
-
-      end
-
-      if i == 1 then
-         hea = tr{ class="tab_bg_1", col }
-      else
-         row[#row+1] = tr{ class='tab_bg_1', col }
-      end
-      col = {}
-   end
-
-   html[#html +1]  = H("table") { border="0", class="tab_cadrehov", thead{ hea }, tbody{ row } }
-   html[#html +1]  = render_table(t)
-   html[#html +1]  = { H("table") { border="0", class="tab_cadrehov", thead{ hea }, tbody{ row } } }
+   html[#html +1]  = render_table(t, {"COL", "COL 2", "CAMPO"})
 
    return render_layout(html)
 end

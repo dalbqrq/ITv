@@ -13,6 +13,7 @@ require "Model"
 module(Model.name, package.seeall, orbit.new)
 
 require "messages"
+require "util"
 
 local scrpt = [[
    function confirmation(question, url) { 
@@ -109,7 +110,7 @@ menu_itens = {
 }
 
 -- o parametro 'link_at_level_1' diz se o menu cujo nivel eh 1 serah tratado como um link
-function make_menu(link_at_level_1) 
+function render_menu(link_at_level_1) 
    local o_level = 0
    local s = ""
 
@@ -177,35 +178,48 @@ function render_layout(inner_html)
 end
 
 
-function render_table_(t)
-   --local res = {}
-   --local row = {}
-   --local hea = {}
+--[[
+   render_table() recebe como parametros:
+
+   t -> tabela lua a ser renderizada em uma tabela html. pode ou não possuir cabeçalho (ver parametro h)
+   h -> cabecalho da tabela. 
+         Se "nil" então não possui header
+         Se tabela vazia ("{}") entao o header estah dentro da tabela t
+         Se tabela com lista de strings, estao este eh o header a ser utilizado
+
+]]
+function render_table(t, h)
+   local row = {}
+   local col = {}
+   local hea = {}
    local i, j, v, w
 
-   for i, v in ipairs(t) do
-      for j, w in ipairs(v) do
-         if i == 1 then
-            col[#col+1] = th{ align="center", w }
---            s = s.. "<th align=\"center\">".. w .."</tr>"
-         else
-            col[#col+1] = td{ w }
---            s = s.. "<td>" .. w .."</td>"
-         end
-
+   if h ~= nil and table.getn(h) > 0 then -- h contendo o header
+      for c, w in ipairs(h) do
+         hea[#hea+1] = th{ align="center", w }
       end
-
-      if i == 1 then
-         hea         = tr{ class="tab_bg_1", col }
---         hea         = "<tr class=\"tab_bg_1\">".. col .."</tr>"
-      else
-         row[#row+1] = tr{ class='tab_bg_1', col }
---         row         = "<tr class=\"tab_bg_1\">".. col .."</tr>"
-      end
+      hea = tr{ class="tab_bg_1", hea }
    end
 
-   return html{ H("table") { border="0", class="tab_cadrehov", thead{ hea }, tbody{ row } } }
+   for r, v in ipairs(t) do
+      for c, w in ipairs(v) do
+         if r == 1 and h ~= nil and table.getn(h) == 0 then -- h vazio ({}) e header dentro de t
+            hea[#hea+1] = th{ align="center", w }
+         else                                               -- nao possui header, tudo eh linha
+            col[#col+1] = td{ w }
+         end
+      end
 
+      if r == 1 and h ~= nil and table.getn(h) == 0 then  -- h vazio ({}) e header dentro de t
+         hea = tr{ class="tab_bg_1", hea }
+      else 
+         row[#row+1] = tr{ class='tab_bg_1', col }
+      end
+
+      col = {}
+   end
+
+   return H("table") { border="0", class="tab_cadrehov", thead{ hea }, tbody{ row } }
 end
 
 

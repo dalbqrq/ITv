@@ -3,7 +3,7 @@
 -- includes & defs ------------------------------------------------------
 
 require "util"
-require "view_utils"
+require "View"
 
 require "orbit"
 require "Model"

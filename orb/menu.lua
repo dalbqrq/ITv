@@ -1,7 +1,7 @@
 #!/usr/bin/env wsapi.cgi
 
 -- includes & defs ------------------------------------------------------
-require "view_utils"
+require "View"
 
 require "orbit"
 require "Model"
@@ -22,7 +22,7 @@ ITvision:dispatch_get(list, "/")
 
 function render_list(web)
    
-   return render_menu_frame(make_menu())
+   return render_menu_frame(render_menu())
 end
 
 
