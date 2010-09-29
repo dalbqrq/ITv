@@ -147,7 +147,6 @@ chmod g+rw /usr/local/monitor/var/*
 insta ndoutils-nagios3-mysql ndoutils-common ndoutils-doc
 update-rc.d nagios3 disable
 sed -i -e 's/nagios/$user/g' /etc/init.d/ndoutils
-echo "user=www-data" >> /etc/default/ndoutils
 #
 # CORRIGIR ESTAS CONFIGS
 #
@@ -177,6 +176,7 @@ tar ~$user/itv/ks/bp-cfg.tgz -C /usr/local/monitorbp/etc
 cat << EOF > /etc/default/ndoutils
 ENABLE_NDOUTILS=1
 DAEMON_OPTS="-c /usr/local/monitor/etc/ndo2db.cfg"
+user=$user
 EOF
 cat << EOF > /usr/local/bin/reset-bp
 #!/bin/bash
@@ -188,9 +188,11 @@ EOF
 chmod 755 /usr/local/bin/reset-bp
 # cria areas para os arquivos de config do BP e do Nagios
 mkdir -p /usr/local/monitor/etc/{"apps","hosts","services"}
-mkdir -p /usr/local/monitorbp/etc/app
+mkdir -p /usr/local/monitorbp/etc/apps
+chown $user.$user /usr/local/monitor/etc/{"apps","hosts","services"}
+chown $user.$user /usr/local/monitorbp/etc/apps
 chmod 775  /usr/local/monitor/etc/{"apps","hosts","services"}
-chmod 775  /usr/local/monitorbp/etc/app
+chmod 775  /usr/local/monitorbp/etc/apps
 
 
 # --------------------------------------------------
@@ -206,6 +208,7 @@ ln -s ../sites-available/nagios.conf 001-nagios
 mkdir -p /usr/local/itvision/html
 mkdir -p /usr/local/itvision/orb
 chown -R $user.$user /usr/local/itvision
+sed -i.orig -e "s/www-data/$user/g" /etc/apache2/envvars
 
 
 
