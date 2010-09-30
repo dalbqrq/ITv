@@ -35,6 +35,7 @@ insta lua5.1 liblua5.1-0 liblua5.1-0-dev
 insta libcurl3 libmysqlclient15off uuid-dev mysql-common mysql-server 
 insta liblua5.1-sql-mysql-dev
 insta libmysqlclient15-dev
+insta git-core
 
 
 
@@ -212,6 +213,59 @@ sed -i.orig -e "s/www-data/$user/g" /etc/apache2/envvars
 
 
 
+
+# --------------------------------------------------
+# GLPI
+#
+cd /usr/local
+wget https://forge.indepnet.net/attachments/download/635/glpi-0.78-RC2.tar.gz
+tar zxf glpi-0.78-RC2.tar.gz
+mv glpi servdesk
+cd servdesk
+chown -R $user.$user *
+
+rootpass=$dbpass
+dbuser=servdesk
+dbpass=servdesk
+echo "CREATE DATABASE $dbuser;" | mysql -u root --password=$rootpass
+
+
+machines="localhost 192.168.8.1"
+for machine in $machines; do
+  echo "CREATE USER '$dbuser'@'$machine' IDENTIFIED BY '$dbpass';" | mysql -u root --password=$rootpass mysql
+  echo "GRANT ALL PRIVILEGES ON *.* TO '$dbuser'@'$machine' WITH GRANT OPTION;" | mysql -u root --password=$rootpass mysql
+done
+#
+# Altera base de dados do ndoutils
+echo "ALTER TABLE nagios_hosts ADD COLUMN networkport_id INT(11) NULL DEFAULT NULL;" | mysql -u root --password=$rootpass ndoutils
+echo "ALTER TABLE nagios_services ADD COLUMN softwareversion_id INT(11) NULL DEFAULT NULL;" | mysql -u root --password=$rootpass ndoutils
+echo "ALTER TABLE nagios_services ADD COLUMN networkport_id INT(11) NULL DEFAULT NULL;" | mysql -u root --password=$rootpass ndoutils
+# Altera base de dados do glpi
+echo "ALTER TABLE glpi_locations ADD COLUMN geotag VARCHAR(25) NULL DEFAULT NULL;" | mysql -u root --password=$rootpass servdesk
+
+
+apt-get install php5-mysql
+cd /etc/apache2
+cp ~$user/itv/ks/servdesk.conf sites-available
+cd sites-enabled
+ln -s ../sites-available/servdesk.conf  200-servdesk
+cd /usr/local/servdesk
+chmod 777 files/ config/
+invoke-rc.d apache2 restart
+
+# Para remover o logo do glpi
+# comentar a linha 1297 (que contem a string 'fd_logo.png') do arquivo
+# /usr/local/servdesk/css/styles.css
+
+
+
+# --------------------------------------------------
+# THE END
+#
+apt-get autoremove
+apt-get clean
+
+
 # --------------------------------------------------
 # Re INIT SERVICES
 #
@@ -219,6 +273,7 @@ invoke-rc.d apache2 restart
 invoke-rc.d nagios restart
 invoke-rc.d ndoutils restart
 invoke-rc.d nagios restart
+
 
 
 exit 0
@@ -342,58 +397,4 @@ restart stunnel4
 ###    telnet localhost 1925
 ###    echo test | mail -v -s "test ssmtp" daniel.dalb@gmail.com
 ###
-
-
-
-# --------------------------------------------------
-# GLPI
-#
-cd /usr/local
-wget https://forge.indepnet.net/attachments/download/635/glpi-0.78-RC2.tar.gz
-tar zxf glpi-0.78-RC2.tar.gz
-mv glpi servdesk
-cd servdesk
-chown -R $user.$user *
-
-rootpass=$dbpass
-dbuser=servdesk
-dbpass=servdesk
-echo "CREATE DATABASE $dbuser;" | mysql -u root --password=$rootpass
-
-
-machines="localhost 192.168.8.1"
-for machine in $machines; do
-  echo "CREATE USER '$dbuser'@'$machine' IDENTIFIED BY '$dbpass';" | mysql -u root --password=$rootpass mysql
-  echo "GRANT ALL PRIVILEGES ON *.* TO '$dbuser'@'$machine' WITH GRANT OPTION;" | mysql -u root --password=$rootpass mysql
-done
-#
-# Altera base de dados do ndoutils
-echo "ALTER TABLE nagios_hosts ADD COLUMN networkport_id INT(11) NULL DEFAULT NULL;" | mysql -u root --password=$rootpass ndoutils
-echo "ALTER TABLE nagios_services ADD COLUMN softwareversion_id INT(11) NULL DEFAULT NULL;" | mysql -u root --password=$rootpass ndoutils
-echo "ALTER TABLE nagios_services ADD COLUMN networkport_id INT(11) NULL DEFAULT NULL;" | mysql -u root --password=$rootpass ndoutils
-# Altera base de dados do glpi
-echo "ALTER TABLE glpi_locations ADD COLUMN geotag VARCHAR(25) NULL DEFAULT NULL;" | mysql -u root --password=$rootpass servdesk
-
-
-apt-get install php5-mysql
-cd /etc/apache2
-cp ~$user/itv/ks/servdesk.conf sites-available
-cd sites-enabled
-ln -s ../sites-available/servdesk.conf  200-servdesk
-cd /usr/local/servdesk
-chmod 777 files/ config/
-invoke-rc.d apache2 restart
-
-# Para remover o logo do glpi
-# comentar a linha 1297 (que contem a string 'fd_logo.png') do arquivo
-# /usr/local/servdesk/css/styles.css
-
-
-
-# --------------------------------------------------
-# THE END
-#
-apt-get autoremove
-apt-get clean
-
 
