@@ -16,5 +16,8 @@ monitor_dir       = "/usr/local/monitor"
 monitor_bp_dir    = "/usr/local/monitorbp"
 monitor_script    = "/etc/init.d/nagios"
 monitor_bp_script = "/etc/init.d/ndoutils"
+monitor_check_ping = "check_ping"
+
+..asf. todo fazer do monitor um table
 
 

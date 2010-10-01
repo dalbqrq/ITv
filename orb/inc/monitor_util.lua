@@ -36,7 +36,7 @@ end
 
 function insert_host_cfg_file (hostname, alias, ip)
    if not  ( hostname and alias and ip ) then return false end
-   local content = Model.query("nagios_objects",nil, nil, "max(object_id)+1 as id")
+   --local content = Model.query("nagios_objects",nil, nil, "max(object_id)+1 as id")
    local text = [[
 define host{
         use]].."\t\t"..[[linux-server
@@ -46,11 +46,9 @@ define host{
         } 
 ]]
 
-   local filename  = cfg_dir..tostring(content[1].id)..".cfg"
-   filename  = "/tmp/"..tostring(content[1].id)..".cfg"
-   filename  = "/tmp/cfg"
+   local filename  = cfg_dir..hostname.."-"..ip..".cfg"
    write_cfg_file (filename, text)
-   --local cmd = restart_monitor ()
+   local cmd = restart_monitor ()
 
    return true, cmd
 end
@@ -58,17 +56,23 @@ end
 
 function insert_service_cfg_file (display_name, hostname, check_cmd)
    if not  ( display_name and hostname and check_cmd ) then return false end
-   local content = Model.query("nagios_objects",nil, nil, "max(object_id)+1 as id")
+   if check_cmd == 0 then
+      clause = "name1 = '"..config.monitor.check_ping
+   else
+      clause = "object_id = "..check_cmd
+   end
+   local content = Model.query("nagios_objects","object_id = "..check_cmd, nil, nil )
+   local check = content[1].name1
    local text = [[
 define service{
         use]].."\t\t\t"..[[linux-server 
         host_name]].."\t\t"..hostname..[[ 
         service_description]].."\t"..display_name..[[ 
-        check_command]].."\t\t"..check_cmd..[[ 
+        check_command]].."\t\t"..check..[[ 
         } 
 ]]
 
-   local filename  = cfg_dir..tostring(content[1].id)..".cfg"
+   local filename  = cfg_dir..hostname.."-"..display_name.."-"..check..".cfg"
    write_cfg_file (filename, text)
    local cmd = restart_monitor ()
 

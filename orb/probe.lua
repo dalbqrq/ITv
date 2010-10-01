@@ -61,6 +61,7 @@ end
 ITvision:dispatch_get(list, "/", "/list")
 
 
+--[[
 function show(web, id)
    return render_show(web, id)
 end 
@@ -77,6 +78,7 @@ function update(web, id)
    return web:redirect(web:link("/list"))
 end
 ITvision:dispatch_post(update, "/update/(%d+)")
+]]
 
 
 function add(web, query, c_id, n_id, sv_id)
@@ -99,12 +101,12 @@ function add(web, query, c_id, n_id, sv_id)
       cmp = Model.query_6(c_id, n_id)
    end
 
-   local default = web.input.check
+   --local default = web.input.check
 
    return render_add(web, cmp, chk, query, default)
 end
 ITvision:dispatch_get(add, "/add/(%d+):(%d+):(%d+):(%d+)")
-ITvision:dispatch_post(add, "/add/(%d+):(%d+):(%d+):(%d+)")
+--ITvision:dispatch_post(add, "/add/(%d+):(%d+):(%d+):(%d+)")
 
 
 --[[
@@ -113,33 +115,42 @@ ITvision:dispatch_post(add, "/add/(%d+):(%d+):(%d+):(%d+)")
    sv_id == 0 significa que entrada nao possui software associado e eh somente uma maquina
    s_name e sv_name == "lkjh" entao os nomes sao nulos e isto é um host e nao um service
 ]]
-function insert(web, n_id, sv_id, c_id, c_name, s_name, sv_name)
+function insert(web, n_id, sv_id, c_id, c_name, s_name, sv_name, ip)
    c_name = string.gsub(c_name," ", "_")
    s_name = string.gsub(s_name," ", "_")
    sv_name = string.gsub(sv_name," ", "_")
 
    local h = hosts:select_host(c_name)
-   local n = computers:select_computers_ports(c_id)
+   local dpl = ""
+   local cmd = ""
+   local msg = "<br><p> ADD <p><br>"
 
-   -- cria check host e service ping caso não exista
-   
+   -- cria check host e service ping caso nao exista
    if h[1] == nil then
-      msg = "HI"
-      insert_host_cfg_file (c_name, c_name, n[1].ip)
+      msg = msg.."Creating host entry: "..c_name.." for ip "..ip.."<p>"
+      insert_host_cfg_file (c_name, c_name, ip)
+      insert_service_cfg_file ("PING", c_name, 0)
    else
-      msg = "Hooo_"..c_name
+      msg = msg.."Entry for host"..c_name.." already exists<p>"
    end   
 
-   if sv_id ~= 0 then
-      -- cria outro service check 
+   -- cria outro service check 
+   if tonumber(sv_id) ~= 0 then
       cmd = web.input.check
+      dpl = web.input.display
+      dpl = dpl or cmd
+      dpl = string.gsub(dpl," ", "_")
+      insert_service_cfg_file (dpl, c_name, cmd)
+      msg = msg.."Creating entry for service: "..dpl.." <p>host: ".. c_name.."<p> command: "..cmd.."<p>"
    end
 
-   return web:redirect(web:link("/list/"..cmd..":"..msg))
+   --return render_confirm(web, msg)
+   return web:redirect(web:link("/list"))
 end
-ITvision:dispatch_post(insert, "/insert/(%d+):(%d+):(%d+):(.+):(.+):(.+)")
+ITvision:dispatch_post(insert, "/insert/(%d+):(%d+):(%d+):(.+):(.+):(.+):(.+)")
 
 
+--[[
 function remove(web, id)
    return render_remove(web, id)
 end
@@ -150,6 +161,7 @@ function delete(web, id)
    return web:redirect(web:link("/list"))
 end
 ITvision:dispatch_get(delete, "/delete/(%d+)")
+]]
 
 
 ITvision:dispatch_static("/css/%.css", "/script/%.js")
@@ -169,7 +181,7 @@ function render_list(web, cmp, chk)
       if v.s_name ~= "" then serv = v.s_name.." / "..v.sv_name end
       if v.sv_id == "" then v.sv_id = 0 end
       if v.svc_check_command_object_id == "" then 
-         link = a{ href= web:link("/add/"..v[1]..":"..v.c_id..":"..v.n_id..":"..v.sv_id), strings.add}
+         link = a{ href= web:link("/add/"..v[1]..":"..v.c_id..":"..v.n_id..":"..v.sv_id), strings.add }
       else
          link = "-"
       end
@@ -189,9 +201,15 @@ function render_list(web, cmp, chk)
    return render_layout(res)
 end
 
-function render_show(web)
-   -- VAZIO
+
+function render_confirm(web, msg)
+   local res = {}
+
+   res[#res+1] = p{ "SHOW", br(), msg }
+
+   return render_layout(res)
 end
+
 
 function render_add(web, cmp, chk, query, default)
    local v = cmp[1]
@@ -199,6 +217,7 @@ function render_add(web, cmp, chk, query, default)
    local res = {}
    local serv = ""
    local s, r
+   local display = ""
 
    default = default or v.svc_check_command_object_id
 
@@ -211,23 +230,23 @@ function render_add(web, cmp, chk, query, default)
          v.s_name = "lkjh"; v.sv_name = "lkjh"
       end
       if v.sv_id == "" then v.sv_id = 0 end
-      -- URL PARA PROPRIA PAGINA! url = "/add/"..query..":"..v.c_id..":"..v.n_id..":"..v.sv_id
-      url = "/insert/"..v.n_id..":"..v.sv_id..":"..v.c_id..":"..v.c_name..":"..v.s_name..":"..v.sv_name
+      url = "/insert/"..v.n_id..":"..v.sv_id..":"..v.c_id..":"..v.c_name..":"..v.s_name..":"..v.sv_name..":"..v.n_ip
 
       if v.sv_id == 0 then 
          cmd = render_form(web:link(url), { "<INPUT TYPE=HIDDEN NAME=\"check\" value=\"0\">", "host-alive", " " } )
       else
-         cmd = render_form(web:link(url), { select_option("check", chk, "object_id", "name1", default), " " } )
+         cmd = render_form(web:link(url), { "Nome:", "<INPUT TYPE=TEXT NAME=\"display\" value=\""..display.."\">", 
+               select_option("check", chk, "object_id", "name1", default), " " } )
       end
 
-
+      --a{ href= web:link("/show/"..v.c_id), v.c_name}, 
       row[#row + 1] = { 
          v[1],
-         a{ href= web:link("/show/"..v.c_id), v.c_name}, 
+         v.c_name,
          v.n_ip, 
          serv,
          v.n_itemtype,
-         cmd
+         cmd,
       }
    end
 
