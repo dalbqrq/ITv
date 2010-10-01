@@ -47,8 +47,10 @@ define host{
 ]]
 
    local filename  = cfg_dir..tostring(content[1].id)..".cfg"
+   filename  = "/tmp/"..tostring(content[1].id)..".cfg"
+   filename  = "/tmp/cfg"
    write_cfg_file (filename, text)
-   local cmd = restart_monitor ()
+   --local cmd = restart_monitor ()
 
    return true, cmd
 end
@@ -169,5 +171,43 @@ function insert_bp_cfg_file(app_name)
    --text_file_writer("/tmp/cmd.out", cmd)
 
 end
+
+
+
+--[[
+check_ping!100.0,20%!500.0,60%
+check_local_disk!20%!10%!/
+check_local_users!20!50
+check_local_procs!250!400!RSZDT
+check_local_load!5.0,4.0,3.0!10.0,6.0,4.0
+check_local_swap!20!10
+check_ssh
+check_http
+]]
+
+cmds = {
+   check_dhcp      = { def="$USER1$/check_dhcp $ARG1$", default=nil },
+   check_ftp       = { def="$USER1$/check_ftp -H $HOSTADDRESS$ $ARG1$", default=nil },
+   check_hpjd      = { def="$USER1$/check_hpjd -H $HOSTADDRESS$ $ARG1$", default=nil },
+   check_http      = { def="$USER1$/check_http -I $HOSTADDRESS$ $ARG1$", default="" },
+   check_imap      = { def="$USER1$/check_imap -H $HOSTADDRESS$ $ARG1$", default=nil },
+   check_disk      = { def="$USER1$/check_disk -w $ARG1$ -c $ARG2$ -p $ARG3$", default=nil },
+   check_load      = { def="$USER1$/check_load -w $ARG1$ -c $ARG2$", default=nil },
+   check_mrtgtraf  = { def="$USER1$/check_mrtgtraf -F $ARG1$ -a $ARG2$ -w $ARG3$ -c $ARG4$ -e $ARG5$", default=nil },
+   check_procs     = { def="$USER1$/check_procs -w $ARG1$ -c $ARG2$ -s $ARG3$", default=nil },
+   check_swap      = { def="$USER1$/check_swap -w $ARG1$ -c $ARG2$", default=nil },
+   check_users     = { def="$USER1$/check_users -w $ARG1$ -c $ARG2$", default=nil },
+   check_nt        = { def="$USER1$/check_nt -H $HOSTADDRESS$ -p 12489 -v $ARG1$ $ARG2$", default=nil },
+   check_ping      = { def="$USER1$/check_ping -H $HOSTADDRESS$ -w $ARG1$ -c $ARG2$ -p 5", default="!100.0,20%!500.0,60%" },
+   check_pop       = { def="$USER1$/check_pop -H $HOSTADDRESS$ $ARG1$", default=nil },
+   check_smtp      = { def="$USER1$/check_smtp -H $HOSTADDRESS$ $ARG1$", default=nil },
+   check_snmp      = { def="$USER1$/check_snmp -H $HOSTADDRESS$ $ARG1$", default=nil },
+   check_ssh       = { def="$USER1$/check_ssh $ARG1$ $HOSTADDRESS$", default="" },
+   check_tcp       = { def="$USER1$/check_tcp -H $HOSTADDRESS$ -p $ARG1$ $ARG2$", default=nil },
+   check_udp       = { def="$USER1$/check_udp -H $HOSTADDRESS$ -p $ARG1$ $ARG2$", default=nil },
+}
+
+
+
 
 

@@ -34,10 +34,21 @@ end
 function computers:select_computers_ports(id)
    local clause = ""
    if id then
-      clause = "ic.id = "..id
+      clause = "c.id = "..id
    end
    return Model.select_ci_ports("Computer", clause)
 end
+
+
+function hosts:select_host(h_name)
+   local clause = ""
+   if h_name then
+      clause = " alias = '"..h_name.."' "
+   end
+
+   return Model.query("nagios_hosts", clause)
+end
+
 
 
 -- controllers ------------------------------------------------------------
@@ -96,10 +107,37 @@ ITvision:dispatch_get(add, "/add/(%d+):(%d+):(%d+):(%d+)")
 ITvision:dispatch_post(add, "/add/(%d+):(%d+):(%d+):(%d+)")
 
 
-function insert(web)
-   return web:redirect(web:link("/list"))
+--[[
+   insert()
+
+   sv_id == 0 significa que entrada nao possui software associado e eh somente uma maquina
+   s_name e sv_name == "lkjh" entao os nomes sao nulos e isto é um host e nao um service
+]]
+function insert(web, n_id, sv_id, c_id, c_name, s_name, sv_name)
+   c_name = string.gsub(c_name," ", "_")
+   s_name = string.gsub(s_name," ", "_")
+   sv_name = string.gsub(sv_name," ", "_")
+
+   local h = hosts:select_host(c_name)
+   local n = computers:select_computers_ports(c_id)
+
+   -- cria check host e service ping caso não exista
+   
+   if h[1] == nil then
+      msg = "HI"
+      insert_host_cfg_file (c_name, c_name, n[1].ip)
+   else
+      msg = "Hooo_"..c_name
+   end   
+
+   if sv_id ~= 0 then
+      -- cria outro service check 
+      cmd = web.input.check
+   end
+
+   return web:redirect(web:link("/list/"..cmd..":"..msg))
 end
-ITvision:dispatch_post(insert, "/insert")
+ITvision:dispatch_post(insert, "/insert/(%d+):(%d+):(%d+):(.+):(.+):(.+)")
 
 
 function remove(web, id)
@@ -122,6 +160,7 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 function render_list(web, cmp, chk)
    local row = {}
    local res = {}
+   local link = {}
    
    local header =  { "query", strings.name, "IP", "SW / Versão", strings.type, strings.command, "." }
 
@@ -129,6 +168,11 @@ function render_list(web, cmp, chk)
       local serv = ""
       if v.s_name ~= "" then serv = v.s_name.." / "..v.sv_name end
       if v.sv_id == "" then v.sv_id = 0 end
+      if v.svc_check_command_object_id == "" then 
+         link = a{ href= web:link("/add/"..v[1]..":"..v.c_id..":"..v.n_id..":"..v.sv_id), strings.add}
+      else
+         link = "-"
+      end
       row[#row + 1] = { 
          v[1],
          a{ href= web:link("/add/"..v.c_id), v.c_name}, 
@@ -136,7 +180,7 @@ function render_list(web, cmp, chk)
          serv,
          v.n_itemtype,
          v.svc_check_command_object_id,
-         a{ href= web:link("/add/"..v[1]..":"..v.c_id..":"..v.n_id..":"..v.sv_id), strings.add} }
+         link }
    end
 
    res[#res+1] = render_content_header("Checagem", web:link("/add"), web:link("/list"))
@@ -161,16 +205,29 @@ function render_add(web, cmp, chk, query, default)
    local header =  { "query", strings.name, "IP", "SW / Versão", strings.type, strings.command }
 
    if v then
-      if v.s_name ~= "" then serv = v.s_name.." / "..v.sv_name end
+      if v.s_name ~= "" then 
+         serv = v.s_name.." / "..v.sv_name
+      else 
+         v.s_name = "lkjh"; v.sv_name = "lkjh"
+      end
       if v.sv_id == "" then v.sv_id = 0 end
-      url = "/add/"..query..":"..v.c_id..":"..v.n_id..":"..v.sv_id
+      -- URL PARA PROPRIA PAGINA! url = "/add/"..query..":"..v.c_id..":"..v.n_id..":"..v.sv_id
+      url = "/insert/"..v.n_id..":"..v.sv_id..":"..v.c_id..":"..v.c_name..":"..v.s_name..":"..v.sv_name
+
+      if v.sv_id == 0 then 
+         cmd = render_form(web:link(url), { "<INPUT TYPE=HIDDEN NAME=\"check\" value=\"0\">", "host-alive", " " } )
+      else
+         cmd = render_form(web:link(url), { select_option("check", chk, "object_id", "name1", default), " " } )
+      end
+
+
       row[#row + 1] = { 
          v[1],
          a{ href= web:link("/show/"..v.c_id), v.c_name}, 
          v.n_ip, 
          serv,
          v.n_itemtype,
-         render_form(web:link(url), { select_option("check", chk, "object_id", "name1", default), " " } )
+         cmd
       }
    end
 
@@ -179,12 +236,13 @@ function render_add(web, cmp, chk, query, default)
 
    for _,c in ipairs(chk) do
       if c.object_id == default then
-         s = config.monitor_dir.."/libexec/"..c.name1.." -H "..v.n_ip.." -p 24"
-         r = os.capture(s)
+         s = config.monitor_dir.."/libexec/"..c.name1.." -H "..v.n_ip.." "
+         --r = os.capture(s)
       end
    end
 
-   res[#res+1] = p{ "| ", default, " | ", s, " | ", r }
+   -- DEBUG res[#res+1] = p{ "| ", default, " | ", s, " | ", r }
+  
 
    return render_layout(res)
 end

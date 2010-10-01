@@ -72,17 +72,28 @@ sed -i.orig '/^#/ a\
 #
 # luagraph - install manually instead of using luarocks that with problems
 #
-cd /tmp
-wget -P /tmp wget http://luarocks.org/repositories/rocks/luagraph-1.0.2-2.src.rock
-unzip luagraph-1.0.2-2.src.rock
-tar zxf luagraph-1.0.2.tar.gz
-cd luagraph-1.0.2
-mv config config.orig
-cp ~$user/itv/ks/luagraph-config .
-make
+#cd /tmp
+#wget -P /tmp wget http://luarocks.org/repositories/rocks/luagraph-1.0.2-2.src.rock
+#unzip luagraph-1.0.2-2.src.rock
+#tar zxf luagraph-1.0.2.tar.gz
+#cd luagraph-1.0.2
+#mv config config.orig
+#cp ~$user/itv/ks/luagraph-config .
+#make
+#make install
+#make webbook
+#cd
+luarocks download luagraph
+luarocks unpack luagraph-1.0.4-1.src.rock
+cd /tmp/luagraph-1.0.4-1/luagraph-1.0.4
+sed -i.orig -e "s/CFLAGS=.*$/& -fPIC/g" config
+cd src
+sed -i.orig -e "s/lt_symlist_t lt_preloaded_symbols\[\] = { { 0, 0 } };//g" gr_graph.c
+cd ..
+make 
 make install
-make webbook
-cd
+
+
 
 
 # --------------------------------------------------

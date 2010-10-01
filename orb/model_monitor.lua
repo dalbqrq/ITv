@@ -611,7 +611,8 @@ end
 function select_checkcmds()
    local table_ = [[ nagios_objects ]]
    local cond_ = [[ objecttype_id = 12 and is_active = 1 and name1 not in 
-      ('check-host-alive', 'notify-host-by-email', 'notify-service-by-email', 'process-host-perfdata', 'process-service-perfdata') ]]
+      ('check-host-alive', 'notify-host-by-email', 'notify-service-by-email', 'process-host-perfdata', 
+       'process-service-perfdata', 'return_true') ]]
 
    return Model.query(table_, cond_)
 end
