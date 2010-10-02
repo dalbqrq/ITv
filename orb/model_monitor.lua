@@ -85,7 +85,7 @@ function query_1(c_id, n_id)
 
    local table_ = [[glpi_computers c, glpi_networkports n]]
 
-   local cond_ = [[ n.itemtype = "Computer" and
+   local cond_ = [[ n.itemtype in ("Computer", "NetworkEquipment") and
            c.id = n.items_id and 
            not exists (select 1 from itvision_monitor m where m.networkports_id = n.id)]]
            --not exists (select 1 from glpi_computers_softwareversions csv where c.id = csv.computers_id) and
@@ -179,7 +179,7 @@ function query_2(c_id, n_id, sv_id)
    local table_ = [[ glpi_computers c, glpi_networkports n, glpi_computers_softwareversions csv, 
                      glpi_softwareversions sv, glpi_softwares s]]
 
-   local cond_ = [[ n.itemtype = "Computer" and
+   local cond_ = [[ n.itemtype in ("Computer", "NetworkEquipment") and
            c.id = n.items_id and 
            c.id = csv.computers_id and
            csv.softwareversions_id = sv.id and
@@ -276,12 +276,17 @@ function query_3(c_id, n_id)
    local table_ = [[ glpi_computers c, glpi_networkports n,
                      nagios_objects o, nagios_hosts hst, nagios_services svc, itvision_monitor m]]
 
-   local cond_ = [[ n.itemtype = "Computer" and
+   local cond_ = [[ n.itemtype in ("Computer", "NetworkEquipment") and
            c.id = n.items_id and 
            n.id = m.networkports_id and
            m.host_object_id = o.object_id and
-           m.service_object_id = o.object_id and
-           not exists (select 1 from glpi_computers_softwareversions csv where c.id = csv.computers_id)]]
+           m.softwareversions_id is null and
+           m.host_object_id = hst.host_object_id and
+           m.host_object_id = svc.host_object_id and
+           m.service_object_id = svc.service_object_id ]]
+
+          -- m.service_object_id = o.object_id and
+          -- not exists (select 1 from glpi_computers_softwareversions csv where c.id = csv.computers_id)]]
  
    if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
    if n_id  then cond_ = cond_ .. " and n.id = "  .. n_id  end
@@ -371,7 +376,8 @@ function query_4(c_id, n_id, sv_id)
    local table_ = [[ glpi_computers c, glpi_networkports n, glpi_computers_softwareversions csv, 
                      glpi_softwareversions sv, glpi_softwares s,
                      nagios_objects o, nagios_hosts hst, nagios_services svc, itvision_monitor m]]
-   local cond_ = [[ n.itemtype = "Computer" and
+
+   local cond_ = [[ n.itemtype in ("Computer", "NetworkEquipment") and
            c.id = n.items_id and 
            c.id = csv.computers_id and
            csv.softwareversions_id = sv.id and
@@ -380,6 +386,18 @@ function query_4(c_id, n_id, sv_id)
            m.host_object_id = o.object_id and
            m.service_object_id = o.object_id and
            m.softwareversions_id = sv.id]]
+
+   local cond_ = [[ n.itemtype in ("Computer", "NetworkEquipment") and
+           c.id = n.items_id and 
+           n.id = m.networkports_id and
+           c.id = csv.computers_id and
+           csv.softwareversions_id = sv.id and
+           sv.softwares_id = s.id and
+           m.host_object_id = o.object_id and
+           m.softwareversions_id = csv.softwareversions_id and
+           m.host_object_id = hst.host_object_id and
+           m.host_object_id = svc.host_object_id and
+           m.service_object_id = svc.service_object_id ]]
 
    if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
    if n_id  then cond_ = cond_ .. " and n.id = "  .. n_id  end
@@ -603,6 +621,9 @@ function select_monitors()
    for _,v in ipairs(q4) do table.insert(q, v) end
    for _,v in ipairs(q5) do table.insert(q, v) end
    for _,v in ipairs(q6) do table.insert(q, v) end
+
+   table.sort(q, function (a, b) 
+      return a.c_name..a.n_ip..a.s_name..a.sv_name < b.c_name..b.n_ip..b.s_name..b.sv_name  end )
 
    return q
 end

@@ -3,7 +3,7 @@ require "config"
 require "util"
 require "Model"
 
-local cfg_dir = config.monitor_dir.."/etc/itvision/"
+local cfg_dir = config.monitor.dir.."/etc/itvision/"
 
 
 ----------------------------- IO FILES ----------------------------------
@@ -36,7 +36,6 @@ end
 
 function insert_host_cfg_file (hostname, alias, ip)
    if not  ( hostname and alias and ip ) then return false end
-   --local content = Model.query("nagios_objects",nil, nil, "max(object_id)+1 as id")
    local text = [[
 define host{
         use]].."\t\t"..[[linux-server
@@ -50,22 +49,29 @@ define host{
    write_cfg_file (filename, text)
    local cmd = restart_monitor ()
 
-   return true, cmd
+   local content = Model.query("nagios_objects", "name1 = '"..hostname.."' and name2 is NULL")
+
+   if content[1] then
+      return true, content[1].object_id, cmd
+   else
+      return false, 0, cmd
+   end
 end
 
 
 function insert_service_cfg_file (display_name, hostname, check_cmd)
+   local check = ""
    if not  ( display_name and hostname and check_cmd ) then return false end
    if check_cmd == 0 then
-      clause = "name1 = '"..config.monitor.check_ping
+      clause = "name1 = '"..config.monitor.check_ping.."'"
    else
       clause = "object_id = "..check_cmd
    end
-   local content = Model.query("nagios_objects","object_id = "..check_cmd, nil, nil )
-   local check = content[1].name1
+   local content = Model.query("nagios_objects",clause , nil, nil )
+   if content[1] then check = content[1].name1 end
    local text = [[
 define service{
-        use]].."\t\t\t"..[[linux-server 
+        use]].."\t\t\t"..[[generic-service
         host_name]].."\t\t"..hostname..[[ 
         service_description]].."\t"..display_name..[[ 
         check_command]].."\t\t"..check..[[ 
@@ -76,7 +82,13 @@ define service{
    write_cfg_file (filename, text)
    local cmd = restart_monitor ()
 
-   return true, cmd
+   local content = Model.query("nagios_objects", "name1 = '"..hostname.."' and name2 = '"..display_name.."'")
+
+   if content[1] then
+      return true, content[1].object_id, cmd
+   else
+      return false, 0, cmd
+   end
 end
 
 
@@ -94,7 +106,7 @@ define contact{
 
    local filename  = cfg_dir..name..".cfg"
    write_cfg_file (filename, text)
-   local cmd = restart_monitor ()
+   --local cmd = restart_monitor ()
 
    return true, cmd
 end
@@ -115,7 +127,7 @@ function delete_cfg_file(filename) -- no caso de hosts e services, filename eh o
    filename = string.gsub(tostring(filename)," ","_")
    local cmd
    cmd = os.capture ("rm -f "..cfg_dir..filename..".cfg", 1)
-   cmd = os.capture (config.monitor_script.." restart", 1)
+   cmd = os.capture (config.monitor.script.." restart", 1)
 end
 
 
@@ -155,7 +167,7 @@ function activate_app(app, objs, flag)
    s = app.name.." = "..s.."\n"
    s = s.."display "..flag..";"..app.name..";"..app.name.."\n"
 
-   text_file_writer(config.monitor_bp_dir.."/etc/apps/"..app.name..".conf", s)
+   text_file_writer(config.monitor.bp_dir.."/etc/apps/"..app.name..".conf", s)
    make_bp(app.name)
    os.reset_monitor()
 
@@ -168,9 +180,9 @@ end
 ]]
 function insert_bp_cfg_file(app_name)
 
-   local cmd = config.monitor_bp_dir.."/bin/bp_cfg2service_cfg.pl"
-   cmd = cmd .. " -f "..config.monitor_bp_dir.."/etc/apps/"..app_name..".conf"
-   cmd = cmd .. " -o "..config.monitor_dir.."/etc/apps/"..app_name..".cfg"
+   local cmd = config.monitor.bp_dir.."/bin/bp_cfg2service_cfg.pl"
+   cmd = cmd .. " -f "..config.monitor.bp_dir.."/etc/apps/"..app_name..".conf"
+   cmd = cmd .. " -o "..config.monitor.dir.."/etc/apps/"..app_name..".cfg"
    os.capture(cmd)
    --text_file_writer("/tmp/cmd.out", cmd)
 

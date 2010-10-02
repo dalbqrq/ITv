@@ -77,7 +77,7 @@ ASSIM PRIMEIRO VAMOS FAZER AS QUERIES PARA VERIFICAR SE AS CLAUSULAS CONDICIONAI
 select * 
 from glpi_computers c, glpi_networkports n
 where 
-     n.itemtype = "Computer" and
+     n.itemtype in ("Computer", "NetworkEquipment")  and
      c.id = n.items_id and 
      not exists (select 1 from glpi_computers_softwareversions csv where c.id = csv.computers_id) and
      not exists (select 1 from itvision_monitor m where m.networkports_id = n.id);
@@ -89,7 +89,7 @@ where
 select * 
 from glpi_computers c, glpi_networkports n, glpi_computers_softwareversions csv, glpi_softwareversions sv, glpi_softwares s
 where 
-     n.itemtype = "Computer" and
+     n.itemtype in ("Computer", "NetworkEquipment")  and
      c.id = n.items_id and 
      c.id = csv.computers_id and
      csv.softwareversions_id = sv.id and
@@ -112,19 +112,42 @@ where
 */
 select *
 from glpi_computers c, glpi_networkports n,
-     nagios_objects o, itvision_monitor m
+     itvision_monitor m, nagios_hosts hst, nagios_services svc
 where
+     n.itemtype in ("Computer", "NetworkEquipment")  and
      c.id = n.items_id and 
      n.id = m.networkports_id and
+     m.host_object_id = hst.host_object_id and
+     m.host_object_id = svc.host_object_id and
+     m.service_object_id = svc.service_object_id and
+     m.softwareversions_id is null
+
+/*
      not exists (select 1 from glpi_computers_softwareversions csv where c.id = csv.computers_id);
+*/
 
 /*
    QUERY 4 - computador com porta com software e com monitor - monitoracao de service por isso tem software associado
 */
 select *
-from glpi_computers c, glpi_networkports n, glpi_computers_softwareversions csv, glpi_softwareversions sv, glpi_softwares s,
+from glpi_computers c, glpi_networkports n, glpi_computers_softwareversions csv, 
+     glpi_softwareversions sv, glpi_softwares s,
      nagios_objects o, nagios_hosts hst, nagios_services svc, itvision_monitor m
 where
+     n.itemtype in ("Computer", "NetworkEquipment") and
+     c.id = n.items_id and  
+     n.id = m.networkports_id and
+     c.id = csv.computers_id and
+     csv.softwareversions_id = sv.id and
+     sv.softwares_id = s.id and
+     m.host_object_id = o.object_id and
+     m.softwareversions_id = csv.softwareversions_id and
+     m.host_object_id = hst.host_object_id and
+     m.host_object_id = svc.host_object_id and
+     m.service_object_id = svc.service_object_id
+
+/*
+     n.itemtype in ("Computer", "NetworkEquipment")  and
      c.id = n.items_id and 
      c.id = csv.computers_id and
      csv.softwareversions_id = sv.id and
@@ -133,6 +156,7 @@ where
      m.host_object_id = o.object_id and
      m.service_object_id = o.object_id and
      m.softwareversions_id = sv.id;
+*/
 
 
 /* 

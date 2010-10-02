@@ -64,8 +64,8 @@ function init_config () --  inicia tabela itvision_config
       content.updated = "now()"
       content.version = "0.9"
       content.home_dir  = "/usr/local/itvision"
-      content.monitor_dir  = "/usr/local/monitor"
-      content.monitor_bp_dir  = "/usr/local/monitorbp"
+      content.monitor.dir  = "/usr/local/monitor"
+      content.monitor.bp_dir  = "/usr/local/monitorbp"
 
       Model.insert("itvision_sysconfig", content)
       return true

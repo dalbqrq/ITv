@@ -1,6 +1,9 @@
 module("config", package.seeall)
 
+
+instance_name = "itv_proto"
 app_name = "ITvision"
+
 
 database = {
         instance_id = 1,
@@ -10,14 +13,17 @@ database = {
         driver = "mysql",
 }
 
+
+monitor = {
+	dir        = "/usr/local/monitor",
+	bp_dir     = "/usr/local/monitorbp",
+	script     = "/etc/init.d/nagios",
+	bp_script  = "/etc/init.d/ndoutils",
+	check_ping = "check_ping",
+}
+
+
 language = "pt_BR"
 
-monitor_dir       = "/usr/local/monitor"
-monitor_bp_dir    = "/usr/local/monitorbp"
-monitor_script    = "/etc/init.d/nagios"
-monitor_bp_script = "/etc/init.d/ndoutils"
-monitor_check_ping = "check_ping"
-
-..asf. todo fazer do monitor um table
 
 

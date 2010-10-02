@@ -9,35 +9,11 @@ require "orbit"
 require "Model"
 module(Model.name, package.seeall,orbit.new)
 
-local app        = Model.itvision:model "app"
-local app_object = Model.itvision:model "app_object"
-local hosts      = Model.nagios:model "hosts"
-local services   = Model.nagios:model "services"
-local computers  = Model.glpi:model "computers"
+local hosts   = Model.nagios:model "hosts"
+local objects = Model.nagios:model "objects"
+local monitor = Model.itvision:model "monitor"
 
 -- models ------------------------------------------------------------
-
-function computers:select_computers(id)
-   local clause = ""
-   if id then
-      clause = "id = "..id
-   end
-   return self:find_all(clause)
-end
-
-
-function computers:select_ci_ports(itemtype)
-   return Model.select_ci_ports(itemtype)
-end
-
-
-function computers:select_computers_ports(id)
-   local clause = ""
-   if id then
-      clause = "c.id = "..id
-   end
-   return Model.select_ci_ports("Computer", clause)
-end
 
 
 function hosts:select_host(h_name)
@@ -50,15 +26,49 @@ function hosts:select_host(h_name)
 end
 
 
+function objects:select_checks(cmd)
+   local clause = ""
+   if cmd then
+      clause = " object_id = '"..cmd.."' "
+   end
+
+   return Model.query("nagios_objects", clause)
+end
+
+
+function monitor:insert_monitor(networkports, softwareversions, host_object, service_object, is_active, type_)
+      -- insere entrada em itvision_monitor
+      --[[
+      self:new()
+      self.networkports_id = networkports
+      self.softwareversions_id = softwareversions
+      self.host_object_id = host_object
+      self.service_object_id = service_object
+      self.is_active = is_active
+      self.type = type_
+      self:save()
+      ]]
+      local mon = { 
+         networkports_id = networkports,
+         softwareversions_id = softwareversions,
+         host_object_id = host_object,
+         service_object_id = service_object,
+         is_active = is_active,
+         type = type_,
+      }
+      Model.insert("itvision_monitor", mon)
+end
+
 
 -- controllers ------------------------------------------------------------
 
-function list(web)
+function list(web, msg)
    local cmp = Model.select_monitors()
    local chk = Model.select_checkcmds()
-   return render_list(web, cmp, chk)
+   return render_list(web, cmp, chk, msg)
 end
-ITvision:dispatch_get(list, "/", "/list")
+ITvision:dispatch_get(list, "/", "/list", "/list/(.+)")
+--ITvision:dispatch_get(list, "/list/(%w+)")
 
 
 --[[
@@ -101,12 +111,9 @@ function add(web, query, c_id, n_id, sv_id)
       cmp = Model.query_6(c_id, n_id)
    end
 
-   --local default = web.input.check
-
    return render_add(web, cmp, chk, query, default)
 end
 ITvision:dispatch_get(add, "/add/(%d+):(%d+):(%d+):(%d+)")
---ITvision:dispatch_post(add, "/add/(%d+):(%d+):(%d+):(%d+)")
 
 
 --[[
@@ -122,30 +129,32 @@ function insert(web, n_id, sv_id, c_id, c_name, s_name, sv_name, ip)
 
    local h = hosts:select_host(c_name)
    local dpl = ""
-   local cmd = ""
-   local msg = "<br><p> ADD <p><br>"
+   local chk = ""
+   local msg = ""
 
    -- cria check host e service ping caso nao exista
    if h[1] == nil then
-      msg = msg.."Creating host entry: "..c_name.." for ip "..ip.."<p>"
-      insert_host_cfg_file (c_name, c_name, ip)
-      insert_service_cfg_file ("PING", c_name, 0)
+      res, hst, os = insert_host_cfg_file (c_name, c_name, ip)
+      res, svc, os = insert_service_cfg_file ("PING", c_name, 0)
+      monitor:insert_monitor(n_id, nil, hst, svc, 1, "hst")
+      msg = msg.."Check do HOST: "..c_name.." para o IP "..ip.." criado. " --" (hst,svc) = ("..hst..","..svc..") "
    else
-      msg = msg.."Entry for host"..c_name.." already exists<p>"
+      hst = h[1].host_object_id
+      msg = msg.."Check do HOST: "..c_name.." já existe! "
    end   
 
    -- cria outro service check 
    if tonumber(sv_id) ~= 0 then
-      cmd = web.input.check
+      chk = web.input.check
       dpl = web.input.display
-      dpl = dpl or cmd
+      dpl = dpl or chk
       dpl = string.gsub(dpl," ", "_")
-      insert_service_cfg_file (dpl, c_name, cmd)
-      msg = msg.."Creating entry for service: "..dpl.." <p>host: ".. c_name.."<p> command: "..cmd.."<p>"
+      res, svc, os = insert_service_cfg_file (dpl, c_name, chk)
+      monitor:insert_monitor(n_id, sv_id, hst, svc, 1, "svc")
+      msg = msg.."Check do SERVIÇO: "..dpl.." HOST: ".. c_name.." COMANDO: "..chk.." criado. "--" (hst,svc) = ("..hst..","..svc..") "
    end
 
-   --return render_confirm(web, msg)
-   return web:redirect(web:link("/list"))
+   return web:redirect(web:link("/list/"..msg..""))
 end
 ITvision:dispatch_post(insert, "/insert/(%d+):(%d+):(%d+):(.+):(.+):(.+):(.+)")
 
@@ -169,20 +178,23 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 
 -- views ------------------------------------------------------------
 
-function render_list(web, cmp, chk)
+function render_list(web, cmp, chk, msg)
    local row = {}
    local res = {}
    local link = {}
    
-   local header =  { "query", strings.name, "IP", "SW / Versão", strings.type, strings.command, "." }
+   local header =  { "query", strings.name, "IP", "Software / Versão", strings.type, strings.command, "." }
 
    for i, v in ipairs(cmp) do
       local serv = ""
       if v.s_name ~= "" then serv = v.s_name.." / "..v.sv_name end
       if v.sv_id == "" then v.sv_id = 0 end
       if v.svc_check_command_object_id == "" then 
+         chk = ""
          link = a{ href= web:link("/add/"..v[1]..":"..v.c_id..":"..v.n_id..":"..v.sv_id), strings.add }
       else
+         content = objects:select_checks(v.svc_check_command_object_id)
+         chk = content[1].name1
          link = "-"
       end
       row[#row + 1] = { 
@@ -191,11 +203,12 @@ function render_list(web, cmp, chk)
          v.n_ip, 
          serv,
          v.n_itemtype,
-         v.svc_check_command_object_id,
+         chk,
          link }
    end
 
    res[#res+1] = render_content_header("Checagem", web:link("/add"), web:link("/list"))
+   if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ msg } end
    res[#res+1] = render_table(row, header)
 
    return render_layout(res)
@@ -255,7 +268,7 @@ function render_add(web, cmp, chk, query, default)
 
    for _,c in ipairs(chk) do
       if c.object_id == default then
-         s = config.monitor_dir.."/libexec/"..c.name1.." -H "..v.n_ip.." "
+         s = config.monitor.dir.."/libexec/"..c.name1.." -H "..v.n_ip.." "
          --r = os.capture(s)
       end
    end
