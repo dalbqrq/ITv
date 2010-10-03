@@ -156,7 +156,7 @@ function render_menu_frame(inner_html)
       },
 
       body{
-         div{ id="header", img{ src="/images/logopurple.png" }, " ITvision",
+         div{ id="header", img{ src="/pics/logopurple.png" }, " ITvision",
             ul{ id="nav", class="dropdown dropdown-linear", inner_html }
          }
       }
@@ -230,20 +230,55 @@ end
    Exemplo retirado da página "computadores"
 
 <table class='tab_cadre_fixe' >
-<tr class='tab_bg_1'><td><table><tr><td class='left'>
+  <tr class='tab_bg_1'>
 
+    <td>
+      <table>
+        <tr>
+          <td class='left'>
+            TABLE_DATA
+          </td>
+        </tr>         
+      </table>
+    </td>
 
-</td></tr>         
+    <td width='150px'>
+      <table width='100%'>
+        <tr>
+          <td width='80' class='center'>
+            <input type='submit' value="Pesquisar" class='submit' >
+          </td>
+          <td> 
+            <a href='#'><img src='bookmark_record.png'></a>
+            <a href='/servdesk/front/computer.php?reset=reset'><img src='reset.png' class='calendrier'></a>
+          </td>
+        </tr>
+      </table>
+    </td>
+
+  </tr>
 </table>
-</td>
-<td width='150px'><table width='100%'><tr><td width='80' class='center'><input type='submit' value="Pesquisar" class='submit' ></td><td> <a href='#' onClic
-k="var w = window.open('/servdesk/front/popup.php?popup=edit_bookmark&amp;type=1&amp;itemtype=Computer&amp;url=%2Fservdesk%2Ffront%2Fcomputer.php' ,'glpipo
-pup', 'height=400, width=600, top=100, left=100, scrollbars=yes' );w.focus();"><img src='/servdesk/pics/bookmark_record.png'
-             title="Salvar Favorito"
-             alt="Salvar Favorito" class='calendrier'></a><a href='/servdesk/front/computer.php?reset=reset' >&nbsp;&nbsp;<img title="Resetar para em branc
-o" alt="Resetar para em branco" src='/servdesk/pics/reset.png' class='calendrier'></a></td></tr></table>
-</td></tr></table>
 ]]
+function render_glpi_search(url, t)
+   return form{ H('table') { class='tab_cadre_fixe', tr{ class='tab_bg_1', 
+      td{ 
+         H('table') { tr{ td{ class='left', t } } }
+      }, 
+      td{ width='150px', 
+         H('table') { width='100%', tr{ 
+            td{ width='80', class='center', 
+               input{ type='submit', value='Pesquisar',  class='submit' }
+            }, 
+            td{ 
+               a{ href=url, img{ src='../../pics/reset.png', class='calendrier' } }
+            } 
+         } }
+      } 
+      } }, 
+      br() }
+end
+
+
 function render_table_search(t)
    return { H("table") { class='tab_cadre_fixe', tr{ class='tab_bg_1', td{ t } } }, br() }
 end
@@ -355,7 +390,7 @@ end
 function render_content_header(name, add, list)
    -- p{ ..., "" } usado para dar um espaco antes de comecar o proximo elemento html
    return div{ id='menu_navigate', div { id='c_ssmenu2', ul{
-         li{ a{href='/servdesk/front/computer.php', class='here', title="'"..name.."'", name} },
+         li{ a{href='#', class='here', title="'"..name.."'", name} },
          li{ "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" },
          li{ a{ href="'"..add.."'", img{ src='/servdesk/pics/menu_add.png', title='Adicionar', alt='Adicionar'} } },
          li{ a{ href="'"..list.."'", img{ src='/servdesk/pics/menu_search.png', title='Pesquisar', alt='Pesquisar' } } },

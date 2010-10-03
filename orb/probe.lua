@@ -37,17 +37,6 @@ end
 
 
 function monitor:insert_monitor(networkports, softwareversions, host_object, service_object, is_active, type_)
-      -- insere entrada em itvision_monitor
-      --[[
-      self:new()
-      self.networkports_id = networkports
-      self.softwareversions_id = softwareversions
-      self.host_object_id = host_object
-      self.service_object_id = service_object
-      self.is_active = is_active
-      self.type = type_
-      self:save()
-      ]]
       local mon = { 
          networkports_id = networkports,
          softwareversions_id = softwareversions,
@@ -62,13 +51,19 @@ end
 
 -- controllers ------------------------------------------------------------
 
-function list(web, msg)
-   local cmp = Model.select_monitors()
+function list(web)
+   local clause = ""
+   if web.input.hostname  then clause = clause.." and c.name like '%"..web.input.hostname.."%' " end
+   if web.input.inventory then clause = clause.." and c.otherserial like '%"..web.input.inventory.."%' " end
+   if web.input.sn        then clause = clause.." and c.serial like '%"..web.input.sn.."%' " end
+
+   local cmp = Model.select_monitors(clause)
    local chk = Model.select_checkcmds()
+
    return render_list(web, cmp, chk, msg)
 end
 ITvision:dispatch_get(list, "/", "/list", "/list/(.+)")
---ITvision:dispatch_get(list, "/list/(%w+)")
+ITvision:dispatch_post(list, "/list")
 
 
 --[[
@@ -178,12 +173,24 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 
 -- views ------------------------------------------------------------
 
+function render_filter(web)
+   local res = {}
+
+   res[#res+1] = {strings.name..": ", input{ type="text", name="hostname", value = "" }, " "}
+   res[#res+1] = {strings.inventory..": ", input{ type="text", name="inventory", value = "" }, " "}
+   res[#res+1] = {strings.sn..": ", input{ type="text", name="sn", value = "" }, " "}
+
+   return res
+end
+
+
 function render_list(web, cmp, chk, msg)
    local row = {}
    local res = {}
    local link = {}
    
-   local header =  { "query", strings.name, "IP", "Software / Versão", strings.type, strings.command, "." }
+   --local header =  { "query", strings.name, "IP", "Software / Versão", strings.type, strings.command, "." }
+   local header =  { strings.name, "IP", "Software / Versão", strings.type, strings.command, "." }
 
    for i, v in ipairs(cmp) do
       local serv = ""
@@ -197,8 +204,8 @@ function render_list(web, cmp, chk, msg)
          chk = content[1].name1
          link = "-"
       end
+         --v[1], QUERY para debug
       row[#row + 1] = { 
-         v[1],
          a{ href= web:link("/add/"..v.c_id), v.c_name}, 
          v.n_ip, 
          serv,
@@ -209,6 +216,7 @@ function render_list(web, cmp, chk, msg)
 
    res[#res+1] = render_content_header("Checagem", web:link("/add"), web:link("/list"))
    if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ msg } end
+   res[#res+1] = render_glpi_search( web:link("/list"), render_filter(web) )
    res[#res+1] = render_table(row, header)
 
    return render_layout(res)

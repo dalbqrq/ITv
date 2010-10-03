@@ -11,7 +11,7 @@ require "Model"
 
 --   QUERY 1 - computador com porta sem software e sem monitor
 
-function query_1(c_id, n_id)
+function query_1(c_id, n_id, clause)
 
    local columns_ = [[
       c.id			as c_id,
@@ -85,13 +85,13 @@ function query_1(c_id, n_id)
 
    local table_ = [[glpi_computers c, glpi_networkports n]]
 
-   local cond_ = [[ n.itemtype in ("Computer", "NetworkEquipment") and
+   local cond_ = [[ n.itemtype = "Computer" and
            c.id = n.items_id and 
            not exists (select 1 from itvision_monitor m where m.networkports_id = n.id)]]
-           --not exists (select 1 from glpi_computers_softwareversions csv where c.id = csv.computers_id) and
 
    if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
    if n_id  then cond_ = cond_ .. " and n.id = "  .. n_id  end
+   if clause  then cond_ = cond_ .. clause end
 
    local q = Model.query(table_, cond_, nil, columns_)
    for _,v in ipairs(q) do table.insert(v, 1, 1) end
@@ -104,7 +104,7 @@ end
            
 --   QUERY 2 - computador com porta com software e sem monitor
 
-function query_2(c_id, n_id, sv_id)
+function query_2(c_id, n_id, sv_id, clause)
 
    local columns_ = [[
       c.id			as c_id,
@@ -179,7 +179,7 @@ function query_2(c_id, n_id, sv_id)
    local table_ = [[ glpi_computers c, glpi_networkports n, glpi_computers_softwareversions csv, 
                      glpi_softwareversions sv, glpi_softwares s]]
 
-   local cond_ = [[ n.itemtype in ("Computer", "NetworkEquipment") and
+   local cond_ = [[ n.itemtype = "Computer" and
            c.id = n.items_id and 
            c.id = csv.computers_id and
            csv.softwareversions_id = sv.id and
@@ -189,6 +189,7 @@ function query_2(c_id, n_id, sv_id)
    if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
    if n_id  then cond_ = cond_ .. " and n.id = "  .. n_id  end
    if sv_id then cond_ = cond_ .. " and sv.id = " .. sv_id end
+   if clause  then cond_ = cond_ .. clause end
 
    local q = Model.query(table_, cond_, nil, columns_)
    for _,v in ipairs(q) do table.insert(v, 1, 2) end
@@ -201,7 +202,7 @@ end
 --   QUERY 3 - computador com porta sem software e com monitor - monitoracao de host onde o service eh ping
 
 
-function query_3(c_id, n_id)
+function query_3(c_id, n_id, clause)
 
    local columns_ = [[
       c.id			as c_id,
@@ -276,7 +277,7 @@ function query_3(c_id, n_id)
    local table_ = [[ glpi_computers c, glpi_networkports n,
                      nagios_objects o, nagios_hosts hst, nagios_services svc, itvision_monitor m]]
 
-   local cond_ = [[ n.itemtype in ("Computer", "NetworkEquipment") and
+   local cond_ = [[ n.itemtype = "Computer" and
            c.id = n.items_id and 
            n.id = m.networkports_id and
            m.host_object_id = o.object_id and
@@ -285,11 +286,9 @@ function query_3(c_id, n_id)
            m.host_object_id = svc.host_object_id and
            m.service_object_id = svc.service_object_id ]]
 
-          -- m.service_object_id = o.object_id and
-          -- not exists (select 1 from glpi_computers_softwareversions csv where c.id = csv.computers_id)]]
- 
    if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
    if n_id  then cond_ = cond_ .. " and n.id = "  .. n_id  end
+   if clause  then cond_ = cond_ .. clause end
 
    local q = Model.query(table_, cond_, nil, columns_)
    for _,v in ipairs(q) do table.insert(v, 1, 3) end
@@ -301,7 +300,7 @@ end
 
 --   QUERY 4 - computador com porta com software e com monitor - monitoracao de service por isso tem software associado
 
-function query_4(c_id, n_id, sv_id)
+function query_4(c_id, n_id, sv_id, clause)
 
    local columns_ = [[
       c.id			as c_id,
@@ -377,17 +376,7 @@ function query_4(c_id, n_id, sv_id)
                      glpi_softwareversions sv, glpi_softwares s,
                      nagios_objects o, nagios_hosts hst, nagios_services svc, itvision_monitor m]]
 
-   local cond_ = [[ n.itemtype in ("Computer", "NetworkEquipment") and
-           c.id = n.items_id and 
-           c.id = csv.computers_id and
-           csv.softwareversions_id = sv.id and
-           sv.softwares_id = s.id and
-           n.id = m.networkports_id and
-           m.host_object_id = o.object_id and
-           m.service_object_id = o.object_id and
-           m.softwareversions_id = sv.id]]
-
-   local cond_ = [[ n.itemtype in ("Computer", "NetworkEquipment") and
+   local cond_ = [[ n.itemtype = "Computer" and
            c.id = n.items_id and 
            n.id = m.networkports_id and
            c.id = csv.computers_id and
@@ -402,6 +391,7 @@ function query_4(c_id, n_id, sv_id)
    if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
    if n_id  then cond_ = cond_ .. " and n.id = "  .. n_id  end
    if sv_id then cond_ = cond_ .. " and sv.id = " .. sv_id end
+   if clause  then cond_ = cond_ .. clause end
 
    local q = Model.query(table_, cond_, nil, columns_)
    for _,v in ipairs(q) do table.insert(v, 1, 4) end
@@ -417,7 +407,7 @@ end
 
 --   QUERY 5 - computador com porta sem software e sem monitor
 
-function query_5(c_id, n_id)
+function query_5(c_id, n_id, clause)
 
    local columns_ = [[
       c.id			as c_id,
@@ -494,10 +484,10 @@ function query_5(c_id, n_id)
    local cond_ = [[ n.itemtype = "NetworkEquipment" and
            c.id = n.items_id and 
            not exists (select 1 from itvision_monitor m where m.networkports_id = n.id)]]
-           --not exists (select 1 from glpi_computers_softwareversions csv where c.id = csv.computers_id) and
 
    if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
    if n_id  then cond_ = cond_ .. " and n.id = "  .. n_id  end
+   if clause  then cond_ = cond_ .. clause end
 
    local q = Model.query(table_, cond_, nil, columns_)
    for _,v in ipairs(q) do table.insert(v, 1, 5) end
@@ -511,7 +501,7 @@ end
 --   QUERY 6 - computador com porta sem software e com monitor - monitoracao de host onde o service eh ping
 
 
-function query_6(c_id, n_id)
+function query_6(c_id, n_id, clause)
 
    local columns_ = [[
       c.id			as c_id,
@@ -590,11 +580,14 @@ function query_6(c_id, n_id)
            c.id = n.items_id and 
            n.id = m.networkports_id and
            m.host_object_id = o.object_id and
-           m.service_object_id = o.object_id and
-           not exists (select 1 from glpi_computers_softwareversions csv where c.id = csv.computers_id)]]
- 
+           m.softwareversions_id is null and
+           m.host_object_id = hst.host_object_id and
+           m.host_object_id = svc.host_object_id and
+           m.service_object_id = svc.service_object_id ]]
+
    if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
    if n_id  then cond_ = cond_ .. " and n.id = "  .. n_id  end
+   if clause  then cond_ = cond_ .. clause end
 
    local q = Model.query(table_, cond_, nil, columns_)
    for _,v in ipairs(q) do table.insert(v, 1, 6) end
@@ -606,14 +599,14 @@ end
            
 -- A FUNCAO ABAIXO JUNTA O RESULTADO DE TODAS AS QUERIES (1 à 6) EM UM UNICO RESULT SET
 
-function select_monitors()
+function select_monitors(clause)
    local q = {}
-   local q1 = query_1()
-   local q2 = query_2()
-   local q3 = query_3()
-   local q4 = query_4()
-   local q5 = query_5()
-   local q6 = query_6()
+   local q1 = query_1(nil, nil, clause)
+   local q2 = query_2(nil, nil, nil, clause)
+   local q3 = query_3(nil, nil, clause)
+   local q4 = query_4(nil, nil, nil, clause)
+   local q5 = query_5(nil, nil, clause)
+   local q6 = query_6(nil, nil, clause)
 
    for _,v in ipairs(q1) do table.insert(q, v) end
    for _,v in ipairs(q2) do table.insert(q, v) end

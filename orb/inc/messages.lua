@@ -59,6 +59,8 @@ strgs.pt_BR = {
 	alias = "Alias",	
 	activate = "Ativar",	
 	deactivate = "Desativar",	
+	inventory = "Inventário",	
+	sn = "Número Serial",
 
 }
 
@@ -118,6 +120,8 @@ strgs.us = {
 	alias = "Alias",	
 	activate = "Activate",	
 	deactivate = "Deactivate",	
+	inventory = "Inventory",	
+	sn = "Serial Number",
 }
 
 
