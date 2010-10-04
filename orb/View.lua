@@ -149,6 +149,7 @@ function render_menu_frame(inner_html)
          meta{ ["http-equiv"] = "Content-Type",  content = "text/html; charset=utf-8" },
          meta{ name="author", content="ATMA (http://www.itvision.com.br)" },
          meta{ name="description", content="IT monitoring" },
+         link{ href="/pics/favicon.ico", rel="shortcut icon" },
          link{ href="/css/menu/helper.css", media="screen", rel="stylesheet", type="text/css" },
          link{ href="/css/menu/dropdown.linear.css", media="screen", rel="stylesheet", type="text/css" },
          link{ href="/css/menu/default.ultimate.linear.css", media="screen", rel="stylesheet", type="text/css" },
@@ -169,7 +170,8 @@ function render_layout(inner_html)
       head{ 
          title("ITvision"),
          meta{ ["http-equiv"] = "Content-Type", content = "text/html; charset=utf-8" },
-         link{ rel = 'stylesheet', type = 'text/css', href = '/css/style.css', media = 'screen' },
+         link{ href="/pics/favicon.ico", rel="shortcut icon" },
+         link{ href="/css/style.css", media="screen", rel="stylesheet", type="text/css" },
          link{ href="/css/glpi_styles.css", media="screen", rel="stylesheet", type="text/css" },
          --script{ type="text/javascript", src="http://itv/js/scripts.js" },
          script{ type="text/javascript", scrt },
