@@ -63,20 +63,23 @@ local menu = {}
    menu[#menu + 1] = "<br><br><br><p><br><p> "
 
 
+function render_index(inner_html)
+   return html{ inner_html }
+end
 
 function render_layout(inner_html)
    return html{
       head{ 
          title("ITvision"),
-         meta{ ["http-equiv"] = "Content-Type",
-            content = "text/html; charset=utf-8" },
-         link{ rel = 'stylesheet', type = 'text/css', 
-            href = '/css/style.css', media = 'screen' },
+         meta{ ["http-equiv"] = "Content-Type", content = "text/html; charset=utf-8" },
+         link{ rel = 'stylesheet', type = 'text/css', href = '/css/style.css', media = 'screen' },
          --script{ type="text/javascript", src="http://itv/js/scripts.js" },
          script{ type="text/javascript", scrt },
 
       },
-      body{ menu, inner_html }
+      -- aqui ia o menu criado manualmente pela lista criada acima
+      -- body{ menu, inner_html }
+      body{ inner_html }
    }
 end
 
@@ -163,6 +166,38 @@ function select_physical_logical(name, default)
    return select_option(name, PhysicalOrLogical, "id", "name", default)
 end
 
+
+--[[
+
+<div id='c_ssmenu2' >
+<ul>
+        <li> <a href='/servdesk/front/computer.php' class='here' title='Computadores' >Computadores </a> </li>
+        <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </li>
+        <li> <a href='/servdesk/front/setup.templates.php?itemtype=Computer&amp;add=1'>
+                <img src='/servdesk/pics/menu_add.png' title='Adicionar' alt='Adicionar'></a> </li>
+        <li> <a href='/servdesk/front/computer.php'>
+                <img src='/servdesk/pics/menu_search.png' title='Pesquisar' alt='Pesquisar'> </a> </li>
+        <li> <a href='/servdesk/front/setup.templates.php?itemtype=Computer&amp;add=0' >
+                <img title="Gerenciar modelos..." alt="Gerenciar modelos..." src='/servdesk/pics/menu_addtemplate.png' 
+> </a> </li>
+
+</ul>
+</div>
+
+]]
+function render_content_header(name, link)
+   return div { id='c_ssmenu2', ul{ 
+         li{ a{href='/servdesk/front/computer.php', class='here', title="'"..name.."'", name} },
+         li{ "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" },
+         li{ a{ href='/servdesk/front/setup.templates.php?itemtype=Computer&amp;add=1',
+             img{ src='/servdesk/pics/menu_add.png', title='Adicionar', alt='Adicionar'} } },
+         li{ a{ href='/servdesk/front/computer.php',
+             img{ src='/servdesk/pics/menu_search.png', title='Pesquisar', alt='Pesquisar' } } },
+         li{ a{ href='/servdesk/front/setup.templates.php?itemtype=Computer&amp;add=0',
+             img{ src='/servdesk/pics/menu_addtemplate.png', title="Gerenciar modelos", alt="Gerenciar modelos" } } }
+         } }
+
+end
 
 function render_map(web, lat, lon)
 

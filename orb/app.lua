@@ -141,9 +141,11 @@ function render_list(web, A)
    local res = {}
    local svc = {}
    
+--[[
    res[#res + 1] = p{ strings.application..": ", str };
    res[#res + 1] = p{ button_link(strings.add, web:link("/add")) }
    res[#res + 1] = p{ br(), br() }
+]]
 
    for i, v in ipairs(A) do
       if v.service_object_id then
@@ -158,7 +160,7 @@ function render_list(web, A)
          stract = strings.deactivate
       end
 
-      rows[#rows + 1] = tr{ 
+      rows[#rows + 1] = tr{ class='tab_bg_1',
          td{ a{ href= web:link("/show/"..v.id), v.name} },
          td{ strings["logical_"..v.type] },
          td{ NoOrYes[v.is_active+1].name },
@@ -169,9 +171,12 @@ function render_list(web, A)
       }
    end
 
-   res[#res + 1]  = H("table") { border=1, cellpadding=1,
+   res[#res + 1]  = render_content_header("Applicação")
+   res[#res + 1] = p{ br() }
+   res[#res + 1]  = div{class='center'}
+   res[#res + 1]  = H("table") { border="0", class="tab_cadrehov",
       thead{ 
-         tr{ 
+         tr{ class="tab_bg_2", 
              th{ strings.name }, 
              th{ strings.type },
              th{ strings.is_active },
