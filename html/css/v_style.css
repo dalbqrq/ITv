@@ -155,13 +155,13 @@ blockquote {
 }
 
 #content {
-	padding: 0px 0px 20px 0px;
+	padding: 0px 0px 0px 0px;
 }
 
 #page {
 	width: 950px;
 	margin: 0px auto;
-	padding: 10px 0px 20px 0px;
+	padding: 10px 0px 10px 0px;
 }
 
 #column1 img { float:left;
@@ -219,7 +219,7 @@ a.menu-right:hover {background-color:#2679B7; color:#D8E9F1}
 #footer {
 	width: 950px;
 	margin: 0px auto;
-	padding: 5px 10px;
+	padding: 0px 10px;
 	border-top: 1px dashed #cccccc;
 	text-align:right;
 }

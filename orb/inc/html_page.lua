@@ -34,6 +34,7 @@ menu_itens = {
 	{ 2, "Comandos de Teste", "/orb/checkcmd" },
 	{ 2, "Manutenção", "/orb/system" },
 	{ 1, "Ajuda", "/blank.html" },
+	{ 2, "iFrame", "/c.html" },
 }
 
 
@@ -66,11 +67,15 @@ end
 
 function make_iframe(item)
 
-   link = menu_itens[item][3]
+   local s = ""
+   local link = menu_itens[item][3]
 
-   s = "\t\t\t<iframe src =\""..link.."\" width=\"100%\" height=\"70%\" align=\"center\" \n"
-   s = s.. "\t\t\tframeborder=\"0\" scrolling=\"no\">"
-   s = s.. "\t\t\t</iframe>"
+   --s = s.. "\t\t\t<iframe src =\""..link.."\" width=\"100%\" height=\"150%\" align=\"center\" \n"
+   --s = s.. "\t\t\tframeborder=\"0\" scrolling=\"no\">\t\t\t</iframe>"
+
+   s = s.."\t\t\t<iframe width=\"100%\" frameborder=0 border=0 src=\""..link.."\" name=\"childframe\" id=\"childframe\"></iframe>"
+
+   --s = s.."<iframe width=\"950\" id=\"the_iframe\" onLoad=\"calcHeight();\" src=\""..link.."\" scrolling=\"NO\" frameborder=\"1\" height=\"1\"> An iframe capable browser is required to view this web site.  </iframe>"
 
    return s
 
@@ -85,7 +90,32 @@ head = [[
 <link href="/css/v_menu.css" rel="stylesheet" type="text/css" media="screen" />
 </head>
 
-<body>
+<body onload="resizeFrame(document.getElementById('childframe'))" bgcolor="#cccccc">
+
+	<script type="text/javascript">
+		// Firefox worked fine. Internet Explorer shows scrollbar because of frameborder
+		function resizeFrame(f) {
+			f.style.height = f.contentWindow.document.body.scrollHeight + "px";
+		}
+	</script>
+
+
+	<script language="JavaScript">
+		<!--
+		function calcHeight()
+		{
+  			//find the height of the internal page
+  			var the_height=
+    			document.getElementById('the_iframe').contentWindow.
+      			document.body.scrollHeight;
+			
+  			//change the height of the iframe
+  			document.getElementById('the_iframe').height=the_height;
+		}
+		//-->
+	</script>
+
+
 <div id="header">
 	<div id="logo">
 		<h1><img src="../../v/images/logopurple.png">ITvision</h1>
@@ -113,7 +143,6 @@ foot = [[
 		</div>
 	</div>
 </div>
-<div style="clear: both;">&nbsp;</div>
 <div id="footer">
 	<p>&copy;&nbsp;desenvolvido pela Verto</p>
 </div>
