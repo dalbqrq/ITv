@@ -15,7 +15,7 @@
  *
  */
 
-@import "default.css";
+@import "/css/menu/default.css";
 
 
 /*-------------------------------------------------/
@@ -50,8 +50,8 @@ ul.dropdown li {
 
 ul.dropdown li a,
 ul.dropdown *.dir {
- border-style: solid;
- border-width: 1px 1px 0;
+ border-style: dotted;
+ border-width: 1px 1px 0 1px;
  border-color: #fff;
 }
 
@@ -87,7 +87,7 @@ ul.dropdown li.hover *.open {
  border-color: #f0f0f0 #666 #666 #f0f0f0;
  background-color: #fff;
  background-image: url(images/nav-arrow-down-open.png);
- color: #0063dc;
+ color: #000000;
  zoom: 1;
 }
 
@@ -170,9 +170,10 @@ ul.dropdown-vertical-rtl ul a.dir:hover {
 	 padding-top: 5px;
 	 padding-bottom: 5px;
 	 border-color: #f0f0f0 #666 #666 #f0f0f0;
+ 	 border-color: #e5e5e5;
 	 background-color: #fff;
 	 background-image: url(images/nav-arrow-down-open.png);
-	 color: #0063dc;
+	 color: #000000;
 	}
 
 	ul.dropdown-horizontal li:hover > *.dir,

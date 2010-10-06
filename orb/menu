@@ -1,6 +1,6 @@
 #!/usr/bin/env wsapi.cgi
 
-require "idx"
+require "menu"
 
 return ITvision
 

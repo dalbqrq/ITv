@@ -370,7 +370,6 @@ daniel */
       $menu['maintain']['content']['stat']['page']='/front/stat.php';
    }
 
-/* daniel
    // FINANCIAL
    if (haveRight("budget","r")) {
       $menu['financial']['content']['budget']['title']=$LANG['financial'][110];
@@ -424,6 +423,7 @@ daniel */
       }
    }
 
+/* daniel
    // UTILS
    $menu['utils']['title']=$LANG['Menu'][18];
    $menu['utils']['default']='/front/reminder.php';
@@ -515,6 +515,7 @@ daniel */
          }
       }
    }
+daniel */
 
    /// ADMINISTRATION
    $menu['admin']['title']=$LANG['Menu'][15];
@@ -552,6 +553,8 @@ daniel */
       $menu['admin']['content']['entity']['links']['add']="/front/entity.form.php";
    }
 
+/* daniel
+daniel */
    if (haveRight("rule_ldap","r")
          || haveRight("rule_ocs","r")
             || haveRight("entity_rule_ticket","r")
@@ -911,12 +914,14 @@ daniel */
    }
 
 
+/* daniel
    // Special items
    $menu['preference']['title'] = $LANG['Menu'][11];
    $menu['preference']['default'] = '/front/preference.php';
 
-daniel */
-
+daniel*/
+/* O comando 'echo' abaixo foi incluido por daniel */
+echo "<div id='menu_navigate'>";
 /* daniel
    echo "<div id='header'>";
    echo "<div id='c_logo' ><a href='".$CFG_GLPI["root_doc"]."/front/central.php' title=\"".
@@ -943,6 +948,27 @@ daniel */
 
 
 
+
+   echo "<div id='header'>";
+   echo "<div id='c_logo' ><a href='".$CFG_GLPI["root_doc"]."/front/central.php' title=\"".
+                            $LANG['central'][5]."\"></a></div>";
+
+   /// Prefs / Logout link
+   echo "<div id='c_preference' >";
+   echo "<ul>";
+
+   echo "<li id='deconnexion'><a href=\"".$CFG_GLPI["root_doc"]."/logout.php";
+   /// logout witout noAuto login for extauth
+   if (isset($_SESSION['glpiextauth']) && $_SESSION['glpiextauth']) {
+      echo "?noAUTO=1";
+   }
+   echo "\"  title=\"".$LANG['central'][6]."\">".$LANG['central'][6]."  </a>";
+   // check user id : header used for display messages when session logout
+   if (getLoginUserID()) {
+      echo "(";
+      echo formatUserName (0,$_SESSION["glpiname"],$_SESSION["glpirealname"],
+                           $_SESSION["glpifirstname"],0,20);
+      echo ")";
 
    echo "<li><a href='".
          (empty($CFG_GLPI["central_doc_url"])?"http://glpi-project.org/help-central":$CFG_GLPI["central_doc_url"]).
@@ -1002,9 +1028,7 @@ daniel */
    echo "</ul>";
    echo "<div class='sep'></div>";
    echo "</div>";
-daniel */
 
-/* daniel
    // End navigation bar
    // End headline
    // Le sous menu contextuel 1
@@ -1045,8 +1069,8 @@ daniel*/
    echo "<div id='c_ssmenu2' >";
    echo "<ul>";
 
-   // Display item
 /* daniel
+   // Display item
    echo "<li><a href='".$CFG_GLPI["root_doc"]."/front/central.php' title='".$LANG['central'][5]."' >".
               $LANG['central'][5]." </a> ></li>";
 

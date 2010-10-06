@@ -1,8 +1,6 @@
 #!/usr/bin/env wsapi.cgi
 
 -- includes & defs ------------------------------------------------------
-require "util"
-require "subsys_util"
 require "view_utils"
 
 require "orbit"
@@ -14,18 +12,17 @@ module(Model.name, package.seeall,orbit.new)
 
 -- controllers ------------------------------------------------------------
 
-function list(web, item)
-   return render_list(web, tonumber(item))
+function list(web)
+   return render_list(web)
 end
-ITvision:dispatch_get(list, "/(%d+)")
+ITvision:dispatch_get(list, "/")
 
 
 -- views ------------------------------------------------------------
 
-function render_list(web, item)
-   local res = {}
+function render_list(web)
    
-   return render_html_menu(res)
+   return render_menu_frame(make_menu())
 end
 
 

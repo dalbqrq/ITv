@@ -36,7 +36,7 @@ ul.dropdown {
 
 	ul.dropdown li {
 	 padding: 4px 6px;
-	 color: #0063dc;
+	 color: #4E5763;
 	}
 
 	ul.dropdown li.divider {
@@ -45,13 +45,13 @@ ul.dropdown {
 
 	ul.dropdown li.hover,
 	ul.dropdown li:hover {
-	 color: #0063dc;
+	 color: #4E5763;
 	}
 
 	ul.dropdown a:link,
-	ul.dropdown a:visited	{ color: #0063dc; text-decoration: none; }
-	ul.dropdown a:hover	{ color: #0063dc; text-decoration: underline; }
-	ul.dropdown a:active	{ color: #ff0084; }
+	ul.dropdown a:visited	{ color: #4E5763; text-decoration: none; }
+	ul.dropdown a:hover	{ color: #4E5763; text-decoration: underline; }
+	ul.dropdown a:active	{ color: #FFFFFF; }
 
 
 	/* -- level mark -- */
@@ -59,16 +59,17 @@ ul.dropdown {
 	ul.dropdown ul {
 	 width: 150px;
 	 padding: 3px 6px;
-	 border-style: solid;
+	 border-style: dotted;
 	 border-width: 1px;
 	 border-color: #f0f0f0 #666 #666 #f0f0f0;
+	 border-color: #e5e5e5;
 	 background-color: #fff;
 	 font-weight: normal;
 	 font-size: 11px;
 	}
 
-		ul.dropdown ul li {
-		}
+	ul.dropdown ul li {
+	}
 
 
 

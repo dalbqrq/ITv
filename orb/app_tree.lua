@@ -19,7 +19,7 @@ local app_tree = Model.itvision:model "app_tree"
 function app_tree:select_app_tree(id)
    local clause = ""
    if id then
-      clause = "app_tree_id = "..id
+      clause = "id = "..id
    end
    return self:find_all(clause)
 end
@@ -67,7 +67,7 @@ function update(web, id)
    local A = {}
    if id then
       local tables = "itvision_app_tree"
-      local clause = "app_tree_id = "..id
+      local clause = "id = "..id
       --A:new()
       A.name = web.input.name
 
@@ -112,7 +112,7 @@ ITvision:dispatch_get(remove, "/remove/(%d+)")
 
 function delete(web, id)
    if id then
-      local clause = "app_tree_id = "..id
+      local clause = "id = "..id
       local tables = "itvision_app_tree"
       Model.delete (tables, clause) 
    end
@@ -154,7 +154,7 @@ function render_list(web, A)
       }
    end
 
-   res[#res + 1] = render_content_header("Árvore de Applicação")
+   res[#res + 1] = render_content_header("Árvore de Applicação", web:link("/add"), web:link("/list"))
    res[#res + 1]  = H("table") { border="0", class="tab_cadrehov",
       thead{ 
          tr{ class="tab_bg_2",
@@ -179,8 +179,8 @@ function render_show(web, A)
    local res = {}
 
    res[#res + 1] = p{ button_link(strings.add, web:link("/add")) }
-   res[#res + 1] = p{ button_link(strings.remove, web:link("/remove/"..A.app_tree_id)) }
-   res[#res + 1] = p{ button_link(strings.edit, web:link("/edit/"..A.app_tree_id)) }
+   res[#res + 1] = p{ button_link(strings.remove, web:link("/remove/"..A.id)) }
+   res[#res + 1] = p{ button_link(strings.edit, web:link("/edit/"..A.id)) }
    res[#res + 1] = p{ button_link(strings.list, web:link("/list")) }
    res[#res + 1] = p{ br(), br() }
 
@@ -214,13 +214,13 @@ function render_add(web, A, edit, err)
    if edit then
       edit = edit[1]
       val1 = edit.name
-      val2 = edit.app_tree_id
+      val2 = edit.id
       url = "/update/"..val2
    else
       url = "/insert"
    end
 
-   local r = { name=strings.root, app_tree_id=0 }
+   local r = { name=strings.root, id=0 }
    for i, v in ipairs(A) do
       table.insert(B, v)
    end
@@ -235,8 +235,8 @@ function render_add(web, A, edit, err)
       method = "post",
       action = web:link(url),
 
-      strings.name..": ", select_option("app_id", A, "app_tree_id", "name", val2), mess, br(),
-      strings.child_of..": ", select_option("parent", B, "app_tree_id", "name", val2), br(),
+      strings.name..": ", select_option("app_id", A, "id", "name", val2), mess, br(),
+      strings.child_of..": ", select_option("parent", B, "id", "name", val2), br(),
 
       p{ button_form(strings.send, "submit", "positive") },
       p{ button_form(strings.reset, "reset", "negative") },
@@ -251,7 +251,7 @@ function render_remove(web, A)
 
    if A then
       A = A[1]
-      url_ok = web:link("/delete/"..A.app_tree_id)
+      url_ok = web:link("/delete/"..A.id)
       url_cancel = web:link("/list")
    end
 

@@ -62,6 +62,7 @@ local menu = {}
    menu[#menu + 1] = "<br><br><br><p><br><p> "
 
 
+
 --[[ 
   Cada entrada da tabela menu_item é uma tabela com os seguintes campos:
   { level, name, link }
@@ -127,14 +128,12 @@ menu_itens = {
 	{ 2, "Logs", "/servdesk/front/event.php" },
 	{ 2, "Comandos de Teste", "/orb/checkcmd" },
 	{ 2, "Manutenção", "/orb/system" },
-	{ 1, "Ajuda", "/blank.html" },
-	{ 2, "iFrame", "/c.html" },
+	{ 0, "Ajuda", "/blank.html" },
 }
 
 -- o parametro 'link_at_level_1' diz se o menu cujo nivel eh 1 serah tratado como um link
 function make_menu(link_at_level_1) 
-   local menu = {}
-   local o_level = 1
+   local o_level = 0
    local s = ""
 
    for i, v in ipairs(menu_itens) do
@@ -143,47 +142,50 @@ function make_menu(link_at_level_1)
       local name  = v[2]
       local link  = v[3]
 
-      if level = 0 or level = 2 then
-         --<li><a href="./content.html" target="content">Home</a></li>
-         s = s .. "<li><a href=\""..link.."\" target=\"content\">"..name.."</a></li>"
-         if level = 0 and o_level = 2 then
-            --</ul></li>
-            s = s .. "\t\t</ul>\t</li>"
-         end
-      elseif level = 1 then
-         -- <li><span class="dir">About Us</span> <ul>
-         --   ou
-         -- <li><a href="./" class="dir">Contact Us</a>
+      if ( ( level == 0 or level == 1 ) and o_level == 2 ) then
+         s = s .. "\t</ul>\n</li>\n"
+      end
+
+      if level == 0 or level == 2 then
+         s = s .. "\t\t<li><a href=\""..link.."\" target=\"content\">"..name.."</a></li>\n"
+      elseif level == 1 then
          if link_at_level_1 then
-            s = s .. "<li><href=\""..link.."\" class=\"dir\">"..name.."</a></li>"
+            s = s .. "<li><a href=\""..link.."\" class=\"dir\">"..name.."</a>\n\t<ul>\n"
          else
-            s = s .. "<li><span class=\"dir\">"..name.."</a></li>"
+            s = s .. "<li><span class=\"dir\">"..name.."</span>\n\t<ul>\n"
          end
       end
 
       o_level = level
-
    end
 
-   return s
+   local menu = { s }
 
+   return menu
 end
 
 
-function render_menu_frame()
+function render_menu_frame(inner_html)
    return html{
       head{ 
          title("ITvision"),
-         meta{ ["http-equiv"]="Content-Type" content="text/html; charset=utf-8" },
-         meta{ name="author" content="ATMA (http://www.itvision.com.br)" },
-         meta{ name="description" content="IT monitoring" },
-         link{ href="css/helper.css" media="screen" rel="stylesheet" type="text/css" },
-         link{ href="css/dropdown.linear.css" media="screen" rel="stylesheet" type="text/css" },
-         link{ href="css/default.ultimate.linear.css" media="screen" rel="stylesheet" type="text/css" },
+         meta{ ["http-equiv"] = "Content-Type",  content = "text/html; charset=utf-8" },
+         meta{ name="author", content="ATMA (http://www.itvision.com.br)" },
+         meta{ name="description", content="IT monitoring" },
+         link{ href="/css/menu/helper.css", media="screen", rel="stylesheet", type="text/css" },
+         link{ href="/css/menu/dropdown.linear.css", media="screen", rel="stylesheet", type="text/css" },
+         link{ href="/css/menu/default.ultimate.linear.css", media="screen", rel="stylesheet", type="text/css" },
+         link{ href="/css/style.css", media="screen", rel="stylesheet", type="text/css" },
       },
-      body{ make_menu() }
+
+      body{ 
+         div{ id="header", img{ src="/images/logopurple.png" }, " ITvision", 
+            ul{ id="nav", class="dropdown dropdown-linear", inner_html } 
+         }
+      }
    }
 end
+
 
 function render_layout(inner_html)
    return html{
@@ -191,12 +193,14 @@ function render_layout(inner_html)
          title("ITvision"),
          meta{ ["http-equiv"] = "Content-Type", content = "text/html; charset=utf-8" },
          link{ rel = 'stylesheet', type = 'text/css', href = '/css/style.css', media = 'screen' },
+         link{ href="/css/glpi_styles.css", media="screen", rel="stylesheet", type="text/css" },
          --script{ type="text/javascript", src="http://itv/js/scripts.js" },
          script{ type="text/javascript", src=scrpt },
 
       },
       -- aqui ia o menu criado manualmente pela lista criada acima
       -- body{ menu, inner_html }
+      --body{ div{ id='menu_navigate', inner_html } }
       body{ inner_html }
    }
 end
@@ -303,18 +307,18 @@ end
 </div>
 
 ]]
-function render_content_header(name, link)
+function render_content_header(name, add, list)
    -- p{ ..., "" } usado para dar um espaco antes de comecar o proximo elemento html
-   return p{ div { id='c_ssmenu2', ul{ 
+   return p{ div{ id='menu_navigate', div { id='c_ssmenu2', ul{ 
          li{ a{href='/servdesk/front/computer.php', class='here', title="'"..name.."'", name} },
          li{ "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" },
-         li{ a{ href='/servdesk/front/setup.templates.php?itemtype=Computer&amp;add=1',
+         li{ a{ href="'"..add.."'",
              img{ src='/servdesk/pics/menu_add.png', title='Adicionar', alt='Adicionar'} } },
-         li{ a{ href='/servdesk/front/computer.php',
+         li{ a{ href="'"..list.."'",
              img{ src='/servdesk/pics/menu_search.png', title='Pesquisar', alt='Pesquisar' } } },
-         li{ a{ href='/servdesk/front/setup.templates.php?itemtype=Computer&amp;add=0',
-             img{ src='/servdesk/pics/menu_addtemplate.png', title="Gerenciar modelos", alt="Gerenciar modelos" } } }
-         } }, "" }
+         --li{ a{ href='/servdesk/front/setup.templates.php?itemtype=Computer&amp;add=0',
+             --img{ src='/servdesk/pics/menu_addtemplate.png', title="Gerenciar modelos", alt="Gerenciar modelos" } } }
+         } }, "", p() } }
 
 end
 

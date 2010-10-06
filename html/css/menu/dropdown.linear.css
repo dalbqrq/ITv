@@ -16,7 +16,7 @@
  *
  */
 
-@import "dropdown.css";
+@import "/css/menu/dropdown.css";
 
 ul.dropdown-linear {
  width: 100%;

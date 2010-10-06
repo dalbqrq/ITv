@@ -121,7 +121,7 @@ function render_list(web, A)
       }
    end
 
-   res[#res + 1]  = render_content_header("Tipo de Relacionamento")
+   res[#res + 1]  = render_content_header("Tipo de Relacionamento", web:link("/add"), web:link("/list"))
    res[#res + 1]  = H("table") { border="0", class="tab_cadrehov",
       thead{ 
          tr{ class="tab_bg_2",
@@ -153,7 +153,7 @@ function render_show(web, A)
 ]]
 
    if A then
-      render_content_header("Tipo de Relacionamento")
+      render_content_header("Tipo de Relacionamento", web:link("/add"), web:link("/list"))
       res[#res + 1] = { H("table") { border="0", class="tab_cadrehov",
          tbody{
             tr{ th{ strings.name }, td{ A.name } },
