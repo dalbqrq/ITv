@@ -35,6 +35,7 @@ strgs.pt_BR = {
 	description = "Descrição",
 	contract = "Contrato",
 	app_relat_type = "Tipo de relacionamento de aplicação",
+	app_relat = "Relacionamentos de uma Aplicação",
 	relation = "Relacionamento",
         version = "Versão",
         created = "Criado",
@@ -97,6 +98,7 @@ strgs.us = {
 	description = "Description",
 	contract = "Contract",
 	app_relat_type = "Aplication relation type",
+	app_relat = "Aplication's relatioships",
 	relation = "Relation",
         version = "Version",
         created = "Created",
@@ -138,6 +140,8 @@ err_msg.pt_BR = {
 	[4] = "Preencher.",
 	[5] = "Localização inserida na árvore de localizações.",
 	[6] = "Lista não encontrada.",
+	[7] = "Selecione uma 'Origem', um 'Tipo de Relacionamento' e um 'Destino'.",
+	[8] = "A conexão entre os seguintes objetos já existe"
 }
 
 err_msg.us = {
@@ -147,6 +151,8 @@ err_msg.us = {
 	[4] = "Fill this field.",
 	[5] = "Local inserted on local tree.",
 	[6] = "List not found.",
+	[7] = "Select a 'Origem', a 'Relationship type' and a 'Destiny'.",
+	[8] = "The conection of the following objects already existes"
 }
 
 

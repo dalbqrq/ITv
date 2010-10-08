@@ -83,13 +83,13 @@ end
 
 function list(web, id)
    local A = app:select_apps()
-   if id == "/" then 
+   if id == "/list" or id == "/" then 
       if A[1] then id = A[1].id else id = nil end
    end
    local AR = Model.select_app_relat_object(id)
    return render_list(web, id, A, AR)
 end
-ITvision:dispatch_get(list, "/", "/list/(%d+)")
+ITvision:dispatch_get(list, "/", "/list", "/list/(%d+)")
 
 
 function show(web, id)
@@ -99,7 +99,7 @@ end
 ITvision:dispatch_get(show, "/show/(%d+)")
 
 
-function add(web, id)
+function add(web, id, msg)
    local A = app:select_apps()
    if id == "/" then 
       if A[1] then id = A[1].app_id else id = nil end
@@ -107,23 +107,41 @@ function add(web, id)
    local AR = Model.select_app_relat_object(id)
    local AL = Model.select_app_app_objects(id)
    local RT = app_relat_type:select_app_relat_type()
-   return render_add(web, id, A, AR, AL, RT)
+   return render_add(web, id, A, AR, AL, RT, msg)
 end
 ITvision:dispatch_get(add, "/add/(%d+)")
+ITvision:dispatch_get(add, "/add/(%d+):(.+)")
 
 
 function insert(web)
-   app_relat:new()
+   local msg = ""
+   local from, to
 
+   app_relat:new()
    app_relat.app_id = web.input.app_id
    app_relat.from_object_id = web.input.from
    app_relat.to_object_id = web.input.to
    app_relat.instance_id = Model.db.instance_id
    app_relat.app_relat_type_id = web.input.relat
 
-   app_relat:save()
+   if not ( web.input.from and web.input.to and web.input.relat ) then
+      msg = ":"..error_message(7)
+      return web:redirect(web:link("/add/"..app_relat.app_id)..msg)
+   end
 
-   return web:redirect(web:link("/add/"..app_relat.app_id))
+   local AR = Model.select_app_relat_object(web.input.app_id, web.input.from, web.input.to)
+   if AR[1] then
+      local v = AR[1]
+      from = v.from_name1
+      to = v.to_name1
+      if v.from_name2 then from = v.from_name2.."@"..from end
+      if v.to_name2 then to = v.to_name2.."@"..to end
+      msg = ":"..error_message(8)..": "..from.." -> "..to
+   else
+      app_relat:save()
+   end
+
+   return web:redirect(web:link("/add/"..app_relat.app_id)..msg)
 end
 ITvision:dispatch_post(insert, "/insert")
 
@@ -176,8 +194,8 @@ function render_list(web, id, A, AR)
    local res = {}
    local header =  { strings.origin, strings.type, strings.destiny, "." }
 
-   res[#res+1] = render_content_header("Relacionamentos de uma Aplicação", web:link("/add/"..id), web:link("/list"))
-   res[#res+1] = render_table_search( render_selector_bar(web, A, id, "/list/") )
+   res[#res+1] = render_content_header(strings.app_relat, web:link("/add/"..id), web:link("/list"))
+   res[#res+1] = render_bar( render_selector_bar(web, A, id, "/list") )
    res[#res+1] = render_table(make_app_relat_table(web, AR), header)
 
    return render_layout(res)
@@ -229,81 +247,15 @@ end
 
 
 
-function render_add(web, id, A, AR, AL, RT)
+function render_add(web, id, A, AR, AL, RT, msg)
    local res = {}
-   local tab = {}
-   local from, to, relat
    local url = "/insert"
-   local list_size = 7
+   local list_size = 8
    local header = {}
-
-   local make_form = function(selopt)
-      return form{
-         name = "input",
-         method = "post",
-         action = web:link(url),
-         p{ selopt },
-         p{ button_form(strings.send, "submit", "positive") },
-         p{ button_form(strings.reset, "reset", "negative") },
-      }
-   end
-
-   -- LISTA APP ORIGEM DOS RELACIONAMENTO ---------------------------------
-   --if AL[1].object_id then
-   if AL[1] then
-      s = [[<SELECT multiple size=]]..list_size..[[ NAME="from">]]
-      for i,v in ipairs(AL) do
-        if v.name2 then ic = v.name2.."@"..v.name1 else ic = v.name1 end
-        s = s..[[<OPTION VALUE="]]..v.object_id..[[">]]..ic
-      end
-      s = s..[[ </SELECT> ]]
-   else 
-      s = ""
-   end
-   from = s
-
-   -- LISTA APP DESTINO DOS RELACIONAMENTO ---------------------------------
-   if AL[1] then
-      s = [[<SELECT multiple size=]]..list_size..[[ NAME="to">]]
-      for i,v in ipairs(AL) do
-        if v.name2 then ic = v.name2.."@"..v.name1 else ic = v.name1 end
-        s = s..[[<OPTION VALUE="]]..v.object_id..[[">]]..ic
-      end
-      s = s..[[ </SELECT> ]]
-   else 
-      s = ""
-   end
-   to = s
-
-   -- LISTA TIPOS DE RELACIONAMENTO  ---------------------------------
-   s = [[<SELECT multiple size=]]..list_size..[[ NAME="relat">]]
-   for i,v in ipairs(RT) do
-     s = s..[[<OPTION VALUE="]]..v.id..[[">]]..v.name
-   end
-   s = s..[[ </SELECT> ]]
-   relat = s
-
-   aid = [[ <INPUT TYPE=HIDDEN NAME="app_id" value="]]..id..[["> ]]
-
-   tab[#tab + 1] = [[<table border=1, cellpadding=1>]]
-   tab[#tab + 1] = {
-      thead{ tr{ 
-         th{ strings.origin }, 
-         th{ strings.type }, 
-         th{ strings.destiny }, 
-      } },
-      tbody{ tr{
-         td{ from },
-         td{ relat },
-         td{ to },
-      } },
-   }
-   tab[#tab + 1] = [[</table>]]..aid
-
 
    header =  { strings.origin, strings.type, strings.destiny, "." }
    res[#res+1] = render_content_header("Relacionamentos de uma Aplicação", web:link("/add/"..id), web:link("/list"))
-   res[#res+1] = render_table_search( render_selector_bar(web, A, id, "/add") )
+   res[#res+1] = render_bar( render_selector_bar(web, A, id, "/add") )
    res[#res+1] = render_table(make_app_relat_table(web, AR), header)
 
    -- LISTA APP ORIGEM DOS RELACIONAMENTO ---------------------------------
@@ -315,16 +267,16 @@ function render_add(web, id, A, AR, AL, RT)
       end
    end
    --local from = H("select") { multiple="multiple", size=list_size, name="from", opt_from, }
-   local from = H("select") { size=list_size, name="from", opt_from, }
+   local from = H("select") { size=list_size, name="from", opt_from }
 
-   -- LISTA APP DESTINO DOS RELACIONAMENTO ---------------------------------
+   -- LISTA TIPOS DE RELACIONAMENTO  ---------------------------------
    local opt_rel = {}
    for i,v in ipairs(RT) do
      opt_rel[#opt_rel+1] = option{ value=v.id, v.name }
    end
-   local rel = H("select") { size=list_size, name="relat", opt_rel, }
+   local rel = H("select") { size=list_size, name="relat", opt_rel }
 
-   -- LISTA TIPOS DE RELACIONAMENTO  ---------------------------------
+   -- LISTA APP DESTINO DOS RELACIONAMENTO ---------------------------------
    local opt_to = {}
    if AL[1] then
       for i,v in ipairs(AL) do
@@ -332,7 +284,7 @@ function render_add(web, id, A, AR, AL, RT)
             opt_to[#opt_to+1] = option{ value=v.object_id, ic }
       end
    end
-   local to = H("select") { multiple="multiple", size=list_size, name="from", opt_to, }
+   local to = H("select") { size=list_size, name="to", opt_to }
 
    -- INFORMACAO OCULTA PARA A INCLUSAO DO RELACIONAMENTO  --------------------
    aid = input{ type="hidden", name="app_id", value=id }
@@ -340,19 +292,8 @@ function render_add(web, id, A, AR, AL, RT)
    local t = { { from, rel, {to, aid} } }
 
    res[#res+1] = br()
-
+   if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ msg } end
    res[#res+1] = render_form_bar( render_table(t, header) , strings.add, web:link("/insert"), web:link("/add/"..id))
-
-   -- LISTA DE OPERACOES 
---[[
-   res[#res + 1] = p{ strings.application..": ", str }
-   res[#res + 1] = p{ render_selector(web, A, id, "/add/") }
-   res[#res + 1] = p{ button_link(strings.list, web:link("/list/"..id)) }
-   res[#res + 1] = p{ br(), br() }
-   res[#res + 1] = p{ make_app_relat_table(web, AR) }
-   res[#res + 1] = p{ br() }
-   res[#res + 1] = make_form(tab) 
-]]
 
    return render_layout(res)
 end
@@ -375,14 +316,13 @@ function render_remove(web, A, AR)
       url_cancel = "/list"
    end
 
-   res[#res + 1] = p{
-      strings.exclude_quest.." "..strings.relation.." \""..obj1.."->"..obj2.."\" "..strings.ofthe.." "
-         ..strings.application.." \""..A.name.."\"?",
-      p{ button_link(strings.yes, web:link("/delete/"..A.app_id..":"..AR.from_object_id..":"..AR.to_object_id)) },
-      p{ button_link(strings.cancel, web:link("/list/"..A.app_id)) },
-   }
+   res[#res + 1] = strings.exclude_quest.." "..strings.relation.." \""..obj1.." -> "..obj2.."\" "..strings.ofthe.." "
+         ..strings.application.." \""..A.name.."\"?"
+   res[#res + 1] = button_link(strings.yes, 
+         web:link("/delete/"..A.app_id..":"..AR.from_object_id..":"..AR.to_object_id))
+   res[#res + 1] = button_link(strings.cancel, web:link("/list/"..A.app_id))
 
-   return render_layout(res)
+   return render_layout(render_bar(res))
 end
 
 

@@ -275,7 +275,7 @@ function render_selector_bar(web, A, id, path)
 end
 
 
-function render_table_search(t)
+function render_bar(t)
    return { H("table") { class='tab_cadre_fixe', tr{ class='tab_bg_1', td{ t } } }, br() }
 end
 
