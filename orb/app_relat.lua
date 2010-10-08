@@ -177,14 +177,14 @@ function render_list(web, id, A, AR)
 
    --res[#res + 1] = p{ strings.application..": ", str };
    res[#res + 1] = p{ render_selector(web, A, id, "/list/") }
-   res[#res + 1] = p{ render_table(web, AR) }
+   res[#res + 1] = p{ render_table_(web, AR) }
    --if id then res[#res + 1] = p{ button_link(strings.add, web:link("/add/"..id)) } end
 
    return render_layout(res)
 end
 
 
-function render_table(web, AR)
+function render_table_(web, AR)
    local res = {}
 
    for i, v in ipairs(AR) do
@@ -344,7 +344,7 @@ function render_add(web, id, A, AR, AL, RT)
    res[#res + 1] = p{ render_selector(web, A, id, "/add/") }
    res[#res + 1] = p{ button_link(strings.list, web:link("/list/"..id)) }
    res[#res + 1] = p{ br(), br() }
-   res[#res + 1] = p{ render_table(web, AR) }
+   res[#res + 1] = p{ render_table_(web, AR) }
    res[#res + 1] = p{ br() }
    res[#res + 1] = make_form(tab) 
 

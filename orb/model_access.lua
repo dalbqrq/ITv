@@ -39,7 +39,7 @@ function connect ()
 end
 
 
-function select_columns (table_) -- Retorna tabela com nome dos campos de uma tabela sql
+function show_columns (table_) -- Retorna tabela com nome dos campos de uma tabela sql
    local db = connect ()
    local content = {}
    local cur = assert ( db:assertexec ("show columns from "..table_))
