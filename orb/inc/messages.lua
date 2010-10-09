@@ -41,6 +41,7 @@ strgs.pt_BR = {
 	relation = "Relacionamento",
         version = "Versão",
         created = "Criado",
+        update = "Atualizar",
         updated = "Atualizado",
         home_dir = "home_dir",
         monitor_dir = "monitor_dir",
@@ -106,6 +107,7 @@ strgs.us = {
 	relation = "Relation",
         version = "Version",
         created = "Created",
+        updated = "Update",
         updated = "Updated",
         home_dir = "home_dir",
         monitor_dir = "monitor_dir",
@@ -138,25 +140,29 @@ strings = strgs[config.language]
 ----------------------------- ERROR MESSAGE ----------------------------------
 local err_msg = {} 
 err_msg.pt_BR = {
-	[1] = "Origen não encontrada.",
-	[2] = "Aplicação inserida na árvore de aplicações.",
-	[3] = "Grupo de Usuário não encontrado.",
+	[1] = "ERRO: Origen não encontrada.",
+	[2] = "ERRO: Aplicação inserida na árvore de aplicações.",
+	[3] = "ERRO: Grupo de Usuário não encontrado.",
 	[4] = "Preencher.",
 	[5] = "Localização inserida na árvore de localizações.",
-	[6] = "Lista não encontrada.",
-	[7] = "Selecione uma 'Origem', um 'Tipo de Relacionamento' e um 'Destino'.",
-	[8] = "A conexão entre os seguintes objetos já existe"
+	[6] = "ERRO: Lista não encontrada.",
+	[7] = "ERRO: Selecione uma 'Origem', um 'Tipo de Relacionamento' e um 'Destino'.",
+	[8] = "ERRO: A conexão entre os seguintes objetos já existe:",
+	[9] = "A seguinte Aplicação fui ativada:",
+	[10] = "ERRO: A seguinte Aplicação não possui objetos associados:",
 }
 
 err_msg.us = {
-	[1] = "Unknown origin.",
-	[2] = "Application inserted on applications tree.",
-	[3] = "User Group not found.",
+	[1] = "ERROR: Unknown origin.",
+	[2] = "ERROR: Application inserted on applications tree.",
+	[3] = "ERROR: User Group not found.",
 	[4] = "Fill this field.",
 	[5] = "Local inserted on local tree.",
-	[6] = "List not found.",
-	[7] = "Select a 'Origem', a 'Relationship type' and a 'Destiny'.",
-	[8] = "The conection of the following objects already existes"
+	[6] = "ERROR: List not found.",
+	[7] = "ERROR: Select a 'Origem', a 'Relationship type' and a 'Destiny'.",
+	[8] = "ERROR: The conection of the following objects already existes:",
+	[9] = "The following Application was activated:",
+	[10] = "ERROR: There is no objects associated with the following Application:",
 }
 
 

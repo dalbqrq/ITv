@@ -147,7 +147,8 @@ end
 ]]
 function activate_app(app, objs, flag)
    app = app[1]
-   s = ""
+   local s = ""
+   local file_name
 
    if app.type == "and" then op = " & " else op = " | " end
 
@@ -164,12 +165,13 @@ function activate_app(app, objs, flag)
       
    end
 
+   file_name = string.gsub(app.name," ", "_")
    s = app.name.." = "..s.."\n"
    s = s.."display "..flag..";"..app.name..";"..app.name.."\n"
 
-   text_file_writer(config.monitor.bp_dir.."/etc/apps/"..app.name..".conf", s)
-   make_bp(app.name)
-   os.reset_monitor()
+   text_file_writer(config.monitor.bp_dir.."/etc/apps/"..file_name..".conf", s)
+   insert_bp_cfg_file(file_name)
+   --os.reset_monitor()
 
 end
 
@@ -178,13 +180,13 @@ end
   Cria arquivo de configuracao do nagios a partir do arquivo de configuracao do BP
   criado na funcao "activate_app()" acima usando o script perl do proprio BP.
 ]]
-function insert_bp_cfg_file(app_name)
+function insert_bp_cfg_file(file_name)
 
    local cmd = config.monitor.bp_dir.."/bin/bp_cfg2service_cfg.pl"
-   cmd = cmd .. " -f "..config.monitor.bp_dir.."/etc/apps/"..app_name..".conf"
-   cmd = cmd .. " -o "..config.monitor.dir.."/etc/apps/"..app_name..".cfg"
-   os.capture(cmd)
-   --text_file_writer("/tmp/cmd.out", cmd)
+   cmd = cmd .. " -f "..config.monitor.bp_dir.."/etc/apps/"..file_name..".conf"
+   cmd = cmd .. " -o "..config.monitor.dir.."/etc/apps/"..file_name..".cfg"
+   --os.capture(cmd)
+   text_file_writer("/tmp/cmd.out", cmd)
 
 end
 

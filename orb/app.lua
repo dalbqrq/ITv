@@ -22,10 +22,11 @@ function app:select(id, clause_)
       clause = "id = "..id.." and "..clause_
    elseif id then
       clause = "id = "..id
-   else 
+   elseif clause_ then
       clause = clause_
+   else 
+      clause = nil
    end
-   --return self:find_all(clause)
    return Model.query("itvision_app", clause)
 end
 
@@ -56,16 +57,17 @@ function services:select(id)
    return self:find_all(clause)
 end
 
+
 -- controllers ------------------------------------------------------------
 
-function list(web)
+function list(web, msg)
    local clause
    if web.input.app_name then clause = " name like '%"..web.input.app_name.."%' " end
 
    local A = app:select(nil, clause)
-   return render_list(web, A)
+   return render_list(web, A, msg)
 end
-ITvision:dispatch_get(list, "/", "/list")
+ITvision:dispatch_get(list, "/", "/list", "/list/(.+)")
 ITvision:dispatch_post(list, "/list")
 
 
@@ -123,7 +125,7 @@ ITvision:dispatch_post(insert, "/insert")
 
 
 function remove(web, id)
-   local A = app:select_apps(id)
+   local A = app:select(id)
    return render_remove(web, A)
 end
 ITvision:dispatch_get(remove, "/remove/(%d+)")
@@ -144,18 +146,25 @@ ITvision:dispatch_get(delete, "/delete/(%d+)")
 function activate(web, id, flag)
    if flag == "0" then flag = 1 else flag = 0 end
    local cols = {}
+   local msg
+
    if id then
       local clause = "id = "..id
       local tables = "itvision_app"
       cols.is_active = flag
 
-      local A = app:select_apps(id)
-      local O = select_app_app_objects(id)
-      activate_app(A, O, flag)
-
-      Model.update (tables, cols, clause) 
+      local A = app:select(id)
+      local O = Model.select_app_app_objects(id)
+      if O[1] then
+         activate_app(A, O, flag)
+         Model.update (tables, cols, clause) 
+         msg = "/"..error_message(9).." "..A[1].name
+      else
+         msg = "/"..error_message(10).." "..A[1].name
+      end
    end
-   return web:redirect(web:link("/list"))
+
+   return web:redirect(web:link("/list"..msg))
 end
 ITvision:dispatch_get(activate, "/activate/(%d+):(%d+)")
 
@@ -170,7 +179,8 @@ function render_filter(web)
 end
 
 
-function make_app_table(A)
+function render_list(web, A, msg)
+   local res = {}
    local row = {}
    local svc, stract
 
@@ -200,15 +210,10 @@ function make_app_table(A)
          button_link(stract, web:link("/activate/"..v.id..":"..v.is_active)) }
    end
 
-   return row
-end
-
-function render_list(web, A)
-   local res = {}
-
    local header =  { strings.name, strings.type, strings.is_active, ".", ".", "." }
    res[#res+1] = render_content_header(strings.application, web:link("/add"), web:link("/list"))
    res[#res+1] = render_form_bar( render_filter(web), strings.search, web:link("/list"), web:link("/list") )
+   if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ msg } end
    res[#res+1] = render_table(row, header)
 
    return render_layout(res)
@@ -237,7 +242,7 @@ function render_add(web, edit)
    local res = {}
 
    if edit then 
-      strbar = strings.edit 
+      strbar = strings.update 
       link = web:link("/update/"..edit.id)
    else 
       strbar = strings.add 

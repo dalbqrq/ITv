@@ -136,7 +136,7 @@ function insert(web)
       to = v.to_name1
       if v.from_name2 then from = v.from_name2.."@"..from end
       if v.to_name2 then to = v.to_name2.."@"..to end
-      msg = ":"..error_message(8)..": "..from.." -> "..to
+      msg = ":"..error_message(8).." "..from.." -> "..to
    else
       app_relat:save()
    end
