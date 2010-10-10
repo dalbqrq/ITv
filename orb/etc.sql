@@ -24,7 +24,7 @@ RELACIONAR O CMDB DO GLPI AS TABELAS QUE DEFINEM UMA MONITORACAO. ELAS TEM O SEG
                                                              |         |
                                                              |         |
                                                    +-----------+      +------------+
-                                                   | itvision_ |      | itvision_  |
+                                                   | nagios_   |      | nagios_    |
                                                    | HOSTS     |      | SERVICES   |
                                                    +-----------+      +------------+
 

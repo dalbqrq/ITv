@@ -2,6 +2,7 @@
 
 -- includes & defs ------------------------------------------------------
 local no_software_code = "_no_software_code_"
+local loop = 100000
 
 require "util"
 require "monitor_util"
@@ -11,21 +12,51 @@ require "orbit"
 require "Model"
 module(Model.name, package.seeall,orbit.new)
 
-local hosts   = Model.nagios:model "hosts"
-local objects = Model.nagios:model "objects"
-local monitor = Model.itvision:model "monitor"
+--[[
+local hosts    = Model.nagios:model "hosts"
+local services = Model.nagios:model "services"
+]]
+local objects  = Model.nagios:model "objects"
+local monitor  = Model.itvision:model "monitor"
 
 
 -- models ------------------------------------------------------------
 
 
+--[[
 function hosts:select_host(h_name)
    local clause = ""
    if h_name then
-      clause = " alias = '"..h_name.."' "
+      clause = " display_name = '"..h_name.."' "
    end
 
    return Model.query("nagios_hosts", clause)
+end
+
+
+function services:select_service(h_id)
+   local clause = ""
+   if h_id then
+      clause = " host_object_id = "..h_id.." and display_name = \"PING\" "
+   end
+
+   return Model.query("nagios_services", clause)
+end
+]]
+
+function objects:select(name1, name2)
+   local clause = ""
+   if name1 ~= nil then
+      clause = " name1 = '"..name1
+   end
+   if name2 ~= nil then
+      clause = clause.."' and name2 = '"..name2.."' "
+   else
+      clause = clause.."' and name2 is NULL "
+   end
+   clause = clause.." and is_active = 1 "
+
+   return Model.query("nagios_objects", clause)
 end
 
 
@@ -121,54 +152,91 @@ ITvision:dispatch_get(add, "/add/(%d+):(%d+):(%d+):(%d+)")
    s_name e sv_name == no_software_code entao os nomes sao nulos e isto é um host e nao um service
 ]]
 function insert(web, n_id, sv_id, c_id, c_name, s_name, sv_name, ip)
-   c_name = string.gsub(c_name," ", "_")
-   s_name = string.gsub(s_name," ", "_")
-   sv_name = string.gsub(sv_name," ", "_")
-
-   --TODO: pegando o host somente pelo nome pode gerar erro quando houver mais de uma maquina
-   --      com o mesmo nome
-   local h = hosts:select_host(c_name)
-   local ins, hst, svc, os, dpl, chk
+   -- hostname passa aqui a ser uma composicao do proprio hostname com o ip a ser monitorado
+   local hostname = string.gsub(c_name.."-"..ip," ","_")
+   local cmd, hst, svc, dpl, chk, h, s
    local msg = ""
+   local content
+   local counter
 
+   h = objects:select(hostname)
 
    -- cria check host e service ping caso nao exista
    if h[1] == nil then
-      ins, hst, os = insert_host_cfg_file (c_name, c_name, ip)
-      ins, svc, os = insert_service_cfg_file ("PING", c_name, 0)
+      cmd = insert_host_cfg_file (hostname, c_name, ip)
+      cmd = insert_service_cfg_file (hostname, "PING", 0)
+      h = objects:select(hostname)
+      -- caso host ainda nao tenha sido incluido aguarde e tente novamente
+      counter = 0
+      while h[1] == nil do
+         counter = counter + 1
+         for i = 1,loop do x = i/2 end -- aguarde...
+         h = objects:select(hostname)
+      end
+      -- DEBUG: text_file_writer ("/tmp/1", "Counter: "..counter.."\n")
+      hst = h[1].object_id
+      s = objects:select(hostname, "PING")
+      -- caso service ainda nao tenha sido incluido aguarde e tente novamente
+      counter = 0
+      while s[1] == nil do
+         counter = counter + 1
+         for i = 1,loop do x = i/2 end -- aguarde...
+         s = objects:select(hostname, "PING")
+      end
+      -- DEBUG: text_file_writer ("/tmp/2", "Counter: "..counter.."\n")
+      svc = s[1].object_id
       monitor:insert_monitor(n_id, nil, hst, svc, 1, "hst")
       msg = msg.."Check do HOST: "..c_name.." para o IP "..ip.." criado. "
-               .." (hst,svc) = ("..hst..","..svc..") "..os
+      -- DEBUG:         .." (hst,svc) = ("..hst..","..svc..") "
    else
-      hst = h[1].host_object_id
+      hst = h[1].object_id
       msg = msg.."Check do HOST: "..c_name.." já existe! "
    end   
 
-   local content = Model.query("nagios_objects", "name1 = '"..c_name.."' and name2 is NULL")
-   if content[1] == nil then 
-      msg = error_message(11)
+   h = objects:select(hostname)
+   counter = 0
+   while h[1] == nil do
+      counter = counter + 1
+      for i = 1,loop do x = i/2 end -- aguarde...
+      h = objects:select(hostname)
+   end
+   -- DEBUG: text_file_writer ("/tmp/3", "Counter: "..counter.."\n")
+   if h[1] == nil then 
+      msg = msg..error_message(11)
    else
-      msg = " ||| hostobjid"..content[1].object_id.." ||| "
+      -- DEBUG: msg = msg.." ||| hostobjid"..hst.." ||| "
+      hst = h[1].object_id
    end
 
-   -- cria outro service check 
+   -- cria o service check caso tenha sido requisitado
    if tonumber(sv_id) ~= 0 then
       chk = web.input.check
-      dpl = web.input.display
-      dpl = dpl or chk
-      dpl = string.gsub(dpl," ", "_")
-      ins, svc, os = insert_service_cfg_file (dpl, c_name, chk)
-      monitor:insert_monitor(n_id, sv_id, hst, svc, 1, "svc")
-      msg = msg.."Check do SERVIÇO: "..dpl.." HOST: ".. c_name.." COMANDO: "..chk.." criado. "
-               .." (hst,svc) = ("..hst..","..svc..") "..os
-      content = Model.query("nagios_objects", "name1 = '"..c_name.."' and name2 = '"..dpl.."'")
-      if content[1] == nil then 
-         msg = error_message(12)
+      if string.gsub(web.input.display," ","") == "" then 
+         dpl = chk
       else
-         msg = " ||| serviceobjid"..content[1].object_id.." ||| " 
+         dpl = web.input.display
+      end
+      cmd = insert_service_cfg_file (hostname, dpl, chk)
+      s = objects:select(hostname, dpl)
+      -- caso service ainda nao tenha sido incluido aguarde e tente novamente
+      counter = 0
+      while s[1] == nil do
+         counter = counter + 1
+         for i = 1,loop do x = i/2 end -- aguarde...
+         s = objects:select(hostname, dpl)
+      end
+      -- DEBUG: text_file_writer ("/tmp/4", "Counter: "..counter.."\n")
+
+      if s[1] == nil then 
+         msg = msg..error_message(12)
+      else
+         svc = s[1].object_id
+         monitor:insert_monitor(n_id, sv_id, hst, svc, 1, "svc")
+         msg = msg.."Check do SERVIÇO: "..dpl.." HOST: ".. c_name.." COMANDO: "..chk.." criado. "
+         -- DEBUG:       .." (hst,svc) = ("..hst..","..svc..") "
+         -- DEBUG: msg = msg.." ||| serviceobjid"..svc.." ||| " 
       end
    end
-
 
    return web:redirect(web:link("/list/"..msg..""))
 end

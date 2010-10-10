@@ -6,6 +6,14 @@ require "Model"
       EXATAMENTE A MESMA ONDE O CONTEUDO DAS COLUNAS QUE NAO EXISTIREM SERÃO DE VALOR ''''.
 
       ESTAS DEVERÃO SER AS QUERIES DEFINITIVAS QUE VIRARÃO FUNCÕES EM UM MÓDULO LUA DO PROJETO ITvision
+      SÃO ELAS:
+
+        QUERY 1 - computador com porta sem software e sem monitor
+        QUERY 2 - computador com porta com software e sem monitor
+        QUERY 3 - computador com porta sem software e com monitor - monitoracao de host onde o service eh ping
+        QUERY 4 - computador com porta com software e com monitor - monitoracao de service 
+        QUERY 5 - network com porta sem software e sem monitor
+        QUERY 6 - network com porta sem software e com monitor - monitoracao de host onde o service eh ping
 ]]
 
 
@@ -184,7 +192,8 @@ function query_2(c_id, n_id, sv_id, clause)
            c.id = csv.computers_id and
            csv.softwareversions_id = sv.id and
            sv.softwares_id = s.id and
-           not exists (select 1 from itvision_monitor m where m.networkports_id = n.id)]]
+           not exists (select 1 from itvision_monitor m where m.networkports_id = n.id 
+                                 and m.softwareversions_id = sv.id)]]
 
    if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
    if n_id  then cond_ = cond_ .. " and n.id = "  .. n_id  end
@@ -405,7 +414,7 @@ end
   AS QUERIES 1 E 3 
 ]]
 
---   QUERY 5 - computador com porta sem software e sem monitor
+--   QUERY 5 - network com porta sem software e sem monitor
 
 function query_5(c_id, n_id, clause)
 
@@ -498,7 +507,7 @@ end
 
 
 
---   QUERY 6 - computador com porta sem software e com monitor - monitoracao de host onde o service eh ping
+--   QUERY 6 - network com porta sem software e com monitor - monitoracao de host onde o service eh ping
 
 
 function query_6(c_id, n_id, clause)
