@@ -14,6 +14,7 @@ module("itvision", package.seeall, orbit.new)
 require "cosmo"
 
 require "messages"
+require "util"
 
 local scrt = [[
    function confirmation(question, url) { 
@@ -44,6 +45,104 @@ function button_link(label, link, class)
    class = class or "none"
    return [[<div class="buttons"> <a href="]]..link..
           [[" class="]]..class..[[">]]..label..[[ </a> </div>]]
+end
+
+--[[ 
+  Cada entrada da tabela menu_item é uma tabela com os seguintes campos:
+  { level, name, link }
+
+  O campo level pode ter os seguinte valores:
+     0 - item principal sem submenu
+     1 - item principal que eh entrada para um submenu
+     2 - item de submenu
+
+  Ex:
+    Um menu com a seguite disposicao:
+   
+       menu1   |   menu2   |   menu3   |   menu4
+                   item2.1     item3.1     item4.1
+                   item2.2                 item4.2
+                   item2.3
+
+    Ficaria assim:
+       menu_itens = {
+	   { 0, "menu1",   "href.html" },
+	   { 1, "menu2",   "href.html" },
+	   { 2, "item2.1", "href.html" },
+	   { 2, "item2.2", "href.html" },
+	   { 2, "item2.3", "href.html" },
+	   { 1, "menu3",   "href.html" },
+	   { 2, "item3.1", "href.html" },
+	   { 1, "menu4",   "href.html" },
+	   { 2, "item4.1", "href.html" },
+	   { 2, "item4.2", "href.html" },
+    }
+]]
+menu_itens = {
+	{ 1, "Monitor", "/fig1.html" },
+	{ 2, "Lógico", "/fig1.html" },
+	{ 2, "Físico", "/fig2.html" },
+	{ 2, "Checagem", "/orb/probe" },
+	{ 2, "Árvore", "/orb/app_tree" },
+	{ 2, "Aplicações", "/orb/app" },
+	{ 2, "Lista Aplicações", "/orb/app_object" },
+	{ 2, "Relacionamento Aplicações", "/orb/app_relat" },
+	{ 2, "Tipo de Relacionamento", "/orb/app_relat_type" },
+	{ 2, "Teste de Atividade", "/orb/probe" },
+	{ 2, "Relatórios", "/blank.html" },
+	{ 1, "ServiceDesk", "/servdesk/front/central.php" },
+	{ 2, "Central", "/servdesk/front/central.php" },
+	{ 2, "ticket", "/servdesk/front/ticket.php" },
+	{ 2, "Estatística", "/servdesk/front/stat.php" },
+	{ 1, "CMDB", "#" },
+	{ 2, "Computadores", "/servdesk/front/computer.php" },
+	{ 2, "Software", "/servdesk/front/software.php" },
+	{ 2, "Equip. de Redes", "/servdesk/front/networkequipment.php" },
+	{ 2, "Telefones", "/servdesk/front/phone.php"  },
+	{ 2, "Periféricos", "/servdesk/front/peripheral.php" },
+	{ 2, "Status", "/servdesk/front/states.php" },
+	{ 2, "Base de Conhecimento", "/servdesk/front/knowbaseitem.php" },
+	{ 2, "Fornecedores", "/servdesk/front/supplier.php" },
+	{ 2, "Contratos", "/servdesk/front/contract.php" },
+	{ 2, "Contatos", "/servdesk/front/contact.php" },
+	{ 1, "Administrar", "#" },
+	{ 2, "Usuários", "/servdesk/front/user.php" },
+	{ 2, "Grupos", "/servdesk/front/group.php" },
+	{ 2, "Regras", "/servdesk/front/rule.php" },
+	{ 2, "Logs", "/servdesk/front/event.php" },
+	{ 2, "Comandos de Teste", "/orb/checkcmd" },
+	{ 2, "Manutenção", "/orb/system" },
+	{ 0, "Ajuda", "/blank.html" },
+}
+
+-- o parametro 'link_at_level_1' diz se o menu cujo nivel eh 1 serah tratado como um link
+function render_menu(link_at_level_1) 
+   local o_level = 0
+   local s = ""
+
+   for i, v in ipairs(menu_itens) do
+      local level = v[1]
+      local name  = v[2]
+      local link  = v[3]
+
+      if ( ( level == 0 or level == 1 ) and o_level == 2 ) then
+         s = s .. "\t</ul>\n</li>\n"
+      end
+
+      if level == 0 or level == 2 then
+         s = s .. "\t\t<li><a href=\""..link.."\" target=\"content\">"..name.."</a></li>\n"
+      elseif level == 1 then
+         if link_at_level_1 then
+            s = s .. "<li><a href=\""..link.."\" class=\"dir\">"..name.."</a>\n\t<ul>\n"
+         else
+            s = s .. "<li><span class=\"dir\">"..name.."</span>\n\t<ul>\n"
+         end
+      end
+
+      o_level = level
+   end
+
+   return { s }
 end
 
 
@@ -94,6 +193,51 @@ function render_layout(inner_html)
       },
       body{ menu, inner_html }
    }
+end
+
+
+--[[
+   render_table() recebe como parametros:
+
+   t -> tabela lua a ser renderizada em uma tabela html. pode ou não possuir cabeçalho (ver parametro h)
+   h -> cabecalho da tabela. 
+         Se "nil" então não possui header
+         Se tabela vazia ("{}") entao o header estah dentro da tabela t
+         Se tabela com lista de strings, estao este eh o header a ser utilizado
+
+]]
+function render_table(t, h)
+   local row = {}
+   local col = {}
+   local hea = {}
+   local i, j, v, w
+
+   if h ~= nil and table.getn(h) > 0 then -- h contendo o header
+      for c, w in ipairs(h) do
+         hea[#hea+1] = th{ align="center", w }
+      end
+      hea = tr{ class="tab_bg_1", hea }
+   end
+
+   for r, v in ipairs(t) do
+      for c, w in ipairs(v) do
+         if r == 1 and h ~= nil and table.getn(h) == 0 then -- h vazio ({}) e header dentro de t
+            hea[#hea+1] = th{ align="center", w }
+         else                                               -- nao possui header, tudo eh linha
+            col[#col+1] = td{ w }
+         end
+      end
+
+      if r == 1 and h ~= nil and table.getn(h) == 0 then  -- h vazio ({}) e header dentro de t
+         hea = tr{ class="tab_bg_1", hea }
+      else 
+         row[#row+1] = tr{ class='tab_bg_1', col }
+      end
+
+      col = {}
+   end
+
+   return H("table") { border="0", class="tab_cadrehov", thead{ hea }, tbody{ row } }
 end
 
 
