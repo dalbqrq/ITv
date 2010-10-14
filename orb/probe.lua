@@ -43,21 +43,39 @@ end
 -- controllers ------------------------------------------------------------
 
 function list(web)
-   local C = Model.select_monitors()
-   return render_list(web, C)
+   local cmp = Model.select_monitors()
+   local chk = Model.select_checkcmds()
+   return render_list(web, cmp, chk)
 end
 ITvision:dispatch_get(list, "/", "/list")
 
 
-function show(web, id)
-   local C = app:select_apps(id)
-   return render_show(web, C)
+function show(web, query, c_id, n_id, sv_id)
+   local chk = Model.select_checkcmds()
+   local cmp
+
+   query = tonumber(query)
+
+   if query == 1 then
+      cmp = Model.query_1(c_id, n_id)
+   elseif query == 2 then
+      cmp = Model.query_2(c_id, n_id, sv_id)
+   elseif query == 3 then
+      cmp = Model.query_3(c_id, n_id)
+   elseif query == 4 then
+      cmp = Model.query_4(c_id, n_id, sv_id)
+   elseif query == 5 then
+      cmp = Model.query_5(c_id, n_id)
+   elseif query == 6 then
+      cmp = Model.query_6(c_id, n_id)
+   end
+
+   return render_show(web, cmp, chk)
 end 
-ITvision:dispatch_get(show, "/show/(%d+)")
+ITvision:dispatch_get(show, "/show/(%d+):(%d+):(%d+):(%d+)")
 
 
 function edit(web, id)
-   local C = app:select_apps(id)
    return render_add(web, C)
 end
 ITvision:dispatch_get(edit, "/edit/(%d+)")
@@ -143,21 +161,24 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 
 -- views ------------------------------------------------------------
 
-function render_list(web, C)
+function render_list(web, cmp, chk)
    local row = {}
    local res = {}
    
-   local header =  { strings.name, "IP", strings.service, strings.type, 
-      strings.command, "." }
+   local header =  { "query", strings.name, "IP", "SW / Versão", strings.type, strings.command, "." }
 
-   for i, v in ipairs(C) do
+   for i, v in ipairs(cmp) do
+      local serv = ""
+      if v.s_name ~= "" then serv = v.s_name.." / "..v.sv_name end
+      if v.sv_id == "" then v.sv_id = 0 end
       row[#row + 1] = { 
+         v[1],
          a{ href= web:link("/show/"..v.c_id), v.c_name}, 
          v.n_ip, 
-         v.svc_display_name,
+         serv,
          v.n_itemtype,
          v.svc_check_command_object_id,
-         a{ href= web:link("/show/"..v.c_id..":"), strings.add} }
+         a{ href= web:link("/show/"..v[1]..":"..v.c_id..":"..v.n_id..":"..v.sv_id), strings.add} }
    end
 
    res[#res+1] = render_content_header("Checagem", web:link("/add"), web:link("/list"))
@@ -167,38 +188,31 @@ function render_list(web, C)
 end
 
 
-function render_show(web, C)
-   C = C[1]
-   local res = {}
+function render_show(web, cmp, chk)
+   --cmp = cmp[1]
+   local header =  { "query", strings.name, "IP", "SW / Versão", strings.type, strings.command, "." }
 
-   res[#res + 1] = p{ button_link(strings.add, web:link("/add")) }
-   res[#res + 1] = p{ button_link(strings.remove, web:link("/remove/"..C.id)) }
-   res[#res + 1] = p{ button_link(strings.edit, web:link("/edit/"..C.id)) }
-   res[#res + 1] = p{ button_link(strings.list, web:link("/list")) }
-   res[#res + 1] = p{ br(), br() }
+   for i, v in ipairs(cmp) do
+res[#res+1] = p{ table.cat(v) }
 
-   if C then
-      if C.service_object_id then
-         svc = services:select_services(C.service_object_id)[1].display_name
-      else
-         svc = "-"
-      end
-
-      res[#res + 1] = { H("table") { border=1, cellpadding=1,
-         tbody{
-            tr{ th{ strings.name }, td{ C.name } },
-            tr{ th{ strings.type }, td{ strings["logical_"..C.type] } },
-            tr{ th{ strings.is_active }, td{ NoOrYes[C.is_active+1].name } },
-            --tr{ th{ strings.service }, td{ svc } },
-         }
-      } }
-   else
-      res = { error_message(3),
-         p(),
-         a{ href= web:link("/list"), strings.list}, " ",
-         a{ href= web:link("/add"), strings.add}, " ",
-      }
+      local serv = ""
+      if v.s_name ~= "" then serv = v.s_name.." / "..v.sv_name end
+      if v.sv_id == "" then v.sv_id = 0 end
+      row[#row + 1] = { 
+         v[1],
+         a{ href= web:link("/show/"..v.c_id), v.c_name}, 
+         v.n_ip, 
+         serv,
+         v.n_itemtype,
+         v.svc_check_command_object_id,
+         "---" }
    end
+
+
+         --a{ href= web:link("/show/"..v[1]..":"..v.c_id..":"..v.n_id..":"..v.sv_id), strings.add} }
+   res[#res+1] = render_content_header("Checagem", web:link("/add"), web:link("/list"))
+   res[#res+1] = render_table(row, header)
+
 
    return render_layout(res)
 end

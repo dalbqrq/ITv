@@ -9,12 +9,11 @@
 
 ]]
 
-require "orbit"
-module("itvision", package.seeall, orbit.new)
-require "cosmo"
-
+require "Model"
+module(Model.name, package.seeall, orbit.new)
 require "messages"
-require "util"
+
+
 
 local scrt = [[
    function confirmation(question, url) { 
@@ -40,12 +39,6 @@ function button_form(label, btype, class)
           [[" class="]]..class..[["> ]]..label..[[ </button> </div> ]]
 end
 
-
-function button_link(label, link, class)
-   class = class or "none"
-   return [[<div class="buttons"> <a href="]]..link..
-          [[" class="]]..class..[[">]]..label..[[ </a> </div>]]
-end
 
 --[[ 
   Cada entrada da tabela menu_item é uma tabela com os seguintes campos:
@@ -146,50 +139,37 @@ function render_menu(link_at_level_1)
 end
 
 
-local menu = {}
-   menu[#menu + 1] = button_link("IC", "/orb/ci")
-   menu[#menu + 1] = button_link("COMP", "/orb/computer")
-   menu[#menu + 1] = button_link("ARVORE APPS", "/orb/app_tree")
-   menu[#menu + 1] = button_link("APPS", "/orb/apps")
-   menu[#menu + 1] = button_link("APP LIST", "/orb/app_list")
-   menu[#menu + 1] = button_link("RELAC.", "/orb/app_relat")
-   menu[#menu + 1] = button_link("TIPO RELAC.", "/orb/app_relat_type")
-   menu[#menu + 1] = button_link("CONTRATOS", "/orb/contract")
-   menu[#menu + 1] = button_link("LOCAL.", "/orb/location_tree")
-   menu[#menu + 1] = button_link("FABR.", "/orb/manufacturer")
-   menu[#menu + 1] = button_link("USUARIO", "/orb/user")
-   menu[#menu + 1] = button_link("GRUPO", "/orb/user_group")
-   menu[#menu + 1] = button_link("CHECK", "/orb/checkcmd")
-   menu[#menu + 1] = button_link("SIS.", "/orb/sysconfig")
---[[
-   menu[#menu + 1] = button_link("ARVORE APPS", "http://itv/orb/app_tree")
-   menu[#menu + 1] = button_link("APPS", "http://itv/orb/apps")
-   menu[#menu + 1] = button_link("APP LIST", "http://itv/orb/app_list")
-   menu[#menu + 1] = button_link("RELACIONAMENTOS", "http://itiv/orb/app_relat")
-   menu[#menu + 1] = button_link("TIPO RELAC.", "http://itiv/orb/app_relat_type")
-   menu[#menu + 1] = button_link("CONTRATOS", "http://itiv/orb/contract")
-   menu[#menu + 1] = button_link("LOCALIZACAO", "http://itiv/orb/location_tree")
-   menu[#menu + 1] = button_link("FABRICANTE", "http://itiv/orb/manufacturer")
-   menu[#menu + 1] = button_link("USUARIO", "http://itiv/orb/user")
-   menu[#menu + 1] = button_link("GRUPO", "http://itiv/orb/user_group")
-   menu[#menu + 1] = button_link("CHECK", "http://itiv/orb/checkcmd")
-   menu[#menu + 1] = button_link("SISTEMA", "http://itiv/orb/sysconfig")
-]]
-   menu[#menu + 1] = "<br><br><br><p><br><p> "
+function render_menu_frame(inner_html)
+   return html{
+      head{
+         title("ITvision"),
+         meta{ ["http-equiv"] = "Content-Type",  content = "text/html; charset=utf-8" },
+         meta{ name="author", content="ATMA (http://www.itvision.com.br)" },
+         meta{ name="description", content="IT monitoring" },
+         link{ href="/css/menu/helper.css", media="screen", rel="stylesheet", type="text/css" },
+         link{ href="/css/menu/dropdown.linear.css", media="screen", rel="stylesheet", type="text/css" },
+         link{ href="/css/menu/default.ultimate.linear.css", media="screen", rel="stylesheet", type="text/css" },
+         link{ href="/css/style.css", media="screen", rel="stylesheet", type="text/css" },
+      },
 
+      body{
+         div{ id="header", img{ src="/images/logopurple.png" }, " ITvision",
+            ul{ id="nav", class="dropdown dropdown-linear", inner_html }
+         }
+      }
+   }
+end
 
 
 function render_layout(inner_html)
    return html{
       head{ 
          title("ITvision"),
-         meta{ ["http-equiv"] = "Content-Type",
-            content = "text/html; charset=utf-8" },
-         link{ rel = 'stylesheet', type = 'text/css', 
-            href = '/css/style.css', media = 'screen' },
+         meta{ ["http-equiv"] = "Content-Type", content = "text/html; charset=utf-8" },
+         link{ rel = 'stylesheet', type = 'text/css', href = '/css/style.css', media = 'screen' },
+         link{ href="/css/glpi_styles.css", media="screen", rel="stylesheet", type="text/css" },
          --script{ type="text/javascript", src="http://itv/js/scripts.js" },
          script{ type="text/javascript", scrt },
-
       },
       body{ menu, inner_html }
    }
@@ -241,9 +221,8 @@ function render_table(t, h)
 end
 
 
-function select_option(name, T, value_idx, label_idx, default_value)
 --[[
-   Parametros:
+   select_options() Parametros:
 
       name -> nome da variavel do form-html que serah recuperado pelo respectivo metodo 'controler'
               tipicamete um metodo 'update' ou 'insert'  
@@ -262,6 +241,7 @@ function select_option(name, T, value_idx, label_idx, default_value)
       select_option("tipo", T, "x_id", "name", "link")
       
 ]]
+function select_option(name, T, value_idx, label_idx, default_value)
    local olist = {}
 
    olist[#olist + 1] = "<select name=\""..name.."\">"
@@ -279,11 +259,8 @@ function select_option(name, T, value_idx, label_idx, default_value)
       end
 
       local str= ""
-
       str = str..v[value_idx]
-
       str = str..v[label_idx]
-
       str = str..selected
 
       olist[#olist + 1] = "<option "..selected.." value=\""..v[value_idx].."\" label=\"".. 
@@ -296,15 +273,26 @@ function select_option(name, T, value_idx, label_idx, default_value)
 
 end
 
-AndOrOr = {
-   { id = "and", name = strings.logical_and },
-   { id = "or",  name = strings.logical_or },
-}
 
 NoOrYes = {
       { id = 0, name = strings.no },
       { id = 1, name = strings.yes },
    }
+
+AndOrOr = {
+   { id = "and", name = strings.logical_and },
+   { id = "or",  name = strings.logical_or },
+}
+
+PhysicalOrLogical = {
+   { id = "physical", name = strings.physical },
+   { id = "logical",  name = strings.logical},
+}
+
+
+function select_yes_no(name, default)
+   return select_option(name, NoOrYes, "id", "name", default)
+end
 
 
 function select_and_or(name, default)
@@ -312,8 +300,24 @@ function select_and_or(name, default)
 end
 
 
-function select_yes_no(name, default)
-   return select_option(name, NoOrYes, "id", "name", default)
+function select_physical_logical(name, default)
+   return select_option(name, PhysicalOrLogical, "id", "name", default)
+end
+
+
+function render_content_header(name, add, list)
+   -- p{ ..., "" } usado para dar um espaco antes de comecar o proximo elemento html
+   return p{ div{ id='menu_navigate', div { id='c_ssmenu2', ul{
+         li{ a{href='/servdesk/front/computer.php', class='here', title="'"..name.."'", name} },
+         li{ "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" },
+         li{ a{ href="'"..add.."'",
+             img{ src='/servdesk/pics/menu_add.png', title='Adicionar', alt='Adicionar'} } },
+         li{ a{ href="'"..list.."'",
+             img{ src='/servdesk/pics/menu_search.png', title='Pesquisar', alt='Pesquisar' } } },
+         --li{ a{ href='/servdesk/front/setup.templates.php?itemtype=Computer&amp;add=0',
+             --img{ src='/servdesk/pics/menu_addtemplate.png', title="Gerenciar modelos", alt="Gerenciar modelos" } } }
+         } }, "", p() } }
+
 end
 
 
@@ -356,4 +360,26 @@ function render_map(web, lat, lon)
 
     return s
 end
+
+
+-- ESTE MODO DE FAZER MENU ESTAh OBSOLETO --
+function button_link(label, link, class)
+   class = class or "none"
+   return [[<div class="buttons"> <a href="]]..link..
+          [[" class="]]..class..[[">]]..label..[[ </a> </div>]]
+end
+
+-- ESTE MODO DE FAZER MENU ESTAh OBSOLETO --
+local menu = {}
+   menu[#menu + 1] = button_link("ARVORE APPS", "/orb/app_tree")
+   menu[#menu + 1] = button_link("APPS", "/orb/app")
+   menu[#menu + 1] = button_link("APP LIST", "/orb/app_object")
+   menu[#menu + 1] = button_link("APP RELAC", "/orb/app_relat")
+   menu[#menu + 1] = button_link("TIPO RELAC", "/orb/app_relat_type")
+   menu[#menu + 1] = button_link("PROBE", "/orb/probe")
+   menu[#menu + 1] = button_link("USUARIO", "/orb/user")
+   menu[#menu + 1] = button_link("GRUPO", "/orb/user_group")
+   menu[#menu + 1] = button_link("CHECK CMDS", "/orb/checkcmd")
+   menu[#menu + 1] = button_link("SISTEMA", "/orb/sysconfig")
+   menu[#menu + 1] = "<br><br><br><p><br><p> "
 
