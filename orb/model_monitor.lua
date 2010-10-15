@@ -93,7 +93,10 @@ function query_1(c_id, n_id)
    if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
    if n_id  then cond_ = cond_ .. " and n.id = "  .. n_id  end
 
-   return Model.query(table_, cond_, nil, columns_)
+   local q = Model.query(table_, cond_, nil, columns_)
+   for _,v in ipairs(q) do table.insert(v, 1, 1) end
+
+   return q
 
 end
 
@@ -187,8 +190,10 @@ function query_2(c_id, n_id, sv_id)
    if n_id  then cond_ = cond_ .. " and n.id = "  .. n_id  end
    if sv_id then cond_ = cond_ .. " and sv.id = " .. sv_id end
 
-   return Model.query(table_, cond_, nil, columns_)
+   local q = Model.query(table_, cond_, nil, columns_)
+   for _,v in ipairs(q) do table.insert(v, 1, 2) end
 
+   return q
 end
 
 
@@ -281,8 +286,10 @@ function query_3(c_id, n_id)
    if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
    if n_id  then cond_ = cond_ .. " and n.id = "  .. n_id  end
 
-   return Model.query(table_, cond_, nil, columns_)
+   local q = Model.query(table_, cond_, nil, columns_)
+   for _,v in ipairs(q) do table.insert(v, 1, 3) end
 
+   return q
 end
 
 
@@ -378,8 +385,10 @@ function query_4(c_id, n_id, sv_id)
    if n_id  then cond_ = cond_ .. " and n.id = "  .. n_id  end
    if sv_id then cond_ = cond_ .. " and sv.id = " .. sv_id end
 
-   return Model.query(table_, cond_, nil, columns_)
+   local q = Model.query(table_, cond_, nil, columns_)
+   for _,v in ipairs(q) do table.insert(v, 1, 4) end
 
+   return q
 end
 
 
@@ -472,8 +481,10 @@ function query_5(c_id, n_id)
    if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
    if n_id  then cond_ = cond_ .. " and n.id = "  .. n_id  end
 
-   return Model.query(table_, cond_, nil, columns_)
+   local q = Model.query(table_, cond_, nil, columns_)
+   for _,v in ipairs(q) do table.insert(v, 1, 5) end
 
+   return q
 end
 
 
@@ -567,8 +578,10 @@ function query_6(c_id, n_id)
    if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
    if n_id  then cond_ = cond_ .. " and n.id = "  .. n_id  end
 
-   return Model.query(table_, cond_, nil, columns_)
+   local q = Model.query(table_, cond_, nil, columns_)
+   for _,v in ipairs(q) do table.insert(v, 1, 6) end
 
+   return q
 end
 
 
@@ -584,12 +597,12 @@ function select_monitors()
    local q5 = query_5()
    local q6 = query_6()
 
-   for _,v in ipairs(q1) do table.insert(v, 1, 1); table.insert(q, v) end
-   for _,v in ipairs(q2) do table.insert(v, 1, 2); table.insert(q, v) end
-   for _,v in ipairs(q3) do table.insert(v, 1, 3); table.insert(q, v) end
-   for _,v in ipairs(q4) do table.insert(v, 1, 4); table.insert(q, v) end
-   for _,v in ipairs(q5) do table.insert(v, 1, 5); table.insert(q, v) end
-   for _,v in ipairs(q6) do table.insert(v, 1, 6); table.insert(q, v) end
+   for _,v in ipairs(q1) do table.insert(q, v) end
+   for _,v in ipairs(q2) do table.insert(q, v) end
+   for _,v in ipairs(q3) do table.insert(q, v) end
+   for _,v in ipairs(q4) do table.insert(q, v) end
+   for _,v in ipairs(q5) do table.insert(q, v) end
+   for _,v in ipairs(q6) do table.insert(q, v) end
 
    return q
 end

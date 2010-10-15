@@ -175,10 +175,9 @@ end
 function render_list(web, id, A, AR)
    local res = {}
 
-   --res[#res + 1] = p{ strings.application..": ", str };
-   res[#res + 1] = p{ render_selector(web, A, id, "/list/") }
+   res[#res + 1] = render_content_header("Relacionamentos de uma Aplicação", web:link("/add"), web:link("/list"))
+   res[#res + 1] = render_table_search( render_selector(web, A, id, "/list/") )
    res[#res + 1] = p{ render_table_(web, AR) }
-   --if id then res[#res + 1] = p{ button_link(strings.add, web:link("/add/"..id)) } end
 
    return render_layout(res)
 end
@@ -205,7 +204,6 @@ function render_table_(web, AR)
       }
    end
 
-   res[#res + 1] = render_content_header("Relacionamentos de um Applicação", web:link("/add"), web:link("/list"))
    res[#res + 1] = H("table") { border="0", class="tab_cadrehov",
       thead{ 
          tr{ class="tab_bg_2",

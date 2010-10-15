@@ -33,10 +33,13 @@ function do_button(web, label, url, question)
 end
 
 
-function button_form(label, btype, class)
+function button_form(label, btype, class, div)
    class = class or "none"
-   return [[<div class="buttons"><button type="]]..btype..
-          [[" class="]]..class..[["> ]]..label..[[ </button> </div> ]]
+   local but = [[<button type="]]..btype..[[" class="]]..class..[[">]]..label..[[</button>]]
+
+   if div then but = [[<div class="]]..div..[[">]]..but..[[</div>]] end
+
+   return but
 end
 
 
@@ -171,7 +174,8 @@ function render_layout(inner_html)
          --script{ type="text/javascript", src="http://itv/js/scripts.js" },
          script{ type="text/javascript", scrt },
       },
-      body{ menu, inner_html }
+      body{ div{ id='page', inner_html } }
+      --body{ inner_html }
    }
 end
 
@@ -220,6 +224,49 @@ function render_table(t, h)
    return H("table") { border="0", class="tab_cadrehov", thead{ hea }, tbody{ row } }
 end
 
+
+--[[
+
+   Exemplo retirado da página "computadores"
+
+<table class='tab_cadre_fixe' >
+<tr class='tab_bg_1'><td><table><tr><td class='left'>
+
+
+</td></tr>         
+</table>
+</td>
+<td width='150px'><table width='100%'><tr><td width='80' class='center'><input type='submit' value="Pesquisar" class='submit' ></td><td> <a href='#' onClic
+k="var w = window.open('/servdesk/front/popup.php?popup=edit_bookmark&amp;type=1&amp;itemtype=Computer&amp;url=%2Fservdesk%2Ffront%2Fcomputer.php' ,'glpipo
+pup', 'height=400, width=600, top=100, left=100, scrollbars=yes' );w.focus();"><img src='/servdesk/pics/bookmark_record.png'
+             title="Salvar Favorito"
+             alt="Salvar Favorito" class='calendrier'></a><a href='/servdesk/front/computer.php?reset=reset' >&nbsp;&nbsp;<img title="Resetar para em branc
+o" alt="Resetar para em branco" src='/servdesk/pics/reset.png' class='calendrier'></a></td></tr></table>
+</td></tr></table>
+]]
+function render_table_search(t)
+   return { H("table") { class='tab_cadre_fixe', tr{ class='tab_bg_1', td{ t } } }, br() }
+end
+
+
+--[[ 
+   render_form()
+
+   Exemplo do que pode aparecer em uma tabela t a ser insertida na funcao
+
+      strings.name..": ", input{ type="text", name="name", value = val1 },br(),
+      strings.type..": ", select_and_or("type", default_val2), br(),
+]]
+function render_form(url, t)
+   return form{
+      name = "input",
+      method = "post",
+      action = url,
+      t,
+      button_form(strings.send, "submit", "positive"),
+      button_form(strings.reset, "reset", "negative"),
+   }
+end
 
 --[[
    select_options() Parametros:
@@ -307,16 +354,14 @@ end
 
 function render_content_header(name, add, list)
    -- p{ ..., "" } usado para dar um espaco antes de comecar o proximo elemento html
-   return p{ div{ id='menu_navigate', div { id='c_ssmenu2', ul{
+   return div{ id='menu_navigate', div { id='c_ssmenu2', ul{
          li{ a{href='/servdesk/front/computer.php', class='here', title="'"..name.."'", name} },
          li{ "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" },
-         li{ a{ href="'"..add.."'",
-             img{ src='/servdesk/pics/menu_add.png', title='Adicionar', alt='Adicionar'} } },
-         li{ a{ href="'"..list.."'",
-             img{ src='/servdesk/pics/menu_search.png', title='Pesquisar', alt='Pesquisar' } } },
+         li{ a{ href="'"..add.."'", img{ src='/servdesk/pics/menu_add.png', title='Adicionar', alt='Adicionar'} } },
+         li{ a{ href="'"..list.."'", img{ src='/servdesk/pics/menu_search.png', title='Pesquisar', alt='Pesquisar' } } },
          --li{ a{ href='/servdesk/front/setup.templates.php?itemtype=Computer&amp;add=0',
              --img{ src='/servdesk/pics/menu_addtemplate.png', title="Gerenciar modelos", alt="Gerenciar modelos" } } }
-         } }, "", p() } }
+         } } }
 
 end
 
