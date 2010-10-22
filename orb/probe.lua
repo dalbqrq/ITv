@@ -216,7 +216,7 @@ function render_list(web, cmp, chk, msg)
 
    res[#res+1] = render_content_header("Checagem", web:link("/add"), web:link("/list"))
    if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ msg } end
-   res[#res+1] = render_glpi_search( web:link("/list"), render_filter(web) )
+   res[#res+1] = render_form_bar( render_filter(web), strings.search, web:link("/list"), web:link("/list") )
    res[#res+1] = render_table(row, header)
 
    return render_layout(res)

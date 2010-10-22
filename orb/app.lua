@@ -11,12 +11,12 @@ module(Model.name, package.seeall,orbit.new)
 
 local app        = Model.itvision:model "app"
 local app_object = Model.itvision:model "app_object"
-local hosts      = Model.nagios:model "hosts"
+local app_relat  = Model.itvision:model "app_relat"
 local services   = Model.nagios:model "services"
 
 -- models ------------------------------------------------------------
 
-function app:select_apps(id)
+function app:select(id)
    local clause = ""
    if id then
       clause = "id = "..id
@@ -25,7 +25,25 @@ function app:select_apps(id)
 end
 
 
-function services:select_services(id)
+function app_object:select(id)
+   local clause = ""
+   if id then
+      clause = "app_id = "..id
+   end
+   return self:find_all(clause)
+end
+
+
+function app_relat:select(id)
+   local clause = ""
+   if id then
+      clause = "app_id = "..id
+   end
+   return self:find_all(clause)
+end
+
+
+function services:select(id)
    local clause = ""
    if id then
       clause = "service_object_id = "..id
@@ -36,24 +54,27 @@ end
 -- controllers ------------------------------------------------------------
 
 function list(web)
-   local A = app:select_apps()
+   local A = app:select()
    return render_list(web, A)
 end
 ITvision:dispatch_get(list, "/", "/list")
+ITvision:dispatch_post(list, "/list")
 
 
 function show(web, id)
-   local A = app:select_apps(id)
-   return render_show(web, A)
+   local A = app:select(id)
+   local O = app_object:select(id)
+   local R = app_relat:select(id)
+   return render_show(web, A, O, R)
 end 
 ITvision:dispatch_get(show, "/show/(%d+)")
 
 
-function edit(web, id)
-   local A = app:select_apps(id)
-   return render_add(web, A)
+function edit(web, id, nm, tp)
+   local edt = { id = id, name = nm, type = tp }
+   return render_add(web, edt)
 end
-ITvision:dispatch_get(edit, "/edit/(%d+)")
+ITvision:dispatch_get(edit, "/edit/(%d+):(.+):(%a+)")
 
 
 function update(web, id)
@@ -137,11 +158,12 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 -- views ------------------------------------------------------------
 
 function render_list(web, A)
-   local rows = {}
+   local row = {}
    local res = {}
    local svc = {}
-   
-   res[#res + 1] = render_content_header("Applicação", web:link("/add"), web:link("/list"))
+   local stract
+
+   local header =  { strings.name, strings.type, strings.is_active, ".", ".", "." }
 
    for i, v in ipairs(A) do
       if v.service_object_id then
@@ -156,119 +178,66 @@ function render_list(web, A)
          stract = strings.deactivate
       end
 
-      rows[#rows + 1] = tr{ class='tab_bg_1',
-         td{ a{ href= web:link("/show/"..v.id), v.name} },
-         td{ strings["logical_"..v.type] },
-         td{ NoOrYes[v.is_active+1].name },
-         --td{ svc },
-         td{ button_link(strings.remove, web:link("/remove/"..v.id), "negative") },
-         td{ button_link(strings.edit, web:link("/edit/"..v.id)) },
-         td{ button_link(stract, web:link("/activate/"..v.id..":"..v.is_active)) },
-      }
+      web.prefix = "/orb/app_object"
+      local lnk = web:link("/list/"..v.id)
+      web.prefix = "/orb/app"
+
+         --a{ href= web:link("/show/"..v.id), v.name },
+      row[#row+1] = {
+         a{ href=lnk, v.name },
+         strings["logical_"..v.type],
+         NoOrYes[v.is_active+1].name,
+         button_link(strings.remove, web:link("/remove/"..v.id), "negative"),
+         button_link(strings.edit, web:link("/edit/"..v.id..":"..v.name..":"..v.type)),
+         button_link(stract, web:link("/activate/"..v.id..":"..v.is_active)) }
    end
 
-   res[#res + 1] = H("table") { border="0", class="tab_cadrehov",
-      thead{ 
-         tr{ class="tab_bg_2", 
-             th{ strings.name }, 
-             th{ strings.type },
-             th{ strings.is_active },
-             th{ "." },
-             th{ "." },
-             th{ "." },
-         }
-      },
-      tbody{
-         rows
-      }
-   }
+   res[#res+1] = render_content_header(strings.application, web:link("/add"), web:link("/list"))
+   res[#res+1] = render_form_bar( render_filter(web), strings.search, web:link("/list"), web:link("/list") )
+   res[#res+1] = render_table(row, header)
 
    return render_layout(res)
 end
 
 
-function render_show(web, A)
-   A = A[1]
-   local res = {}
+--[[  
+   MUDEI DE IDEIA, VOU CONTINUAR USANDO cwapp_object.lua e app_relat.lua PARA ENTRAR
+   COM OS COMPONENTES DA APLICACAO!!!
 
-   res[#res + 1] = p{ button_link(strings.add, web:link("/add")) }
-   res[#res + 1] = p{ button_link(strings.remove, web:link("/remove/"..A.id)) }
-   res[#res + 1] = p{ button_link(strings.edit, web:link("/edit/"..A.id)) }
-   res[#res + 1] = p{ button_link(strings.list, web:link("/list")) }
-   res[#res + 1] = p{ br(), br() }
-
-   if A then
-      if A.service_object_id then
-         svc = services:select_services(A.service_object_id)[1].display_name
-      else
-         svc = "-"
-      end
-
-      res[#res + 1] = { H("table") { border=1, cellpadding=1,
-         tbody{
-            tr{ th{ strings.name }, td{ A.name } },
-            tr{ th{ strings.type }, td{ strings["logical_"..A.type] } },
-            tr{ th{ strings.is_active }, td{ NoOrYes[A.is_active+1].name } },
-            --tr{ th{ strings.service }, td{ svc } },
-         }
-      } }
-   else
-      res = { error_message(3),
-         p(),
-         a{ href= web:link("/list"), strings.list}, " ",
-         a{ href= web:link("/add"), strings.add}, " ",
-      }
-   end
-
-   return render_layout(res)
-end
-
-
-function render_add(web, edit)
-   local res = {}
-   local s = ""
-   local val1 = ""
-   local val2 = ""
-   local val3 = ""
-   local url = ""
-   local default_value = ""
-
-   if edit then
-      edit = edit[1]
-      val1 = edit.name
-      val2 = edit.type
-      val3 = edit.is_active
-      val4 = edit.service_object_id
-      url = "/update/"..edit.id
-      default_val2 = val2
-      default_val3 = val3
-   else
-      url = "/insert"
-      default_val2 = "and"
-      default_val3 = 0
-   end
-
-   -- LISTA DE OPERACOES 
-   res[#res + 1] = p{ button_link(strings.list, web:link("/list")) }
-   res[#res + 1] = p{ br(), br() }
-
-   res[#res + 1] = form{
-      name = "input",
-      method = "post",
-      action = web:link(url),
-
-      strings.name..": ", input{ type="text", name="name", value = val1 },br(),
-      strings.type..": ", select_and_or("type", default_val2), br(),
---[[
-      strings.service..": ", select_option("service_object_id", services:find_all(""), "service_object_id", 
-         "display_name", val4 ), br(),
-      strings.is_active..": ", select_yes_no("is_active", default_val3), br(),
+   Diferente dos demais metodos "show", este serve para incluir e excluir os componentes
+   e os relacionamentos de uma aplicacao.
 ]]
-      "<INPUT TYPE=HIDDEN NAME=\"is_active\" value=\"0\">",
+function render_show(web, app, obj, rel )
+   app = app[1]
+   local res = {}
+   local row = {}
 
-      p{ button_form(strings.send, "submit", "positive") },
-      p{ button_form(strings.reset, "reset", "negative") },
+   return render_layout(res)
+end
+
+
+-- TODO: edit deve receber os valores a serem alterados
+function render_add(web, edit)
+   local val1, val2, strbar, link
+   local res = {}
+
+   if edit then 
+      strbar = strings.edit 
+      link = web:link("/update/"..edit.id)
+   else 
+      strbar = strings.add 
+      link = web:link("/insert")
+      edit = { id = 0, name = "", type = "" }
+   end
+
+   local inc = {
+      strings.name..": ", input{ type="text", name="name", value = edit.name }, " ",
+      strings.type..": ", select_and_or("type", edit.type ),  " ",
+      "<INPUT TYPE=HIDDEN NAME=\"is_active\" value=\"0\">",
    }
+   
+   res[#res+1] = render_content_header(strings.application, web:link("/add"), web:link("/list"))
+   res[#res+1] = render_form_bar( inc, strbar, link, web:link("/add") )
 
    return render_layout(res)
 end
@@ -284,7 +253,7 @@ function render_remove(web, A)
       url_cancel = web:link("/list")
    end
 
-   res[#res + 1] = p{
+   res[#res+1] = p{
       strings.exclude_quest.." "..strings.application.." "..A.name.."?",
       p{ button_link(strings.yes, web:link(url_ok)) },
       p{ button_link(strings.cancel, web:link(url_cancel)) },

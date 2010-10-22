@@ -61,6 +61,7 @@ strgs.pt_BR = {
 	deactivate = "Desativar",	
 	inventory = "Inventário",	
 	sn = "Número Serial",
+	search = "Pesquisar",
 
 }
 
@@ -122,6 +123,7 @@ strgs.us = {
 	deactivate = "Deactivate",	
 	inventory = "Inventory",	
 	sn = "Serial Number",
+	search = "Search",
 }
 
 

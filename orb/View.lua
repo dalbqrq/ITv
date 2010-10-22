@@ -261,23 +261,24 @@ end
   </tr>
 </table>
 ]]
-function render_glpi_search(url, t)
-   return form{ H('table') { class='tab_cadre_fixe', tr{ class='tab_bg_1', 
-      td{ 
-         H('table') { tr{ td{ class='left', t } } }
-      }, 
-      td{ width='150px', 
-         H('table') { width='100%', tr{ 
-            td{ width='80', class='center', 
-               input{ type='submit', value='Pesquisar',  class='submit' }
-            }, 
-            td{ 
-               a{ href=url, img{ src='../../pics/reset.png', class='calendrier' } }
-            } 
-         } }
-      } 
-      } }, 
-      br() }
+function render_form_bar(form_content, button_name, url_post, url_reset)
+   return form{ name = "input", method = "post", action = url_post,
+      H('table') { class='tab_cadre_fixe', tr{ class='tab_bg_1', 
+         td{ 
+            H('table') { tr{ td{ class='left', form_content } } }
+         }, 
+         td{ width='150px', 
+            H('table') { width='100%', tr{ 
+               td{ width='80', class='center', 
+                  input{ type='submit', value=button_name,  class='submit' }
+               }, 
+               td{ 
+                  a{ href=url_reset, img{ src='/pics/reset.png', class='calendrier' } }
+               } 
+            } }
+         } 
+      } }, br() 
+   }
 end
 
 

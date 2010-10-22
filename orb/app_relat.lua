@@ -174,10 +174,31 @@ end
 
 function render_list(web, id, A, AR)
    local res = {}
+   local row = {}
 
-   res[#res + 1] = render_content_header("Relacionamentos de uma Aplicação", web:link("/add"), web:link("/list"))
-   res[#res + 1] = render_table_search( render_selector(web, A, id, "/list/") )
-   res[#res + 1] = p{ render_table_(web, AR) }
+   local header =  { strings.origin, strings.type, strings.destiny, "." }
+
+   for i, v in ipairs(AR) do
+      local from = v.from_name1
+      local to = v.to_name1
+
+      if v.from_name2 then from = v.from_name2.."@"..from end
+      if v.to_name2 then to = v.to_name2.."@"..to end
+      if v.connection_type == "physical" then contype = strings.physical else contype = strings.logical end
+
+      row[#row+1] = { 
+         from,
+         v.rtype_name,
+         to,
+         button_link(strings.remove, web:link("/remove/"..v.app_id..":"..v.from_object_id
+             ..":"..v.to_object_id), "negative"),
+      }
+   end
+
+   res[#res+1] = render_content_header("Relacionamentos de uma Aplicação", web:link("/add"), web:link("/list"))
+   res[#res+1] = render_table_search( render_selector(web, A, id, "/list/") )
+   res[#res+1] = render_form_bar( render_filter(web), strings.search, web:link("/list"), web:link("/list") )
+   res[#res+1] = render_table(row, header)
 
    return render_layout(res)
 end
