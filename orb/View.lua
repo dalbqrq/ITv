@@ -227,58 +227,51 @@ function render_table(t, h)
 end
 
 
---[[
-
-   Exemplo retirado da página "computadores"
-
-<table class='tab_cadre_fixe' >
-  <tr class='tab_bg_1'>
-
-    <td>
-      <table>
-        <tr>
-          <td class='left'>
-            TABLE_DATA
-          </td>
-        </tr>         
-      </table>
-    </td>
-
-    <td width='150px'>
-      <table width='100%'>
-        <tr>
-          <td width='80' class='center'>
-            <input type='submit' value="Pesquisar" class='submit' >
-          </td>
-          <td> 
-            <a href='#'><img src='bookmark_record.png'></a>
-            <a href='/servdesk/front/computer.php?reset=reset'><img src='reset.png' class='calendrier'></a>
-          </td>
-        </tr>
-      </table>
-    </td>
-
-  </tr>
-</table>
-]]
 function render_form_bar(form_content, button_name, url_post, url_reset)
+         --td{ width='150px', 
+               --td{ width='80', class='center', 
    return form{ name = "input", method = "post", action = url_post,
       H('table') { class='tab_cadre_fixe', tr{ class='tab_bg_1', 
          td{ 
             H('table') { tr{ td{ class='left', form_content } } }
          }, 
-         td{ width='150px', 
+         td{ 
             H('table') { width='100%', tr{ 
-               td{ width='80', class='center', 
+               td{ class='center', 
                   input{ type='submit', value=button_name,  class='submit' }
                }, 
                td{ 
+                  --a{ href=url_bookmark, img{ src='/pics/bookmark_record.png' } }
                   a{ href=url_reset, img{ src='/pics/reset.png', class='calendrier' } }
                } 
             } }
          } 
       } }, br() 
    }
+end
+
+
+function render_selector_bar(web, A, id, path)
+   local url = ""
+   local res = {}
+   local selected = ""
+   local curr_app = 0
+   id = id or -1
+
+   for i, v in ipairs(A) do
+      url = web:link(path.."/"..v.id)
+      if tonumber(v.id) == tonumber(id) then
+         selected = "selected"
+         curr_app = i
+      else
+         selected = nil
+      end
+      res[#res+1] = option{ selected=selected, value=url, v.name }
+   end
+
+   return form{ H("select"){ ONCHANGE="location = this.options[this.selectedIndex].value;", res } }
+
+   
 end
 
 
