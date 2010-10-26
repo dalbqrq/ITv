@@ -254,7 +254,7 @@ function render_add(web, id, A, AR, AL, RT, msg)
    local header = {}
 
    header =  { strings.origin, strings.type, strings.destiny, "." }
-   res[#res+1] = render_content_header("Relacionamentos de uma Aplicação", web:link("/add/"..id), web:link("/list"))
+   res[#res+1] = render_content_header(strings.app_relat, web:link("/add/"..id), web:link("/list"))
    res[#res+1] = render_bar( render_selector_bar(web, A, id, "/add") )
    res[#res+1] = render_table(make_app_relat_table(web, AR), header)
 

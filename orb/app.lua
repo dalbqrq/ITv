@@ -16,12 +16,17 @@ local services   = Model.nagios:model "services"
 
 -- models ------------------------------------------------------------
 
-function app:select(id)
-   local clause = ""
-   if id then
+function app:select(id, clause_)
+   local clause
+   if id and clause_ then
+      clause = "id = "..id.." and "..clause_
+   elseif id then
       clause = "id = "..id
+   else 
+      clause = clause_
    end
-   return self:find_all(clause)
+   --return self:find_all(clause)
+   return Model.query("itvision_app", clause)
 end
 
 
@@ -54,7 +59,10 @@ end
 -- controllers ------------------------------------------------------------
 
 function list(web)
-   local A = app:select()
+   local clause
+   if web.input.app_name then clause = " name like '%"..web.input.app_name.."%' " end
+
+   local A = app:select(nil, clause)
    return render_list(web, A)
 end
 ITvision:dispatch_get(list, "/", "/list")
@@ -157,13 +165,14 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 
 -- views ------------------------------------------------------------
 
-function render_list(web, A)
-   local row = {}
-   local res = {}
-   local svc = {}
-   local stract
+function render_filter(web)
+   return { strings.name..": ", input{ type="text", name="app_name", value = "" }, " " }
+end
 
-   local header =  { strings.name, strings.type, strings.is_active, ".", ".", "." }
+
+function make_app_table(A)
+   local row = {}
+   local svc, stract
 
    for i, v in ipairs(A) do
       if v.service_object_id then
@@ -182,7 +191,6 @@ function render_list(web, A)
       local lnk = web:link("/list/"..v.id)
       web.prefix = "/orb/app"
 
-         --a{ href= web:link("/show/"..v.id), v.name },
       row[#row+1] = {
          a{ href=lnk, v.name },
          strings["logical_"..v.type],
@@ -192,6 +200,13 @@ function render_list(web, A)
          button_link(stract, web:link("/activate/"..v.id..":"..v.is_active)) }
    end
 
+   return row
+end
+
+function render_list(web, A)
+   local res = {}
+
+   local header =  { strings.name, strings.type, strings.is_active, ".", ".", "." }
    res[#res+1] = render_content_header(strings.application, web:link("/add"), web:link("/list"))
    res[#res+1] = render_form_bar( render_filter(web), strings.search, web:link("/list"), web:link("/list") )
    res[#res+1] = render_table(row, header)

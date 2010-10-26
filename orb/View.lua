@@ -78,11 +78,11 @@ menu_itens = {
 	{ 1, "Monitor", "/fig1.html" },
 	{ 2, "Lógico", "/fig1.html" },
 	{ 2, "Físico", "/fig2.html" },
-	{ 2, "Checagem", "/orb/probe" },
 	{ 2, "Árvore", "/orb/app_tree" },
 	{ 2, "Aplicações", "/orb/app" },
-	{ 2, "Lista Aplicações", "/orb/app_object" },
-	{ 2, "Relacionamento Aplicações", "/orb/app_relat" },
+	{ 2, "Objetos", "/orb/app_object" },
+	{ 2, "Relacionamento", "/orb/app_relat" },
+	{ 2, "Checagem", "/orb/probe" },
 	{ 2, "Tipo de Relacionamento", "/orb/app_relat_type" },
 	{ 2, "Teste de Atividade", "/orb/probe" },
 	{ 2, "Relatórios", "/blank.html" },
@@ -285,8 +285,10 @@ end
 
    Exemplo do que pode aparecer em uma tabela t a ser insertida na funcao
 
+   t = {
       strings.name..": ", input{ type="text", name="name", value = val1 },br(),
       strings.type..": ", select_and_or("type", default_val2), br(),
+   }
 ]]
 function render_form(url, t)
    return form{

@@ -128,47 +128,24 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 
 -- views ------------------------------------------------------------
 
-function render_table(web, t)
-   local res = {}
-   res[#res + 1] = p{ table.dump(t) }
-   return render_layout(res)
-end
-
 
 function render_list(web, A)
-   local rows = {}
    local res = {}
+   local row = {}
    
---[[
-   res[#res + 1] = p{ button_link(strings.add, web:link("/add")) }
-   res[#res + 1] = p{ br(), br() }
-]]
-
    for i, v in ipairs(A) do
-      rows[#rows + 1] = tr{ class='tab_bg_1',
-         td{ a{ href= web:link("/show/"..v.app_id), v.name} },
-         td{ strings.sonof },
-         td{ a{ href= web:link("/show/"..v.papp_id), v.pname} },
-         td{ button_link(strings.remove, web:link("/remove/"..v.id), "negative") },
-         td{ button_link(strings.edit, web:link("/edit/"..v.id)) },
+      row[#row+1] = { 
+         a{ href= web:link("/show/"..v.app_id), v.name},
+         strings.sonof,
+         a{ href= web:link("/show/"..v.papp_id), v.pname},
+         button_link(strings.remove, web:link("/remove/"..v.id), "negative"),
+         button_link(strings.edit, web:link("/edit/"..v.id)),
       }
    end
 
-   res[#res + 1] = render_content_header("Árvore de Applicação", web:link("/add"), web:link("/list"))
-   res[#res + 1]  = H("table") { border="0", class="tab_cadrehov",
-      thead{ 
-         tr{ class="tab_bg_2",
-             th{ strings.name }, 
-             th{ "." },
-             th{ strings.parent }, 
-             th{ "." },
-             th{ "." },
-         }
-      },
-      tbody{
-         rows
-      }
-   }
+   local header = { strings.name, ".", strings.parent, ".", "." }
+   res[#res+1] = render_content_header(strings.app_tree, web:link("/add"), web:link("/list"))
+   res[#res+1] = render_table(row, header)
 
    return render_layout(res)
 end

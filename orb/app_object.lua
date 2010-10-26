@@ -47,16 +47,15 @@ end
 -- controllers ------------------------------------------------------------
 
 function list(web, id)
-   local B = app:select_apps()
-   --if (id == "/") and (B[1] ~= nil)  then id = B[1].id else id = nil end
+   local APPS = app:select_apps()
    if type(tonumber(id)) ~= "number" then
-      if id == "/" and B[1] ~= nil then id = B[1].id else id = nil end
+      if ( id == "/" or id == "/list" ) and APPS[1] ~= nil then id = APPS[1].id else id = nil end
    end
 
-   local A = Model.select_app_app_objects(id)
-   return render_list(web, A, B, id)
+   local APPOBJ = Model.select_app_app_objects(id)
+   return render_list(web, APPOBJ, APPS, id)
 end
-ITvision:dispatch_get(list, "/", "/list/(%d+)")
+ITvision:dispatch_get(list, "/", "/list", "/list/(%d+)")
 
 
 function show(web, id)
@@ -67,11 +66,12 @@ ITvision:dispatch_get(show, "/show/(%d+)")
 
 
 function add(web, id)
-   local H = Model.select_host_object()
-   local S = Model.select_service_object()
-   local A = Model.select_service_object(nil, nil, nil, true)
-   local APPL = Model.select_app_app_objects(id)
-   return render_add(web, H, S, A, APPL, id)
+   local HST = Model.select_host_object()
+   local SVC = Model.select_service_object()
+   local APP = Model.select_service_object(nil, nil, nil, true)
+   local APPOBJ = Model.select_app_app_objects(id)
+   local APPS = app:select_apps()
+   return render_add(web, HST, SVC, APP, APPOBJ, APPS, id)
 end
 ITvision:dispatch_get(add, "/add/(%d+)")
 
@@ -128,199 +128,91 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 
 -- views ------------------------------------------------------------
 
-
-function render_list(web, A, B, app_id)
-   local rows = {}
-   local res = {}
-   local svc = {}
-   local str = ""
-   local selected = ""
-   local curr_app = 0
-   local sel_app = app_id
-
-
-   str = [[<FORM> <SELECT ONCHANGE="location = this.options[this.selectedIndex].value;">]]
-   for i, v in ipairs(B) do
-      url = web:link("/list/"..v.id)
-      if tonumber(v.id) == tonumber(app_id) then 
-         selected = " selected " 
-         curr_app = i
-         sel_app = v.id
-      else 
-         selected = " "
-      end
-      str = str .. [[<OPTION]]..selected..[[ VALUE="]]..url..[[">]]..v.name
-   end
-   str = str .. [[</SELECT> </FORM>]]
-
-
-   res[#res + 1] = p{ strings.application..": ", str };
-   if sel_app ~= nil then 
-
-      res[#res + 1] = p{ render_show(web, B[curr_app], sel_app) }
-
-      web.prefix = "/orb/app_object"
-      res[#res + 1] = p{ button_link(strings.add, web:link("/add/"..app_id)) }
-      res[#res + 1] = p{ br(), br() }
-      res[#res + 1] = p{ render_table(web, A) }
-    end
-
-   return render_layout(res)
-end
-
-
-function render_table(web, A)
-   local res = {}
+function make_app_object_table(web, A)
+   local row = {}
 
    for i, v in ipairs(A) do
       local obj = v.name1
       if v.name2 then obj = v.name2.."@"..obj end
       web.prefix = "/orb/app_object"
 
-      rows[#rows + 1] = tr{ 
-         td{ a{ href= web:link("/show/"..v.app_id), v.app_name} },
-         td{ align="center", v.obj_type },
-         td{ align="right", obj },
-         td{ button_link(strings.remove, web:link("/remove/"..v.app_id..":"..v.object_id), "negative") },
+         --button_link(v.app_name, web:link("/show/"..v.app_id), "negative"),
+      row[#row + 1] = { 
+         v.app_name,
+         v.obj_type,
+         obj,
+         button_link(strings.remove, web:link("/remove/"..v.app_id..":"..v.object_id), "negative"),
       }
    end
 
-   res[#res + 1]  = H("table") { border=1, cellpadding=1,
-      thead{ 
-         tr{ 
-             th{ strings.application }, 
-             th{ strings.type },
-             th{ strings.service.."@"..strings.host },
-             th{ "." },
-         }
-      },
-      tbody{
-         rows
-      }
-   }
+   return row
+end
 
-   return res
+
+function render_list(web, APPOBJ, APPS, app_id)
+   local res = {}
+
+   local header = { strings.application, strings.type, strings.service.."@"..strings.host, "." }
+   res[#res+1] = render_content_header(strings.app_object, web:link("/add/"..app_id), web:link("/list"))
+   res[#res+1] = render_bar( render_selector_bar(web, APPS, app_id, "/list") )
+   res[#res+1] = render_table(make_app_object_table(web, APPOBJ), header)
+
+   return render_layout(res)
 end
 
 
 function render_show(web, A, app_id)
-   --A = A[1]
-   local res = {}
-   local svc = {}
-   local lst = {}
-
-   web.prefix = "/orb/app" 
-
-   --res[#res + 1] = p{ button_link(strings.add, web:link("/add")) }
-   res[#res + 1] = p{ button_link(strings.remove, web:link("/remove/"..app_id)) }
-   res[#res + 1] = p{ button_link(strings.edit, web:link("/edit/"..app_id)) }
-   res[#res + 1] = p{ button_link(strings.list, web:link("/list")) }
-   res[#res + 1] = p{ br(), br() }
-
-   if A then
-      if A.service_object_id then
-         --lst = Model.select_host_object(...
-         svc = "-to change-"
-      else
-         svc = "-nonono-"
-      end
-
-      -- app
-      res[#res + 1] = { H("table") { border=1, cellpadding=1,
-         tbody{
-            tr{ th{ strings.name }, td{ A.name } },
-            tr{ th{ strings.type }, td{ strings["logical_"..A.type] } },
-            tr{ th{ strings.is_active }, td{ NoOrYes[A.is_active+1].name } },
-            --tr{ th{ strings.service }, td{ svc } },
-         }
-      } }
-
-   else
-      res = { error_message(6),
-         p(),
-         a{ href= web:link("/list"), strings.list}, " ",
-         a{ href= web:link("/add"), strings.add}, " ",
-      }
-   end
-
-   return res
 end
 
 
-function render_add(web, H, S, A, APPL, app_id)
+function render_add(web, HST, SVC, APP, APPOBJ, APPS, app_id)
    local res = {}
-   local hst = {}
-   local svc = {}
-   local app = {}
    local url = "/insert"
-   local list_size = 7
-   local s = ""
+   local list_size = 8
+   local header = ""
 
-   --local app_id = 0
-   --if APPL[1] then app_id = APPL[1].app_id end
+   local header = { strings.application, strings.type, strings.service.."@"..strings.host, "." }
+   res[#res+1] = render_content_header(strings.app_object, web:link("/add/"..app_id), web:link("/list"))
+   res[#res+1] = render_bar( render_selector_bar(web, APPS, app_id, "/add") )
+   res[#res+1] = render_table(make_app_object_table(web, APPOBJ), header)
+   res[#res+1] = br()
 
-   local make_form = function(selopt)
-      return form{
-         name = "input",
-         method = "post",
-         action = web:link(url),
-         p{ selopt },
-         p{ button_form(strings.send, "submit", "positive") },
-         p{ button_form(strings.reset, "reset", "negative") },
-      }
-   end
-
-
-   -- LISTA DE OPERACOES 
-   res[#res + 1] = p{ button_link(strings.list, web:link("/list/"..app_id)) }
-   res[#res + 1] = p{ br(), br() }
-   res[#res + 1] = p{ render_table(web, APPL) }
-   res[#res + 1] = p{ br() }
 
    -- LISTA DE HOSTS PARA SEREM INCLUIDOS ---------------------------------
-   s = [[<SELECT multiple size=]]..list_size..[[ NAME="item">]]
-   for i,v in ipairs(H) do
-     s = s..[[<OPTION VALUE="]]..v.object_id..[[">]]..v.name1
+   local opt_hst = {}
+   for i,v in ipairs(HST) do
+     opt_hst[#opt_hst+1] = option{ value=v.object_id, v.name1 }
    end
-   s = s..[[ </SELECT>
-      <INPUT TYPE=HIDDEN NAME="app_id" value="]]..app_id..[[">
-      <INPUT TYPE=HIDDEN NAME="type" value="hst"> ]]
-   hst = make_form(s)
+   local hst = { render_form(web:link(url),
+               { H("select") { size=list_size, style="width: 100%;", name="item", opt_hst }, br(),
+                 input{ type="hidden", name="app_id", value=app_id },
+                 input{ type="hidden", name="type", value="hst" } } ) }
+   
 
    -- LISTA DE SERVICES PARA SEREM INCLUIDOS ---------------------------------
-   s = [[<SELECT multiple size=]]..list_size..[[ NAME="item">]]
-   for i,v in ipairs(S) do
-     s = s..[[<OPTION VALUE="]]..v.object_id..[[">]]..v.name2.."@"..v.name1
-   end
-   s = s..[[ </SELECT>
-      <INPUT TYPE=HIDDEN NAME="app_id" value="]]..app_id..[[">
-      <INPUT TYPE=HIDDEN NAME="type" value="svc"> ]]
-   svc = make_form(s)
+   local opt_svc = {}
+   for i,v in ipairs(SVC) do
+      opt_svc[#opt_svc+1] = option{ value=v.object_id, v.name2.."@"..v.name1 }
+   end  
+   local svc = { render_form(web:link(url),
+               { H("select") { size=list_size, style="width: 100%;", name="item", opt_svc }, br(),
+                 input{ type="hidden", name="app_id", value=app_id },
+                 input{ type="hidden", name="type", value="svc" } } ) }
+
 
    -- LISTA DE APPLIC PARA SEREM INCLUIDOS ---------------------------------
-   s = [[<SELECT multiple size=]]..list_size..[[ NAME="item">]]
-   for i,v in ipairs(A) do
-     s = s..[[<OPTION VALUE="]]..v.object_id..[[">]]..v.name2
-   end
-   s = s..[[ </SELECT>
-      <INPUT TYPE=HIDDEN NAME="app_id" value="]]..app_id..[[">
-      <INPUT TYPE=HIDDEN NAME="type" value="app"> ]]
-   app = make_form(s)
+   local opt_app = {}
+   for i,v in ipairs(APP) do
+      opt_app[#opt_app+1] = option{ value=v.object_id, v.name2 }
+   end  
+   local app = { render_form(web:link(url),
+               { H("select") { size=list_size, style="width: 100%;", name="item", opt_app }, br(),
+                 input{ type="hidden", name="app_id", value=app_id },
+                 input{ type="hidden", name="type", value="app" } } ) }
 
 
-   res[#res + 1] = [[<table border=1, cellpadding=1>]]
-   res[#res + 1] = {
-      thead{ tr{ 
-         th{ strings.host }, 
-         th{ strings.service }, 
-         th{ strings.application }, 
-      } },
-      tbody{ tr{
-         td{ hst },
-         td{ svc },
-         td{ app },
-      } },
-   }
+   local header = ({ strings.host, strings.service, strings.application })
+   res[#res+1] = render_table({ {hst, svc, app} }, header)
 
    return render_layout(res)
 end
