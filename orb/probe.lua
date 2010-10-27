@@ -1,6 +1,8 @@
 #!/usr/bin/env wsapi.cgi
 
 -- includes & defs ------------------------------------------------------
+local no_software_code = "_no_software_code_"
+
 require "util"
 require "monitor_util"
 require "View"
@@ -12,6 +14,7 @@ module(Model.name, package.seeall,orbit.new)
 local hosts   = Model.nagios:model "hosts"
 local objects = Model.nagios:model "objects"
 local monitor = Model.itvision:model "monitor"
+
 
 -- models ------------------------------------------------------------
 
@@ -51,7 +54,7 @@ end
 
 -- controllers ------------------------------------------------------------
 
-function list(web)
+function list(web, msg)
    local clause = ""
    if web.input.hostname  then clause = clause.." and c.name like '%"..web.input.hostname.."%' " end
    if web.input.inventory then clause = clause.." and c.otherserial like '%"..web.input.inventory.."%' " end
@@ -115,28 +118,38 @@ ITvision:dispatch_get(add, "/add/(%d+):(%d+):(%d+):(%d+)")
    insert()
 
    sv_id == 0 significa que entrada nao possui software associado e eh somente uma maquina
-   s_name e sv_name == "lkjh" entao os nomes sao nulos e isto é um host e nao um service
+   s_name e sv_name == no_software_code entao os nomes sao nulos e isto é um host e nao um service
 ]]
 function insert(web, n_id, sv_id, c_id, c_name, s_name, sv_name, ip)
    c_name = string.gsub(c_name," ", "_")
    s_name = string.gsub(s_name," ", "_")
    sv_name = string.gsub(sv_name," ", "_")
 
+   --TODO: pegando o host somente pelo nome pode gerar erro quando houver mais de uma maquina
+   --      com o mesmo nome
    local h = hosts:select_host(c_name)
-   local dpl = ""
-   local chk = ""
+   local ins, hst, svc, os, dpl, chk
    local msg = ""
+
 
    -- cria check host e service ping caso nao exista
    if h[1] == nil then
-      res, hst, os = insert_host_cfg_file (c_name, c_name, ip)
-      res, svc, os = insert_service_cfg_file ("PING", c_name, 0)
+      ins, hst, os = insert_host_cfg_file (c_name, c_name, ip)
+      ins, svc, os = insert_service_cfg_file ("PING", c_name, 0)
       monitor:insert_monitor(n_id, nil, hst, svc, 1, "hst")
-      msg = msg.."Check do HOST: "..c_name.." para o IP "..ip.." criado. " --" (hst,svc) = ("..hst..","..svc..") "
+      msg = msg.."Check do HOST: "..c_name.." para o IP "..ip.." criado. "
+               .." (hst,svc) = ("..hst..","..svc..") "..os
    else
       hst = h[1].host_object_id
       msg = msg.."Check do HOST: "..c_name.." já existe! "
    end   
+
+   local content = Model.query("nagios_objects", "name1 = '"..c_name.."' and name2 is NULL")
+   if content[1] == nil then 
+      msg = error_message(11)
+   else
+      msg = " ||| hostobjid"..content[1].object_id.." ||| "
+   end
 
    -- cria outro service check 
    if tonumber(sv_id) ~= 0 then
@@ -144,10 +157,18 @@ function insert(web, n_id, sv_id, c_id, c_name, s_name, sv_name, ip)
       dpl = web.input.display
       dpl = dpl or chk
       dpl = string.gsub(dpl," ", "_")
-      res, svc, os = insert_service_cfg_file (dpl, c_name, chk)
+      ins, svc, os = insert_service_cfg_file (dpl, c_name, chk)
       monitor:insert_monitor(n_id, sv_id, hst, svc, 1, "svc")
-      msg = msg.."Check do SERVIÇO: "..dpl.." HOST: ".. c_name.." COMANDO: "..chk.." criado. "--" (hst,svc) = ("..hst..","..svc..") "
+      msg = msg.."Check do SERVIÇO: "..dpl.." HOST: ".. c_name.." COMANDO: "..chk.." criado. "
+               .." (hst,svc) = ("..hst..","..svc..") "..os
+      content = Model.query("nagios_objects", "name1 = '"..c_name.."' and name2 = '"..dpl.."'")
+      if content[1] == nil then 
+         msg = error_message(12)
+      else
+         msg = " ||| serviceobjid"..content[1].object_id.." ||| " 
+      end
    end
+
 
    return web:redirect(web:link("/list/"..msg..""))
 end
@@ -189,8 +210,8 @@ function render_list(web, cmp, chk, msg)
    local res = {}
    local link = {}
    
-   --local header =  { "query", strings.name, "IP", "Software / Versão", strings.type, strings.command, "." }
-   local header =  { strings.name, "IP", "Software / Versão", strings.type, strings.command, "." }
+   local header =  { "query", strings.name, "IP", "Software / Versão", strings.type, strings.command, "." }
+   --local header =  { strings.name, "IP", "Software / Versão", strings.type, strings.command, "." }
 
    for i, v in ipairs(cmp) do
       local serv = ""
@@ -204,8 +225,8 @@ function render_list(web, cmp, chk, msg)
          chk = content[1].name1
          link = "-"
       end
-         --v[1], QUERY para debug
       row[#row + 1] = { 
+         v[1],
          a{ href= web:link("/add/"..v.c_id), v.c_name}, 
          v.n_ip, 
          serv,
@@ -242,21 +263,25 @@ function render_add(web, cmp, chk, query, default)
 
    default = default or v.svc_check_command_object_id
 
-   local header =  { "query", strings.name, "IP", "SW / Versão", strings.type, strings.command }
+   local header = { "query", strings.name, "IP", "SW / Versão", strings.type, strings.command }
 
    if v then
       if v.s_name ~= "" then 
          serv = v.s_name.." / "..v.sv_name
       else 
-         v.s_name = "lkjh"; v.sv_name = "lkjh"
+         v.s_name = no_software_code; v.sv_name = no_software_code
       end
+
       if v.sv_id == "" then v.sv_id = 0 end
-      url = "/insert/"..v.n_id..":"..v.sv_id..":"..v.c_id..":"..v.c_name..":"..v.s_name..":"..v.sv_name..":"..v.n_ip
+      url = "/insert/"..v.n_id..":"..v.sv_id..":"..v.c_id..":"..v.c_name..":"..v.s_name..":"
+            ..v.sv_name..":"..v.n_ip
 
       if v.sv_id == 0 then 
-         cmd = render_form(web:link(url), { "<INPUT TYPE=HIDDEN NAME=\"check\" value=\"0\">", "host-alive", " " } )
+         cmd = render_form(web:link(url), 
+               { "<INPUT TYPE=HIDDEN NAME=\"check\" value=\"0\">", "host-alive", " " } )
       else
-         cmd = render_form(web:link(url), { "Nome:", "<INPUT TYPE=TEXT NAME=\"display\" value=\""..display.."\">", 
+         cmd = render_form(web:link(url), 
+               { "Nome:", "<INPUT TYPE=TEXT NAME=\"display\" value=\""..display.."\">", 
                select_option("check", chk, "object_id", "name1", default), " " } )
       end
 
@@ -282,7 +307,6 @@ function render_add(web, cmp, chk, query, default)
    end
 
    -- DEBUG res[#res+1] = p{ "| ", default, " | ", s, " | ", r }
-  
 
    return render_layout(res)
 end

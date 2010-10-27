@@ -6,36 +6,12 @@ require "Model"
 local cfg_dir = config.monitor.dir.."/etc/itvision/"
 
 
------------------------------ IO FILES ----------------------------------
-
-function write_cfg_file (filename, text)
-   local f = io.open(filename, 'w')
-   f:write(text)
-   f:close()
-end
-
------------------------------ SYSTEM MANTEINANCE ----------------------------------
-
-function restart_monitor ()
-   Model.execute ( "LOCK TABLE itvision_app_tree WRITE" )
-   local cmd = os.reset_monitor()
-   Model.execute ( "UNLOCK TABLES" )
-   return cmd
-end
-
-
-function restart_monitor_bp ()
-   Model.execute ( "LOCK TABLE itvision_app_tree WRITE" )
-   local cmd = os.reset_monitor()
-   Model.execute ( "UNLOCK TABLES" )
-   return cmd
-end
-
-
 ----------------------------- CONFIG FILES ----------------------------------
 
 function insert_host_cfg_file (hostname, alias, ip)
    if not  ( hostname and alias and ip ) then return false end
+   local content = nil
+
    local text = [[
 define host{
         use]].."\t\t"..[[linux-server
@@ -46,12 +22,18 @@ define host{
 ]]
 
    local filename  = cfg_dir..hostname.."-"..ip..".cfg"
-   write_cfg_file (filename, text)
-   local cmd = restart_monitor ()
+   text_file_writer (filename, text)
+   local cmd = os.reset_monitor()
 
-   local content = Model.query("nagios_objects", "name1 = '"..hostname.."' and name2 is NULL")
+   while content == nil do
+      content = Model.query("nagios_objects", "name1 = '"..hostname.."' and name2 is NULL")
+      for i = 1,5000 do
+         local x = i/2
+      end
+      if content[1] == nil then content = nil end
+   end
 
-   if content[1] then
+   if content[1] ~= nil then
       return true, content[1].object_id, cmd
    else
       return false, 0, cmd
@@ -60,15 +42,18 @@ end
 
 
 function insert_service_cfg_file (display_name, hostname, check_cmd)
-   local check = ""
    if not  ( display_name and hostname and check_cmd ) then return false end
+   local check, content
+
    if check_cmd == 0 then
       clause = "name1 = '"..config.monitor.check_ping.."'"
    else
       clause = "object_id = "..check_cmd
    end
-   local content = Model.query("nagios_objects",clause , nil, nil )
-   if content[1] then check = content[1].name1 end
+
+   chk = Model.query("nagios_objects", clause)
+   if chk[1] then check = chk[1].name1 end
+
    local text = [[
 define service{
         use]].."\t\t\t"..[[generic-service
@@ -79,13 +64,19 @@ define service{
 ]]
 
    local filename  = cfg_dir..hostname.."-"..display_name.."-"..check..".cfg"
-   write_cfg_file (filename, text)
-   local cmd = restart_monitor ()
+   text_file_writer (filename, text)
+   local cmd = os.reset_monitor()
 
-   local content = Model.query("nagios_objects", "name1 = '"..hostname.."' and name2 = '"..display_name.."'")
+   
+   while content[1] == nil do
+      content = Model.query("nagios_objects", "name1 = '"..hostname.."' and name2 = '"..display_name.."'")
+      for i = 1,5000 do
+         local x = i/2
+      end
+   end
 
-   if content[1] then
-      return true, content[1].object_id, cmd
+   if content[1] ~= nil then
+      return true, content[1].object_id
    else
       return false, 0, cmd
    end
@@ -105,8 +96,8 @@ define contact{
 ]]
 
    local filename  = cfg_dir..name..".cfg"
-   write_cfg_file (filename, text)
-   --local cmd = restart_monitor ()
+   text_file_writer (filename, text)
+   local cmd = os.reset_monitor()
 
    return true, cmd
 end
@@ -127,7 +118,7 @@ function delete_cfg_file(filename) -- no caso de hosts e services, filename eh o
    filename = string.gsub(tostring(filename)," ","_")
    local cmd
    cmd = os.capture ("rm -f "..cfg_dir..filename..".cfg", 1)
-   cmd = os.capture (config.monitor.script.." restart", 1)
+   cmd = os.reset_monitor()
 end
 
 
@@ -171,7 +162,7 @@ function activate_app(app, objs, flag)
 
    text_file_writer(config.monitor.bp_dir.."/etc/apps/"..file_name..".conf", s)
    insert_bp_cfg_file(file_name)
-   --os.reset_monitor()
+   os.reset_monitor()
 
 end
 
@@ -185,7 +176,8 @@ function insert_bp_cfg_file(file_name)
    local cmd = config.monitor.bp_dir.."/bin/bp_cfg2service_cfg.pl"
    cmd = cmd .. " -f "..config.monitor.bp_dir.."/etc/apps/"..file_name..".conf"
    cmd = cmd .. " -o "..config.monitor.dir.."/etc/apps/"..file_name..".cfg"
-   --os.capture(cmd)
+   os.capture(cmd)
+   os.reset_monitor()
    text_file_writer("/tmp/cmd.out", cmd)
 
 end
