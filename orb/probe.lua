@@ -164,7 +164,7 @@ function insert(web, n_id, sv_id, c_id, c_name, s_name, sv_name, ip)
    -- cria check host e service ping caso nao exista
    if h[1] == nil then
       cmd = insert_host_cfg_file (hostname, c_name, ip)
-      cmd = insert_service_cfg_file (hostname, "PING", 0)
+      cmd = insert_service_cfg_file (hostname, "PING", config.monitor.check_ping)
       h = objects:select(hostname)
       -- caso host ainda nao tenha sido incluido aguarde e tente novamente
       counter = 0
@@ -210,14 +210,23 @@ function insert(web, n_id, sv_id, c_id, c_name, s_name, sv_name, ip)
 
    -- cria o service check caso tenha sido requisitado
    if tonumber(sv_id) ~= 0 then
-      chk = web.input.check
-      if string.gsub(web.input.display," ","") == "" then 
-         dpl = chk
+      local clause
+
+      if web.input.check == 0 then
+         clause = "name1 = '"..config.monitor.check_ping.."'"
       else
-         dpl = web.input.display
+         clause = "object_id = "..web.input.check
+      end
+      chk = Model.query("nagios_objects", clause)
+      if chk[1] then chk = chk[1].name1 end
+
+      dpl = string.gsub(web.input.display," ","_")
+      if dpl == "" then 
+         dpl = chk
       end
       cmd = insert_service_cfg_file (hostname, dpl, chk)
       s = objects:select(hostname, dpl)
+
       -- caso service ainda nao tenha sido incluido aguarde e tente novamente
       counter = 0
       while s[1] == nil do
@@ -346,7 +355,7 @@ function render_add(web, cmp, chk, query, default)
 
       if v.sv_id == 0 then 
          cmd = render_form(web:link(url), 
-               { "<INPUT TYPE=HIDDEN NAME=\"check\" value=\"0\">", "host-alive", " " } )
+               { "<INPUT TYPE=HIDDEN NAME=\"check\" value=\"0\">", config.monitor.check_ping, " " } )
       else
          cmd = render_form(web:link(url), 
                { "Nome:", "<INPUT TYPE=TEXT NAME=\"display\" value=\""..display.."\">", 

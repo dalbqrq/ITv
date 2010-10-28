@@ -32,24 +32,16 @@ end
 
 function insert_service_cfg_file (hostname, display_name, check_cmd)
    if not  ( display_name and hostname and check_cmd ) then return false end
-   local check, content, cmd, filename
+   local content, cmd, filename
 
-   if check_cmd == 0 then
-      clause = "name1 = '"..config.monitor.check_ping.."'"
-   else
-      clause = "object_id = "..check_cmd
-   end
-
-   chk = Model.query("nagios_objects", clause)
-   if chk[1] then check = chk[1].name1 else return false, 0, "ERROR" end
-   filename = cfg_dir..hostname.."-"..display_name.."-"..check..".cfg"
+   filename = cfg_dir..hostname.."-"..display_name.."-"..check_cmd..".cfg"
 
    local text = [[
 define service{
         use]].."\t\t\t"..[[generic-service
         host_name]].."\t\t"..hostname..[[ 
         service_description]].."\t"..display_name..[[ 
-        check_command]].."\t\t"..check..[[ 
+        check_command]].."\t\t"..check_cmd..cmds[check_cmd].default..[[ 
         } 
 ]]
 
