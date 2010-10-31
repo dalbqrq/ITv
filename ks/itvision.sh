@@ -4,7 +4,7 @@ user=itv
 dbpass=itv
 dbuser=$user
 dbname=itvision
-itvhome=/usr/local/itv
+itvhome=/usr/local/itvision
 
 alias install_pack='apt-get -y install'
 
@@ -96,6 +96,18 @@ cat << EOF > /etc/apache2/conf.d/itvision.cong
 EOF
 
 
+sed -i -e 's|instance_name = ".*"|instance_name = "default"|g' \
+	-e 's|dbname = ".*",|dbname = "'$dbname'",|g' \
+	-e 's|dbuser = ".*",|dbuser = "'$dbuser'",|g' \
+	-e 's|dbpass = ".*",|dbpass = "'$dbpass'",|g' \
+	-e 's|dir        = ".*",|dir        = "/etc/nagios3",|g' \
+	-e 's|bp_dir     = ".*",|bp_dir     = "/etc/nagios3/nagiosbp",|g' \
+	-e 's|script     = ".*",|script     = "/etc/init.d/nagios3",|g' \
+	-e 's|bp_script  = ".*",|bp_script  = "/etc/init.d/ndoutils",|g' $itvhome/orb/config.lua
+
+
+ln -s $itvhome ~$user/itvision
+chown -R $user.$user ~$user/itvision
 
 # --------------------------------------------------
 # NAGIOS
@@ -218,7 +230,7 @@ cd ..
 luarocks make
 #
 sed -i.orig '/^#/ a\
-. /usr/local/itvision/bin/lua_path' /usr/local/bin/wsapi.cgi
+. '$itvhome'/bin/lua_path' /usr/local/bin/wsapi.cgi
 
 
 
