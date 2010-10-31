@@ -224,24 +224,31 @@ printf "$aliases" >> /home/$user/.bashrc
 cat << EOF > /usr/local/bin/dumpdb
 #!/bin/bash
 
-dbuser=ndoutils
-dbpass=itv
-dbname=ndoutils
+dbuser=$dbuser
+dbpass=$dbpass
+dbname=$dbname
 
-d=`date "+%Y%m%d%H%M"`
+d=\`date "+%Y%m%d%H%M"\`
 tmpfile=/tmp/tables
 
-if [ $# -eq 1 ]; then
-   echo "show tables like '$1_%'" | mysql -u $dbuser --password=$dbpass $dbname | grep -v Tables_in_ > $tmpfile
-   ext="_$1"
-   tables=`cat $tmpfile`
+if [ \$# -eq 1 ]; then
+   echo "show tables like '\$1_%'" | mysql -u \$dbuser --password=\$dbpass \$dbname | grep -v Tables_in_ > \$tmpfile
+   ext="_\$1"
+   tables=\`cat \$tmpfile\`
+   opt="--add-drop-table"
+
+   if [ \$# -eq 2 ]; then
+      if [ \$2 == "no-data" ]; then
+         opt="--add-drop-table --no-data"
+      else
+         echo usage: dumpdb [<sub-db-name>] [no-data]
+      fi
+   fi
 fi
-opt="--add-drop-table --no-data"
-opt="--add-drop-table"
 
-mysqldump -u $dbuser --password=$dbpass $opt $dbname $tables > /tmp/dumpdb$ext"_"$d.sql
+mysqldump -u \$dbuser --password=\$dbpass \$opt \$dbname \$tables > /tmp/dumpdb\$ext"_"\$d.sql
 
-\rm -f $tmpfile
+\rm -f \$tmpfile
 EOF
 chmod 755 /usr/local/bin/dumpdb
 
