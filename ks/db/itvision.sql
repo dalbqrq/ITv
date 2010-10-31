@@ -44,7 +44,6 @@ CREATE TABLE `itvision_app` (
 
 LOCK TABLES `itvision_app` WRITE;
 /*!40000 ALTER TABLE `itvision_app` DISABLE KEYS */;
-INSERT INTO `itvision_app` VALUES (23,1,'ITvision','and','0',NULL),(24,1,'itiv_proto','and','0',NULL),(25,1,'TEST','or','1',NULL);
 /*!40000 ALTER TABLE `itvision_app` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -75,7 +74,6 @@ CREATE TABLE `itvision_app_object` (
 
 LOCK TABLES `itvision_app_object` WRITE;
 /*!40000 ALTER TABLE `itvision_app_object` DISABLE KEYS */;
-INSERT INTO `itvision_app_object` VALUES (23,1,5,'svc'),(23,1,6,'svc'),(24,1,55,'app'),(23,1,8,'svc'),(23,1,1,'hst'),(25,1,86,'hst'),(25,1,87,'svc');
 /*!40000 ALTER TABLE `itvision_app_object` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -111,7 +109,6 @@ CREATE TABLE `itvision_app_relat` (
 
 LOCK TABLES `itvision_app_relat` WRITE;
 /*!40000 ALTER TABLE `itvision_app_relat` DISABLE KEYS */;
-INSERT INTO `itvision_app_relat` VALUES (1,12,23,5,1),(1,12,23,6,1),(1,12,23,8,1);
 /*!40000 ALTER TABLE `itvision_app_relat` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -136,7 +133,7 @@ CREATE TABLE `itvision_app_relat_type` (
 
 LOCK TABLES `itvision_app_relat_type` WRITE;
 /*!40000 ALTER TABLE `itvision_app_relat_type` DISABLE KEYS */;
-INSERT INTO `itvision_app_relat_type` VALUES (12,'roda em','physical'),(13,'conectado a','physical'),(14,'usa','logical'),(15,'faz backup em','logical');
+INSERT INTO `itvision_app_relat_type` VALUES (1,'roda em','physical'),(2,'conectado a','physical'),(3,'usa','logical'),(4,'faz backup em','logical');
 /*!40000 ALTER TABLE `itvision_app_relat_type` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -167,7 +164,6 @@ CREATE TABLE `itvision_app_tree` (
 
 LOCK TABLES `itvision_app_tree` WRITE;
 /*!40000 ALTER TABLE `itvision_app_tree` DISABLE KEYS */;
-INSERT INTO `itvision_app_tree` VALUES (3,1,24,1,4),(4,1,23,2,3);
 /*!40000 ALTER TABLE `itvision_app_tree` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -194,7 +190,6 @@ CREATE TABLE `itvision_monitor` (
 
 LOCK TABLES `itvision_monitor` WRITE;
 /*!40000 ALTER TABLE `itvision_monitor` DISABLE KEYS */;
-INSERT INTO `itvision_monitor` VALUES (6,NULL,86,87,'1','hst'),(7,NULL,80,81,'1','hst'),(7,2,80,92,'1','svc');
 /*!40000 ALTER TABLE `itvision_monitor` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -257,7 +252,6 @@ CREATE TABLE `itvision_sysconfig` (
 
 LOCK TABLES `itvision_sysconfig` WRITE;
 /*!40000 ALTER TABLE `itvision_sysconfig` DISABLE KEYS */;
-INSERT INTO `itvision_sysconfig` VALUES (1,1,'0000-00-00 00:00:00','0000-00-00 00:00:00','0.9','/usr/local/itvision','/usr/local/monitor','/usr/local/monitorbp');
 /*!40000 ALTER TABLE `itvision_sysconfig` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -289,7 +283,6 @@ CREATE TABLE `itvision_user` (
 
 LOCK TABLES `itvision_user` WRITE;
 /*!40000 ALTER TABLE `itvision_user` DISABLE KEYS */;
-INSERT INTO `itvision_user` VALUES (2,1,'daniel','0tucamis',10,0),(9,1,'jantonio','asdfas',17,0);
 /*!40000 ALTER TABLE `itvision_user` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -317,7 +310,6 @@ CREATE TABLE `itvision_user_group` (
 
 LOCK TABLES `itvision_user_group` WRITE;
 /*!40000 ALTER TABLE `itvision_user_group` DISABLE KEYS */;
-INSERT INTO `itvision_user_group` VALUES (2,'LINS',17,1),(10,'ATMA',16,1),(17,'ATK_ust',17,1),(22,'GrPo',16,1);
 /*!40000 ALTER TABLE `itvision_user_group` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -344,7 +336,6 @@ CREATE TABLE `itvision_user_prefs` (
 
 LOCK TABLES `itvision_user_prefs` WRITE;
 /*!40000 ALTER TABLE `itvision_user_prefs` DISABLE KEYS */;
-INSERT INTO `itvision_user_prefs` VALUES (0,16,1);
 /*!40000 ALTER TABLE `itvision_user_prefs` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

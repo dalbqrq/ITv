@@ -87,6 +87,7 @@ function list(web, id)
       if A[1] then id = A[1].id else id = nil end
    end
    local AR = Model.select_app_relat_object(id)
+   id = id or ""
    return render_list(web, id, A, AR)
 end
 ITvision:dispatch_get(list, "/", "/list", "/list/(%d+)")

@@ -53,6 +53,7 @@ function list(web, id)
    end
 
    local APPOBJ = Model.select_app_app_objects(id)
+   id = id or ""
    return render_list(web, APPOBJ, APPS, id)
 end
 ITvision:dispatch_get(list, "/", "/list", "/list/(%d+)")
