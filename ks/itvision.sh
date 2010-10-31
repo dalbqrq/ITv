@@ -108,6 +108,8 @@ sed -i -e 's|instance_name = ".*"|instance_name = "default"|g' \
 
 ln -s $itvhome ~$user/itvision
 chown -R $user.$user ~$user/itvision
+cd $itvhome
+sudo -u $user git checkout glpi
 
 # --------------------------------------------------
 # NAGIOS
