@@ -236,7 +236,7 @@ end
 
 
 function os.reset_monitor()
-   return os.capture("/usr/sbin/invoke-rc.d nagios reload")
+   return os.capture("/usr/sbin/invoke-rc.d nagios3 reload")
 end
 
 
