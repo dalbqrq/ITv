@@ -13,7 +13,6 @@ alias install_pack='apt-get -y install'
 # --------------------------------------------------
 apt-get -y update
 apt-get -y upgrade
-apt-get -y autoremove
 
 #install_pack openssh-server
 #install_pack sysutils
@@ -120,16 +119,16 @@ sed -i.orig -e "s/root/$user/" -e "s/Root/Admin/" \
 # --------------------------------------------------
 # NDO UTILS - Nagios
 # --------------------------------------------------
+chown -R $user.$user /etc/nagios3/ndomod.cfg /etc/nagios3/ndo2db.cfg /usr/lib/ndoutils /etc/init.d/ndoutils
+
 sed -i.orig -e "s/ nagios / $user /g" /etc/init.d/ndoutils
 sed -i.orig -e '/# LOG ROTATION METHOD/ i\
 broker_module=/usr/lib/ndoutils/ndomod-mysql-3x.o config_file=/etc/nagios3/ndomod.cfg' /etc/nagios3/nagios.cfg
-chown -R $user.$user /etc/nagios3/ndomod.cfg /etc/nagios3/ndo2db.cfg /usr/lib/ndoutils /etc/init.d/ndoutils
-
 sed -i.orig -e "s/ndo2db_group=nagios/ndo2db_group=$user/" \
 	-e "s/ndo2db_user=nagios/ndo2db_user=$user/" \
 	-e "s/db_name=ndoutils/db_name=$dbname/" \
-	-e "s/^db_user=ndoutils/db_user=$dbuser/" /etc/nagios3/ndo2db.cfg 
-sed -i -e "s/\/\//\//g" /etc/nagios3/ndo2db.cfg
+	-e "s/^db_user=ndoutils/db_user=$dbuser/" \
+	-e "s/\/\//\//g" /etc/nagios3/ndo2db.cfg
 sed -i -e "s/\/\//\//g" /etc/nagios3/ndomod.cfg
 sed -i -e 's/ENABLE_NDOUTILS=0/ENABLE_NDOUTILS=1/' /etc/default/ndoutils
 
@@ -185,7 +184,7 @@ echo "<?php
  var \$dbdefault = '$dbname';
  }
 ?>" > /usr/local/servdesk/config/config_db.php
-chmod 644 /usr/local/servdesk/config/config_db.php
+chmod 600 /usr/local/servdesk/config/config_db.php
 chown $user.$user /usr/local/servdesk/config/config_db.php
 echo "Alias /servdesk "/usr/local/servdesk"
 <Directory "/usr/local/servdesk">
@@ -233,16 +232,14 @@ mysql -u root --password=$dbpass itvision < /tmp/cacti.sql
 echo "DROP DATABASE cacti;" | mysql -u root --password=$dbpass
 chown -R $user.$user /etc/cacti/ /usr/bin/rrdtool /usr/bin/php /usr/bin/snmpwalk /usr/bin/snmpget /usr/bin/snmpbulkwalk /usr/bin/snmpgetnext /var/log/cacti /usr/share/cacti /var/lib/cacti /usr/share/lintian/overrides/cacti /usr/share/doc/cacti /usr/share/dbconfig-common/data/cacti /usr/local/share/cacti /etc/cron.d/cacti /etc/logrotate.d/cacti
 
-sed -i.orig -e "s/\$database_username='cacti';/\$database_username='$dbuser';/" /etc/cacti/debian.php
-sed -i.orig -e "s/\$basepath=''/\$basepath='/usr/share/php';/" /etc/cacti/debian.php
-sed -i.orig -e "s/\$database_default='cacti';/\$database_default='$dbname';/" /etc/cacti/debian.php
-sed -i.orig -e "s/\$database_hostname='';/\$database_hostname='localhost';/" /etc/cacti/debian.php
-sed -i.orig -e "s/\$database_port='';/\$database_port='3306';/" /etc/cacti/debian.php
-
-sed -i.orig -e "s/\$database_default = \"cacti\";/\$database_default = \"$dbname\";/" /usr/share/cacti/site/include/global.php
-sed -i.orig -e "s/\$database_username = \"cactiuser\";/\$database_username = \"$dbuser\";/" /usr/share/cacti/site/include/global.php
-sed -i.orig -e "s/\$database_password = \"cactiuser\";/\$database_password = \"$dbpass\";/" /usr/share/cacti/site/include/global.php
-
+sed -i.orig -e "s/\$database_username='cacti';/\$database_username='$dbuser';/" \
+	-e "s/\$basepath=''/\$basepath='/usr/share/php';/" \
+	-e "s/\$database_default='cacti';/\$database_default='$dbname';/" \
+	-e "s/\$database_hostname='';/\$database_hostname='localhost';/" \
+	-e "s/\$database_port='';/\$database_port='3306';/" /etc/cacti/debian.php
+sed -i.orig -e "s/\$database_default = \"cacti\";/\$database_default = \"$dbname\";/" \
+	-e "s/\$database_username = \"cactiuser\";/\$database_username = \"$dbuser\";/" \
+	-e "s/\$database_password = \"cactiuser\";/\$database_password = \"$dbpass\";/" /usr/share/cacti/site/include/global.php
 sed -i -e "s/www-data/$user/" /etc/cron.d/cacti
 
 
