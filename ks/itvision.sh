@@ -2,8 +2,9 @@
 
 user=itv
 dbpass=itv
-dbuser=itv
+dbuser=$user
 dbname=itvision
+itvhome=/usr/local/itv
 
 alias install_pack='apt-get -y install'
 
@@ -58,6 +59,46 @@ rm -rf /var/cache/nagios3/ndo.sock
 
 
 # --------------------------------------------------
+# ITVISION
+# --------------------------------------------------
+echo "CREATE DATABASE $dbname;" | mysql -u root --password=$dbpass
+echo "CREATE USER '$dbuser'@'localhost' IDENTIFIED BY '$dbpass';" | mysql -u root --password=$dbpass
+echo "GRANT ALL PRIVILEGES ON *.* TO '$dbuser'@'localhost' WITH GRANT OPTION;" | mysql -u root --password=$dbpass
+mysql -u root --password=$dbpass $dbname < $itvhome/ks/db/itvision.sql
+
+cat << EOF > /etc/apache2/conf.d/itvision.cong
+<VirtualHost *:80>
+        ServerAdmin webmaster@itvision.com.br
+
+        DocumentRoot $itvhome/html
+        <Directory "$itvhome/html">
+                Options Indexes FollowSymLinks MultiViews
+                AllowOverride None
+                Order allow,deny
+                allow from all
+        </Directory>
+
+        ScriptAlias /orb $itvhome/orb
+        <Directory "$itvhome/orb">
+                AllowOverride None
+                Options +ExecCGI +MultiViews +SymLinksIfOwnerMatch FollowSymLinks
+                Order allow,deny
+                Allow from all
+        </Directory>
+
+        # Possible values: debug, info, notice, warn, error, crit,
+        # alert, emerg.
+        LogLevel warn
+
+        ErrorLog /var/log/apache2/itvision_error.log
+        CustomLog /var/log/apache2/tivision_access.log combined
+
+</VirtualHost>
+EOF
+
+
+
+# --------------------------------------------------
 # NAGIOS
 # --------------------------------------------------
 htpasswd -cb /etc/nagios3/htpasswd.users $user $dbpass
@@ -93,13 +134,10 @@ sed -i -e "s/\/\//\//g" /etc/nagios3/ndomod.cfg
 sed -i -e 's/ENABLE_NDOUTILS=0/ENABLE_NDOUTILS=1/' /etc/default/ndoutils
 
 mysqldump -u root --password=$dbpass -v ndoutils > /tmp/ndoutils.sql
-echo "CREATE DATABASE $dbname;" | mysql -u root --password=$dbpass
 mysql -u root --password=$dbpass $dbname < /tmp/ndoutils.sql
 echo "DROP DATABASE ndoutils;" | mysql -u root --password=$dbpass
-echo "CREATE USER '$dbuser'@'localhost' IDENTIFIED BY '$dbpass';" | mysql -u root --password=$dbpass
-echo "GRANT ALL PRIVILEGES ON *.* TO '$dbuser'@'localhost' WITH GRANT OPTION;" | mysql -u root --password=$dbpass
 
-chown -R $user.$user /var/log/nagios3  /etc/init.d/nagios-nrpe-server /etc/init.d/nagios3 /etc/nagios3 /etc/nagios /etc/nagios-plugins /var/run/nagios /var/run/nagios3 /usr/lib/nagios /usr/sbin/log2ndo /usr/lib/nagios3 /etc/apache2 /var/cache/nagios3 /var/lib/nagios /var/lib/nagios3 /usr/share/nagios3/ /usr/lib/cgi-bin/nagios3
+chown -R $user.$user /var/log/nagios3 /etc/init.d/nagios-nrpe-server /etc/init.d/nagios3 /etc/nagios3 /etc/nagios /etc/nagios-plugins /var/run/nagios /var/run/nagios3 /usr/lib/nagios /usr/sbin/log2ndo /usr/lib/nagios3 /etc/apache2 /var/cache/nagios3 /var/lib/nagios /var/lib/nagios3 /usr/share/nagios3/ /usr/lib/cgi-bin/nagios3
 
 
 
@@ -107,8 +145,7 @@ chown -R $user.$user /var/log/nagios3  /etc/init.d/nagios-nrpe-server /etc/init.
 # BUSINESS PROCESS
 # --------------------------------------------------
 bp=nagiosbp
-wget -P /tmp  http://www.itvision.com.br/ks/nagiosbp-0.9.5.tgz
-tar zxf /tmp/nagiosbp-0.9.5.tgz -C /usr/local/src
+tar zxf $itvhome/ks/files/nagiosbp-0.9.5.tgz -C /usr/local/src
 cd /usr/local/src/nagios-business-process-addon-0.9.5
 ./configure --prefix=/etc/nagios3/$bp --with-nagiosbp-user=$user --with-nagiosbp-group=$user --with-nagetc=/etc/nagios3 --with-naghtmurl=/nagios3 --with-nagcgiurl=/cgi-bin/nagios3 --with-htmurl=/$bp --with-cgiurl=/$bp/cgi-bin/ --with-apache-user=$user
 make install
@@ -136,6 +173,7 @@ sed -i.orig -e "s/ndodb_database=nagios/ndodb_database=$user/" \
 # --------------------------------------------------
 wget -P /tmp https://forge.indepnet.net/attachments/download/656/glpi-0.78.tar.gz
 tar zxf /tmp/glpi-0.78.tar.gz -C /usr/local
+tar zxf $itvhome/ks/files/glpi-0.78.tar.gz -C /usr/local
 mv /usr/local/glpi /usr/local/servdesk
 chown -R $user.$user /usr/local/servdesk
 
@@ -157,9 +195,12 @@ echo "Alias /servdesk "/usr/local/servdesk"
     Allow from all
 </Directory>"  >> /etc/apache2/conf.d/servdesk.conf
 
-wget -P /tmp http://www.itvision.com.br/ks/glpi.sql.gz
+cp $itvhome/ks/files/glpi.sql.gz /tmp
 gunzip /tmp/glpi.sql.gz
 mysql -u $dbuser --password=$dbpass $dbname < /tmp/glpi.sql
+
+cd $itvhome/ks/servdesk
+tar cf - * | ( cd /usr/local/servdesk; tar xfp -)
 
 
 # --------------------------------------------------
@@ -179,15 +220,6 @@ luarocks make
 #
 sed -i.orig '/^#/ a\
 . /usr/local/itvision/bin/lua_path' /usr/local/bin/wsapi.cgi
-
-# --------------------------------------------------
-# ITVISION
-# --------------------------------------------------
-itvhome=itv
-cd /usr/local
-mkdir $itvhome
-chown $user.$user $itvhome
-git clone git@github.com:dlins/ITv.git $itvhome
 
 
 
