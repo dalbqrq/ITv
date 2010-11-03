@@ -108,8 +108,17 @@ sed -i -e 's|instance_name = ".*"|instance_name = "default"|g' \
 	-e 's|bp_script  = ".*",|bp_script  = "/etc/init.d/ndoutils",|g' $itvhome/orb/config.lua
 
 
-ln -s $itvhome ~$user/itvision
-chown -R $user.$user ~$user/itvision
+cd ~$user
+ln -s $itvhome itv
+ln -s $itvhome/bin
+chown -R $user.$user itv
+chown -R $user.$user bin
+
+cat << EOF > $itvhome/bin/dbconf
+dbuser=$dbuser
+dbpass=$dbpass
+dbname=$dbname
+EOF
 
 # --------------------------------------------------
 # NAGIOS
@@ -138,6 +147,18 @@ mkdir -p /etc/nagios3/orig/conf.d /etc/nagios3/hosts /etc/nagios3/services /etc/
 mv /etc/nagios3/*.orig orig
 mv /etc/nagios3/conf.d/* orig/conf.d
 cp $itvhome/ks/files/conf.d/* /etc/nagios3/conf.d
+
+# rename plugins
+dir=/etc/nagios-plugins/config
+cp -r $dir $dir".orig"
+
+for f in $dir/*; do
+ sed -i -e 's/check-rpc/check_rpc/g' -e 's/check-nfs/check_nfs/g' \
+	-e 's/traffic_average/\U&/' \
+	-e 's/ssh_disk/\U&/' \
+	-e 's/ check_.*/\U&/' -e 's/\tcheck_.*/\U&/' -e 's/CHECK_//g' \
+	-e 's/ snmp_.*/\U&/' -e 's/\tsnmp_.*/\U&/' $f
+done
 
 
 
@@ -272,39 +293,10 @@ sed -i -e "s/www-data/$user/" /etc/cron.d/cacti
 # UTILILITARIOS
 # --------------------------------------------------
 aliases="\n\nalias mv='mv -i'\nalias cp='cp -i'\nalias rm='rm -i'\n"
+path="PATH=\$PATH:$itvhome/bin\n"
 printf "$aliases" >> /root/.bashrc
 printf "$aliases" >> /home/$user/.bashrc
-
-cat << EOF > /usr/local/bin/dumpdb
-#!/bin/bash
-
-dbuser=$dbuser
-dbpass=$dbpass
-dbname=$dbname
-
-d=\`date "+%Y%m%d%H%M"\`
-tmpfile=/tmp/tables
-
-if [ \$# -eq 1 ]; then
-   echo "show tables like '\$1_%'" | mysql -u \$dbuser --password=\$dbpass \$dbname | grep -v Tables_in_ > \$tmpfile
-   ext="_\$1"
-   tables=\`cat \$tmpfile\`
-   opt="--add-drop-table"
-
-   if [ \$# -eq 2 ]; then
-      if [ \$2 == "no-data" ]; then
-         opt="--add-drop-table --no-data"
-      else
-         echo usage: dumpdb [<sub-db-name>] [no-data]
-      fi
-   fi
-fi
-
-mysqldump -u \$dbuser --password=\$dbpass \$opt \$dbname \$tables > /tmp/dumpdb\$ext"_"\$d.sql
-
-\rm -f \$tmpfile
-EOF
-chmod 755 /usr/local/bin/dumpdb
+printf "$path" >> /home/$user/.bashrc
 
 
 # --------------------------------------------------
