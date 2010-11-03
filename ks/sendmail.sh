@@ -7,12 +7,11 @@ cd /etc/mail
 hostname -f > genericsdomain
 touch genericstable
 makemap -r hash genericstable.db < genericstable
-mv sendmail.mc sendmail.mc.original
+mv sendmail.mc sendmail.mc.orig
 wget http://pbxinaflash.net/source/sendmail/sendmail.mc.gmail
-cp sendmail.mc.gmail sendmail.mc.gmail
+cp sendmail.mc.gmail sendmail.mc
 # If the above file is no longer available I've uploaded a mirror here
 # wget http://network-13.com/sendmail.mc.gmail
-cp sendmail.mc.gmail sendmail.mc
 mkdir -p auth
 chmod 700 auth
 cd auth
