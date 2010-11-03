@@ -1,0 +1,18 @@
+#!/bin/bash
+
+dir=/etc/nagios-plugins/config
+
+#cp -r $dir $dir".orig"
+
+for f in $dir/*; do
+ sed -i -e 's/check-rpc/check_rpc/g' -e 's/check-nfs/check_nfs/g' \
+	-e 's/traffic_average/\U&/' \
+	-e 's/ssh_disk/\U&/' \
+	-e 's/ check_.*/\U&/' -e 's/\tcheck_.*/\U&/' -e 's/CHECK_//g' \
+	-e 's/ snmp_.*/\U&/' -e 's/\tsnmp_.*/\U&/' $f
+done
+
+
+grep "command_name" /etc/nagios-plugins/config/* | cut -d: -f2
+grep "ARG[0-9]" /etc/nagios-plugins/config/* | cut -d: -f2
+

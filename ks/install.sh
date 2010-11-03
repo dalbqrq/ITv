@@ -6,6 +6,7 @@ user=itv
 pass=itv
 itvhome=/usr/local/itvision
 
+apt-get install -y git-core
 mkdir $itvhome
 chown $user.$user $itvhome
 cd $itvhome
