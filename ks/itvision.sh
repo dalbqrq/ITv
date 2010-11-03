@@ -221,6 +221,7 @@ tar cf - * | ( cd /usr/local/servdesk; tar xfp -)
 luarocks install wsapi
 luarocks install cgilua
 luarocks install orbit
+luarocks install dado
 # luarocks install luagraph - BROKEN! install and compile it manually!
 cd /tmp
 luarocks download luagraph

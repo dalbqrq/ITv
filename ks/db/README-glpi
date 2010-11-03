@@ -1,0 +1,23 @@
+TIPO 1 - OBRIGATORIO
+glpi_dropdown_filesystems
+glpi_dropdown_kbcategories
+glpi_dropdown_interface
+glpi_dropdown_licensetypes
+glpi_dropdown_manufacturero
+glpi_dropdown_os
+glpi_dropdown_software_category
+glpi_dropdown_state
+glpi_type_peripherals
+glpi_type_phones
+glpi_type_printers
+glpi_dropdown_tracking_category
+glpi_dropdown_user_types
+
+TIPO 2 - OPCIONAL
+glpi_dropdown_model
+glpi_dropdown_model_monitors
+glpi_dropdown_model_networking
+glpi_dropdown_model_peripherals
+glpi_dropdown_model_phones
+glpi_dropdown_model_printers
+glpi_dropdown_ram_type
