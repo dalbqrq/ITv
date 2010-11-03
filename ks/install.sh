@@ -14,6 +14,7 @@ if [ "$1" == "clone-for-devel" ]; then # MUST USE PASSWORD OR SSH-KEY MUST BE IN
 else
    sudo -u $user git clone git://github.com/dlins/ITv.git $itvhome
 fi
+sudo -u $user git checkout glpi
 sed -i -e "s,^user=.*,user=$user,g" \
 	-e "s,^dbpass=.*,dbpass=$pass,g" \
 	-e "s,^itvhome=.*,itvhome=$itvhome,g" $itvhome/ks/itvision.sh
