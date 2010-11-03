@@ -297,6 +297,14 @@ chmod 755 /usr/local/bin/dumpdb
 
 
 # --------------------------------------------------
+# ONLY FOR DEVELOPMENT
+# --------------------------------------------------
+#echo "GRANT ALL ON '$dbname'.* TO '$dbuser'@'%' IDENTIFIED BY '$dbpass';"
+#sed -i.orig -e "s/^bind-address/#bind-address/g" /etc/mysql/my.cnf
+#/usr/sbin/service mysql restart
+
+
+# --------------------------------------------------
 # CLEAN UP & RESTART ALL PROCESSES
 # --------------------------------------------------
 /usr/sbin/invoke-rc.d apache2 start
