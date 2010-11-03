@@ -8,6 +8,7 @@ itvhome=/usr/local/itvision
 
 mkdir $itvhome
 chown $user.$user $itvhome
+cd $itvhome
 if [ "$1" == "clone-for-devel" ]; then # MUST USE PASSWORD OR SSH-KEY MUST BE INCLUDED IN GITHUB
    ssh-keygen -t rsa -C "devel@itvision.com.br" -N "" -f ~$user/.ssh/id_rsa > /dev/null
    sudo -u $user git clone git@github.com:dlins/ITv.git $itvhome
