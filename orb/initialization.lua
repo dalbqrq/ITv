@@ -1,6 +1,7 @@
 #!/usr/bin/env wsapi.cgi
 
 -- includes & defs ------------------------------------------------------
+require "config"
 require "util"
 require "View"
 
@@ -113,7 +114,7 @@ function init_app_tree() --  inicia tabela itvision_app_tree com app da propria 
 
    -- aplicacao de controle do proprio ITvision local
    t = {}
-   t.name = "ITvision"
+   t.name = Model.name
    t.instance_id = Model.db.instance_id
    t.type = "and"
    app1 = Model.insert_app(t)

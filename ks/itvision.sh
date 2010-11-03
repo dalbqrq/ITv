@@ -123,11 +123,22 @@ sed -i.orig -e "s/nagiosadmin/$user/g" /etc/nagios3/cgi.cfg
 sed -i.orig -e "s/nagios_user=nagios/nagios_user=$user/" \
 	-e "s/nagios_group=nagios/nagios_group=$user/" \
 	-e "s/admin_email=root@localhost/admin_email=webmaster@itvision.com.br/" \
-	-e "s/admin_pager=pageroot@localhost/#admin_pager=pageroot@localhost/" /etc/nagios3/nagios.cfg
+	-e "s/admin_pager=pageroot@localhost/#admin_pager=pageroot@localhost/" \
+	-e "/conf.d/a \\
+cfg_dir=/etc/nagios3/hosts \\
+cfg_dir=/etc/nagios3/apps \\
+cfg_dir=/etc/nagios3/services \\
+cfg_dir=/etc/nagios3/contacts" /etc/nagios3/nagios.cfg
 sed -i.orig -e "s/chown nagios:nagios/chown $user:root/" /etc/init.d/nagios3
 sed -i.orig -e "s/chown nagios/chown $user/" /etc/init.d/nagios-nrpe-server
 sed -i.orig -e "s/root/$user/" -e "s/Root/Admin/" \
 	-e "s/root@localhost/webmaster@itvision.com.br/" /etc/nagios3/conf.d/contacts_nagios2.cfg
+
+mkdir -p /etc/nagios3/orig/conf.d /etc/nagios3/hosts /etc/nagios3/services /etc/nagios3/apps /etc/nagios3/contacts
+mv /etc/nagios3/*.orig orig
+mv /etc/nagios3/conf.d/* orig/conf.d
+cp $itvhome/ks/files/conf.d/* /etc/nagios3/conf.d
+
 
 
 # --------------------------------------------------
