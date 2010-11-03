@@ -65,7 +65,7 @@ echo "CREATE USER '$dbuser'@'localhost' IDENTIFIED BY '$dbpass';" | mysql -u roo
 echo "GRANT ALL PRIVILEGES ON *.* TO '$dbuser'@'localhost' WITH GRANT OPTION;" | mysql -u root --password=$dbpass
 mysql -u root --password=$dbpass $dbname < $itvhome/ks/db/itvision.sql
 
-cat << EOF > /etc/apache2/conf.d/itvision.cong
+cat << EOF > /etc/apache2/conf.d/itvision.conf
 <VirtualHost *:80>
         ServerAdmin webmaster@itvision.com.br
 
@@ -186,7 +186,6 @@ sed -i.orig -e "s/ndodb_database=nagios/ndodb_database=$user/" \
 # --------------------------------------------------
 wget -P /tmp https://forge.indepnet.net/attachments/download/656/glpi-0.78.tar.gz
 tar zxf /tmp/glpi-0.78.tar.gz -C /usr/local
-tar zxf $itvhome/ks/files/glpi-0.78.tar.gz -C /usr/local
 mv /usr/local/glpi /usr/local/servdesk
 chown -R $user.$user /usr/local/servdesk
 
@@ -208,7 +207,7 @@ echo "Alias /servdesk "/usr/local/servdesk"
     Allow from all
 </Directory>"  >> /etc/apache2/conf.d/servdesk.conf
 
-cp $itvhome/ks/files/glpi.sql.gz /tmp
+cp $itvhome/ks/db/glpi.sql.gz /tmp
 gunzip /tmp/glpi.sql.gz
 mysql -u $dbuser --password=$dbpass $dbname < /tmp/glpi.sql
 
