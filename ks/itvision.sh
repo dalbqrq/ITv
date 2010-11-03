@@ -6,7 +6,9 @@ dbuser=$user
 dbname=itvision
 itvhome=/usr/local/itvision
 
-alias install_pack='apt-get -y install'
+function install_pack() {
+	apt-get -y install $1
+}
 
 # --------------------------------------------------
 # INSTALL UBUNTU NATIVE PACKAGES VIA apt-get
