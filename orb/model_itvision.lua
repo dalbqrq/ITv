@@ -72,6 +72,21 @@ function select_service_object (cond_, extra_, columns_, app, app_id, ping)
    return content
 end
 
+-- seleciona applicacoes para serem incluidas como uma subaplicacao de outra aplicacao em app_obj.lua
+-- na lista retornada nao pode haver aplicacoes que já possuam como pai uma app_id em nem ela propria
+-- TODO: 1 
+function select_app_service_object (cond_, extra_, columns_, app_id)
+   local bp_id = get_bp_id()
+
+   if cond_ ~= nil then cond_ = " and "..cond_ else cond_ = "" end
+
+   cond_ = cond_ .. " and  service_object_id not in (select service_object_id from itvision_app)"
+
+   local content = query ("nagios_services", "check_command_object_id = "..bp_id..cond_,
+      extra_, columns_)
+   return content
+
+end
 
 ----------------------------- SERVICE APP ----------------------------------
 

@@ -91,7 +91,7 @@ end
 
 
 --[[
-  Cria arquivo de conf do business process. 
+  Cria arquivo de conf do business process para uma unica aplicacao. 
 
   display 0 - significa usar o template de service "generic-bp-detail-service" que possiu 
               os parametros de configuracao active_checks_enabled=0 e passive_checks_enabled=0
@@ -104,7 +104,7 @@ end
       Veja em /usr/local/monitorbp/README
 ]]
 function activate_app(app, objs, flag)
-   app = app[1]
+   --app = app[1]
    local s = ""
    local file_name = string.gsub(app.name," ", "_")
 
@@ -115,34 +115,55 @@ function activate_app(app, objs, flag)
 
       if v.obj_type == "app" then
          s = s..v.name2 
-      elseif v.obj_type == "hst" then
-         s = s..v.name1
-      elseif v.obj_type == "svc" then
+      else
          s = s..v.name1..";"..v.name2 
       end
       
    end
 
-   s = app.name.." = "..s.."\n"
-   s = s.."display "..flag..";"..app.name..";"..app.name.."\n"
+   ref = string.gsub(string.gsub(app.name,"(%p+)","_")," ","_")
 
-   text_file_writer(config.monitor.bp_dir.."/etc/apps/"..file_name..".conf", s)
-   insert_bp_cfg_file(file_name)
+   s = "\n"..app.name.." = "..s.."\n"
+   s = s.."display "..flag..";"..ref..";"..app.name.."\n\n"
+
+   --text_file_writer(config.monitor.bp_dir.."/etc/apps/"..file_name..".conf", s)
+   --insert_bp_cfg_file(file_name)
    --os.reset_monitor()
+   return s
 end
 
 
 --[[
-  Cria arquivo de configuracao do nagios a partir do arquivo de configuracao do BP
-  criado na funcao "activate_app()" acima usando o script perl do proprio BP.
-]]
-function insert_bp_cfg_file(file_name)
-   local cmd = config.monitor.bp_dir.."/bin/bp_cfg2service_cfg.pl"
-   cmd = cmd .. " -f "..config.monitor.bp_dir.."/etc/apps/"..file_name..".conf"
-   cmd = cmd .. " -o "..config.monitor.dir.."/etc/apps/"..file_name..".cfg"
+  Cria aquivo de conf para todas a aplicacoes
 
-   --os.capture(cmd)
-   --os.reset_monitor()
+]]
+function activate_all_apps(apps)
+   local s = ""
+   local op
+   local file_name = config.monitor.bp_dir.."/etc/nagios-bp.conf"
+
+   for i, v  in ipairs(apps) do
+      local objs = Model.select_app_app_objects(v.id)
+      if objs[1] then s = s .. activate_app(v, objs, v.is_active) end
+   end
+
+   text_file_writer(file_name, s)
+   insert_bp_cfg_file()
+   os.reset_monitor()
+end
+
+
+
+--[[
+  Cria arquivo de configuracao do nagios a partir do arquivo de configuracao do BP
+  criado na funcao "activate_all_apps()" acima usando o script perl do proprio BP.
+]]
+function insert_bp_cfg_file()
+   local cmd = config.monitor.bp_dir.."/bin/bp_cfg2service_cfg.pl"
+   cmd = cmd .. " -f "..config.monitor.bp_dir.."/etc/nagios-bp.conf"
+   cmd = cmd .. " -o "..config.monitor.dir.."/apps/app.cfg"
+
+   os.capture(cmd)
    text_file_writer("/tmp/cmd.out", cmd)
 end
 

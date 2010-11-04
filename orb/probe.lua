@@ -2,7 +2,6 @@
 
 -- includes & defs ------------------------------------------------------
 local no_software_code = "_no_software_code_"
-local loop = 100000
 
 require "util"
 require "monitor_util"
