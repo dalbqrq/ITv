@@ -46,7 +46,7 @@ install_pack php5-mysql
 install_pack libcgi-simple-perl
 install_pack snmpd
 install_pack cacti
-
+exit
 
 # --------------------------------------------------
 # STOP ALL PROCESSES
@@ -107,7 +107,7 @@ sed -i -e 's|instance_name = ".*"|instance_name = "default"|g' \
 	-e 's|bp_script  = ".*",|bp_script  = "/etc/init.d/ndoutils",|g' $itvhome/orb/config.lua
 
 
-cd ~$user
+cd /home/$user
 ln -s $itvhome itv
 ln -s $itvhome/bin
 chown -R $user.$user itv
@@ -115,7 +115,7 @@ chown -R $user.$user bin
 
 cat << EOF > $itvhome/bin/dbconf
 dbuser=$dbuser
-dbpass=$dbpass
+dbpass=itv
 dbname=$dbname
 EOF
 
@@ -143,8 +143,8 @@ sed -i.orig -e "s/root/$user/" -e "s/Root/Admin/" \
 	-e "s/root@localhost/webmaster@itvision.com.br/" /etc/nagios3/conf.d/contacts_nagios2.cfg
 
 mkdir -p /etc/nagios3/orig/conf.d /etc/nagios3/hosts /etc/nagios3/services /etc/nagios3/apps /etc/nagios3/contacts
-mv /etc/nagios3/*.orig orig
-mv /etc/nagios3/conf.d/* orig/conf.d
+mv /etc/nagios3/*.orig /etc/nagios3/orig
+mv /etc/nagios3/conf.d/* /etc/nagios3/orig/conf.d
 cp $itvhome/ks/files/conf.d/* /etc/nagios3/conf.d
 
 # rename plugins
@@ -249,6 +249,7 @@ tar cf - * | ( cd /usr/local/servdesk; tar xfp -)
 # --------------------------------------------------
 # LUA ROCKS
 # --------------------------------------------------
+luarocks install lpeg 0.9-1
 luarocks install wsapi
 luarocks install cgilua
 luarocks install orbit
