@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# STOP
+/usr/sbin/invoke-rc.d nagios-nrpe-server stop
+/usr/sbin/invoke-rc.d ndoutils stop
+/usr/sbin/invoke-rc.d nagios3 stop
+
+# START
+/usr/sbin/invoke-rc.d nagios3 start
+/usr/sbin/invoke-rc.d ndoutils start
+/usr/sbin/invoke-rc.d nagios-nrpe-server start

@@ -16,8 +16,7 @@ function install_pack() {
 apt-get -y update
 apt-get -y upgrade
 
-#install_pack openssh-server
-#install_pack sysutils
+install_pack openssh-server
 install_pack build-essential
 install_pack locate
 install_pack apache2
@@ -292,11 +291,11 @@ sed -i -e "s/www-data/$user/" /etc/cron.d/cacti
 # --------------------------------------------------
 # UTILILITARIOS
 # --------------------------------------------------
-aliases="\n\nalias mv='mv -i'\nalias cp='cp -i'\nalias rm='rm -i'\n"
-path="PATH=\$PATH:$itvhome/bin\n"
-printf "$aliases" >> /root/.bashrc
+path="\n\nPATH=\$PATH:$itvhome/bin\n\n"
+aliases="\nalias mv='mv -i'\nalias cp='cp -i'\nalias rm='rm -i'\nalias psa='ps -ef  |grep -v \" \\[\"'"
+printf "$path"    >> /home/$user/.bashrc
 printf "$aliases" >> /home/$user/.bashrc
-printf "$path" >> /home/$user/.bashrc
+printf "$aliases" >> /root/.bashrc
 
 
 # --------------------------------------------------
