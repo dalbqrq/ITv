@@ -353,6 +353,7 @@ function render_add(web, cmp, chk, query, default)
       url = "/insert/"..v.n_id..":"..v.sv_id..":"..v.c_id..":"..v.c_name..":"..v.s_name..":"
             ..v.sv_name..":"..v.n_ip
 
+      -- se sv_id == 0 entao eh um host
       if v.sv_id == 0 then 
          cmd = render_form(web:link(url), 
                { "<INPUT TYPE=HIDDEN NAME=\"check\" value=\"0\">", config.monitor.check_ping, " " } )
@@ -378,7 +379,7 @@ function render_add(web, cmp, chk, query, default)
 
    for _,c in ipairs(chk) do
       if c.object_id == default then
-         s = config.monitor.dir.."/libexec/"..c.name1.." -H "..v.n_ip.." "
+         --s = config.monitor.dir.."/libexec/"..c.name1.." -H "..v.n_ip.." "
          --r = os.capture(s)
       end
    end
