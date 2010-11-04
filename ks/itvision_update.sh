@@ -234,19 +234,19 @@ sed -i.orig -e "139a \\
 # --------------------------------------------------
 wget -P /tmp https://forge.indepnet.net/attachments/download/656/glpi-0.78.tar.gz
 tar zxf /tmp/glpi-0.78.tar.gz -C /usr/local
-mv /usr/local/glpi /usr/local/servdesk
-chown -R $user.$user /usr/local/servdesk
+cp -a /usr/local/glpi /usr/local/servdesk
+chown -R $user.$user /usr/local/servdesk /usr/local/glpi
 
-echo "<?php
- class DB extends DBmysql {
- var \$dbhost    = 'localhost';
- var \$dbuser    = '$dbuser';
- var \$dbpassword= '$dbpass';
- var \$dbdefault = '$dbname';
- }
-?>" > /usr/local/servdesk/config/config_db.php
-chmod 600 /usr/local/servdesk/config/config_db.php
-chown $user.$user /usr/local/servdesk/config/config_db.php
+#echo "<?php
+# class DB extends DBmysql {
+# var \$dbhost    = 'localhost';
+# var \$dbuser    = '$dbuser';
+# var \$dbpassword= '$dbpass';
+# var \$dbdefault = '$dbname';
+# }
+#?>" > /usr/local/servdesk/config/config_db.php
+#chmod 600 /usr/local/servdesk/config/config_db.php
+#chown $user.$user /usr/local/servdesk/config/config_db.php
 echo "Alias /servdesk "/usr/local/servdesk"
 <Directory "/usr/local/servdesk">
     Options None
@@ -255,12 +255,21 @@ echo "Alias /servdesk "/usr/local/servdesk"
     Allow from all
 </Directory>"  >> /etc/apache2/conf.d/servdesk.conf
 
-cp $itvhome/ks/db/glpi.sql.gz /tmp
-gunzip /tmp/glpi.sql.gz
-mysql -u $dbuser --password=$dbpass $dbname < /tmp/glpi.sql
+echo "Alias /glpi "/usr/local/glpi"
+<Directory "/usr/local/glpi">
+    Options None
+    AllowOverride None
+    Order allow,deny
+    Allow from all
+</Directory>"  >> /etc/apache2/conf.d/glpi.conf
 
-cd $itvhome/ks/servdesk
-tar cf - * | ( cd /usr/local/servdesk; tar xfp -)
+#cp $itvhome/ks/db/glpi-0.72.4-2010-10-04-18-00.sql.gz /tmp
+#gunzip /tmp/glpi-0.72.4-2010-10-04-18-00.sql.gz
+#mysql -u $dbuser --password=$dbpass $dbname < /tmp/glpi-0.72.4-2010-10-04-18-00.sql
+
+
+#cd $itvhome/ks/servdesk
+#tar cf - * | ( cd /usr/local/servdesk; tar xfp -)
 
 
 # --------------------------------------------------
@@ -346,6 +355,10 @@ echo "# Settings to firewall;							            #"
 echo "# accept connections port 5666 to NRPE					            #"
 echo "# accept connections port 161  to SNMP					            #"
 echo "# accept connections port 80 and 443 HTTP					            #"
+echo "#											    #"
+echo "# Acesse servdior.com.br/servdesk e atualize a base mysql, logo após execute os cmd;  #"
+echo '# chmod 600 /usr/local/servdesk/config/config_db.php				    #'
+echo '# chown $user.$user /usr/local/servdesk/config/config_db.php			    #'
 echo "======================================================================================="
 echo ""
 
