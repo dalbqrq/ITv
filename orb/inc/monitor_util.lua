@@ -12,11 +12,11 @@ function insert_host_cfg_file (hostname, alias, ip)
    if not  ( hostname and alias and ip ) then return false end
    -- hostname passa aqui a ser uma composicao do proprio hostname com o ip a ser monitorado
    local content, cmd
-   local filename = cfg_dir..hostname..".cfg"
+   local filename = config.monitor.dir.."/hosts/"..hostname..".cfg"
 
    local text = [[
 define host{
-        use]].."\t\t"..[[linux-server
+        use]].."\t\t"..[[generic-host
         host_name]].."\t"..hostname..[[ 
         alias]].."\t\t"..alias..[[ 
         address]].."\t\t"..ip..[[ 
@@ -34,7 +34,7 @@ function insert_service_cfg_file (hostname, display_name, check_cmd)
    if not  ( display_name and hostname and check_cmd ) then return false end
    local content, cmd, filename
 
-   filename = cfg_dir..hostname.."-"..display_name.."-"..check_cmd..".cfg"
+   filename = config.monitor.dir.."/services/"..hostname.."-"..display_name.."-"..check_cmd..".cfg"
 
    local text = [[
 define service{
@@ -55,7 +55,7 @@ end
 function insert_contact_cfg_file (name, full_name, email)
    if not  ( name and full_name and email ) then return false end
    name = string.gsub(tostring(name)," ","_")
-   local cmd, filename = cfg_dir..name..".cfg"
+   local cmd, filename = config.monitor.dir.."/contacts/"..name..".cfg"
 
    local text = [[
 define contact{
@@ -74,20 +74,17 @@ end
 
 
 --[[
-
 TODO: 
-
-Falta criar grupos de contatos e poder remover contados dos grupos
-Falta ainda associar service tipo BP aos contatos ou aos grupos de contatos
-
+   Falta criar grupos de contatos e poder remover contados dos grupos
+   Falta ainda associar service tipo BP aos contatos ou aos grupos de contatos
 ]]
 
 
-function delete_cfg_file(filename) -- no caso de hosts e services, filename eh o object_id
-				   -- no caso de contacts, filename eh o contact_name
+-- Ainda nao está funcionando
+function delete_cfg_file(filename, conf_type)
    filename = string.gsub(tostring(filename)," ","_")
    local cmd
-   cmd = os.capture ("rm -f "..cfg_dir..filename..".cfg", 1)
+   cmd = os.capture ("rm -f "..config.monitor.dir.."/"..conf_type.."/"..filename..".cfg", 1)
    cmd = os.reset_monitor()
 end
 
@@ -163,25 +160,25 @@ check_http
 ]]
 
 cmds = {
-   check_dhcp      = { def="$USER1$/check_dhcp $ARG1$", default=nil },
-   check_ftp       = { def="$USER1$/check_ftp -H $HOSTADDRESS$ $ARG1$", default=nil },
-   check_hpjd      = { def="$USER1$/check_hpjd -H $HOSTADDRESS$ $ARG1$", default=nil },
-   check_http      = { def="$USER1$/check_http -I $HOSTADDRESS$ $ARG1$", default="" },
-   check_imap      = { def="$USER1$/check_imap -H $HOSTADDRESS$ $ARG1$", default=nil },
-   check_disk      = { def="$USER1$/check_disk -w $ARG1$ -c $ARG2$ -p $ARG3$", default=nil },
-   check_load      = { def="$USER1$/check_load -w $ARG1$ -c $ARG2$", default=nil },
-   check_mrtgtraf  = { def="$USER1$/check_mrtgtraf -F $ARG1$ -a $ARG2$ -w $ARG3$ -c $ARG4$ -e $ARG5$", default=nil },
-   check_procs     = { def="$USER1$/check_procs -w $ARG1$ -c $ARG2$ -s $ARG3$", default=nil },
-   check_swap      = { def="$USER1$/check_swap -w $ARG1$ -c $ARG2$", default=nil },
-   check_users     = { def="$USER1$/check_users -w $ARG1$ -c $ARG2$", default=nil },
-   check_nt        = { def="$USER1$/check_nt -H $HOSTADDRESS$ -p 12489 -v $ARG1$ $ARG2$", default=nil },
-   check_ping      = { def="$USER1$/check_ping -H $HOSTADDRESS$ -w $ARG1$ -c $ARG2$ -p 5", default="!100.0,20%!500.0,60%" },
-   check_pop       = { def="$USER1$/check_pop -H $HOSTADDRESS$ $ARG1$", default=nil },
-   check_smtp      = { def="$USER1$/check_smtp -H $HOSTADDRESS$ $ARG1$", default=nil },
-   check_snmp      = { def="$USER1$/check_snmp -H $HOSTADDRESS$ $ARG1$", default=nil },
-   check_ssh       = { def="$USER1$/check_ssh $ARG1$ $HOSTADDRESS$", default="" },
-   check_tcp       = { def="$USER1$/check_tcp -H $HOSTADDRESS$ -p $ARG1$ $ARG2$", default=nil },
-   check_udp       = { def="$USER1$/check_udp -H $HOSTADDRESS$ -p $ARG1$ $ARG2$", default=nil },
+   DHCP      = { def="$USER1$/check_dhcp $ARG1$", default=nil },
+   FTP       = { def="$USER1$/check_ftp -H $HOSTADDRESS$ $ARG1$", default=nil },
+   HPJD      = { def="$USER1$/check_hpjd -H $HOSTADDRESS$ $ARG1$", default=nil },
+   HTTP      = { def="$USER1$/check_http -I $HOSTADDRESS$ $ARG1$", default="" },
+   IMAP      = { def="$USER1$/check_imap -H $HOSTADDRESS$ $ARG1$", default=nil },
+   DISK      = { def="$USER1$/check_disk -w $ARG1$ -c $ARG2$ -p $ARG3$", default=nil },
+   LOAD      = { def="$USER1$/check_load -w $ARG1$ -c $ARG2$", default=nil },
+   MRTGTRAF  = { def="$USER1$/check_mrtgtraf -F $ARG1$ -a $ARG2$ -w $ARG3$ -c $ARG4$ -e $ARG5$", default=nil },
+   PROCS     = { def="$USER1$/check_procs -w $ARG1$ -c $ARG2$ -s $ARG3$", default=nil },
+   SWAP      = { def="$USER1$/check_swap -w $ARG1$ -c $ARG2$", default=nil },
+   USERS     = { def="$USER1$/check_users -w $ARG1$ -c $ARG2$", default=nil },
+   NT        = { def="$USER1$/check_nt -H $HOSTADDRESS$ -p 12489 -v $ARG1$ $ARG2$", default=nil },
+   PING      = { def="$USER1$/check_ping -H $HOSTADDRESS$ -w $ARG1$ -c $ARG2$ -p 5", default="!100.0,20%!500.0,60%" },
+   POP       = { def="$USER1$/check_pop -H $HOSTADDRESS$ $ARG1$", default=nil },
+   SMTP      = { def="$USER1$/check_smtp -H $HOSTADDRESS$ $ARG1$", default=nil },
+   SNMP      = { def="$USER1$/check_snmp -H $HOSTADDRESS$ $ARG1$", default=nil },
+   SSH       = { def="$USER1$/check_ssh $ARG1$ $HOSTADDRESS$", default="" },
+   TCP       = { def="$USER1$/check_tcp -H $HOSTADDRESS$ -p $ARG1$ $ARG2$", default=nil },
+   UDP       = { def="$USER1$/check_udp -H $HOSTADDRESS$ -p $ARG1$ $ARG2$", default=nil },
 }
 
 

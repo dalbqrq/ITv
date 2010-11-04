@@ -19,7 +19,7 @@ monitor = {
 	bp_dir     = "/etc/nagios3/nagiosbp",
 	script     = "/etc/init.d/nagios3",
 	bp_script  = "/etc/init.d/ndoutils",
-	check_ping = "check_ping",
+	check_ping = "PING",
 }
 
 
