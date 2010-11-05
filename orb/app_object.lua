@@ -70,7 +70,8 @@ function add(web, id)
    --local HST = Model.select_host_object()
    local HST = Model.select_service_object(nil, nil, nil, nil, id, true)
    local SVC = Model.select_service_object(nil, nil, nil, nil, id, nil)
-   local APP = Model.select_service_object(nil, nil, nil, true)
+   --local APP = Model.select_service_object(nil, nil, nil, true)
+   local APP = Model.select_app_service_object(nil, nil, nil, id)
    local APPOBJ = Model.select_app_app_objects(id)
    local APPS = app:select_apps()
    return render_add(web, HST, SVC, APP, APPOBJ, APPS, id)
@@ -131,6 +132,7 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 -- views ------------------------------------------------------------
 
 function make_app_object_table(web, A)
+-- TODO: 2 (acho este todo deve ficar aqui!)
    local row = {}
 
    for i, v in ipairs(A) do
