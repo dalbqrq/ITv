@@ -3,8 +3,8 @@
 progdir=$(dirname $(readlink -f $0))
 . $progdir/dbconf
 
-if [ $# -eq 1 ]; then
-	echo "$1" | mysql -u $dbuser --password=$dbpass $dbname
+if [ $# -ge 1 ]; then
+	echo "$*" | mysql -u $dbuser --password=$dbpass $dbname
 else
 	mysql -u $dbuser --password=$dbpass $dbname
 fi

@@ -128,7 +128,7 @@ function activate_app(app, objs, flag)
 
    text_file_writer(config.monitor.bp_dir.."/etc/apps/"..file_name..".conf", s)
    insert_bp_cfg_file(file_name)
-   os.reset_monitor()
+   --os.reset_monitor()
 end
 
 
@@ -141,8 +141,8 @@ function insert_bp_cfg_file(file_name)
    cmd = cmd .. " -f "..config.monitor.bp_dir.."/etc/apps/"..file_name..".conf"
    cmd = cmd .. " -o "..config.monitor.dir.."/etc/apps/"..file_name..".cfg"
 
-   os.capture(cmd)
-   os.reset_monitor()
+   --os.capture(cmd)
+   --os.reset_monitor()
    text_file_writer("/tmp/cmd.out", cmd)
 end
 

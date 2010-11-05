@@ -6,7 +6,7 @@ progdir=$(dirname $(readlink -f $0))
 d=`date "+%Y%m%d%H%M"`
 tmpfile=/tmp/tables
 
-if [ $# -eq 1 ]; then
+if [ $# -ge 1 ]; then
    echo "show tables like '$1_%'" | mysql -u $dbuser --password=$dbpass $dbname | grep -v Tables_in_ > $tmpfile
    ext="_$1"
    tables=`cat $tmpfile`

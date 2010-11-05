@@ -191,25 +191,43 @@ chown -R $user.$user /var/log/nagios3 /etc/init.d/nagios-nrpe-server /etc/init.d
 bp=nagiosbp
 tar zxf $itvhome/ks/files/nagiosbp-0.9.5.tgz -C /usr/local/src
 cd /usr/local/src/nagios-business-process-addon-0.9.5
-./configure --prefix=/etc/nagios3/$bp --with-nagiosbp-user=$user --with-nagiosbp-group=$user --with-nagetc=/etc/nagios3 --with-naghtmurl=/nagios3 --with-nagcgiurl=/cgi-bin/nagios3 --with-htmurl=/$bp --with-cgiurl=/$bp/cgi-bin/ --with-apache-user=$user
+./configure --prefix=/usr/local/$bp --with-nagiosbp-user=$user --with-nagiosbp-group=$user --with-nagetc=/etc/nagios3 --with-naghtmurl=/nagios3 --with-nagcgiurl=/cgi-bin/nagios3 --with-htmurl=/$bp --with-apache-user=$user
 make install
-sed -i -e 's/ScriptAlias \/nagiosbp\/cgi-bin\/ "\/etc\/nagios3\/nagiosbp\/sbin"/ScriptAlias \/nagiosbp\/cgi-bin\/ "\/etc\/nagios3\/nagiosbp\/sbin\/"/' /etc/apache2/conf.d/nagiosbp.conf
-cp -a /etc/nagios3/nagiosbp/etc/nagios-bp.conf-sample /etc/nagios3/nagiosbp/etc/nagios-bp.conf
-cp -a /etc/nagios3/nagiosbp/etc/ndo.cfg-sample /etc/nagios3/nagiosbp/etc/ndo.cfg
-sed -i.orig -e "s/ndodb_database=nagios/ndodb_database=$user/" \
-        -e "s/ndodb_username=nagiosro/ndodb_username=$user/" \
-        -e "s/ndodb_password=dummy/ndodb_password=$dbpass/" /etc/nagios3/nagiosbp/etc/ndo.cfg
+cat << EOF > /usr/local/$bp/etc/ndo.cfg
+# Nagios Business Process
+# backend
+ndo=db
+ndodb_host=localhost
+ndodb_port=3306
+ndodb_database=$dbname
+ndodb_username=$dbuser
+ndodb_password=$dbpass
+ndodb_prefix=nagios_
+# common settings
+cache_time=0
+cache_file=/usr/local/$bp/var/cache/ndo_backend_cache
+# unused but must be here with dummy values
+ndofs_basedir=/usr/local/ndo2fs/var
+ndofs_instance_name=default
+ndo_livestatus_socket=/usr/local/nagios/var/rw/live
+EOF
+mkdir /usr/local/$bp/etc/sample
+cat << EOF > $itvhome/bin/bp2cfg
+#!/bin/bash
+/usr/local/$bp/bin/bp_cfg2service_cfg.pl -o /etc/nagios3/apps/apps.cfg
+EOF
+chmod 755 $itvhome/bin/bp2cfg
+chown $user.$user /usr/local/$bp/etc/ndo.cfg $itvhome/bin/bp2cfg
 
-# TODO: INCLUDE THE FOLLOWING IN side.php
-#sed -i.orig -e "139a \\
-#  <tr> \\
-#    <td width=13><img src=\"images/greendot.gif\" width=\"13\" height=\"14\" name=\"statuswrl-dot\"></td> \\
-#    <td nowrap><a href=\"/nagiosbp/cgi-bin/nagios-bp.cgi\" target=\"main\" onMouseOver=\"switchdot('statuswrl-dot',1)\" onMouseOut=\"switchdot('statuswrl-dot',0)\" class=\"NavBarItem\">Business Process View</a></td> \\
-#  </tr> \\
-#  <tr> \\
-#    <td width=13><img src=\"images/greendot.gif\" width=\"13\" height=\"14\" name=\"statuswrl-dot\"></td> \\
-#    <td nowrap><a href=\"/nagiosbp/cgi-bin/nagios-bp.cgi?mode=bi\" target=\"main\" onMouseOver=\"switchdot('statuswrl-dot',1)\" onMouseOut=\"switchdot('statuswrl-dot',0)\" class=\"NavBarItem\">Business Impact</a></td> \\
-#  </tr>" /usr/share/nagios3/htdocs/side.php
+sed -i.orig -e "140a \\
+  <tr> \\
+    <td width=13><img src=\"images/greendot.gif\" width=\"13\" height=\"14\" name=\"statuswrl-dot\"></td> \\
+    <td nowrap><a href=\"/nagiosbp/cgi-bin/nagios-bp.cgi\" target=\"main\" onMouseOver=\"switchdot('statuswrl-dot',1)\" onMouseOut=\"switchdot('statuswrl-dot',0)\" class=\"NavBarItem\">Business Process View</a></td> \\
+  </tr> \\
+  <tr> \\
+    <td width=13><img src=\"images/greendot.gif\" width=\"13\" height=\"14\" name=\"statuswrl-dot\"></td> \\
+    <td nowrap><a href=\"/nagiosbp/cgi-bin/nagios-bp.cgi?mode=bi\" target=\"main\" onMouseOver=\"switchdot('statuswrl-dot',1)\" onMouseOut=\"switchdot('statuswrl-dot',0)\" class=\"NavBarItem\">Business Impact</a></td> \\
+  </tr>" /usr/share/nagios3/htdocs/side.php
 
 
 # --------------------------------------------------
