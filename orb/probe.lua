@@ -2,7 +2,6 @@
 
 -- includes & defs ------------------------------------------------------
 local no_software_code = "_no_software_code_"
-local loop = 100000
 
 require "util"
 require "monitor_util"
@@ -153,7 +152,8 @@ ITvision:dispatch_get(add, "/add/(%d+):(%d+):(%d+):(%d+)")
 ]]
 function insert(web, n_id, sv_id, c_id, c_name, s_name, sv_name, ip)
    -- hostname passa aqui a ser uma composicao do proprio hostname com o ip a ser monitorado
-   local hostname = string.gsub(c_name.."-"..ip," ","_")
+   local hostname = string.gsub(string.gsub(c_name,"(%p+)"," ").."-"..ip,"(%s+)","_")
+   local software = string.gsub(string.gsub(s_name.." "..sv_name,"(%p+)"," "),"(%s+)","_")
    local cmd, hst, svc, dpl, chk, h, s
    local msg = ""
    local content
@@ -161,7 +161,10 @@ function insert(web, n_id, sv_id, c_id, c_name, s_name, sv_name, ip)
 
    h = objects:select(hostname)
 
+
+   ------------------------------------------------------
    -- cria check host e service ping caso nao exista
+   ------------------------------------------------------
    if h[1] == nil then
       cmd = insert_host_cfg_file (hostname, c_name, ip)
       cmd = insert_service_cfg_file (hostname, "PING", config.monitor.check_ping)
@@ -208,7 +211,10 @@ function insert(web, n_id, sv_id, c_id, c_name, s_name, sv_name, ip)
       hst = h[1].object_id
    end
 
+
+   ------------------------------------------------------
    -- cria o service check caso tenha sido requisitado
+   ------------------------------------------------------
    if tonumber(sv_id) ~= 0 then
       local clause
 
@@ -220,9 +226,9 @@ function insert(web, n_id, sv_id, c_id, c_name, s_name, sv_name, ip)
       chk = Model.query("nagios_objects", clause)
       if chk[1] then chk = chk[1].name1 end
 
-      dpl = string.gsub(web.input.display," ","_")
+      dpl = string.gsub(string.gsub(web.input.display,"(%p+)","_")," ","_")
       if dpl == "" then 
-         dpl = chk
+         dpl = software
       end
       cmd = insert_service_cfg_file (hostname, dpl, chk)
       s = objects:select(hostname, dpl)
@@ -353,6 +359,7 @@ function render_add(web, cmp, chk, query, default)
       url = "/insert/"..v.n_id..":"..v.sv_id..":"..v.c_id..":"..v.c_name..":"..v.s_name..":"
             ..v.sv_name..":"..v.n_ip
 
+      -- se sv_id == 0 entao eh um host
       if v.sv_id == 0 then 
          cmd = render_form(web:link(url), 
                { "<INPUT TYPE=HIDDEN NAME=\"check\" value=\"0\">", config.monitor.check_ping, " " } )
@@ -378,7 +385,7 @@ function render_add(web, cmp, chk, query, default)
 
    for _,c in ipairs(chk) do
       if c.object_id == default then
-         s = config.monitor.dir.."/libexec/"..c.name1.." -H "..v.n_ip.." "
+         --s = config.monitor.dir.."/libexec/"..c.name1.." -H "..v.n_ip.." "
          --r = os.capture(s)
       end
    end

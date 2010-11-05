@@ -13,9 +13,15 @@ function select_host (cond_, extra_, columns_)
 end
 
 
-function select_host_object (cond_, extra_, columns_)
-   if cond_ then cond_ = " and "..cond_ else cond_ = "" end
+function select_host_object (cond_, extra_, columns_, app_id)
+   local exclude = ""
+   if app_id then exclude=" and o.object_id not in ( select object_id from itvision_app_object where app_id = "..app_id..") " end
+   exclude = exclude.." and o.is_active = 1 "
+
+   if cond_ then cond_ = exclude.." and "..cond_ else cond_ = exclude end
+
    cond_ = cond_ .. " and o.name1 NOT LIKE 'business_processes%' " -- retira "dummy hosts" criados pelo BP
+   cond_ = cond_ .. " and o.name1 <> 'dummy' " -- retira "dummy hosts" criados pela inicializacao
    local content = query ("nagios_hosts h, nagios_objects o ", "h.host_object_id = o.object_id"..cond_,
       extra_, columns_)
    return content
@@ -40,11 +46,25 @@ function select_service (cond_, extra_, columns_, app)
 end
 
 
--- Exemplo de uso: t = select_service_object (nil, nil, nil, true)
-function select_service_object (cond_, extra_, columns_, app)
+-- Exemplo de uso: t = select_service_object (nil, nil, nil, true, nil)
+-- app_obj eh a lista de objetos de uma aplicacao
+function select_service_object (cond_, extra_, columns_, app, app_id, ping)
    if app ~= nil then app = " = " else app = " <> " end
-   if cond_ then cond_ = " and "..cond_ else cond_ = "" end
+   local exclude = ""
+
+   if app_id then exclude=" and o.object_id not in ( select object_id from itvision_app_object where app_id = "..app_id..") " end
+   exclude = exclude.." and o.is_active = 1 "
+
+   if cond_ then cond_ = exclude.." and "..cond_ else cond_ = exclude end
+   cond_ = cond_ .. " and o.name1 <> 'dummy' " -- retira "dummy hosts" criados pela inicializacao
+   if ping == nil then 
+      cond_ = cond_ .. " and o.name2 <> 'PING' "
+   else
+      cond_ = cond_ .. " and o.name2 = 'PING' "
+   end
+
    extra_ = "order by o.name1, o.name2" -- ignorando outros "extras" para ordenar pelo host. Pode ser melhorado!
+
    local bp_id = get_bp_id()
    local content = query ("nagios_services s, nagios_objects o ", 
       "s.service_object_id = o.object_id and s.check_command_object_id"..app..bp_id..cond_, 
@@ -52,6 +72,21 @@ function select_service_object (cond_, extra_, columns_, app)
    return content
 end
 
+-- seleciona applicacoes para serem incluidas como uma subaplicacao de outra aplicacao em app_obj.lua
+-- na lista retornada nao pode haver aplicacoes que já possuam como pai uma app_id em nem ela propria
+-- TODO: 1 
+function select_app_service_object (cond_, extra_, columns_, app_id)
+   local bp_id = get_bp_id()
+
+   if cond_ ~= nil then cond_ = " and "..cond_ else cond_ = "" end
+
+   cond_ = cond_ .. " and  service_object_id not in (select service_object_id from itvision_app)"
+
+   local content = query ("nagios_services", "check_command_object_id = "..bp_id..cond_,
+      extra_, columns_)
+   return content
+
+end
 
 ----------------------------- SERVICE APP ----------------------------------
 

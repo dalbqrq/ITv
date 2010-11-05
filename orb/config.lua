@@ -16,8 +16,9 @@ database = {
 
 monitor = {
 	dir        = "/etc/nagios3",
-	bp_dir     = "/etc/nagios3/nagiosbp",
 	script     = "/etc/init.d/nagios3",
+	bp_dir     = "/usr/local/nagiosbp",
+	bp2cfg     = "bp2cfg",
 	bp_script  = "/etc/init.d/ndoutils",
 	check_ping = "PING",
 }

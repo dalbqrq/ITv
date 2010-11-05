@@ -1,0 +1,14 @@
+
+TODO List
+
+1. a query da funcao select_app_service_object() [model_itvision.lua] nao deve retornar apps 
+   em loop circular. Uma app nao pode ter uma sub app que seja ancestral dela, ou seja, esteja
+   acima dela. Esta funcao eh usada na inclusao de objetos em uma aplicacao em app_aobjecs.lua.
+
+2. colocar filtros para a listagem de Servidores, Serviços e Aplicaçoes na tela de inclusao em
+   app_objects.lua
+
+3. Permitir que seja criada mais de uma checagem (probe) por serviço
+
+4. Na inclusao de nova aplicacao, verificar (criticar) antes se nome já existe.
+

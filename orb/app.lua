@@ -31,6 +31,19 @@ function app:select(id, clause_)
 end
 
 
+function app:update(app)
+   local A = {}
+   if app.id then
+      local tables = "itvision_app"
+      local clause = "id = "..app.id
+      A.id = app.id
+      A.service_object_id = app.service_object_id
+
+      Model.update (tables, A, clause) 
+   end
+end
+
+
 function app_object:select(id)
    local clause = ""
    if id then
@@ -49,12 +62,18 @@ function app_relat:select(id)
 end
 
 
-function services:select(id)
-   local clause = ""
-   if id then
+function services:select(id, clause_)
+   local clause
+   if id and clause_ then
+      clause = "service_object_id = "..id.." and "..clause_
+   elseif id then
       clause = "service_object_id = "..id
+   elseif clause_ then
+      clause = clause_
+   else 
+      clause = nil
    end
-   return self:find_all(clause)
+   return Model.query("nagios_services", clause)
 end
 
 
@@ -146,7 +165,7 @@ ITvision:dispatch_get(delete, "/delete/(%d+)")
 function activate(web, id, flag)
    if flag == "0" then flag = 1 else flag = 0 end
    local cols = {}
-   local msg
+   local msg, counter
 
    if id then
       local clause = "id = "..id
@@ -156,8 +175,24 @@ function activate(web, id, flag)
       local A = app:select(id)
       local O = Model.select_app_app_objects(id)
       if O[1] then
-         activate_app(A, O, flag)
+         -- Sinaliza a app como ativa
          Model.update (tables, cols, clause) 
+         -- Recria arquivo de config do business process e 
+         -- servicos do nagios para as aplicacoes
+         local APPS = app:select()
+         activate_all_apps(APPS)
+
+         local s = services:select(nil, "display_name = '"..A[1].name.."'")
+         -- caso host ainda nao tenha sido incluido aguarde e tente novamente
+         counter = 0
+         while s[1] == nil do
+            counter = counter + 1
+            for i = 1,loop do x = i/2 end -- aguarde...
+            s = services:select(nil, "display_name = '"..A[1].name.."'")
+         end
+         local svc = { id = A[1].id, service_object_id = s[1].service_object_id }
+         app:update(svc)
+
          msg = "/"..error_message(9).." "..A[1].name
       else
          msg = "/"..error_message(10).." "..A[1].name
@@ -185,12 +220,6 @@ function render_list(web, A, msg)
    local svc, stract
 
    for i, v in ipairs(A) do
-      if v.service_object_id then
-         svc = services:select_services(v.service_object_id)[1].display_name
-      else
-         svc = "-"
-      end
-
       if v.is_active == "0" then
          stract = strings.activate
       else
