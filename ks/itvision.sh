@@ -219,7 +219,7 @@ EOF
 chmod 755 $itvhome/bin/bp2cfg
 chown $user.$user /usr/local/$bp/etc/ndo.cfg $itvhome/bin/bp2cfg
 
-sed -i.orig -e "140a \\
+sed -i.orig -e "139a \\
   <tr> \\
     <td width=13><img src=\"images/greendot.gif\" width=\"13\" height=\"14\" name=\"statuswrl-dot\"></td> \\
     <td nowrap><a href=\"/nagiosbp/cgi-bin/nagios-bp.cgi\" target=\"main\" onMouseOver=\"switchdot('statuswrl-dot',1)\" onMouseOut=\"switchdot('statuswrl-dot',0)\" class=\"NavBarItem\">Business Process View</a></td> \\
@@ -227,7 +227,7 @@ sed -i.orig -e "140a \\
   <tr> \\
     <td width=13><img src=\"images/greendot.gif\" width=\"13\" height=\"14\" name=\"statuswrl-dot\"></td> \\
     <td nowrap><a href=\"/nagiosbp/cgi-bin/nagios-bp.cgi?mode=bi\" target=\"main\" onMouseOver=\"switchdot('statuswrl-dot',1)\" onMouseOut=\"switchdot('statuswrl-dot',0)\" class=\"NavBarItem\">Business Impact</a></td> \\
-  </tr>" /usr/share/nagios3/htdocs/side.php
+  </tr>" /usr/share/nagios3/htdocs/side.html
 
 
 # --------------------------------------------------
