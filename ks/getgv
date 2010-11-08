@@ -1,0 +1,11 @@
+
+wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/graphviz_2.26.3-1_i386.deb
+wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/graphviz-dev_2.26.3-1_all.deb
+wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/libgraphviz4_2.26.3-1_i386.deb
+wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/libgraphviz-dev_2.26.3-1_i386.deb
+wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/libgv-lua_2.26.3-1_i386.deb
+
+dpkg -i /tmp/*.deb
+dot -c
+
+

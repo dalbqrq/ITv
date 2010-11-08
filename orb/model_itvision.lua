@@ -164,6 +164,7 @@ function select_objects_app_object (cond_, extra_, columns_)
    return content
 end
 
+
 function select_app_app_objects (id)
    local cond_ = "no.object_id = al.object_id and al.app_id = ap.id"
    if id then
@@ -176,6 +177,19 @@ function select_app_app_objects (id)
    local content = query (tables_, cond_, extra_, columns_)
    return content
 end
+
+
+function select_app_to_graph (id)
+   local columns_ = "app_id, a.name as a_name, ao.type as ao_type, o.name1, o.name2, ss.current_state"
+   local tables_  = "itvision_app a, itvision_app_object ao, nagios_services s, nagios_objects o, nagios_servicestatus ss"
+   local cond_    = "a.id = ao.app_id and ao.object_id = s.service_object_id and \
+                     s.service_object_id = o.object_id and s.service_object_id = ss.service_object_id and \
+                     a.id = "..id
+
+   local content = query (tables_, cond_, extra_, columns_)
+   return content
+end
+
 
 function insert_app_object (content_)
    local table_ = "itvision_app_object"
@@ -214,6 +228,27 @@ function select_app_relat_object (id, from, to)
    if from and to then cond_ = cond_  .. " and from_object_id = "..from.." and to_object_id = "..to end
    local content = query (tables_, cond_, extra_, columns_)
 
+   return content
+end
+
+--[[
+select  a.name as a_name, art.name as art_name, o1.name1 as o1_name1, o1.name2 as o1_name2, o2.name1 as o2_name1, o2.name2 as o2_name2
+from itvision_app a, itvision_app_relat ar, nagios_objects o1, nagios_objects o2, itvision_app_relat_type art
+where a.id = ar.app_id and
+ar.from_object_id = o1.object_id and
+ar.to_object_id = o2.object_id and
+ar.app_relat_type_id = art.id
+]]
+function select_app_relat_to_graph (id)
+   local columns_ = "a.name as a_name, art.name as art_name, o1.name1 as o1_name1, o1.name2 as o1_name2, o2.name1 as o2_name1, o2.name2 as o2_name2"
+   local tables_  = "itvision_app a, itvision_app_relat ar, nagios_objects o1, nagios_objects o2, itvision_app_relat_type art"
+   local cond_    = "a.id = ar.app_id and \
+                     ar.from_object_id = o1.object_id and \
+                     ar.to_object_id = o2.object_id and \
+                     ar.app_relat_type_id = art.id and \
+                     a.id = "..id
+
+   local content = query (tables_, cond_, extra_, columns_)
    return content
 end
 
