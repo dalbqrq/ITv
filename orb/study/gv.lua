@@ -2,7 +2,8 @@
 -- VER: http://code.google.com/apis/chart/docs/gallery/graphviz.html
 -- e:    http://code.google.com/apis/charttools/docs/choosing.html
 
-gr = require "graph"
+local gr = require "graph"
+
 
 --
 -- Convenience
@@ -43,8 +44,8 @@ end
 
 
 
-function create_graph_file(content, file)
-   file = file or "../html/gv.png"
+function create_graph_file(content, filename)
+   filename = filename or "../../html/gv/gv.png"
    local file_type = "png"
 
    local g = digraph{"G",
@@ -52,9 +53,30 @@ function create_graph_file(content, file)
    --   compound = "1",
    --   rankdir = "LR",
       size="6.5,6.5",
+      nodesep=0.05,
 
       unpack(content)
    }
+--[[
+g:declare{
+  graph = {
+    rankdir = "LR",
+    size = "6.5 6.5",
+    nodesep=0.05
+  },
+  node = {
+    shape = "box",
+    width = 0,
+    height = 0,
+    margin = 0.03,
+    fontsize = 8,
+    fontname = "helvetica"
+  },
+  edge = {
+    arrowsize = 0.4
+  }
+}
+]]
 
    -- Make the layout using 'dot' (default) engine
    --print("Layout ...")
@@ -63,10 +85,12 @@ function create_graph_file(content, file)
    -- write graph to stdout
    --print("Write ...")
    --g:write()
+
+   --g:show()
    
    -- Render the graph into postscript format
    --print("Render ...")
-   g:render(file_type, file)
+   g:render(file_type, filename)
    
    -- Close the graph
    --print("Close ...")

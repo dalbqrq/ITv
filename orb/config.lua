@@ -21,10 +21,15 @@ monitor = {
 	bp2cfg     = "bp2cfg",
 	bp_script  = "/etc/init.d/ndoutils",
 	host_ping  = "HOST_PING",
+	--check_ping = "PING",
+	check_app  = "business_processes"
 }
-
 
 language = "pt_BR"
 
-
+path = {
+	itvision = "/usr/local/itvision",
+	gv = "/gv",
+	html = "html",
+}
 
