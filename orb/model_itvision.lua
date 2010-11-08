@@ -58,9 +58,9 @@ function select_service_object (cond_, extra_, columns_, app, app_id, ping)
    if cond_ then cond_ = exclude.." and "..cond_ else cond_ = exclude end
    cond_ = cond_ .. " and o.name1 <> 'dummy' " -- retira "dummy hosts" criados pela inicializacao
    if ping == nil then 
-      cond_ = cond_ .. " and o.name2 <> 'PING' "
+      cond_ = cond_ .. " and o.name2 <> '"..config.monitor.host_ping.."' "
    else
-      cond_ = cond_ .. " and o.name2 = 'PING' "
+      cond_ = cond_ .. " and o.name2 = '"..config.monitor.host_ping.."' "
    end
 
    extra_ = "order by o.name1, o.name2" -- ignorando outros "extras" para ordenar pelo host. Pode ser melhorado!

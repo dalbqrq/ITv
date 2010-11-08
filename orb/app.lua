@@ -17,15 +17,13 @@ local services   = Model.nagios:model "services"
 -- models ------------------------------------------------------------
 
 function app:select(id, clause_)
-   local clause
+   local clause = nil
    if id and clause_ then
       clause = "id = "..id.." and "..clause_
    elseif id then
       clause = "id = "..id
    elseif clause_ then
       clause = clause_
-   else 
-      clause = nil
    end
    return Model.query("itvision_app", clause)
 end
@@ -174,7 +172,7 @@ function activate(web, id, flag)
 
       local A = app:select(id)
       local O = Model.select_app_app_objects(id)
-      if O[1] then
+      if A[1] then
          -- Sinaliza a app como ativa
          Model.update (tables, cols, clause) 
          -- Recria arquivo de config do business process e 

@@ -20,7 +20,7 @@ monitor = {
 	bp_dir     = "/usr/local/nagiosbp",
 	bp2cfg     = "bp2cfg",
 	bp_script  = "/etc/init.d/ndoutils",
-	check_ping = "PING",
+	host_ping  = "HOST_PING",
 }
 
 

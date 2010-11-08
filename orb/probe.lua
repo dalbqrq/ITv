@@ -22,27 +22,6 @@ local monitor  = Model.itvision:model "monitor"
 -- models ------------------------------------------------------------
 
 
---[[
-function hosts:select_host(h_name)
-   local clause = ""
-   if h_name then
-      clause = " display_name = '"..h_name.."' "
-   end
-
-   return Model.query("nagios_hosts", clause)
-end
-
-
-function services:select_service(h_id)
-   local clause = ""
-   if h_id then
-      clause = " host_object_id = "..h_id.." and display_name = \"PING\" "
-   end
-
-   return Model.query("nagios_services", clause)
-end
-]]
-
 function objects:select(name1, name2)
    local clause = ""
    if name1 ~= nil then
@@ -53,7 +32,7 @@ function objects:select(name1, name2)
    else
       clause = clause.."' and name2 is NULL "
    end
-   clause = clause.." and is_active = 1 "
+   clause = clause.." name1 = 'business_processes_detail' "
 
    return Model.query("nagios_objects", clause)
 end
@@ -167,7 +146,7 @@ function insert(web, n_id, sv_id, c_id, c_name, s_name, sv_name, ip)
    ------------------------------------------------------
    if h[1] == nil then
       cmd = insert_host_cfg_file (hostname, c_name, ip)
-      cmd = insert_service_cfg_file (hostname, "PING", config.monitor.check_ping)
+      cmd = insert_service_cfg_file (hostname, config.monitor.host_ping, config.monitor.host_ping)
       h = objects:select(hostname)
       -- caso host ainda nao tenha sido incluido aguarde e tente novamente
       counter = 0
@@ -178,13 +157,13 @@ function insert(web, n_id, sv_id, c_id, c_name, s_name, sv_name, ip)
       end
       -- DEBUG: text_file_writer ("/tmp/1", "Counter: "..counter.."\n")
       hst = h[1].object_id
-      s = objects:select(hostname, "PING")
+      s = objects:select(hostname, config.monitor.host_ping)
       -- caso service ainda nao tenha sido incluido aguarde e tente novamente
       counter = 0
       while s[1] == nil do
          counter = counter + 1
          for i = 1,loop do x = i/2 end -- aguarde...
-         s = objects:select(hostname, "PING")
+         s = objects:select(hostname, config.monitor.host_ping)
       end
       -- DEBUG: text_file_writer ("/tmp/2", "Counter: "..counter.."\n")
       svc = s[1].object_id
@@ -219,7 +198,7 @@ function insert(web, n_id, sv_id, c_id, c_name, s_name, sv_name, ip)
       local clause
 
       if web.input.check == 0 then
-         clause = "name1 = '"..config.monitor.check_ping.."'"
+         clause = "name1 = '"..config.monitor.host_ping.."'"
       else
          clause = "object_id = "..web.input.check
       end
@@ -362,7 +341,7 @@ function render_add(web, cmp, chk, query, default)
       -- se sv_id == 0 entao eh um host
       if v.sv_id == 0 then 
          cmd = render_form(web:link(url), 
-               { "<INPUT TYPE=HIDDEN NAME=\"check\" value=\"0\">", config.monitor.check_ping, " " } )
+               { "<INPUT TYPE=HIDDEN NAME=\"check\" value=\"0\">", config.monitor.host_ping, " " } )
       else
          cmd = render_form(web:link(url), 
                { "Nome:", "<INPUT TYPE=TEXT NAME=\"display\" value=\""..display.."\">", 

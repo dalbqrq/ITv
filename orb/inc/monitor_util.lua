@@ -161,7 +161,7 @@ end
 function insert_bp_cfg_file()
    local cmd = config.monitor.bp_dir.."/bin/bp_cfg2service_cfg.pl"
    cmd = cmd .. " -f "..config.monitor.bp_dir.."/etc/nagios-bp.conf"
-   cmd = cmd .. " -o "..config.monitor.dir.."/apps/app.cfg"
+   cmd = cmd .. " -o "..config.monitor.dir.."/apps/apps.cfg"
 
    os.capture(cmd)
    text_file_writer("/tmp/cmd.out", cmd)
@@ -194,6 +194,7 @@ cmds = {
    USERS     = { def="$USER1$/check_users -w $ARG1$ -c $ARG2$", default=nil },
    NT        = { def="$USER1$/check_nt -H $HOSTADDRESS$ -p 12489 -v $ARG1$ $ARG2$", default=nil },
    PING      = { def="$USER1$/check_ping -H $HOSTADDRESS$ -w $ARG1$ -c $ARG2$ -p 5", default="!100.0,20%!500.0,60%" },
+   HOST_PING = { def="$USER1$/check_ping -H $HOSTADDRESS$ -w $ARG1$ -c $ARG2$ -p 5", default="!100.0,20%!500.0,60%" },
    POP       = { def="$USER1$/check_pop -H $HOSTADDRESS$ $ARG1$", default=nil },
    SMTP      = { def="$USER1$/check_smtp -H $HOSTADDRESS$ $ARG1$", default=nil },
    SNMP      = { def="$USER1$/check_snmp -H $HOSTADDRESS$ $ARG1$", default=nil },
