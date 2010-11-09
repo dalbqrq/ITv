@@ -29,7 +29,7 @@ language = "pt_BR"
 
 path = {
 	itvision = "/usr/local/itvision",
-	gv = "/gv",
+	gv = "gv",
 	html = "html",
 }
 

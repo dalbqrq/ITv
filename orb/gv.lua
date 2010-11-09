@@ -33,10 +33,11 @@ ITvision:dispatch_get(list, "/", "/list")
 
 
 function show(web, id)
+   local apps = app:select_apps()
    local app = app:select_apps(id)
    local obj = Model.select_app_to_graph(id)
    local rel = Model.select_app_relat_to_graph(id)
-   return render_show(web, app[1].name, obj, rel)
+   return render_show(web, apps, app[1].name, id, obj, rel)
 end
 ITvision:dispatch_get(show, "/show/(%d+)")
 
@@ -53,31 +54,28 @@ function render_list(web, A)
 end
 
 
---[[
-<map id="[ORLA] SWITCH PUC" name="[ORLA] SWITCH PUC"> 
-<area shape="rect" id="node1" href="ics.lp?ickey=HWSWI005" target="_self" title="SWP00001" alt="" coords="225,228,299,252"/> 
-</map> 
-]]
-
-function render_show(web, app_name, obj, rel)
+function render_show(web, apps, app_name, app_id, obj, rel)
    local res = {}
    local engene = "dot"
    local file_type = "png"
-   local filename = config.path.gv.."/"..app_name.."."..file_type
+   local imgfile, imglink, mapfile, maplink, dotfile = Graph.make_gv_filename(app_name, file_type)
 
    local content = Graph.make_content(obj, rel)
-   Graph.render(filename, file_type, engene, content)
+   Graph.render(app_name, file_type, engene, content)
+   local map = text_file_reader(mapfile)
 
-   res[#res+1] = p{ app_name, br(), br() }
+
+   res[#res+1] = render_bar( render_selector_bar(web, apps, app_id, "/show") )
+
+   res[#res+1] = { map }
 
    res[#res+1] = img{ 
-      src=filename,
+      src=imglink,
       alt="Realistic ITvision",
       border=0,
       class="figs",
-      USEMAP="#[ORLA] SWITCH PUC",
+      USEMAP="#G",
    }
-
  
    return render_layout(res)
 end

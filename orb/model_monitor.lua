@@ -1,12 +1,42 @@
 require "Model"
 
-
 --[[
-      COMO OS RESULTADOS DESSAS QUERIES DEVEM SER JUNTADOS EM UMA ÚNICA LISTA, A LISTA DE CAMPOS DEVE SER 
-      EXATAMENTE A MESMA ONDE O CONTEUDO DAS COLUNAS QUE NAO EXISTIREM SERÃO DE VALOR ''''.
 
-      ESTAS DEVERÃO SER AS QUERIES DEFINITIVAS QUE VIRARÃO FUNCÕES EM UM MÓDULO LUA DO PROJETO ITvision
-      SÃO ELAS:
+   PRIMEIRO VAMOS FAZER ALGUMAS QUERIES DE TESTE, COMBINANDO AS TABELAS MAIS IMPORTANTS DESTES RELACIONAMENTOS 
+   ENTRE A BASE DO NAGIOS, GLPI E DO ITVISION. DE FATO, A TABELA itvision_monitor FOI CONCEBIDA JUTAMENTE PARA
+   RELACIONAR O CMDB DO GLPI AS TABELAS QUE DEFINEM UMA MONITORACAO. ELAS TEM O SEGUINTE DIAGRAMA:
+
+
+   +-----------+        +-------------------------+      +-----------------+      +----------+
+   |  glpi_    |--------| glpi_                   |------|  glpi_          |------|  glpi_   |
+   | COMPUTER  |        |COMPUTER_SOFTWAREVERSION |      | SOFTWAREVERSION |      | SOFTWARE |
+   +-----------+        +-------------------------+      +-----------------+      +----------+
+         |                                                       |
+         |                                                       |
+   +-------------+                                          +-----------+
+   |  glpi_      |------------------------------------------| itvision_ |
+   | NETWORKPORT |                                          | MONITOR   |
+   +-------------+                                          +-----------+
+                                                                 |
+                                                                 |
+                                                            +-----------+
+                                                            | nagios_   |
+                                                            | OBJECTS   |
+                                                            +-----------+
+                                                             |         |
+                                                             |         |
+                                                   +-----------+      +------------+
+                                                   | nagios_   |      | nagios_    |
+                                                   | HOSTS     |      | SERVICES   |
+                                                   +-----------+      +------------+
+
+
+
+   COMO OS RESULTADOS DESSAS QUERIES DEVEM SER JUNTADOS EM UMA ÚNICA LISTA, A LISTA DE CAMPOS DEVE SER 
+   EXATAMENTE A MESMA ONDE O CONTEUDO DAS COLUNAS QUE NAO EXISTIREM SERÃO DE VALOR ''''.
+
+   ESTAS DEVERÃO SER AS QUERIES DEFINITIVAS QUE VIRARÃO FUNCÕES EM UM MÓDULO LUA DO PROJETO ITvision
+   SÃO ELAS:
 
         QUERY 1 - computador com porta sem software e sem monitor
         QUERY 2 - computador com porta com software e sem monitor

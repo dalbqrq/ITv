@@ -1,17 +1,45 @@
 module("Graph", package.seeall)
 
 require "config"
+require "state"
 
 -- VER: http://code.google.com/apis/chart/docs/gallery/graphviz.html
 -- e:    http://code.google.com/apis/charttools/docs/choosing.html
 
 local gr = require "graph"
 
---
 -- Convenience
---
 local node, edge, subgraph, cluster, digraph, strictdigraph =
-   gr.node, gr.edge, gr.subgraph, gr.cluster, gr.digraph, gr.strictdigraph
+      gr.node, gr.edge, gr.subgraph, gr.cluster, gr.digraph, gr.strictdigraph
+
+
+function set_color(state, obj_type)
+   local color
+   if obj_type == 'hst' then
+      color = host_alert[state+1].color
+   elseif obj_type == 'svc' then
+      color = service_alert[state+1].color
+   elseif obj_type == 'app' then
+      color = applic_alert[state+1].color
+   end
+
+   return color
+end
+
+
+function make_gv_filename(app_name, file_type)
+   filename = string.gsub(string.gsub(app_name,"(%p+)"," "),"(%s+)","_")
+   local basepath = config.path.itvision.."/"..config.path.html.."/"..config.path.gv.."/"
+   local urlpath  = "/"..config.path.gv.."/"
+
+   local imgfile = basepath..filename.."."..file_type
+   local imglink =  urlpath..filename.."."..file_type
+   local lnkfile = basepath..filename..".cmapx" -- ".imap"
+   local maplink =  urlpath..filename..".cmapx" -- ".imap"
+   local dotfile = basepath..filename..".dot"
+
+   return imgfile, imglink, lnkfile, maplink, dotfile
+end
 
 
 function make_content(obj, rel)
@@ -22,21 +50,38 @@ function make_content(obj, rel)
          local name, shape  = "", ""
          if v.ao_type == 'hst' then
             name = v.name1
+            label = v.name1
             shape = "box"
          elseif v.ao_type == 'svc' then
-            name = v.name2
+            name = v.name1.."-"..v.name2
+            label = v.name2
             shape = "ellipse"
          elseif v.ao_type == 'app' then
             name = v.name2
+            label = v.name2
             shape = "hexagon"
          end
 
-         --color = set_color(v.current_state)
-         color = "#FF0000"
-         url   = "ics.lp"
+--[[ TODO: 5
 
-         table.insert(content, node{name, shape=shape ,style="filled",height=.1,width=.1,fontsize=20.,
-                      fontname="Helvetica", label=name, color=color ,URL=url ,target="_self"})
+select app_id, a.name as a_name, ao.type as ao_type, o.name1, o.name2, ss.current_state as curr_state
+from itvision_app a, itvision_app_object ao, nagios_services s, nagios_objects o, nagios_servicestatus ss,
+     itvision_monitor m, glpi_networkports n, glpi_computers c
+where a.id = ao.app_id and ao.object_id = s.service_object_id and 
+s.service_object_id = o.object_id and s.service_object_id = ss.service_object_id and
+a.id = 1 and
+m.networkports_id = n.id and
+c.id = n.items_id and
+
+]]
+         color = set_color(v.curr_state, v.ao_type)
+         url   = "ics.lp="..v.curr_state
+
+         name = string.gsub(name, "%p", "")
+
+         table.insert(content, node{name, shape=shape, height=1, width=1, fontsize=20.,
+                      fontname="Helvetica", label=label, color="black", fillcolor=color ,URL=url ,target="_self",
+                      nodesep=0.05, style="rounded,bold,filled,solid", penwidth=2})
       end
    end
 
@@ -45,7 +90,7 @@ function make_content(obj, rel)
          local from_name, to_name = "", ""
          if string.find(v.o1_name1, config.monitor.check_app) then
             from_name = v.o1_name2
-         elseif v.o1_name2 == config.monitor.check_ping then
+         elseif v.o1_name2 == config.monitor.host_ping then
             from_name = v.o1_name1
          else
             from_name = v.o1_name1.."-"..v.o1_name2
@@ -53,13 +98,16 @@ function make_content(obj, rel)
 
          if string.find(v.o2_name1, config.monitor.check_app) then
             to_name = v.o2_name2
-         elseif v.o2_name2 == config.monitor.check_ping then
+         elseif v.o2_name2 == config.monitor.host_ping then
             to_name = v.o2_name1
          else
             to_name = v.o2_name1.."-"..v.o2_name2
          end
 
-         table.insert(content, edge{from_name, to_name, label=v.art_name})
+         from_name = string.gsub(from_name, "%p", "")
+         to_name = string.gsub(to_name, "%p", "")
+
+         table.insert(content, edge{ from_name, to_name, label=v.art_name } )
       end
    end
 
@@ -78,22 +126,19 @@ end
    twopi - radial graph layout
    nop, nop2 - undirected graph layout like neato, but assumes the graph has position attributes attached.
 ]]
-function render(filename, file_type, engene, content)
-   filename =  filename or config.path.gv.."/gv."..file_type
-   filename = config.path.itvision.."/"..config.path.html.."/"..filename
+function render(app_name, file_type, engene, content)
+   local imgfile, imglink, lnkfile, maplink, dotfile = make_gv_filename(app_name, file_type)
 
    local g = digraph{"G",
       size="6.5,6.5",
-      --nodesep=0.05,
+      node = { nodesep=1.05, style="rounded,bold,dotted" },
       unpack(content)
    }
 
-
    g:layout(engene) -- if engene == nil, then use the default 'dot'
-   --g:write() -- write graph to stdout
-   local fn = os.tmpname()..".dot"
-   g:write(fn)
-   g:render(file_type, filename) -- Render the graph into postscript format
+   g:render(file_type, imgfile) -- Render the graph into postscript format
+   g:render("cmapx", lnkfile) -- Render the graph into image map format
+   g:write(dotfile) -- Write the graph in dot 'text' format
    g:close() -- Close the graph
    
 end

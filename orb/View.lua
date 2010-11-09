@@ -75,9 +75,9 @@ end
     }
 ]]
 menu_itens = {
-	{ 1, "Monitor", "/fig1.html" },
-	{ 2, "Lógico", "/fig1.html" },
-	{ 2, "Físico", "/fig2.html" },
+	{ 1, "Monitor", "/orb/gv/show/1" },
+	{ 2, "Lógico", "/orb/gv/show/1" },
+	{ 2, "Físico", "/orb/gv/show/2" },
 	{ 2, "Árvore", "/orb/app_tree" },
 	{ 2, "Aplicações", "/orb/app" },
 	{ 2, "Objetos", "/orb/app_object" },
