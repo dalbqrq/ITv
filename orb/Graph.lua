@@ -60,6 +60,7 @@ function make_content(obj, rel)
             name = v.name2
             label = v.name2
             shape = "hexagon"
+            shape = "diamond"
          end
 
 --[[ TODO: 5

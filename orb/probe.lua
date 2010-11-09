@@ -26,13 +26,16 @@ function objects:select(name1, name2)
    local clause = ""
    if name1 ~= nil then
       clause = " name1 = '"..name1
+   else
+      clause = " name1 like 'business_processes%' "
    end
+
    if name2 ~= nil then
       clause = clause.."' and name2 = '"..name2.."' "
    else
       clause = clause.."' and name2 is NULL "
    end
-   clause = clause.." name1 = 'business_processes_detail' "
+   clause = clause .. " and is_active = 1"
 
    return Model.query("nagios_objects", clause)
 end
