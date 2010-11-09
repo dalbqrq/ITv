@@ -1,0 +1,9 @@
+#!/bin/bash
+
+. /etc/nagios3/ndo2db.cfg
+
+/usr/sbin/invoke-rc.d ndoutils stop
+if [ -f $socket_name ]; then
+   \rm -f $socket_name
+fi
+/usr/sbin/invoke-rc.d ndoutils start
