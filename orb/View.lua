@@ -75,9 +75,9 @@ end
     }
 ]]
 menu_itens = {
-	{ 1, "Monitor", "/orb/gv/show/1" },
-	{ 2, "Lógico", "/orb/gv/show/1" },
-	{ 2, "Físico", "/orb/gv/show/2" },
+	{ 1, "Monitor", "/orb/gv/show" },
+	{ 2, "Lógico", "/orb/gv/show" },
+	{ 2, "Físico", "/orb/gv/show" },
 	{ 2, "Árvore", "/orb/app_tree" },
 	{ 2, "Aplicações", "/orb/app" },
 	{ 2, "Objetos", "/orb/app_object" },
@@ -385,17 +385,28 @@ function select_physical_logical(name, default)
 end
 
 
-function render_content_header(name, add, list)
-   -- p{ ..., "" } usado para dar um espaco antes de comecar o proximo elemento html
-   return div{ id='menu_navigate', div { id='c_ssmenu2', ul{
-         li{ a{href='#', class='here', title="'"..name.."'", name} },
-         li{ "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" },
-         li{ a{ href="'"..add.."'", img{ src='/servdesk/pics/menu_add.png', title='Adicionar', alt='Adicionar'} } },
-         li{ a{ href="'"..list.."'", img{ src='/servdesk/pics/menu_search.png', title='Pesquisar', alt='Pesquisar' } } },
-         --li{ a{ href='/servdesk/front/setup.templates.php?itemtype=Computer&amp;add=0',
-             --img{ src='/servdesk/pics/menu_addtemplate.png', title="Gerenciar modelos", alt="Gerenciar modelos" } } }
-         } } }
+function render_content_header(name, add, list, edit, geotag)
+   local myul = { li{ a{href='#', class='here', title="'"..name.."'", name} }, }
 
+   myul[#myul+1] = li{ "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" }
+
+   if add then
+      myul[#myul+1] = li{ a{ href="'"..add.."'", img{ src='/servdesk/pics/menu_add.png', title='Adicionar', alt='Adicionar'} } }
+   end
+
+   if list then
+      myul[#myul+1] = li{ a{ href="'"..list.."'",img{ src='/servdesk/pics/menu_search.png', title='Pesquisar', alt='Pesquisar'} } }
+   end
+
+   if edit then
+      myul[#myul+1] = li{ a{ href="'"..edit.."'",img{ src='/servdesk/pics/edit.png', title='Editar', alt='Editar'} } }
+   end
+
+   if geotag then
+      myul[#myul+1] = li{ a{ href="'"..geotag.."'",img{ src='/pics/icon32.png', title='GeoVision', alt='Geotag'} } }
+   end
+
+   return div{ id='menu_navigate', div { id='c_ssmenu2', ul{ myul } } }
 end
 
 

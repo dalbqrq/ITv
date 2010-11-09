@@ -18,6 +18,7 @@ local services   = Model.nagios:model "services"
 
 function app:select(id, clause_)
    local clause = nil
+
    if id and clause_ then
       clause = "id = "..id.." and "..clause_
    elseif id then
@@ -25,7 +26,9 @@ function app:select(id, clause_)
    elseif clause_ then
       clause = clause_
    end
-   return Model.query("itvision_app", clause)
+
+   extra  = " order by id "
+   return Model.query("itvision_app", clause, extra)
 end
 
 
@@ -94,7 +97,7 @@ function show(web, id)
    local R = app_relat:select(id)
    return render_show(web, A, O, R)
 end 
-ITvision:dispatch_get(show, "/show/(%d+)")
+ITvision:dispatch_get(show, "/show", "/show/(%d+)")
 
 
 function edit(web, id, nm, tp)
@@ -248,7 +251,7 @@ end
 
 
 --[[  
-   MUDEI DE IDEIA, VOU CONTINUAR USANDO cwapp_object.lua e app_relat.lua PARA ENTRAR
+   MUDEI DE IDEIA, VOU CONTINUAR USANDO app_object.lua e app_relat.lua PARA ENTRAR
    COM OS COMPONENTES DA APLICACAO!!!
 
    Diferente dos demais metodos "show", este serve para incluir e excluir os componentes

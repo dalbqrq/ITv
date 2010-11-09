@@ -61,6 +61,7 @@ function query_1(c_id, n_id, clause)
       c.is_template		as c_is_template,
       c.is_deleted		as c_is_deleted,
       c.states_id		as c_states_id,
+      c.geotag			as c_geotag,
 
       n.id			as n_id,
       n.items_id		as n_items_id,
@@ -154,6 +155,7 @@ function query_2(c_id, n_id, sv_id, clause)
       c.is_template		as c_is_template,
       c.is_deleted		as c_is_deleted,
       c.states_id		as c_states_id,
+      c.geotag			as c_geotag,
 
       n.id			as n_id,
       n.items_id		as n_items_id,
@@ -253,6 +255,7 @@ function query_3(c_id, n_id, clause)
       c.is_template		as c_is_template,
       c.is_deleted		as c_is_deleted,
       c.states_id		as c_states_id,
+      c.geotag			as c_geotag,
 
       n.id			as n_id,
       n.items_id		as n_items_id,
@@ -288,15 +291,6 @@ function query_3(c_id, n_id, clause)
       o.name2			as o_name2,
       o.is_active		as o_is_active,
 
-      hst.host_id		as hst_host_id,
-      hst.instance_id		as hst_instance_id,
-      hst.host_object_id	as hst_host_object_id,
-      hst.alias			as hst_alias,
-      hst.display_name		as hst_display_name,
-      hst.address		as hst_address,
-      hst.check_command_object_id	as hst_check_command_object_id,
-      hst.check_command_args	as hst_check_command_args,
-
       svc.service_id		as svc_service_id,
       svc.instance_id		as svc_instance_id,
       svc.host_object_id	as svc_host_object_id,
@@ -310,20 +304,26 @@ function query_3(c_id, n_id, clause)
       m.host_object_id		as m_host_object_id,
       m.service_object_id	as m_service_object_id,
       m.is_active		as m_is_active,
-      m.type			as m_type
+      m.type			as m_type,
+
+      ss.current_state          as ss_current_state
       ]]
 
    local table_ = [[ glpi_computers c, glpi_networkports n,
-                     nagios_objects o, nagios_hosts hst, nagios_services svc, itvision_monitor m]]
+                     nagios_objects o, nagios_services svc, nagios_servicestatus ss,
+                     itvision_monitor m
+                  ]]
+
 
    local cond_ = [[ n.itemtype = "Computer" and
            c.id = n.items_id and 
-           n.id = m.networkports_id and
-           m.host_object_id = o.object_id and
+           m.networkports_id = n.id and
            m.softwareversions_id is null and
-           m.host_object_id = hst.host_object_id and
-           m.host_object_id = svc.host_object_id and
-           m.service_object_id = svc.service_object_id ]]
+           m.service_object_id = o.object_id and
+           m.service_object_id = ss.service_object_id and
+           m.service_object_id = svc.service_object_id 
+           ]]
+
 
    if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
    if n_id  then cond_ = cond_ .. " and n.id = "  .. n_id  end
@@ -351,6 +351,7 @@ function query_4(c_id, n_id, sv_id, clause)
       c.is_template		as c_is_template,
       c.is_deleted		as c_is_deleted,
       c.states_id		as c_states_id,
+      c.geotag			as c_geotag,
 
       n.id			as n_id,
       n.items_id		as n_items_id,
@@ -379,13 +380,6 @@ function query_4(c_id, n_id, sv_id, clause)
       s.is_deleted		as s_is_deleted,
       s.is_template		as s_is_template,
 
-      o.object_id		as o_object_id,
-      o.instance_id		as o_instance_id,
-      o.objecttype_id		as o_objecttype_id,
-      o.name1			as o_name1,
-      o.name2			as o_name2,
-      o.is_active		as o_is_active,
-
       hst.host_id		as hst_host_id,
       hst.instance_id		as hst_instance_id,
       hst.host_object_id	as hst_host_object_id,
@@ -408,12 +402,28 @@ function query_4(c_id, n_id, sv_id, clause)
       m.host_object_id		as m_host_object_id,
       m.service_object_id	as m_service_object_id,
       m.is_active		as m_is_active,
-      m.type			as m_type
+      m.type			as m_type,
+
+      ss.current_state          as ss_current_state,
+      hs.current_state          as hs_current_state
       ]]
+--[[ 
+      o.object_id		as o_object_id,
+      o.instance_id		as o_instance_id,
+      o.objecttype_id		as o_objecttype_id,
+      o.name1			as o_name1,
+      o.name2			as o_name2,
+      o.is_active		as o_is_active,
+
+      nagios_objects o,
+
+           m.host_object_id = o.object_id and
+]]
 
    local table_ = [[ glpi_computers c, glpi_networkports n, glpi_computers_softwareversions csv, 
                      glpi_softwareversions sv, glpi_softwares s,
-                     nagios_objects o, nagios_hosts hst, nagios_services svc, itvision_monitor m]]
+                     nagios_hosts hst, nagios_services svc, nagios_servicestatus ss, nagios_hoststatus hs,
+                     itvision_monitor m]]
 
    local cond_ = [[ n.itemtype = "Computer" and
            c.id = n.items_id and 
@@ -421,11 +431,13 @@ function query_4(c_id, n_id, sv_id, clause)
            c.id = csv.computers_id and
            csv.softwareversions_id = sv.id and
            sv.softwares_id = s.id and
-           m.host_object_id = o.object_id and
            m.softwareversions_id = csv.softwareversions_id and
            m.host_object_id = hst.host_object_id and
            m.host_object_id = svc.host_object_id and
-           m.service_object_id = svc.service_object_id ]]
+             m.host_object_id = hs.host_object_id and
+             m.service_object_id = ss.service_object_id and
+           m.service_object_id = svc.service_object_id
+           ]]
 
    if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
    if n_id  then cond_ = cond_ .. " and n.id = "  .. n_id  end
@@ -458,6 +470,7 @@ function query_5(c_id, n_id, clause)
       c.is_template		as c_is_template,
       c.is_deleted		as c_is_deleted,
       c.states_id		as c_states_id,
+      c.geotag			as c_geotag,
 
       n.id			as n_id,
       n.items_id		as n_items_id,
@@ -552,6 +565,7 @@ function query_6(c_id, n_id, clause)
       c.is_template		as c_is_template,
       c.is_deleted		as c_is_deleted,
       c.states_id		as c_states_id,
+      c.geotag			as c_geotag,
 
       n.id			as n_id,
       n.items_id		as n_items_id,

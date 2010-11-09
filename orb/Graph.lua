@@ -15,13 +15,19 @@ local node, edge, subgraph, cluster, digraph, strictdigraph =
 
 function set_color(state, obj_type)
    local color
+   state = tonumber(state)
+-- Hoje, todos os tipos de objetos de uma aplicacao sao representado por um service!
+--[[
    if obj_type == 'hst' then
       color = host_alert[state+1].color
    elseif obj_type == 'svc' then
-      color = service_alert[state+1].color
+]]
+      color = service_alert[state].color
+--[[
    elseif obj_type == 'app' then
       color = applic_alert[state+1].color
    end
+]]
 
    return color
 end
@@ -50,15 +56,15 @@ function make_content(obj, rel)
          local name, shape  = "", ""
          if v.ao_type == 'hst' then
             name = v.name1
-            label = v.name1
+            label = v.name1..":"..v.curr_state
             shape = "box"
          elseif v.ao_type == 'svc' then
             name = v.name1.."-"..v.name2
-            label = v.name2
+            label = v.name2..":"..v.curr_state
             shape = "ellipse"
          elseif v.ao_type == 'app' then
             name = v.name2
-            label = v.name2
+            label = v.name2..":"..v.curr_state
             shape = "hexagon"
             shape = "diamond"
          end
@@ -76,7 +82,7 @@ c.id = n.items_id and
 
 ]]
          color = set_color(v.curr_state, v.ao_type)
-         url   = "ics.lp="..v.curr_state
+         url   = "/orb/obj_info/"..v.ao_type.."/"..v.obj_id
 
          name = string.gsub(name, "%p", "")
 

@@ -12,29 +12,29 @@ color = {
 
 
 applic_alert = {   
-	{ name= "NORMAL",	status = APPLIC_UP,		color = color.green },
-	{ name= "CRITICO", 	status = APPLIC_DOWN,		color = color.red },
-	{ name= "ANORMAL",	status = APPLIC_WARNING,	color = color.yellow },
-	{ name= "PENDENTE",	status = APPLIC_PENDING,	color = color.blue },
-	{ name= "DESABILITADO",	status = APPLIC_DISABLE,	color = color.orange },
+	[APPLIC_UP]      = { name= "NORMAL",		status = APPLIC_UP,		color = color.green },
+	[APPLIC_DOWN]    = { name= "CRITICO", 		status = APPLIC_DOWN,		color = color.red },
+	[APPLIC_WARNING] = { name= "ANORMAL",		status = APPLIC_WARNING,	color = color.yellow },
+	[APPLIC_PENDING] = { name= "PENDENTE",		status = APPLIC_PENDING,	color = color.blue },
+	[APPLIC_DISABLE] = { name= "DESABILITADO",	status = APPLIC_DISABLE,	color = color.orange },
 }
 
 
 host_alert = {   
-	{ name= "NORMAL",	status = HOST_UP,		color = color.green },
-	{ name= "CRITICO", 	status = HOST_DOWN,		color = color.red },
-	{ name= "DESCONHECIDO",	status = HOST_UNREACHABLE,	color = color.gray },
-	{ name= "PENDENTE", 	status = HOST_PENDING,		color = color.blue },
-	{ name= "DESABILITADO",	status = HOST_DISABLE,		color = color.orange }
+	[HOST_UP]          = { name= "NORMAL",		status = HOST_UP,		color = color.green },
+	[HOST_DOWN]        = { name= "CRITICO", 	status = HOST_DOWN,		color = color.red },
+	[HOST_UNREACHABLE] = { name= "DESCONHECIDO",	status = HOST_UNREACHABLE,	color = color.gray },
+	[HOST_PENDING]     = { name= "PENDENTE", 	status = HOST_PENDING,		color = color.blue },
+	[HOST_DISABLE]     = { name= "DESABILITADO",	status = HOST_DISABLE,		color = color.orange }
 }
 
 
 service_alert = {
-	{ name= "NORMAL",	status = STATE_OK,		color = color.green },
-	{ name= "ANORMAL", 	status = STATE_WARNING,		color = color.yellow },
-	{ name= "CRITICO", 	status = STATE_CRITICAL,	color = color.red },
-	{ name= "DESCONHECIDO",	status = STATE_UNKNOWN,		color = color.gray },
-	{ name= "PENDENTE",	status = STATE_PENDING,		color = color.blue },
-	{ name= "DESABILITADO",	status = STATE_DISABLE,		color = color.orange }
+	[STATE_OK]       = { name= "NORMAL",		status = STATE_OK,		color = color.green },
+	[STATE_WARNING]  = { name= "ANORMAL",	 	status = STATE_WARNING,		color = color.yellow },
+	[STATE_CRITICAL] = { name= "CRITICO", 		status = STATE_CRITICAL,	color = color.red },
+	[STATE_UNKNOWN]  = { name= "DESCONHECIDO",	status = STATE_UNKNOWN,		color = color.gray },
+	[STATE_PENDING]  = { name= "PENDENTE",		status = STATE_PENDING,		color = color.blue },
+	[STATE_DISABLE]  = { name= "DESABILITADO",	status = STATE_DISABLE,		color = color.orange }
 }
 

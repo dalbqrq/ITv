@@ -110,17 +110,33 @@ where
      m.service_object_id = o.object_id and
      not exists (select 1 from glpi_computers_softwareversions csv where c.id = csv.computers_id);
 */
+
+mysql> select * from itvision_monitor;
++-----------------+---------------------+----------------+-------------------+-----------+------+
+| networkports_id | softwareversions_id | host_object_id | service_object_id | is_active | type |
++-----------------+---------------------+----------------+-------------------+-----------+------+
+|               1 |                NULL |            167 |               168 | 1         | hst  |
+|               1 |                   1 |            167 |               169 | 1         | svc  |
+|               1 |                   3 |            167 |               170 | 1         | svc  |
+|               1 |                   2 |            167 |               171 | 1         | svc  |
+|               4 |                NULL |            172 |               173 | 1         | hst  |
+|               4 |                   3 |            172 |               174 | 1         | svc  |
+|               5 |                NULL |            353 |               354 | 1         | hst  |
+|               5 |                   3 |            353 |               355 | 1         | svc  |
++-----------------+---------------------+----------------+-------------------+-----------+------+
+
 select *
 from glpi_computers c, glpi_networkports n,
      itvision_monitor m, nagios_hosts hst, nagios_services svc
 where
-     n.itemtype in ("Computer", "NetworkEquipment")  and
+     n.itemtype in ("Computer")  and
      c.id = n.items_id and 
      n.id = m.networkports_id and
      m.host_object_id = hst.host_object_id and
      m.host_object_id = svc.host_object_id and
      m.service_object_id = svc.service_object_id and
      m.softwareversions_id is null
+
 
 /*
      not exists (select 1 from glpi_computers_softwareversions csv where c.id = csv.computers_id);

@@ -15,11 +15,12 @@ local app = Model.itvision:model "app"
 -- models ------------------------------------------------------------
 
 function app:select_apps(id)
-   local clause = ""
+   local clause = nil
    if id then
       clause = "id = "..id
    end
-   return self:find_all(clause)
+   --return self:find_all(clause)
+   return Model.query("itvision_app", clause, "order by id")
 end
 
 
@@ -33,13 +34,16 @@ ITvision:dispatch_get(list, "/", "/list")
 
 
 function show(web, id)
+   local app_name
    local apps = app:select_apps()
+   if id == "/show" and apps[1] then id = apps[1].id end
    local app = app:select_apps(id)
    local obj = Model.select_app_to_graph(id)
    local rel = Model.select_app_relat_to_graph(id)
-   return render_show(web, apps, app[1].name, id, obj, rel)
+   if app[1] then app_name = app[1].name else app_name = "none" end
+   return render_show(web, apps, app_name, id, obj, rel)
 end
-ITvision:dispatch_get(show, "/show/(%d+)")
+ITvision:dispatch_get(show,"/show", "/show/(%d+)")
 
 
 ITvision:dispatch_static("/css/%.css", "/script/%.js")

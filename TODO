@@ -23,6 +23,10 @@ TODO List
    Mais IMPORTANTE ainda, talvez seja bom incluir o campor "service_host_object_id", ou seja,
    o servico "HOSTYPE" nesta tabela.
 
+7. Nos combos de selecao de aplicacao, exlcuir as inativas.
+
+8. Nas queries de 1 a 6, escluir as inativas e que sao templates tanto com relacao aos computadores
+   quando com relacao aos softwares.
 
 
 ==========================================================
