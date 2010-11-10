@@ -520,7 +520,7 @@ class Computer extends CommonDBTM {
          $datestring = $LANG['computers'][14]." : ";
          $date       = convDateTime($_SESSION["glpi_currenttime"]);
       } else {
-         $datestring = $LANG['common'][26].": ";
+         $datestring = $LANG['common'][26].": "; // daniel
          $date       = convDateTime($this->fields["date_mod"]);
          $template   = false;
       }
@@ -669,6 +669,14 @@ class Computer extends CommonDBTM {
          }
       }
 
+// -------------------------- daniel@itvision.com.br - INCLUIDO
+      echo "<tr class='tab_bg_1'>";
+      echo "<td>".'GeoTag'."&nbsp;:</td>";
+      echo "<td>"; autocompletionTextField($this,'geotag'); echo "</td>";
+      echo "</tr>";
+// -------------------------- daniel@itvision.com.br
+
+/* --------------- daniel@itvision.com.br - TRECHO RETIRADO DAQUI E RECOLOCAR (COPIADO) ABAIXO
       echo "<tr class='tab_bg_1'>";
       echo "<td colspan='2' class='center'>".$datestring.$date;
       if (!$template && !empty($this->fields['template_name'])) {
@@ -712,6 +720,7 @@ class Computer extends CommonDBTM {
          }
       }
       echo "</td></tr>\n";
+------------------ daniel@itvision.com.br */
 
       echo "<tr class='tab_bg_1'>";
       if (!empty($ID)
@@ -732,15 +741,51 @@ class Computer extends CommonDBTM {
       Dropdown::show('AutoUpdateSystem', array('value' => $this->fields["autoupdatesystems_id"]));
       echo "</td></tr>";
 
-// -------------------------- daniel@itvision.com.br
+// -------------------------- daniel@itvision.com.br - TRECHO RECOLOCADO NO FINAL 
       echo "<tr class='tab_bg_1'>";
-      echo "<td>".'GeoTag'."&nbsp;:</td>";
-      echo "<td>";
-      autocompletionTextField($this,'geotag');
-      echo "</td>";
+      echo "<td colspan='2' class='center'>".$datestring.$date;
+      if (!$template && !empty($this->fields['template_name'])) {
+         echo "&nbsp;&nbsp;&nbsp;(".$LANG['common'][13]."&nbsp;: ".$this->fields['template_name'].")";
+      }
+      if (!empty($ID)
+          && $this->fields["is_ocs_import"]
+          && haveRight("view_ocsng","r")
+          && count($dataocs)) {
 
-      echo "<td colspan=2></td>";
-      echo "</tr>";
+         echo "<br>";
+         echo $LANG['ocsng'][14]."&nbsp;: ".convDateTime($dataocs["last_ocs_update"]);
+         echo "<br>";
+         echo $LANG['ocsng'][13]."&nbsp;: ".convDateTime($dataocs["last_update"]);
+         echo "<br>";
+         if (haveRight("ocsng","r")) {
+            echo $LANG['common'][52]." <a href='".$CFG_GLPI["root_doc"]."/front/ocsserver.form.php?id="
+                 .OcsServer::getByMachineID($ID)."'>".OcsServer::getServerNameByID($ID)."</a>";
+            $query = "SELECT `ocs_agent_version`, `ocsid`
+                      FROM `glpi_ocslinks`
+                      WHERE `computers_id` = '$ID'";
+
+            $result_agent_version = $DB->query($query);
+            $data_version = $DB->fetch_array($result_agent_version);
+
+            $ocs_config = OcsServer::getConfig(OcsServer::getByMachineID($ID));
+
+            //If have write right on OCS and ocsreports url is not empty in OCS config
+            if (haveRight("ocsng","w") && $ocs_config["ocs_url"] != '') {
+               echo ", ".OcsServer::getComputerLinkToOcsConsole (OcsServer::getByMachineID($ID),
+                                                                 $data_version["ocsid"],
+                                                                 $LANG['ocsng'][57]);
+            }
+
+            if ($data_version["ocs_agent_version"] != NULL) {
+               echo " , ".$LANG['ocsng'][49]."&nbsp;: ".$data_version["ocs_agent_version"];
+            }
+
+         } else {
+            echo $LANG['common'][52]." ".OcsServer::getServerNameByID($ID);
+         }
+      }
+      echo "<td colspan=2></td>"; // -- ESTE LINHA TEVE QUE SER COLOCADA PARA COMPLETAR A TABELA.
+      echo "</td></tr>\n";
 // -------------------------- daniel@itvision.com.br
 
       $this->showFormButtons($options);

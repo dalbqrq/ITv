@@ -180,7 +180,7 @@ end
 
 
 function select_app_to_graph (id)
-   local columns_ = "app_id, a.name as a_name, ao.type as ao_type, o.name1, o.name2, ss.current_state as curr_state"
+   local columns_ = "app_id, a.name as a_name, ao.type as ao_type, o.object_id as obj_id, o.name1, o.name2, ss.current_state as curr_state"
    local tables_  = "itvision_app a, itvision_app_object ao, nagios_services s, nagios_objects o, nagios_servicestatus ss"
    local cond_    = "a.id = ao.app_id and ao.object_id = s.service_object_id and \
                      s.service_object_id = o.object_id and s.service_object_id = ss.service_object_id and \

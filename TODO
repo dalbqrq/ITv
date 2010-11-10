@@ -19,6 +19,9 @@ TODO List
    que seja a soma de queries ligando servicestatus à computador e a softwareversion. PArte
    inicial da query em Graph.lua no local onde entrará o link através do mapa da imagem.
 
+6. Quando incluir entrada em itvision_monitor, identificar se o monitoramento é de uma app.
+   Mais IMPORTANTE ainda, talvez seja bom incluir o campor "service_host_object_id", ou seja,
+   o servico "HOSTYPE" nesta tabela.
 
 
 

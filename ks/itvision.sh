@@ -22,8 +22,6 @@ install_pack locate
 install_pack apache2
 install_pack libapache2-mod-php5
 install_pack libgd2-xpm-dev
-install_pack graphviz
-install_pack graphviz-dev
 install_pack unzip
 install_pack wget
 install_pack vim
@@ -46,6 +44,10 @@ install_pack php5-mysql
 install_pack libcgi-simple-perl
 install_pack snmpd
 install_pack cacti
+#install_pack nagiosgrapher
+
+
+
 
 # --------------------------------------------------
 # STOP ALL PROCESSES
@@ -265,6 +267,17 @@ tar cf - * | ( cd /usr/local/servdesk; tar xfp -)
 echo "ALTER TABLE \`itvision\`.\`glpi_computers\` ADD COLUMN \`geotag\` VARCHAR(20) NULL DEFAULT NULL  AFTER \`ticket_tco\` ;" | \
 	mysql -u root --password=$dbpass
  
+
+# --------------------------------------------------
+# GRAPHVIZ
+# --------------------------------------------------
+/usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/graphviz_2.26.3-1_i386.deb
+/usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/graphviz-dev_2.26.3-1_all.deb
+/usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/libgraphviz4_2.26.3-1_i386.deb
+/usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/libgraphviz-dev_2.26.3-1_i386.deb
+/usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/libgv-lua_2.26.3-1_i386.deb
+/usr/bin/dpkg -i /tmp/*.deb
+/usr/bin/dot -c
 
 
 # --------------------------------------------------
