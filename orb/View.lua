@@ -185,8 +185,9 @@ end
 function render_map(marker_maker, center, google_key)
    marker_maker = marker_maker or [[ function marker_maker() {} ]]
    --center = center or "-22.865104,-43.430157" -- Av Bradil
-   center = center or "-22.966849,-43.243217" -- IMPA
-   google_key = google_key or "ABQIAAAAsqOIUfpoX_G_Pw0Ar48BRhS64UBg-UePRXM9viX4hk4iiwv9HRSiOpB5WKHSB9ZBy9mHRo7Ycwp9JA"
+   center = center or "-22.965299,-43.237789" -- IMPA
+   google_key = google_key or "ABQIAAAAsqOIUfpoX_G_Pw0Ar48BRhS64UBg-UePRXM9viX4hk4iiwv9HRSiOpB5WKHSB9ZBy9mHRo7Ycwp9JA" --www.impa.br
+   --google_key = google_key or "ABQIAAAAsqOIUfpoX_G_Pw0Ar48BRhRtyMmS1TXEK_DXFnd23B1n8zvUnRT_9hDq4-PHCmE33vrSdHVrdUyjgw" --itv.impa.br
 
    java_code = [[
 // http://code.google.com/apis/maps/documentation/javascript/events.html
@@ -201,7 +202,7 @@ var map;
 function initialize() {
   var myLatlng = new google.maps.LatLng(]]..center..[[);
   var myOptions = {
-    zoom: 13,
+    zoom: 17,
     center: myLatlng,
     //mapTypeId: google.maps.MapTypeId.ROADMAP
     mapTypeId: google.maps.MapTypeId.HYBRID
