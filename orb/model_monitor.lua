@@ -470,7 +470,6 @@ function query_5(c_id, n_id, clause)
       c.is_template		as c_is_template,
       c.is_deleted		as c_is_deleted,
       c.states_id		as c_states_id,
-      c.geotag			as c_geotag,
 
       n.id			as n_id,
       n.items_id		as n_items_id,
@@ -565,7 +564,6 @@ function query_6(c_id, n_id, clause)
       c.is_template		as c_is_template,
       c.is_deleted		as c_is_deleted,
       c.states_id		as c_states_id,
-      c.geotag			as c_geotag,
 
       n.id			as n_id,
       n.items_id		as n_items_id,

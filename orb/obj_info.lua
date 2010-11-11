@@ -3,6 +3,7 @@
 -- includes & defs ------------------------------------------------------
 require "util"
 require "View"
+require "state"
 
 require "orbit"
 require "Model"
@@ -23,15 +24,9 @@ function app:select(id, obj_id)
 end
 
 
--- Esta funcao recebe um ou outro parametro, nunca os dois
-function app_object:select_app_object(id, obj_id)
-   if obj_id then 
-      A = app:select(nil, obj_id)
-      id = A[1].id
-   end
-   clause = "id = "..id
+function app_object:select_app_object(obj_id)
 
-   return self:find_all(clause)
+   return Model.query(clause)
 end
 
 -- controllers ------------------------------------------------------------
@@ -57,12 +52,22 @@ end
 ITvision:dispatch_get(show_app, "/app/(%d+)")
 
 
+-- esta funcao deverah servir para colocar o mapa em um ou mais iframes para 
+--  que ele nao ocupe toda a tela
+function map_frame(web, objtype, obj_id)
+   return render_map_frame(web, obj_id, objtype)
+end
+ITvision:dispatch_get(map_frame, "/map_frame/(%a+):(%d+)")
+
+
 function geotag(web, objtype, obj_id)
    local A
    if objtype == "app" then
-      A = Model.query_3(nil, nil, " and m.service_object_id = "..obj_id)
+      local cond_ = [[and m.service_object_id in (select object_id from itvision_app a, itvision_app_object ao 
+                          where a.id = ao.app_id and a.service_object_id = ]]..obj_id..[[)]]
+      A = Model.query_3(nil, nil, cond_)
    elseif objtype == "hst" then
-      A = app_object:select_app_object(nil, obj_id)
+      A = Model.query_3(nil, nil, " and m.service_object_id = "..obj_id)
    end
 
    return render_geotag(web, obj_id, objtype, A)
@@ -150,9 +155,40 @@ end
 
 function render_geotag(web, obj_id, objtype, A)
    local res = {obj_id, objtype}
+   local latlon = ""
 
-   return render_layout(res)
+   local marker_maker = ""
+
+   for i, v in ipairs(A) do
+      if v.ss_current_state then
+         res[#res+1] = " | "..v.c_geotag.." | "
+         local icon = service_alert[tonumber(v.ss_current_state)].color_name
+
+         marker_maker = marker_maker .. "var location"..i.." = new google.maps.LatLng("..v.c_geotag..");\n"
+         marker_maker = marker_maker .. "var marker"..i.." = new google.maps.Marker({ position: location"..i..", map: map, icon: "..icon.." });\n"
+         marker_maker = marker_maker .. "//marker"..i..".setTitle(\"VERTO\");\n"
+         marker_maker = marker_maker .. "var infowindow"..i.." = new google.maps.InfoWindow( \n"
+         marker_maker = marker_maker .. "{ content: \""..v.c_name.."<p><a href='www.impa.br'>Link ITvision</a>\", size: new google.maps.Size(50,50) });\n"
+         marker_maker = marker_maker .. "google.maps.event.addListener(marker"..i..", 'click', function() { infowindow"..i..".open(map,marker"..i.."); });\n"
+      end
+   end
+
+   marker_maker = "function marker_maker() { \n"..marker_maker.."\n}"
+   res[#res+1] = " | "..marker_maker.." | "
+
+   --return render_layout(res)
+   return render_map(marker_maker)
 end
+
+
+-- Ver codigo fonte da pagina http://code.google.com/apis/maps/documentation/javascript/basics.html
+-- que possui dois mapas lado a lado.
+function render_map_frame(web, objtype, obj_id)
+
+   render_layout( iframe{ style="width:400px;height:400px", src=web:link("/"..objtype":"..obj_id) }  )
+
+end
+
 
 orbit.htmlify(ITvision, "render_.+")
 

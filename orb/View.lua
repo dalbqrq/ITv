@@ -182,6 +182,53 @@ function render_layout(inner_html)
 end
 
 
+function render_map(marker_maker, center, google_key)
+   marker_maker = marker_maker or [[ function marker_maker() {} ]]
+   --center = center or "-22.865104,-43.430157" -- Av Bradil
+   center = center or "-22.966849,-43.243217" -- IMPA
+   google_key = google_key or "ABQIAAAAsqOIUfpoX_G_Pw0Ar48BRhS64UBg-UePRXM9viX4hk4iiwv9HRSiOpB5WKHSB9ZBy9mHRo7Ycwp9JA"
+
+   java_code = [[
+// http://code.google.com/apis/maps/documentation/javascript/events.html
+
+var red    = '/pics/red.png';
+var blue   = '/pics/blue.png';
+var green  = '/pics/green.png';
+var gray   = '/pics/gray.png';
+var orange = '/pics/orange.png';
+
+var map;
+function initialize() {
+  var myLatlng = new google.maps.LatLng(]]..center..[[);
+  var myOptions = {
+    zoom: 13,
+    center: myLatlng,
+    //mapTypeId: google.maps.MapTypeId.ROADMAP
+    mapTypeId: google.maps.MapTypeId.HYBRID
+  }
+
+  map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+  marker_maker();
+}
+   ]]
+
+   return { "<!DOCTYPE html>", html{
+      head{
+         title("ITvision"),
+         meta{ name = "viewport", content = "initial-scale=1.0, user-scalable=no" },
+         meta{ ["http-equiv"] = "Content-Type", content = "text/html; charset=utf-8" },
+         link{ href="http://code.google.com/apis/maps/documentation/javascript/examples/default.css", rel="stylesheet", type="text/css" },
+
+         script{ type="text/javascript", src="http://maps.google.com/maps?file=api&amp;v=2&amp;sensor=false&amp;key="..google_key },
+         script{ type="text/javascript", src="http://maps.google.com/maps/api/js?sensor=false" },
+         script{ type="text/javascript", java_code, marker_maker },
+      },
+      body{ onload="initialize()", div{ id="map_canvas" } }
+   } }
+
+end
+
+
 --[[
    render_table() recebe como parametros:
 
@@ -410,7 +457,7 @@ function render_content_header(name, add, list, edit, geotag)
 end
 
 
-function render_map(web, lat, lon)
+function render_map_old(web, lat, lon)
 
     s = [[
 <html>
