@@ -339,14 +339,7 @@ luarocks install wsapi
 luarocks install cgilua
 luarocks install orbit
 luarocks install dado
-# luarocks install luagraph - BROKEN! install and compile it manually!
-cd /tmp
-luarocks download luagraph
-luarocks unpack luagraph
-cd luagraph-1.0.4-1/luagraph-1.0.4/src
-sed -i.orig -e "s/lt_symlist_t lt_preloaded_symbols\[\] = { { 0, 0 } };//g" gr_graph.c
-cd ..
-luarocks make
+luarocks install luagraph
 #
 sed -i.orig '/^#/ a\
 . '$itvhome'/bin/lua_path' /usr/local/bin/wsapi.cgi
