@@ -22,6 +22,8 @@ install_pack locate
 install_pack apache2
 install_pack libapache2-mod-php5
 install_pack libgd2-xpm-dev
+# install_pack graphviz
+# install_pack graphviz-dev
 install_pack unzip
 install_pack wget
 install_pack vim
@@ -44,9 +46,17 @@ install_pack php5-mysql
 install_pack libcgi-simple-perl
 install_pack snmpd
 install_pack cacti
-#install_pack nagiosgrapher
-
-
+install_pack php5
+install_pack php5-gd
+install_pack libapache-dbi-perl
+install_pack libnet-ip-perl
+install_pack libsoap-lite-perl
+install_pack libcalendar-simple-perl
+install_pack autoconf
+install_pack libgd-gd2-perl
+install_pack perlmagick
+install_pack librrds-perl
+install_pack nagios_grapher
 
 
 # --------------------------------------------------
@@ -120,6 +130,19 @@ dbpass=itv
 dbname=$dbname
 EOF
 
+
+# --------------------------------------------------
+# GRAPHVIZ
+# --------------------------------------------------
+/usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/graphviz_2.26.3-1_i386.deb
+/usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/graphviz-dev_2.26.3-1_all.deb
+/usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/libgraphviz4_2.26.3-1_i386.deb
+/usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/libgraphviz-dev_2.26.3-1_i386.deb
+/usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/libgv-lua_2.26.3-1_i386.deb
+/usr/bin/dpkg -i /tmp/*.deb
+/usr/bin/dot -c
+
+
 # --------------------------------------------------
 # NAGIOS
 # --------------------------------------------------
@@ -160,6 +183,25 @@ for f in $dir/*; do
 	-e 's/ snmp_.*/\U&/' -e 's/\tsnmp_.*/\U&/' $f
 done
 
+
+# Config nagiosgrapher
+sed -i.orig2 -e "s/process_performance_data=0/process_performance_data=1/" \
+    -e "s/^#service_perfdata_file=\/tmp\/service-perfdata/service_perfdata_file=\/var\/lib\/nagiosgrapher\/service-perfdata/" \
+    -e "s/cfg_dir=\/usr\/local\/nagios\/etc\/serviceext/cfg_dir=\/etc\/nagios3\/services\/serviceext/" \
+    -e "s/^#service_perfdata_file_template=/service_perfdata_file_template=/" \
+    -e "s/^#service_perfdata_file_mode=a/service_perfdata_file_mode=a/" \
+    -e "s/^#service_perfdata_file_processing_interval=0/service_perfdata_file_processing_interval=30/" \
+    -e "s/^#service_perfdata_file_processing_command=process-service-perfdata-file/service_perfdata_file_processing_command=process-service-perfdata-file/" /etc/nagios3/nagios.cfg
+sed -i.orig -e '/# OBJECT CONFIGURATION FILE/ i\
+cfg_dir=/etc/nagiosgrapher/ngraph.d' /etc/nagios3/nagios.cfg
+
+sed -i.orig -e "s/user                    nagios/user                    itv/" \
+        -e "s/group                   nagios/group                   itv/" \
+        -e "s/nagiosadmin/itv/" \
+        -e "s/serviceext_path         \/etc\/nagiosgrapher\/nagios3\/serviceext/serviceext_path        \/etc\/nagios3\/services\/serviceext/" /etc/nagiosgrapher/ngraph.ncfg
+
+mkdir -p /etc/nagios3/services/serviceext /var/lib/nagiosgrapher/service-perfdata
+chown -R itv.itv /var/lib/nagiosgrapher /etc/nagios3/services/serviceext /etc/nagiosgrapher /var/run/nagiosgrapher /var/log/nagiosgrapher/ngraph.log /var/cache/nagiosgrapher /usr/share/perl5/NagiosGrapher /usr/lib/nagiosgrapher /usr/sbin/nagiosgrapher
 
 
 # --------------------------------------------------
@@ -269,15 +311,24 @@ echo "ALTER TABLE \`itvision\`.\`glpi_computers\` ADD COLUMN \`geotag\` VARCHAR(
  
 
 # --------------------------------------------------
-# GRAPHVIZ
+# OCS INVENTORY v1.3.2
 # --------------------------------------------------
-/usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/graphviz_2.26.3-1_i386.deb
-/usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/graphviz-dev_2.26.3-1_all.deb
-/usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/libgraphviz4_2.26.3-1_i386.deb
-/usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/libgraphviz-dev_2.26.3-1_i386.deb
-/usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/libgv-lua_2.26.3-1_i386.deb
-/usr/bin/dpkg -i /tmp/*.deb
-/usr/bin/dot -c
+
+
+apt-get install php5
+apt-get install php5-gd
+apt-get install libapache-dbi-perl
+apt-get install libnet-ip-perl
+apt-get install libsoap-lite-perl
+
+wget -P /tmp http://launchpad.net/ocsinventory-server/stable-1.3/1.3.2/+download/OCSNG_UNIX_SERVER-1.3.2.tar.gz
+tar -xzf /tmp/OCSNG_UNIX_SERVER-1.3.2.tar.gz -C /usr/local
+cd /usr/local/OCSNG_UNIX_SERVER-1.3.2
+
+sed -i.orig -e "s/DB_SERVER_USER=\"ocs\"/DB_SERVER_USER=\"$user\"/" \
+        -e "s/DB_SERVER_PWD=\"ocs\"/DB_SERVER_PWD=\"$dbpass\"/" /usr/local/OCSNG_UNIX_SERVER-1.3.2/setup.sh
+
+/usr/local/OCSNG_UNIX_SERVER-1.3.2/setup.sh
 
 
 # --------------------------------------------------
