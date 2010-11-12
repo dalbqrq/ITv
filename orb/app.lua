@@ -185,8 +185,6 @@ function activate(web, id, flag)
 
 -- TODO: 11  - o service_object_id deve ser descoberto retirando-se a possibilidade de 
 --             de se pegar o business_process_detail (servico desabilitado) da aplicacao.
-
-
          local s = services:select(nil, "display_name = '"..string.toid(A[1].name).."'")
          -- caso host ainda nao tenha sido incluido aguarde e tente novamente
          counter = 0

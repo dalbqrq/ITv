@@ -1,4 +1,3 @@
-module("config", package.seeall)
 
 
 instance_name = "default"
@@ -20,9 +19,11 @@ monitor = {
 	bp_dir     = "/usr/local/nagiosbp",
 	bp2cfg     = "bp2cfg",
 	bp_script  = "/etc/init.d/ndoutils",
-	host_ping  = "HOST_PING",
-	--check_ping = "PING",
-	check_app  = "business_processes"
+	--check_host = "HOST_ALIVE",
+	check_host = "HOST_PING", -- depricated
+	--check_app  = "BUSPROC_SERVICE",
+	check_app  = "business_processes", -- depricated
+        cmd_app    = "BUSPROC_STATUS",
 }
 
 language = "pt_BR"

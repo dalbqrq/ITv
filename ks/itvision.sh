@@ -284,6 +284,8 @@ tar zxf /tmp/glpi-0.78.tar.gz -C /usr/local
 cp -r /usr/local/glpi /usr/local/servdesk
 chown -R $user.$user /usr/local/glpi /usr/local/servdesk
 
+# TODO: DUPLICAR CORRETAMENTE O GLPI
+
 echo "<?php
  class DB extends DBmysql {
  var \$dbhost    = 'localhost';

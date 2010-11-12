@@ -65,7 +65,6 @@ function make_content(obj, rel)
          elseif v.ao_type == 'svc' then
             name = v.name1.."-"..v.name2
             label = v.name2  -- DEBUG ..":"..v.curr_state
-            url   = "/orb/obj_info/"..v.ao_type.."/"..v.obj_id
             shape = "ellipse"
          elseif v.ao_type == 'app' then
             name = v.name2
@@ -103,7 +102,7 @@ c.id = n.items_id and
          local from_name, to_name = "", ""
          if string.find(v.o1_name1, config.monitor.check_app) then
             from_name = v.o1_name2
-         elseif v.o1_name2 == config.monitor.host_ping then
+         elseif v.o1_name2 == config.monitor.check_host then
             from_name = v.o1_name1
             if not show_ip then from_name = string.gsub(from_name,"-(.+)", "") end
          else
@@ -112,7 +111,7 @@ c.id = n.items_id and
 
          if string.find(v.o2_name1, config.monitor.check_app) then
             to_name = v.o2_name2
-         elseif v.o2_name2 == config.monitor.host_ping then
+         elseif v.o2_name2 == config.monitor.check_host then
             to_name = v.o2_name1
             if not show_ip then to_name = string.gsub(to_name,"-(.+)", "") end
          else

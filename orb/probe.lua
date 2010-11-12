@@ -134,8 +134,8 @@ ITvision:dispatch_get(add, "/add/(%d+):(%d+):(%d+):(%d+)")
 ]]
 function insert(web, n_id, sv_id, c_id, c_name, s_name, sv_name, ip)
    -- hostname passa aqui a ser uma composicao do proprio hostname com o ip a ser monitorado
-   local hostname = string.gsub(string.gsub(c_name,"(%p+)"," ").."-"..ip,"(%s+)","_")
-   local software = string.gsub(string.gsub(s_name.." "..sv_name,"(%p+)"," "),"(%s+)","_")
+   local hostname = string.gsub(string.toid(c_name).."-"..ip,"(%s+)","_")
+   local software = string.toid(s_name.." "..sv_name)
    local cmd, hst, svc, dpl, chk, h, s
    local msg = ""
    local content
@@ -149,7 +149,7 @@ function insert(web, n_id, sv_id, c_id, c_name, s_name, sv_name, ip)
    ------------------------------------------------------
    if h[1] == nil then
       cmd = insert_host_cfg_file (hostname, c_name, ip)
-      cmd = insert_service_cfg_file (hostname, config.monitor.host_ping, config.monitor.host_ping)
+      cmd = insert_service_cfg_file (hostname, config.monitor.check_host, config.monitor.check_host)
       h = objects:select(hostname)
       -- caso host ainda nao tenha sido incluido aguarde e tente novamente
       counter = 0
@@ -160,13 +160,13 @@ function insert(web, n_id, sv_id, c_id, c_name, s_name, sv_name, ip)
       end
       -- DEBUG: text_file_writer ("/tmp/1", "Counter: "..counter.."\n")
       hst = h[1].object_id
-      s = objects:select(hostname, config.monitor.host_ping)
+      s = objects:select(hostname, config.monitor.check_host)
       -- caso service ainda nao tenha sido incluido aguarde e tente novamente
       counter = 0
       while s[1] == nil do
          counter = counter + 1
          for i = 1,loop do x = i/2 end -- aguarde...
-         s = objects:select(hostname, config.monitor.host_ping)
+         s = objects:select(hostname, config.monitor.check_host)
       end
       -- DEBUG: text_file_writer ("/tmp/2", "Counter: "..counter.."\n")
       svc = s[1].object_id
@@ -201,7 +201,7 @@ function insert(web, n_id, sv_id, c_id, c_name, s_name, sv_name, ip)
       local clause
 
       if web.input.check == 0 then
-         clause = "name1 = '"..config.monitor.host_ping.."'"
+         clause = "name1 = '"..config.monitor.check_host.."'"
       else
          clause = "object_id = "..web.input.check
       end
@@ -344,7 +344,7 @@ function render_add(web, cmp, chk, query, default)
       -- se sv_id == 0 entao eh um host
       if v.sv_id == 0 then 
          cmd = render_form(web:link(url), 
-               { "<INPUT TYPE=HIDDEN NAME=\"check\" value=\"0\">", config.monitor.host_ping, " " } )
+               { "<INPUT TYPE=HIDDEN NAME=\"check\" value=\"0\">", config.monitor.check_host, " " } )
       else
          cmd = render_form(web:link(url), 
                { "Nome:", "<INPUT TYPE=TEXT NAME=\"display\" value=\""..display.."\">", 

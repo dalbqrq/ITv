@@ -100,6 +100,15 @@ end
 
 
 
+
+----------------------------- STRING ----------------------------------
+
+string.toid = function (str)
+   return string.gsub(string.gsub(str,"(%p+)"," "),"(%s+)","_")
+end
+
+
+
 ----------------------------- CSV ----------------------------------
 
 -- Transform an array of strings into CSV 

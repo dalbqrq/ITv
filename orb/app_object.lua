@@ -137,8 +137,12 @@ function make_app_object_table(web, A)
 
    for i, v in ipairs(A) do
       local obj = v.name1
-      --if v.name2 then obj = v.name2.."@"..obj end
-      if v.obj_type ~= 'hst' then obj = v.name2.."@"..obj end
+      if v.obj_type == 'svc' then 
+         obj = v.name2.."@"..obj
+      elseif v.obj_type == 'app' then 
+         obj = v.name2
+      end
+
       web.prefix = "/orb/app_object"
 
          --button_link(v.app_name, web:link("/show/"..v.app_id), "negative"),
