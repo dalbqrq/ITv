@@ -9,7 +9,7 @@ TODO List
    acima dela. Esta funcao eh usada na inclusao de objetos em uma aplicacao em app_aobjecs.lua.
 
 2. colocar filtros para a listagem de Servidores, Serviços e Aplicaçoes na tela de inclusao em
-   app_objects.lua
+   app_content.lua
 
 3. Permitir que seja criada mais de uma checagem (probe) por serviço
 

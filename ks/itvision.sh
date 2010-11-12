@@ -109,6 +109,8 @@ cat << EOF > /etc/apache2/conf.d/itvision.conf
 EOF
 
 cat << EOF > $itvhome/orb/config.lua
+module("config", package.seeall)
+
 app_name = "ITvision"
 
 database = {

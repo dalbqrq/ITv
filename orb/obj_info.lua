@@ -151,7 +151,7 @@ function render_app(web, obj_id, A)
    obj_id = tonumber(obj_id)
    if obj_id == 291 then obj_id = 267 end
 ]]
-   web.prefix = "/orb/gv"
+   web.prefix = "/orb/gviz"
    return web:redirect(web:link("/show/"..A[1].id))
 end
 

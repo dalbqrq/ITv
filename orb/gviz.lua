@@ -33,14 +33,14 @@ end
 ITvision:dispatch_get(list, "/", "/list")
 
 --[[
-   id -> é um 
+   id -> é uma id de aplicacao
 ]]
 function show(web, id)
    local app_name, obj_id
    local apps = app:select_apps()
-   --if id == "/show" and apps[1] then id = apps[1].id end
+   if id == "/show" and apps[1] then id = apps[1].id end
    -- para presentacao Verto
-   if id == "/show" and apps[1] then id = 31 end
+   --if id == "/show" and apps[1] then id = 31 end
    local app = app:select_apps(id)
    local obj = Model.select_app_to_graph(id)
    local rel = Model.select_app_relat_to_graph(id)
@@ -71,8 +71,8 @@ end
 function render_show(web, apps, app_name, app_id, obj, rel, obj_id)
    local res = {}
    local engene = "dot"
-   local engene
    local file_type = "png"
+   local refresh_time = 15
    local imgfile, imglink, mapfile, maplink, dotfile = Graph.make_gv_filename(app_name, file_type)
 
 --[[
@@ -91,7 +91,7 @@ function render_show(web, apps, app_name, app_id, obj, rel, obj_id)
    if obj_id then 
       web.prefix = "/orb/obj_info"
       lnkgeo = web:link("/geotag/app:"..obj_id) 
-      web.prefix = "/orb/gv"
+      web.prefix = "/orb/gviz"
    end
    res[#res+1] = render_bar( render_selector_bar(web, apps, app_id, "/show") )
    res[#res+1] = render_content_header("", nil, nil, nil, lnkgeo)
@@ -104,7 +104,7 @@ function render_show(web, apps, app_name, app_id, obj, rel, obj_id)
       USEMAP="#G",
    }
  
-   return render_layout(res, true)
+   return render_layout(res, refresh_time)
 end
 
 

@@ -229,7 +229,7 @@ function render_list(web, A, msg)
          stract = strings.deactivate
       end
 
-      web.prefix = "/orb/app_object"
+      web.prefix = "/orb/app_content"
       local lnk = web:link("/list/"..v.id)
       web.prefix = "/orb/app"
 

@@ -246,7 +246,8 @@ function render_remove(web, A, O)
    end
 
    res[#res + 1] = p{
-      strings.exclude_quest.." o "..strings.host.."/"..strings.service.." "..obj.." da "..strings.application.." "..A.name.."?",
+      strings.exclude_quest.." o "..strings.host.."/"..strings.service.." "..obj.." da "..
+         strings.application.." "..A.name.."?",
       p{ button_link(strings.yes, web:link("/delete/"..A.id..":"..O.object_id)) },
       p{ button_link(strings.cancel, web:link("/list/"..A.id)) },
    }

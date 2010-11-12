@@ -186,7 +186,6 @@ function make_app_relat_table(web, AR)
    end
 
    return row
-
 end
 
 function render_list(web, id, A, AR)

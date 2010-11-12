@@ -75,17 +75,18 @@ end
     }
 ]]
 menu_itens = {
-	{ 1, "Monitor", "/orb/gv/show" },
-	{ 2, "Lógico", "/orb/gv/show" },
-	{ 2, "Físico", "/orb/gv/show" },
-	{ 2, "Árvore", "/orb/app_tree" },
+	{ 1, "Monitor", "/orb/gviz/show" },
+	{ 2, "Lógico", "/orb/gviz/show" },
+	{ 2, "Físico", "/orb/gviz/show" },
+	--{ 2, "Árvore", "/orb/app_tree" },
 	{ 2, "Aplicações", "/orb/app" },
-	{ 2, "Objetos", "/orb/app_object" },
-	{ 2, "Relacionamento", "/orb/app_relat" },
+	{ 2, "Objetos & Relacionamentos", "/orb/app_content" },
+	--{ 2, "Objetos", "/orb/app_object" },
+	--{ 2, "Relacionamento", "/orb/app_relat" },
 	{ 2, "Checagem", "/orb/probe" },
 	{ 2, "Tipo de Relacionamento", "/orb/app_relat_type" },
-	{ 2, "Teste de Atividade", "/orb/probe" },
-	{ 2, "Relatórios", "/blank.html" },
+	--{ 2, "Teste de Atividade", "/orb/probe" },
+	--{ 2, "Relatórios", "/blank.html" },
 	{ 1, "ServiceDesk", "/servdesk/front/central.php" },
 	{ 2, "Central", "/servdesk/front/central.php" },
 	{ 2, "ticket", "/servdesk/front/ticket.php" },
@@ -165,10 +166,10 @@ function render_menu_frame(inner_html)
 end
 
 
-function render_layout(inner_html, opt_refresh)
+function render_layout(inner_html, refresh_time)
    local refresh = {}
-   if opt_refresh then
-      refresh = meta{ ["http-equiv"] = "Refresh", content = "5", target = "main" }
+   if refresh_time then
+      refresh = meta{ ["http-equiv"]="Refresh", content=refresh_time, target="main" }
    end
 
    return html{
@@ -286,7 +287,8 @@ function render_form_bar(form_content, button_name, url_post, url_reset)
          --td{ width='150px', 
                --td{ width='80', class='center', 
    return form{ name = "input", method = "post", action = url_post,
-      H('table') { class='tab_cadre_fixe', tr{ class='tab_bg_1', 
+      --H('table') { class='tab_cadre_fixe', tr{ class='tab_bg_1', 
+      H('table') { class='tab_cadrehov', tr{ class='tab_bg_1', 
          td{ 
             H('table') { tr{ td{ class='left', form_content } } }
          }, 
@@ -345,7 +347,21 @@ end
       strings.type..": ", select_and_or("type", default_val2), br(),
    }
 ]]
-function render_form(url, t)
+function render_form(url, url_reset, t)
+   url_reset = url_reset or ""
+   return form{
+      name = "input",
+      method = "post",
+      action = url,
+      t,
+      br(),
+      input{ type='submit', value=strings.send,  class='submit' },
+      " ",
+      a{ href=url_reset, img{ src='/pics/reset.png', class='calendrier' } },
+   }
+end
+
+function render_form_default(url, t)
    return form{
       name = "input",
       method = "post",
@@ -409,34 +425,78 @@ function select_option(name, T, value_idx, label_idx, default_value)
 end
 
 
+-- YES or NO
 NoOrYes = {
-      { id = 0, name = strings.no },
-      { id = 1, name = strings.yes },
-   }
-
-AndOrOr = {
-   { id = "and", name = strings.logical_and },
-   { id = "or",  name = strings.logical_or },
+   { id = 0, name = strings.no },
+   { id = 1, name = strings.yes },
 }
 
-PhysicalOrLogical = {
-   { id = "physical", name = strings.physical },
-   { id = "logical",  name = strings.logical},
-}
-
+function name_yes_no(id)
+   return choose_name(NoOrYes, id)
+end
 
 function select_yes_no(name, default)
    return select_option(name, NoOrYes, "id", "name", default)
 end
 
 
+-- AND or OR
+AndOrOr = {
+   { id = "and", name = strings.logical_and },
+   { id = "or",  name = strings.logical_or },
+}
+
+function name_and_or(id)
+   return choose_name(AndOrOr, id)
+end
+
 function select_and_or(name, default)
    return select_option(name, AndOrOr, "id", "name", default)
 end
 
 
+-- PHYSICAL or LOGICAL
+PhysicalOrLogical = {
+   { id = "physical", name = strings.physical },
+   { id = "logical",  name = strings.logical},
+}
+
+function name_physical_logical(id)
+   return choose_name(PhysicalOrLogical, id)
+end
+
 function select_physical_logical(name, default)
    return select_option(name, PhysicalOrLogical, "id", "name", default)
+end
+
+
+--  HOST or SERVICE or APP
+HostOrServiceOrApp = {
+   { id = "hst", name = strings.host },
+   { id = "svc", name = strings.service},
+   { id = "app", name = strings.application},
+}
+
+function name_hst_svc_app(id)
+   return choose_name(HostOrServiceOrApp, id)
+end
+
+function select_hst_svc_app(name, default)
+   return select_option(name, HostOrServiceOrApp, "id", "name", default)
+end
+
+
+function choose_name(opts, id)
+   for _, v in ipairs(opts) do
+      if v.id == id then
+         return v.name
+      end
+   end
+   return "noname"
+end
+
+function select_hst_or_svc_or_app(name, default)
+   return select_option(name, HostOrServiceOrApp, "id", "name", default)
 end
 
 
