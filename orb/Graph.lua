@@ -35,8 +35,8 @@ end
 
 function make_gv_filename(app_name, file_type)
    filename = string.gsub(string.gsub(app_name,"(%p+)"," "),"(%s+)","_")
-   local basepath = config.path.itvision.."/"..config.path.html.."/"..config.path.gv.."/"
-   local urlpath  = "/"..config.path.gv.."/"
+   local basepath = config.path.itvision.."/html/gv/"
+   local urlpath  = "/gv/"
 
    local imgfile = basepath..filename.."."..file_type
    local imglink =  urlpath..filename.."."..file_type

@@ -5,6 +5,7 @@ dbpass=itv
 dbuser=$user
 dbname=itvision
 itvhome=/usr/local/itvision
+instance=IMPA
 
 function install_pack() {
 	apt-get -y install $1
@@ -107,15 +108,35 @@ cat << EOF > /etc/apache2/conf.d/itvision.conf
 </VirtualHost>
 EOF
 
+cat << EOF > $itvhome/orb/config.lua
+app_name = "ITvision"
 
-sed -i -e 's|instance_name = ".*"|instance_name = "default"|g' \
-	-e 's|dbname = ".*",|dbname = "'$dbname'",|g' \
-	-e 's|dbuser = ".*",|dbuser = "'$dbuser'",|g' \
-	-e 's|dbpass = ".*",|dbpass = "'$dbpass'",|g' \
-	-e 's|dir        = ".*",|dir        = "/etc/nagios3",|g' \
-	-e 's|bp_dir     = ".*",|bp_dir     = "/etc/nagios3/nagiosbp",|g' \
-	-e 's|script     = ".*",|script     = "/etc/init.d/nagios3",|g' \
-	-e 's|bp_script  = ".*",|bp_script  = "/etc/init.d/ndoutils",|g' $itvhome/orb/config.lua
+database = {
+        instance_id = 1,
+        instance_name = "$instance",
+        dbname = "$dbname",
+        dbuser = "$dbuser",
+        dbpass = "$dbpass",
+        driver = "mysql",
+}
+
+monitor = {
+        dir        = "/etc/nagios3",
+        bp_dir     = "/usr/local/nagiosbp",
+        script     = "/etc/init.d/nagios3",
+        bp_script  = "/etc/init.d/ndoutils",
+        bp2cfg     = "bp2cfg",
+        check_host = "HOST_ALIVE",
+        check_app  = "BUSPROC_SERVICE",
+        cmd_app    = "BUSPROC_STATUS",
+}
+
+path = {
+        itvision = "$itvhome",
+}
+
+language = "pt_BR"
+EOF
 
 
 cd /home/$user
@@ -126,12 +147,12 @@ chown -R $user.$user bin
 
 cat << EOF > $itvhome/bin/dbconf
 dbuser=$dbuser
-dbpass=itv
+dbpass=$dbpass
 dbname=$dbname
 EOF
 
 mkdir $itvhome/html/gv
-echo gv >> $itvhome/.git/info/exclude
+printf "html/gv\norb/config.lua\nbin/dbconf\n" >> $itvhome/.git/info/exclude
 
 
 # --------------------------------------------------
