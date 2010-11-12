@@ -73,6 +73,7 @@ function make_content(obj, rel)
             url   = "/orb/obj_info/"..v.ao_type.."/"..v.obj_id
             shape = "hexagon"
             shape = "diamond"
+            shape = "invhouse"
          end
 
 --[[ TODO: 5
@@ -93,7 +94,7 @@ c.id = n.items_id and
 
          table.insert(content, node{name, shape=shape, height=0.8, width=1, fontsize=12.,
                       fontname="Helvetica", label=label, color="black", fillcolor=color ,URL=url ,target="_self",
-                      nodesep=0.05, style="rounded,bold,filled,solid", penwidth=2})
+                      nodesep=0.05, style="bold,filled,solid", penwidth=2})
       end
    end
 
@@ -150,7 +151,7 @@ function render(app_name, file_type, engene, content)
    local imgfile, imglink, lnkfile, maplink, dotfile = make_gv_filename(app_name, file_type)
 
    local g = digraph{"G",
-      size="8.5,8.5",
+      size="7.0,7.0",
       node = { nodesep=.5, style="rounded" },
       unpack(content)
    }
