@@ -78,7 +78,7 @@ function render_show(web, apps, app_name, app_id, obj, rel, obj_id)
    if string.find(app_name, "AvBrasil") then
       engene = "dot"
    else
-      engene = "circo"
+      engene = "dot"
    end
 
    local content = Graph.make_content(obj, rel)
