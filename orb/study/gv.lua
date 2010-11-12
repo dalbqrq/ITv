@@ -53,7 +53,6 @@ function create_graph_file(content, filename)
    --   compound = "1",
    --   rankdir = "LR",
       size="6.5,6.5",
-      nodesep=0.05,
 
       unpack(content)
    }

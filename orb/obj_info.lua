@@ -17,10 +17,10 @@ local app_object = Model.itvision:model "app_object"
 
 -- Esta funcao recebe um ou outro parametro, nunca os dois
 function app:select(id, obj_id)
-   local clause1, clause2 = "", ""
-   if id then clause1 = "id = "..id end
-   if obj_id then clause2 = "service_object_id = "..obj_id end
-   return self:find_all(clause)
+   local clause = ""
+   if id then clause = "id = "..id end
+   if obj_id then clause = "service_object_id = "..obj_id end
+   return Model.query("itvision_app", clause)
 end
 
 
@@ -129,6 +129,7 @@ end
 
 
 function render_app(web, obj_id, A)
+--[[
    local res = {}
    local row = {}
    local lnkgeo = web:link("/geotag/app:"..obj_id)
@@ -137,12 +138,6 @@ function render_app(web, obj_id, A)
    for i, v in pairs(A[1]) do
       row[#row+1] = {
          i, v,
---[[
-         a{ href=lnk, v.name },
-         strings["logical_"..v.type],
-         NoOrYes[v.is_active+1].name,
-         button_link(strings.edit, web:link("/edit/"..v.id..":"..v.name..":"..v.type)),
-]]
       }
    end
 
@@ -150,6 +145,14 @@ function render_app(web, obj_id, A)
    res[#res+1] = render_table(row, nil)
 
    return render_layout(res)
+   --return geotag(web, "app", obj_id)
+]]
+--[[
+   obj_id = tonumber(obj_id)
+   if obj_id == 291 then obj_id = 267 end
+]]
+   web.prefix = "/orb/gv"
+   return web:redirect(web:link("/show/"..A[1].id))
 end
 
 
@@ -168,7 +171,7 @@ function render_geotag(web, obj_id, objtype, A)
          marker_maker = marker_maker .. "var marker"..i.." = new google.maps.Marker({ position: location"..i..", map: map, icon: "..icon.." });\n"
          marker_maker = marker_maker .. "//marker"..i..".setTitle(\"VERTO\");\n"
          marker_maker = marker_maker .. "var infowindow"..i.." = new google.maps.InfoWindow( \n"
-         marker_maker = marker_maker .. "{ content: \""..v.c_name.."<p><a href='www.impa.br'>Link ITvision</a>\", size: new google.maps.Size(50,50) });\n"
+         marker_maker = marker_maker .. "{ content: \""..v.c_name.."<br>"..v.n_ip.."<br>Funcionmaneto: "..service_alert[tonumber(v.ss_current_state)].name.."<br><a href='/servdesk/front/computer.form.php?id="..v.c_id.."'>CMDB</a>\", size: new google.maps.Size(50,50) });\n"
          marker_maker = marker_maker .. "google.maps.event.addListener(marker"..i..", 'click', function() { infowindow"..i..".open(map,marker"..i.."); });\n"
       end
    end

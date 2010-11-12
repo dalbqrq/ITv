@@ -92,6 +92,13 @@ table.toString = function (t)
    return s
 end
 
+----------------------------- STRING ----------------------------------
+
+string.toid = function (str)
+   return string.gsub(string.gsub(str,"(%p+)"," "),"(%s+)","_")
+end
+
+
 
 ----------------------------- CSV ----------------------------------
 

@@ -165,11 +165,17 @@ function render_menu_frame(inner_html)
 end
 
 
-function render_layout(inner_html)
+function render_layout(inner_html, opt_refresh)
+   local refresh = {}
+   if opt_refresh then
+      refresh = meta{ ["http-equiv"] = "Refresh", content = "5", target = "main" }
+   end
+
    return html{
       head{ 
          title("ITvision"),
          meta{ ["http-equiv"] = "Content-Type", content = "text/html; charset=utf-8" },
+         refresh,
          link{ href="/pics/favicon.ico", rel="shortcut icon" },
          link{ href="/css/style.css", media="screen", rel="stylesheet", type="text/css" },
          link{ href="/css/glpi_styles.css", media="screen", rel="stylesheet", type="text/css" },
@@ -184,9 +190,11 @@ end
 
 function render_map(marker_maker, center, google_key)
    marker_maker = marker_maker or [[ function marker_maker() {} ]]
+   --center = center or "-22.966849,-43.243217" -- IMPA
    --center = center or "-22.865104,-43.430157" -- Av Bradil
-   center = center or "-22.966849,-43.243217" -- IMPA
-   google_key = google_key or "ABQIAAAAsqOIUfpoX_G_Pw0Ar48BRhS64UBg-UePRXM9viX4hk4iiwv9HRSiOpB5WKHSB9ZBy9mHRo7Ycwp9JA"
+   center = center or "-22.88604,-43.229721" -- Av Brasil - Celula 01
+   --google_key = google_key or "ABQIAAAAsqOIUfpoX_G_Pw0Ar48BRhS64UBg-UePRXM9viX4hk4iiwv9HRSiOpB5WKHSB9ZBy9mHRo7Ycwp9JA" --www.impa.br
+   google_key = google_key or "ABQIAAAAsqOIUfpoX_G_Pw0Ar48BRhRtyMmS1TXEK_DXFnd23B1n8zvUnRT_9hDq4-PHCmE33vrSdHVrdUyjgw" --itv.impa.br
 
    java_code = [[
 // http://code.google.com/apis/maps/documentation/javascript/events.html
@@ -201,7 +209,7 @@ var map;
 function initialize() {
   var myLatlng = new google.maps.LatLng(]]..center..[[);
   var myOptions = {
-    zoom: 13,
+    zoom: 15,
     center: myLatlng,
     //mapTypeId: google.maps.MapTypeId.ROADMAP
     mapTypeId: google.maps.MapTypeId.HYBRID
@@ -293,7 +301,7 @@ function render_form_bar(form_content, button_name, url_post, url_reset)
                } 
             } }
          } 
-      } }, br() 
+      } } --, br() 
    }
 end
 
@@ -316,7 +324,7 @@ function render_selector_bar(web, A, id, path)
       res[#res+1] = option{ selected=selected, value=url, v.name }
    end
 
-   return form{ H("select"){ ONCHANGE="location = this.options[this.selectedIndex].value;", res } }
+   return { form{ H("select"){ ONCHANGE="location = this.options[this.selectedIndex].value;", res } } }
 
    
 end

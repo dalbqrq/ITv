@@ -30,7 +30,11 @@ TODO List
 
 9. Colocar refresh nas paginas com status app, svc e hsts.
 
+10. IMPORTANTE!!! há um bug relacionado aos services das apps, que mistura os business services  
+    habilitados e desabilitados. Parece que o itvision_monitor usa o desabilitado!!!
 
+11. O service_object_id deve ser descoberto retirando-se a possibilidade de 
+    de se pegar o business_process_detail (servico desabilitado) da aplicacao.
 
 ==========================================================
 

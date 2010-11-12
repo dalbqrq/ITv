@@ -50,21 +50,27 @@ end
 
 function make_content(obj, rel)
    local content = {}
+   local use_relat_label = true
+   local show_ip = false
 
    if obj[1] then
    for _,v in ipairs(obj) do
          local name, shape  = "", ""
          if v.ao_type == 'hst' then
             name = v.name1
-            label = v.name1..":"..v.curr_state
+            if not show_ip then name = string.gsub(name,"-(.+)", "") end
+            label = v.name1  -- DEBUG ..":"..v.curr_state
+            url   = "/orb/obj_info/"..v.ao_type.."/"..v.obj_id
             shape = "box"
          elseif v.ao_type == 'svc' then
             name = v.name1.."-"..v.name2
-            label = v.name2..":"..v.curr_state
+            label = v.name2  -- DEBUG ..":"..v.curr_state
+            url   = "/orb/obj_info/"..v.ao_type.."/"..v.obj_id
             shape = "ellipse"
          elseif v.ao_type == 'app' then
             name = v.name2
-            label = v.name2..":"..v.curr_state
+            label = v.name2  --DEBUG ..":"..v.curr_state
+            url   = "/orb/obj_info/"..v.ao_type.."/"..v.obj_id
             shape = "hexagon"
             shape = "diamond"
          end
@@ -82,11 +88,10 @@ c.id = n.items_id and
 
 ]]
          color = set_color(v.curr_state, v.ao_type)
-         url   = "/orb/obj_info/"..v.ao_type.."/"..v.obj_id
 
          name = string.gsub(name, "%p", "")
 
-         table.insert(content, node{name, shape=shape, height=1, width=1, fontsize=20.,
+         table.insert(content, node{name, shape=shape, height=0.8, width=1, fontsize=12.,
                       fontname="Helvetica", label=label, color="black", fillcolor=color ,URL=url ,target="_self",
                       nodesep=0.05, style="rounded,bold,filled,solid", penwidth=2})
       end
@@ -99,6 +104,7 @@ c.id = n.items_id and
             from_name = v.o1_name2
          elseif v.o1_name2 == config.monitor.host_ping then
             from_name = v.o1_name1
+            if not show_ip then from_name = string.gsub(from_name,"-(.+)", "") end
          else
             from_name = v.o1_name1.."-"..v.o1_name2
          end
@@ -107,6 +113,7 @@ c.id = n.items_id and
             to_name = v.o2_name2
          elseif v.o2_name2 == config.monitor.host_ping then
             to_name = v.o2_name1
+            if not show_ip then to_name = string.gsub(to_name,"-(.+)", "") end
          else
             to_name = v.o2_name1.."-"..v.o2_name2
          end
@@ -114,7 +121,13 @@ c.id = n.items_id and
          from_name = string.gsub(from_name, "%p", "")
          to_name = string.gsub(to_name, "%p", "")
 
-         table.insert(content, edge{ from_name, to_name, label=v.art_name } )
+         if use_relat_label then
+            relat_label = v.art_name
+         else
+            relat_label = ""
+         end
+
+         table.insert(content, edge{ from_name, to_name, label=relat_label } )
       end
    end
 
@@ -137,8 +150,8 @@ function render(app_name, file_type, engene, content)
    local imgfile, imglink, lnkfile, maplink, dotfile = make_gv_filename(app_name, file_type)
 
    local g = digraph{"G",
-      size="6.5,6.5",
-      node = { nodesep=1.05, style="rounded,bold,dotted" },
+      size="8.5,8.5",
+      node = { nodesep=.5, style="rounded" },
       unpack(content)
    }
 

@@ -183,13 +183,17 @@ function activate(web, id, flag)
          local APPS = app:select()
          activate_all_apps(APPS)
 
-         local s = services:select(nil, "display_name = '"..A[1].name.."'")
+-- TODO: 11  - o service_object_id deve ser descoberto retirando-se a possibilidade de 
+--             de se pegar o business_process_detail (servico desabilitado) da aplicacao.
+
+
+         local s = services:select(nil, "display_name = '"..string.toid(A[1].name).."'")
          -- caso host ainda nao tenha sido incluido aguarde e tente novamente
          counter = 0
          while s[1] == nil do
             counter = counter + 1
             for i = 1,loop do x = i/2 end -- aguarde...
-            s = services:select(nil, "display_name = '"..A[1].name.."'")
+            s = services:select(nil, "display_name = '"..string.toid(A[1].name).."'")
          end
          local svc = { id = A[1].id, service_object_id = s[1].service_object_id }
          app:update(svc)
