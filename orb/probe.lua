@@ -343,10 +343,10 @@ function render_add(web, cmp, chk, query, default)
 
       -- se sv_id == 0 entao eh um host
       if v.sv_id == 0 then 
-         cmd = render_form(web:link(url), nil
+         cmd = render_form(web:link(url), nil,
                { "<INPUT TYPE=HIDDEN NAME=\"check\" value=\"0\">", config.monitor.check_host, " " } )
       else
-         cmd = render_form(web:link(url), nil
+         cmd = render_form(web:link(url), nil,
                { "Nome:", "<INPUT TYPE=TEXT NAME=\"display\" value=\""..display.."\">", 
                select_option("check", chk, "object_id", "name1", default), " " } )
       end
