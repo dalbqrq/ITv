@@ -31,7 +31,7 @@ end
 ----------------------------- SERVICES ----------------------------------
 
 function get_bp_id () -- usado para selecionar os 'services' que sao aplicacoes
-   local content = query ("nagios_objects", "name1 = 'check_bp_status'", extra_, columns_)
+   local content = query ("nagios_objects", "name1 = '"..config.monitor.cmd_app.."'", extra_, columns_)
    return content[1].object_id
 end
 
