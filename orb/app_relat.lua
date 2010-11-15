@@ -2,10 +2,10 @@
 
 -- includes & defs ------------------------------------------------------
 require "util"
-require "View"
-
+require "monitor_util"
 require "orbit"
 require "Model"
+require "View"
 module(Model.name, package.seeall,orbit.new)
 
 local app = Model.itvision:model "app"
@@ -171,11 +171,9 @@ function make_app_relat_table(web, AR)
    local row = {}
 
    for i, v in ipairs(AR) do
-      local from = v.from_name1
-      local to = v.to_name1
+      local from = make_obj_name(v.from_name1, v.from_name2)
+      local to   = make_obj_name(v.to_name1, v.to_name2)
 
-      if v.from_name2 then from = v.from_name2.."@"..from end
-      if v.to_name2 then to = v.to_name2.."@"..to end
       if v.connection_type == "physical" then contype = strings.physical else contype = strings.logical end
 
       row[#row+1] = { 
@@ -263,8 +261,9 @@ function render_add(web, id, A, AR, AL, RT, msg)
    local opt_from = {}
    if AL[1] then
       for i,v in ipairs(AL) do
-         if v.name2 then ic = v.name2.."@"..v.name1 else ic = v.name1 end
-            opt_from[#opt_from+1] = option{ value=v.object_id, ic }
+         --if v.name2 then ic = v.name2.."@"..v.name1 else ic = v.name1 end
+         ic = make_obj_name(v.name1, v.name2)
+         opt_from[#opt_from+1] = option{ value=v.object_id, ic }
       end
    end
    --local from = H("select") { multiple="multiple", size=list_size, name="from", opt_from, }
@@ -281,8 +280,9 @@ function render_add(web, id, A, AR, AL, RT, msg)
    local opt_to = {}
    if AL[1] then
       for i,v in ipairs(AL) do
-         if v.name2 then ic = v.name2.."@"..v.name1 else ic = v.name1 end
-            opt_to[#opt_to+1] = option{ value=v.object_id, ic }
+         --if v.name2 then ic = v.name2.."@"..v.name1 else ic = v.name1 end
+         ic = make_obj_name(v.name1, v.name2)
+         opt_to[#opt_to+1] = option{ value=v.object_id, ic }
       end
    end
    local to = H("select") { size=list_size, name="to", opt_to }
@@ -303,22 +303,21 @@ end
 function render_remove(web, A, AR)
    local res = {}
    local url = ""
+   local obj1, obj2
 
    if A then
       A = A[1]
       if AR then
          AR = AR[1]
-         obj1 = AR.from_name1
-         if AR.from_name2 then obj1 = AR.from_name2.."@"..obj1 end
-         obj2 = AR.to_name1
-         if AR.to_name2 then obj2 = AR.to_name2.."@"..obj2 end
+         obj1 = make_obj_name(AR.from_name1, AR.from_name2)
+         obj2 = make_obj_name(AR.to_name1,   AR.to_name2)
       end
       url_ok = "/delete/"..A.app_id..":"..AR.from_object_id..":"..AR.to_object_id
       url_cancel = "/list"
    end
 
-   res[#res + 1] = strings.exclude_quest.." "..strings.relation.." \""..obj1.." -> "..obj2.."\" "..strings.ofthe.." "
-         ..strings.application.." \""..A.name.."\"?"
+   res[#res + 1] = strings.exclude_quest.." "..strings.relation.." \""..obj1.." -> "..obj2.."\" "
+         ..strings.ofthe.." "..strings.application.." \""..A.name.."\"?"
    res[#res + 1] = button_link(strings.yes, 
          web:link("/delete/"..A.app_id..":"..AR.from_object_id..":"..AR.to_object_id))
    res[#res + 1] = button_link(strings.cancel, web:link("/list/"..A.app_id))

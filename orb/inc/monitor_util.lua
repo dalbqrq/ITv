@@ -6,6 +6,27 @@ require "Model"
 local cfg_dir = config.monitor.dir.."/etc/itvision/"
 
 
+----------------------------- MAKE NAMES ----------------------------------
+
+function make_obj_name(host, service)
+   local name = ""
+
+   if string.find(host,config.monitor.check_app) == nil then 
+       name = host
+   end
+   if service ~= config.monitor.check_host then
+      if name ~= "" then
+         name = "@"..name
+      else
+         name = " (app)"..name
+      end
+      name = service..name
+   end
+
+   return name
+end
+
+
 ----------------------------- CONFIG FILES ----------------------------------
 
 function insert_host_cfg_file (hostname, alias, ip)
