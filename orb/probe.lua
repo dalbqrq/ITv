@@ -134,8 +134,8 @@ ITvision:dispatch_get(add, "/add/(%d+):(%d+):(%d+):(%d+)")
 ]]
 function insert(web, n_id, sv_id, c_id, c_name, s_name, sv_name, ip)
    -- hostname passa aqui a ser uma composicao do proprio hostname com o ip a ser monitorado
-   local hostname = string.gsub(string.gsub(c_name,"(%p+)"," ").."-"..ip,"(%s+)","_")
-   local software = string.gsub(string.gsub(s_name.." "..sv_name,"(%p+)"," "),"(%s+)","_")
+   local hostname = string.gsub(string.toid(c_name).."-"..ip,"(%s+)","_")
+   local software = string.toid(s_name.." "..sv_name)
    local cmd, hst, svc, dpl, chk, h, s
    local msg = ""
    local content

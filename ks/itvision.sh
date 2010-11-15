@@ -278,8 +278,10 @@ sed -i.orig -e "139a \\
 # --------------------------------------------------
 wget -P /tmp https://forge.indepnet.net/attachments/download/656/glpi-0.78.tar.gz
 tar zxf /tmp/glpi-0.78.tar.gz -C /usr/local
-mv /usr/local/glpi /usr/local/servdesk
-chown -R $user.$user /usr/local/servdesk
+cp -r /usr/local/glpi /usr/local/servdesk
+chown -R $user.$user /usr/local/glpi /usr/local/servdesk
+
+# TODO: DUPLICAR CORRETAMENTE O GLPI
 
 echo "<?php
  class DB extends DBmysql {

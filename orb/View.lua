@@ -324,7 +324,7 @@ end
 
 
 function render_bar(t)
-   return { H("table") { class='tab_cadre_fixe', tr{ class='tab_bg_1', td{ t } } }, br() }
+   return { H("table") { class='tab_cadre_fixe', tr{ class='tab_bg_1', td{ t } } } }
 end
 
 

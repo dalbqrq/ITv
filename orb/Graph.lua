@@ -50,21 +50,24 @@ end
 
 function make_content(obj, rel)
    local content = {}
+   local use_relat_label = false
+   local show_ip = false
 
    if obj[1] then
    for _,v in ipairs(obj) do
          local name, shape  = "", ""
          if v.ao_type == 'hst' then
             name = v.name1
-            label = v.name1..":"..v.curr_state
+            if not show_ip then name = string.gsub(name,"-(.+)", "") end
+            label = v.name1  -- DEBUG ..":"..v.curr_state
             shape = "box"
          elseif v.ao_type == 'svc' then
             name = v.name1.."-"..v.name2
-            label = v.name2..":"..v.curr_state
+            label = v.name2  -- DEBUG ..":"..v.curr_state
             shape = "ellipse"
          elseif v.ao_type == 'app' then
             name = v.name2
-            label = v.name2..":"..v.curr_state
+            label = v.name2  -- DEBUG ..":"..v.curr_state
             shape = "hexagon"
             shape = "diamond"
          end
@@ -99,6 +102,7 @@ c.id = n.items_id and
             from_name = v.o1_name2
          elseif v.o1_name2 == config.monitor.host_ping then
             from_name = v.o1_name1
+            if not show_ip then from_name = string.gsub(from_name,"-(.+)", "") end
          else
             from_name = v.o1_name1.."-"..v.o1_name2
          end
@@ -107,6 +111,7 @@ c.id = n.items_id and
             to_name = v.o2_name2
          elseif v.o2_name2 == config.monitor.host_ping then
             to_name = v.o2_name1
+            if not show_ip then to_name = string.gsub(to_name,"-(.+)", "") end
          else
             to_name = v.o2_name1.."-"..v.o2_name2
          end
@@ -114,7 +119,13 @@ c.id = n.items_id and
          from_name = string.gsub(from_name, "%p", "")
          to_name = string.gsub(to_name, "%p", "")
 
-         table.insert(content, edge{ from_name, to_name, label=v.art_name } )
+         if use_relat_label then
+            relat_label = v.art_name
+         else
+            relat_label = ""
+         end
+
+         table.insert(content, edge{ from_name, to_name, label=relat_label } )
       end
    end
 
