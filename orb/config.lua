@@ -21,8 +21,9 @@ monitor = {
 	bp2cfg     = "bp2cfg",
 	bp_script  = "/etc/init.d/ndoutils",
 	host_ping  = "HOST_PING",
-	--check_ping = "PING",
-	check_app  = "business_processes"
+	check_app  = "business_processes",
+	--check_app  = "BUSPROC_SERVICE",
+        cmd_app    = "BUSPROC_STATUS",
 }
 
 language = "pt_BR"

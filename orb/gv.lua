@@ -70,16 +70,18 @@ end
 
 function render_show(web, apps, app_name, app_id, obj, rel, obj_id)
    local res = {}
-   --local engene = "dot"
+   local engene = "dot"
    local engene
    local file_type = "png"
    local imgfile, imglink, mapfile, maplink, dotfile = Graph.make_gv_filename(app_name, file_type)
 
+--[[
    if string.find(app_name, "AvBrasil") then
       engene = "dot"
    else
       engene = "circo"
    end
+]]
 
    local content = Graph.make_content(obj, rel)
    Graph.render(app_name, file_type, engene, content)
