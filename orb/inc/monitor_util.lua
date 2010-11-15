@@ -123,8 +123,12 @@ function activate_app(app, objs, flag)
 
    ref = string.gsub(string.gsub(app.name,"(%p+)","_")," ","_")
 
+--[[
    s = "\n"..app.name.." = "..s.."\n"
    s = s.."display "..flag..";"..ref..";"..app.name.."\n\n"
+]]
+   s = "\n"..ref.." = "..s.."\n"
+   s = s.."display "..flag..";"..ref..";"..ref.."\n\n"
 
    --text_file_writer(config.monitor.bp_dir.."/etc/apps/"..file_name..".conf", s)
    --insert_bp_cfg_file(file_name)
@@ -193,8 +197,8 @@ cmds = {
    SWAP      = { def="$USER1$/check_swap -w $ARG1$ -c $ARG2$", default=nil },
    USERS     = { def="$USER1$/check_users -w $ARG1$ -c $ARG2$", default=nil },
    NT        = { def="$USER1$/check_nt -H $HOSTADDRESS$ -p 12489 -v $ARG1$ $ARG2$", default=nil },
-   PING      = { def="$USER1$/check_ping -H $HOSTADDRESS$ -w $ARG1$ -c $ARG2$ -p 5", default="!100.0,20%!500.0,60%" },
-   HOST_PING = { def="$USER1$/check_ping -H $HOSTADDRESS$ -w $ARG1$ -c $ARG2$ -p 5", default="!100.0,20%!500.0,60%" },
+   PING      = { def="$USER1$/check_ping -H $HOSTADDRESS$ -w $ARG1$ -c $ARG2$ -p 5", default="!400.0,20%!999.0,70%" },
+   HOST_PING = { def="$USER1$/check_ping -H $HOSTADDRESS$ -w $ARG1$ -c $ARG2$ -p 5", default="!400.0,20%!999.0,70%" },
    POP       = { def="$USER1$/check_pop -H $HOSTADDRESS$ $ARG1$", default=nil },
    SMTP      = { def="$USER1$/check_smtp -H $HOSTADDRESS$ $ARG1$", default=nil },
    SNMP      = { def="$USER1$/check_snmp -H $HOSTADDRESS$ $ARG1$", default=nil },

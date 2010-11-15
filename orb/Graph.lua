@@ -50,7 +50,7 @@ end
 
 function make_content(obj, rel)
    local content = {}
-   local use_relat_label = false
+   local use_relat_label = true
    local show_ip = false
 
    if obj[1] then
@@ -60,6 +60,7 @@ function make_content(obj, rel)
             name = v.name1
             if not show_ip then name = string.gsub(name,"-(.+)", "") end
             label = v.name1  -- DEBUG ..":"..v.curr_state
+            url   = "/orb/obj_info/"..v.ao_type.."/"..v.obj_id
             shape = "box"
          elseif v.ao_type == 'svc' then
             name = v.name1.."-"..v.name2
@@ -67,9 +68,11 @@ function make_content(obj, rel)
             shape = "ellipse"
          elseif v.ao_type == 'app' then
             name = v.name2
-            label = v.name2  -- DEBUG ..":"..v.curr_state
+            label = v.name2  --DEBUG ..":"..v.curr_state
+            url   = "/orb/obj_info/"..v.ao_type.."/"..v.obj_id
             shape = "hexagon"
             shape = "diamond"
+            shape = "invhouse"
          end
 
 --[[ TODO: 5
@@ -85,13 +88,12 @@ c.id = n.items_id and
 
 ]]
          color = set_color(v.curr_state, v.ao_type)
-         url   = "/orb/obj_info/"..v.ao_type.."/"..v.obj_id
 
          name = string.gsub(name, "%p", "")
 
-         table.insert(content, node{name, shape=shape, height=1, width=1, fontsize=20.,
+         table.insert(content, node{name, shape=shape, height=0.8, width=1, fontsize=12.,
                       fontname="Helvetica", label=label, color="black", fillcolor=color ,URL=url ,target="_self",
-                      nodesep=0.05, style="rounded,bold,filled,solid", penwidth=2})
+                      nodesep=0.05, style="bold,filled,solid", penwidth=2})
       end
    end
 
@@ -148,8 +150,8 @@ function render(app_name, file_type, engene, content)
    local imgfile, imglink, lnkfile, maplink, dotfile = make_gv_filename(app_name, file_type)
 
    local g = digraph{"G",
-      size="6.5,6.5",
-      node = { nodesep=1.05, style="rounded,bold,dotted" },
+      size="7.0,7.0",
+      node = { nodesep=.5, style="rounded" },
       unpack(content)
    }
 

@@ -130,6 +130,9 @@ dbpass=itv
 dbname=$dbname
 EOF
 
+mkdir $itvhome/html/gv
+echo gv >> $itvhome/.git/info/exclude
+
 
 # --------------------------------------------------
 # GRAPHVIZ

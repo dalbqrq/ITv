@@ -17,10 +17,10 @@ local app_object = Model.itvision:model "app_object"
 
 -- Esta funcao recebe um ou outro parametro, nunca os dois
 function app:select(id, obj_id)
-   local clause1, clause2 = "", ""
-   if id then clause1 = "id = "..id end
-   if obj_id then clause2 = "service_object_id = "..obj_id end
-   return self:find_all(clause)
+   local clause = ""
+   if id then clause = "id = "..id end
+   if obj_id then clause = "service_object_id = "..obj_id end
+   return Model.query("itvision_app", clause)
 end
 
 
@@ -129,6 +129,7 @@ end
 
 
 function render_app(web, obj_id, A)
+--[[
    local res = {}
    local row = {}
    local lnkgeo = web:link("/geotag/app:"..obj_id)
@@ -137,12 +138,6 @@ function render_app(web, obj_id, A)
    for i, v in pairs(A[1]) do
       row[#row+1] = {
          i, v,
---[[
-         a{ href=lnk, v.name },
-         strings["logical_"..v.type],
-         NoOrYes[v.is_active+1].name,
-         button_link(strings.edit, web:link("/edit/"..v.id..":"..v.name..":"..v.type)),
-]]
       }
    end
 
@@ -150,6 +145,14 @@ function render_app(web, obj_id, A)
    res[#res+1] = render_table(row, nil)
 
    return render_layout(res)
+   --return geotag(web, "app", obj_id)
+]]
+--[[
+   obj_id = tonumber(obj_id)
+   if obj_id == 291 then obj_id = 267 end
+]]
+   web.prefix = "/orb/gv"
+   return web:redirect(web:link("/show/"..A[1].id))
 end
 
 
