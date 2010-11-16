@@ -20,7 +20,7 @@ function select_host_object (cond_, extra_, columns_, app_id)
 
    if cond_ then cond_ = exclude.." and "..cond_ else cond_ = exclude end
 
-   cond_ = cond_ .. " and o.name1 NOT LIKE 'business_processes%' " -- retira "dummy hosts" criados pelo BP
+   cond_ = cond_ .. " and o.name1 NOT LIKE '"..config.monitor.check_app.."%' " -- retira "dummy hosts" criados pelo BP
    cond_ = cond_ .. " and o.name1 <> 'dummy' " -- retira "dummy hosts" criados pela inicializacao
    local content = query ("nagios_hosts h, nagios_objects o ", "h.host_object_id = o.object_id"..cond_,
       extra_, columns_)

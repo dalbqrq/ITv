@@ -27,7 +27,7 @@ function objects:select(name1, name2)
    if name1 ~= nil then
       clause = " name1 = '"..name1
    else
-      clause = " name1 like 'business_processes%' "
+      clause = " name1 like '"..config.monitor.check_app.."%' "
    end
 
    if name2 ~= nil then
