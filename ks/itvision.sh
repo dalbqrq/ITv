@@ -2,379 +2,466 @@
 
 user=itv
 dbpass=itv
+dbuser=$user
+dbname=itvision
+itvhome=/usr/local/itvision
+instance=IMPA
 
-function insta() {
-	apt-get -y install $*
+function install_pack() {
+	apt-get -y install $1
 }
 
-function restart() {
-	invoke-rc.d $1 restart
-}
+# --------------------------------------------------
+# INSTALL UBUNTU NATIVE PACKAGES VIA apt-get
+# --------------------------------------------------
+apt-get -y update
+apt-get -y upgrade
+
+install_pack openssh-server
+install_pack build-essential
+install_pack locate
+install_pack apache2
+install_pack libapache2-mod-php5
+install_pack libgd2-xpm-dev
+install_pack graphviz
+install_pack graphviz-dev
+install_pack unzip
+install_pack wget
+install_pack vim
+install_pack libreadline6-dev
+install_pack lua5.1
+install_pack liblua5.1-0
+install_pack liblua5.1-0-dev
+install_pack luarocks
+install_pack libcurl3
+install_pack uuid-dev
+install_pack mysql-common
+install_pack mysql-server
+install_pack liblua5.1-sql-mysql-dev
+install_pack git-core
+install_pack nagios3
+install_pack nagios-nrpe-plugin
+install_pack nagios-nrpe-server
+install_pack ndoutils-nagios3-mysql
+install_pack php5-mysql # OCSNG
+install_pack perl # OCSNG
+install_pack libapache2-mod-perl2 # OCSNG
+install_pack libxml-simple-perl # OCSNG
+install_pack libcompress-zlib-perl # OCSNG
+install_pack libdbi-perl # OCSNG
+install_pack libdbd-mysql-perl # OCSNG
+install_pack libcgi-simple-perl # OCSNG
+install_pack php5 # OCSNG
+install_pack php5-gd # OCSNG
+install_pack libapache-dbi-perl # OCSNG
+install_pack libnet-ip-perl # OCSNG
+install_pack libsoap-lite-perl # OCSNG
+install_pack libc6-dev # OCSNG
+install_pack libcalendar-simple-perl
+install_pack autoconf
+install_pack snmpd
+#install_pack cacti
+install_pack libgd-gd2-perl
+install_pack perlmagick
+install_pack librrds-perl
+install_pack nagiosgrapher
+
+# --------------------------------------------------
+# STOP ALL PROCESSES
+# --------------------------------------------------
+/usr/sbin/invoke-rc.d ndoutils stop
+/usr/sbin/invoke-rc.d nagios3 stop
+/usr/sbin/invoke-rc.d nagios-nrpe-server stop
+/usr/sbin/invoke-rc.d apache2 stop
+rm -rf /var/cache/nagios3/ndo.sock
 
 
 # --------------------------------------------------
-# Install ubuntu native pachages via apt-get
-#
-apt-get update
-apt-get upgrade
-apt-get autoremove
-
-insta openssh-server
-insta build-essential
-insta locate
-insta apache2
-insta libapache2-mod-php5
-insta libgd2-xpm-dev
-insta graphviz graphviz-dev
-insta unzip
-insta wget
-insta vim
-insta libreadline6-dev
-#insta sysutils
-insta lua5.1 liblua5.1-0 liblua5.1-0-dev 
-insta libcurl3 libmysqlclient15off uuid-dev mysql-common mysql-server 
-insta liblua5.1-sql-mysql-dev
-insta libmysqlclient15-dev
-
-
-
+# ITVISION
 # --------------------------------------------------
-# LUA ROCKS
-#
-# Do not install it from apt-get. It is broken! #insta luarocks
-#
-wget -P /tmp http://luarocks.org/releases/luarocks-2.0.2.tar.gz
-tar zxf /tmp/luarocks-2.0.2.tar.gz -C /usr/src
-cd /usr/src/luarocks-2.0.2/
-./configure --prefix=/usr --sysconfdir=/etc/luarocks --with-lua-include=/usr/include/lua5.1
-make
-make install
-cd /usr/include
-for f in `ls lua5.1/*`; do ln -s  $f; done
-wget -P /tmp http://luaforge.net/frs/download.php/1410/compat-5.1r5.tar.gz
-tar zxf /tmp/compat-5.1r5.tar.gz -C /usr/local
-cd /usr/include 
-ln -s /usr/local/compat-5.1r5/compat-5.1.h
-cd
+echo "CREATE DATABASE $dbname;" | mysql -u root --password=$dbpass
+echo "CREATE USER '$dbuser'@'localhost' IDENTIFIED BY '$dbpass';" | mysql -u root --password=$dbpass
+echo "GRANT ALL PRIVILEGES ON *.* TO '$dbuser'@'localhost' WITH GRANT OPTION;" | mysql -u root --password=$dbpass
+mysql -u root --password=$dbpass $dbname < $itvhome/ks/db/itvision.sql
 
-# Rocks
-luarocks install wsapi
-luarocks install cgilua
-luarocks install orbit
-luarocks install cosmo
-#luarocks install luagraph
-#luarocks install wsapi-xavante
-#luarocks install markdown
+cat << EOF > /etc/apache2/conf.d/itvision.conf
+<VirtualHost *:80>
+        ServerAdmin webmaster@itvision.com.br
 
-#
-# luagraph - install manually instead of using luarocks that with problems
-#
-cd /tmp
-wget -P /tmp wget http://luarocks.org/repositories/rocks/luagraph-1.0.2-2.src.rock
-unzip luagraph-1.0.2-2.src.rock
-tar zxf luagraph-1.0.2.tar.gz
-cd luagraph-1.0.2
-mv config config.orig
-cp ~$user/itv/ks/luagraph-config .
-make
-make install
-make webbook
-cd
+        DocumentRoot $itvhome/html
+        <Directory "$itvhome/html">
+                Options Indexes FollowSymLinks MultiViews
+                AllowOverride None
+                Order allow,deny
+                allow from all
+        </Directory>
 
+        ScriptAlias /orb $itvhome/orb
+        <Directory "$itvhome/orb">
+                AllowOverride None
+                Options +ExecCGI +MultiViews +SymLinksIfOwnerMatch FollowSymLinks
+                Order allow,deny
+                Allow from all
+        </Directory>
+
+        # Possible values: debug, info, notice, warn, error, crit,
+        # alert, emerg.
+        LogLevel warn
+
+        ErrorLog /var/log/apache2/itvision_error.log
+        CustomLog /var/log/apache2/tivision_access.log combined
+
+</VirtualHost>
+EOF
+
+cat << EOF > $itvhome/orb/config.lua
+module("config", package.seeall)
+
+app_name = "ITvision"
+
+database = {
+        instance_id = 1,
+        instance_name = "$instance",
+        dbname = "$dbname",
+        dbuser = "$dbuser",
+        dbpass = "$dbpass",
+        driver = "mysql",
+}
+
+monitor = {
+        dir        = "/etc/nagios3",
+        bp_dir     = "/usr/local/nagiosbp",
+        script     = "/etc/init.d/nagios3",
+        bp_script  = "/etc/init.d/ndoutils",
+        bp2cfg     = "bp2cfg",
+        check_host = "HOST_ALIVE",
+        check_app  = "BUSPROC_SERVICE",
+        cmd_app    = "BUSPROC_STATUS",
+}
+
+path = {
+        itvision = "$itvhome",
+}
+
+language = "pt_BR"
+EOF
+
+
+cd /home/$user
+ln -s $itvhome itv
+ln -s $itvhome/bin
+chown -R $user.$user itv
+chown -R $user.$user bin
+
+cat << EOF > $itvhome/bin/dbconf
+dbuser=$dbuser
+dbpass=itv
+dbname=$dbname
+EOF
+
+mkdir $itvhome/html/gv
+chown -R $user.$user $itvhome/html/gv
+printf "html/gv\norb/config.lua\nbin/dbconf\n" >> $itvhome/.git/info/exclude
 
 # --------------------------------------------------
 # NAGIOS
-#
-url=http://prdownloads.sourceforge.net/sourceforge
+# --------------------------------------------------
+htpasswd -cb /etc/nagios3/htpasswd.users $user $dbpass
+sed -i.orig -e "s/nrpe_user=nagios/nrpe_user=$user/" \
+	-e "s/nrpe_group=nagios/nrpe_group=$user/" \
+	-e "s/allowed_hosts=127.0.0.1/#allowed_hosts=127.0.0.1/" /etc/nagios/nrpe.cfg
+sed -i.orig -e "s/www-data/$user/g" /etc/apache2/envvars
+sed -i.orig -e "s/nagiosadmin/$user/g" /etc/nagios3/cgi.cfg
+sed -i.orig -e "s/nagios_user=nagios/nagios_user=$user/" \
+	-e "s/nagios_group=nagios/nagios_group=$user/" \
+	-e "s/admin_email=root@localhost/admin_email=webmaster@itvision.com.br/" \
+	-e "s/admin_pager=pageroot@localhost/#admin_pager=pageroot@localhost/" \
+	-e "/conf.d/a \\
+cfg_dir=/etc/nagios3/hosts \\
+cfg_dir=/etc/nagios3/apps \\
+cfg_dir=/etc/nagios3/services \\
+cfg_dir=/etc/nagios3/contacts" /etc/nagios3/nagios.cfg
+sed -i.orig -e "s/chown nagios:nagios/chown $user:root/" /etc/init.d/nagios3
+sed -i.orig -e "s/chown nagios/chown $user/" /etc/init.d/nagios-nrpe-server
+sed -i.orig -e "s/root/$user/" -e "s/Root/Admin/" \
+	-e "s/root@localhost/webmaster@itvision.com.br/" /etc/nagios3/conf.d/contacts_nagios2.cfg
 
-nagver=3.2.1
-wget -P /tmp $url/nagios/nagios-$nagver.tar.gz
-tar zxf /tmp/nagios-$nagver.tar.gz -C /usr/local/src
+mkdir -p /etc/nagios3/orig/conf.d /etc/nagios3/hosts /etc/nagios3/services /etc/nagios3/apps /etc/nagios3/contacts
+mv /etc/nagios3/*.orig /etc/nagios3/orig
+mv /etc/nagios3/conf.d/* /etc/nagios3/orig/conf.d
+cp $itvhome/ks/files/conf.d/* /etc/nagios3/conf.d
 
-#plgver=1.4.14
-#wget -P /tmp $url/nagiosplug/nagios-plugins-$plgver.tar.gz
-#tar zxf /tmp/nagios-plugins-$plgver.tar.gz -C /usr/local/src
+# rename plugins
+dir=/etc/nagios-plugins/config
+cp -r $dir $dir".orig"
 
-urlitiv=http://www.itvision.com.br/ks
-wget -P /tmp $urlitiv/nagios-$nagver-itvision.tgz
-tar zxf /tmp/nagios-3.2.1-itvision.tgz -C /usr/local/src
+for f in $dir/*; do
+ sed -i -e 's/check-rpc/check_rpc/g' -e 's/check-nfs/check_nfs/g' \
+	-e 's/traffic_average/\U&/' \
+	-e 's/ssh_disk/\U&/' \
+	-e 's/ check_.*/\U&/' -e 's/\tcheck_.*/\U&/' -e 's/CHECK_//g' \
+	-e 's/ snmp_.*/\U&/' -e 's/\tsnmp_.*/\U&/' $f
+done
 
-cd /usr/local/src/nagios-$nagver
-./configure \
-	--prefix=/usr/local/monitor \
-	--with-nagios-user=$user \
-	--with-nagios-group=$user \
-	--with-command-user=$user \
-	--with-command-group=$user \
-	--with-htmurl=/monitor \
-	--with-cgiurl=/monitor/cgi-bin \
-	--with-httpd-conf=/etc/apache2/sites-available \
-	--enable-event-broker
+# --------------------------------------------------
+# NAGIOSGRAPHER
+# --------------------------------------------------
+sed -i.orig2 -e "s/process_performance_data=0/process_performance_data=1/" \
+    -e "s/^#service_perfdata_file=\/tmp\/service-perfdata/service_perfdata_file=\/var\/log\/nagiosgrapher\/service-perfdata/" \
+    -e "s/^#service_perfdata_file_template=/service_perfdata_file_template=/" \
+    -e "s/^#service_perfdata_file_mode=a/service_perfdata_file_mode=a/" \
+    -e "s/^#service_perfdata_file_processing_interval=0/service_perfdata_file_processing_interval=10/" \
+    -e "s/^#service_perfdata_file_processing_command=process-service-perfdata-file/service_perfdata_file_processing_command=ngraph-process-service-perfdata-pipe/" /etc/nagios3/nagios.cfg
 
-make all
-make fullinstall
-make install-config
-make install-webconf
-# Config user
-htpasswd -cb /usr/local/monitor/etc/htpasswd.users $user $user
-chown $user.$user /usr/local/monitor/etc/htpasswd.users
-sed -i.orig -e "s/nagiosadmin/$user/g" /usr/local/monitor/etc/cgi.cfg
-/usr/sbin/usermod -a -G $user www-data
-# Config plugins
-insta nagios-plugins
-insta nagios-nrpe-plugin nagios-nrpe-server
-mv libexec libexec.orig
-# Config cfg
-cd /usr/local/monitor/etc
-mkdir orig
-mv * orig
-wget $urlitiv/nagios-cfg.tgz
-tar zxf nagios-cfg.tgz
-mkdir /usr/local/monitor/etc/itvision
-chown -R $user.$user /usr/local/monitor/etc /etc/init.d/nagios
-sed -i.orig -e "s,NagiosLockDir=/var/lock/subsys,NagiosLockDir=\${prefix}/var,g" \
-	-e "s,su - \$NagiosUser -c \",,g" \
-	-e "s,NagiosRetentionFile\",NagiosRetentionFile,g" /etc/init.d/nagios
+sed -i -e '/# OBJECT CONFIGURATION FILE/ i\
+cfg_dir=/etc/nagiosgrapher' /etc/nagios3/nagios.cfg
+mkdir -p /etc/nagios3/services/serviceext
 
 
+sed -i.orig -e "s/user                    nagios/user                    itv/" \
+        -e "s/group                   nagios/group                   itv/" \
+	-e "s/serviceextinfo          \/etc\/nagios3\/serviceextinfo.cfg/serviceextinfo          \/etc\/nagios3\/conf.d\/serviceextinfo.cfg/" \
+	-e "s/serviceext_path         \/etc\/nagiosgrapher\/nagios3\/serviceext/serviceext_path         \/etc\/nagios3\/services\/serviceext/" \
+        -e "s/nagiosadmin/itv/" /etc/nagiosgrapher/ngraph.ncfg
+
+cat << EOF > /etc/nagios3/conf.d/serviceextinfo.cfg
+define hostextinfo {
+        host_name               dummy
+        }
+
+define serviceextinfo {
+        host_name               dummy
+        service_description     PING
+        }
+EOF
+
+rm -f /etc/nagiosgrapher/nagios3/commands.cfg
+
+ln -s /etc/nagios3/services/serviceext /etc/nagiosgrapher/nagios3/serviceext
+touch /var/log/nagiosgrapher/service-perfdata
+touch /var/lib/nagiosgrapher/ngraph.pipe
+chown -R itv.itv /var/lib/nagiosgrapher /etc/nagiosgrapher /var/run/nagiosgrapher /var/log/nagiosgrapher /var/cache/nagiosgrapher /usr/share/perl5/NagiosGrapher /usr/lib/nagiosgrapher /usr/sbin/nagiosgrapher
+cat /etc/nagiosgrapher/nagios3/commands.cfg >> /etc/nagios3/commands.cfg 
 
 # --------------------------------------------------
 # NDO UTILS - Nagios
-#
-#wget -P /tmp http://prdownloads.sourceforge.net/sourceforge/nagios/ndoutils-1.4b9.tar.gz
-insta ndoutils-nagios3-mysql ndoutils-common ndoutils-doc
-update-rc.d nagios3 disable
-sed -i -e 's/nagios/$user/g' /etc/init.d/ndoutils
-#
-# CORRIGIR ESTAS CONFIGS
-#
-#cp ndo*.cfg /usr/local/monitor/etc
-#
-#sed -e '/broker_module=\/somewhere\/module2/a  \
-#broker_module=@bindir@/ndomod-3x.o config_file=@sysconfdir@/ndomod.cfg # MUDAR AQUI!!!
-#' /usr/local/monitor/etc/nagios.cfg
+# --------------------------------------------------
+chown -R $user.$user /etc/nagios3/ndomod.cfg /etc/nagios3/ndo2db.cfg /usr/lib/ndoutils /etc/init.d/ndoutils
+
+sed -i.orig -e "s/ nagios / $user /g" /etc/init.d/ndoutils
+sed -i.orig -e '/# LOG ROTATION METHOD/ i\
+broker_module=/usr/lib/ndoutils/ndomod-mysql-3x.o config_file=/etc/nagios3/ndomod.cfg' /etc/nagios3/nagios.cfg
+sed -i.orig -e "s/ndo2db_group=nagios/ndo2db_group=$user/" \
+	-e "s/ndo2db_user=nagios/ndo2db_user=$user/" \
+	-e "s/db_name=ndoutils/db_name=$dbname/" \
+	-e "s/^db_user=ndoutils/db_user=$dbuser/" \
+	-e "s/\/\//\//g" /etc/nagios3/ndo2db.cfg
+sed -i -e "s/\/\//\//g" /etc/nagios3/ndomod.cfg
+sed -i -e 's/ENABLE_NDOUTILS=0/ENABLE_NDOUTILS=1/' /etc/default/ndoutils
+
+mysqldump -u root --password=$dbpass -v ndoutils > /tmp/ndoutils.sql
+mysql -u root --password=$dbpass $dbname < /tmp/ndoutils.sql
+echo "DROP DATABASE ndoutils;" | mysql -u root --password=$dbpass
+
+chown -R $user.$user /var/log/nagios3 /etc/init.d/nagios-nrpe-server /etc/init.d/nagios3 /etc/nagios3 /etc/nagios /etc/nagios-plugins /var/run/nagios /var/run/nagios3 /usr/lib/nagios /usr/sbin/log2ndo /usr/lib/nagios3 /etc/apache2 /var/cache/nagios3 /var/lib/nagios /var/lib/nagios3 /usr/share/nagios3/ /usr/lib/cgi-bin/nagios3
+
 
 
 # --------------------------------------------------
 # BUSINESS PROCESS
-#
-bp=monitorbp
-insta libcgi-simple-perl
-wget -P /tmp https://www.nagiosforge.org/gf/download/frsrelease/154/411/nagios-business-process-addon-0.9.5.tar.gz
-tar zxf /tmp/nagios-business-process-addon-0.9.5.tar.gz -C /usr/local/src
+# --------------------------------------------------
+bp=nagiosbp
+tar zxf $itvhome/ks/files/nagiosbp-0.9.5.tgz -C /usr/local/src
 cd /usr/local/src/nagios-business-process-addon-0.9.5
-./configure --prefix=/usr/local/$bp --with-nagiosbp-user=$user --with-nagiosbp-group=$user --with-nagetc=/usr/local/monitor/etc --with-naghtmurl=/monitor --with-nagcgiurl=/monitor/cgi-bin --with-htmurl=/$bp --with-cgiurl=/$bp/cgi-bin
-make all
+./configure --prefix=/usr/local/$bp --with-nagiosbp-user=$user --with-nagiosbp-group=$user --with-nagetc=/etc/nagios3 --with-naghtmurl=/nagios3 --with-nagcgiurl=/cgi-bin/nagios3 --with-htmurl=/$bp --with-apache-user=$user
 make install
-mv /usr/local/monitor/share/side.php /usr/local/monitor/side.php.orig
-cp ~$user/itv/ks/side.php /usr/local/monitor/share
-chown -R $user.$user /usr/local/monitor/share
-\rm -rf /usr/local/monitorbp/etc/*
-tar ~$user/itv/ks/bp-cfg.tgz -C /usr/local/monitorbp/etc
-cat << EOF > /etc/default/ndoutils
-ENABLE_NDOUTILS=1
-DAEMON_OPTS="-c /usr/local/monitor/etc/ndo2db.cfg"
+cat << EOF > /usr/local/$bp/etc/ndo.cfg
+# Nagios Business Process
+# backend
+ndo=db
+ndodb_host=localhost
+ndodb_port=3306
+ndodb_database=$dbname
+ndodb_username=$dbuser
+ndodb_password=$dbpass
+ndodb_prefix=nagios_
+# common settings
+cache_time=0
+cache_file=/usr/local/$bp/var/cache/ndo_backend_cache
+# unused but must be here with dummy values
+ndofs_basedir=/usr/local/ndo2fs/var
+ndofs_instance_name=default
+ndo_livestatus_socket=/usr/local/nagios/var/rw/live
 EOF
-cat << EOF > /usr/local/bin
+mkdir /usr/local/$bp/etc/sample
+cat << EOF > $itvhome/bin/bp2cfg
 #!/bin/bash
-
-/usr/local/monitorbp/bin/bp_cfg2service_cfg.pl
-mv /usr/local/monitor/etc/services-bp.cfg /usr/local/monitor/etc/objects
-sudo invoke-rc.d nagios restart
+/usr/local/$bp/bin/bp_cfg2service_cfg.pl -o /etc/nagios3/apps/apps.cfg
 EOF
-chmod 755 /usr/local/bin/reset-bp
+chmod 755 $itvhome/bin/bp2cfg
+chown $user.$user /usr/local/$bp/etc/ndo.cfg $itvhome/bin/bp2cfg
 
-
-
-# --------------------------------------------------
-# APACHE
-#
-cd /etc/apache2/
-cp ~$user/itv/ks/itvision.conf ./sites-available
-cd ./sites-enabled
-rm -f ./000-default
-sed -i -e "s/Nagios/ITVision Monitor/g" ../sites-available/nagios.conf
-ln -s ../sites-available/itvision.conf 100-itvision
-ln -s ../sites-available/nagios.conf 001-nagios
-mkdir -p /usr/local/itvision/html
-mkdir -p /usr/local/itvision/orb
-chown -R $user.$user /usr/local/itvision
-
-
-
-# --------------------------------------------------
-# Re INIT SERVICES
-#
-invoke-rc.d apache2 restart
-invoke-rc.d nagios restart
-invoke-rc.d ndoutils restart
-invoke-rc.d nagios restart
-
-
-exit 0
-###############################################  ATÉ AQUI  ################################################
-
-
-# --------------------------------------------------
-# NSCA - Nagios
-#
-cd /usr/local/src
-wget http://prdownloNSCAads.sourceforge.net/sourceforge/nagios/nsca-2.7.2.tar.gz
-tar zxf nsca-2.7.2.tar.gz
-cd nsca-2.7.2
-./configure --prefix=/usr/local/monitor  --with-nsca-user=$user --with-nsca-grp=$user --with-nsca-port=5555
-# FALTA INSTALAR!!!
-
-
-
-# --------------------------------------------------
-# BUSINESS PROCESS  - compilation
-#
-wget https://www.nagiosforge.org/gf/download/frsrelease/138/316/nagios-business-process-addon-0.9.3.tar.gz
-tar zxf nagios-business-process-addon-0.9.3.tar.gz
-cd nagios-business-process-addon-0.9.3
-./configure --prefix=/usr/local/monitor --with-ndo2db-user=$user --with-ndo2db-group=$user 
-make all
-make install-init
-
-echo "CREATE DATABASE $user;" | mysql -u root --password=$dbpass
-echo "CREATE USER '$user'@'localhost' IDENTIFIED BY '$dbpass';" | mysql -u root --password=$dbpass mysql
-echo "GRANT ALL PRIVILEGES ON *.* TO '$user'@'localhost' WITH GRANT OPTION;" | mysql -u root --password=$dbpass mysql
-./db/installdb -u $user -p mttp0c0s -h localhost -d $user
-cp src/ndomod-3x.o /usr/local/monitor/bin/ndomod.o
-sed -e "s/nagios/monitor/g" config/ndomod.cfg > /usr/local/monitor/etc/ndomod.cfg
-cat << EOF >> /usr/local/monitor/etc/nagios.cfg 
-
-#
-# NDO
-#
-broker_module=/usr/local/monitor/bin/ndomod.o config_file=/usr/local/monitor/etc/ndomod.cfg
-
-EOF
-cp src/ndo2db-3x /usr/local/monitor/bin/ndo2db
-#cp config/ndo2db.cfg /usr/local/itvision/etc
-sed -e "s/=nagios$/=$user/g" -e "s/nagios/itvision_monitor/g" -e "s/ndouser/$user/g" -e "s/ndopassword/$user/g" -e "s/monitor_/nagios_/g" config/ndo2db.cfg > /usr/local/monitor/etc/ndo2db.cfg
-
-sed -i -e "/Starting /a \
-     \/usr\/local\/monitor\/bin\/ndo2db -c \/usr\/local\/monitor\/etc\/ndo2db.cfg
-" /etc/init.d/nagios
-
-sed -i -e "/Stopping /a \
-     killall ndo2db
-" /etc/init.d/nagios
-
-
-# --------------------------------------------------
-# ITVision
-#
-VERSION=0.2.5
-wget -P /tmp $URL/itvision-$VERSION.tgz
-tar zxf /tmp/itvision-$VERSION.tgz -C /usr/local
-chown -R itvision.users /usr/local/itvision
-chown www-data /usr/local/itvision/www/figs
-
-
-# --------------------------------------------------
-# MAIL
-#
-email=alert@itvision.com.br
-pass=serserfm
-
-### FROM: http://ez.no/developer/forum/install_configuration/sending_mail_via_gmail_or_google_apps_smtp
-
-insta ssmtp mailx stunnel4
-
-mv /etc/ssmtp/ssmtp.conf /etc/ssmtp/ssmtp.conf.orig
-cat << EOF > /etc/ssmtp/ssmtp.conf
-#
-# ssmtp.conf
-#
-# GOOGLE APPS ACCOUNT 
-#
-root=alert@itvision.com.br
-mailhub=smtp.gmail.com:587
-rewriteDomain=
-hostname=alert@itvision.com.br
-UseSTARTTLS=YES
-AuthUser=alert@itvision.com.br
-AuthPass=serserfm
-FromLineOverride=YES
-EOF
-#
-# ssmtp.conf
-#
-# GMAIL (STANDARD) ACCOUNT
-#
-# root=daniel.dalb@gmail.com
-# mailhub=smtp.gmail.com:587
-# rewriteDomain=
-# hostname=daniel.dalb@gmail.com
-# UseSTARTTLS=YES
-# AuthUser=daniel.dalb
-# AuthPass=0tucamis
-# FromLineOverride=YES
-
-cd /etc/stunnel
-mv stunnel.conf stunnel.conf_
-cat << EOF > gmail-smtp.conf
-; Use it for client mode
-client = yes
-; Service-level configuration
-[ssmtp]
-accept = 1925
-connect = smtp.gmail.com:465
-EOF
-
-sed -i -e "s/ENABLED=0/ENABLED=1/g" /etc/default/stunnel4
-restart stunnel4
-### 
-### To test ssmtp with stunnel4 run: 
-###    telnet localhost 1925
-###    echo test | mail -v -s "test ssmtp" daniel.dalb@gmail.com
-###
-
+sed -i.orig -e "139a \\
+  <tr> \\
+    <td width=13><img src=\"images/greendot.gif\" width=\"13\" height=\"14\" name=\"statuswrl-dot\"></td> \\
+    <td nowrap><a href=\"/nagiosbp/cgi-bin/nagios-bp.cgi\" target=\"main\" onMouseOver=\"switchdot('statuswrl-dot',1)\" onMouseOut=\"switchdot('statuswrl-dot',0)\" class=\"NavBarItem\">Business Process View</a></td> \\
+  </tr> \\
+  <tr> \\
+    <td width=13><img src=\"images/greendot.gif\" width=\"13\" height=\"14\" name=\"statuswrl-dot\"></td> \\
+    <td nowrap><a href=\"/nagiosbp/cgi-bin/nagios-bp.cgi?mode=bi\" target=\"main\" onMouseOver=\"switchdot('statuswrl-dot',1)\" onMouseOut=\"switchdot('statuswrl-dot',0)\" class=\"NavBarItem\">Business Impact</a></td> \\
+  </tr>" /usr/share/nagios3/htdocs/side.html
 
 
 # --------------------------------------------------
 # GLPI
+# --------------------------------------------------
+wget -P /tmp https://forge.indepnet.net/attachments/download/656/glpi-0.78.tar.gz
+tar zxf /tmp/glpi-0.78.tar.gz -C /usr/local
+cp -r /usr/local/glpi /usr/local/servdesk
+chown -R $user.$user /usr/local/glpi /usr/local/servdesk
+
+# TODO: DUPLICAR CORRETAMENTE O GLPI
+
+echo "<?php
+ class DB extends DBmysql {
+ var \$dbhost    = 'localhost';
+ var \$dbuser    = '$dbuser';
+ var \$dbpassword= '$dbpass';
+ var \$dbdefault = '$dbname';
+ }
+?>" > /usr/local/servdesk/config/config_db.php
+chmod 600 /usr/local/servdesk/config/config_db.php
+chown $user.$user /usr/local/servdesk/config/config_db.php
+echo "Alias /servdesk "/usr/local/servdesk"
+<Directory "/usr/local/servdesk">
+    Options None
+    AllowOverride None
+    Order allow,deny
+    Allow from all
+</Directory>"  >> /etc/apache2/conf.d/servdesk.conf
+
+cp $itvhome/ks/db/glpi.sql.gz /tmp
+gunzip /tmp/glpi.sql.gz
+mysql -u $dbuser --password=$dbpass $dbname < /tmp/glpi.sql
+
+cd $itvhome/ks/servdesk
+tar cf - * | ( cd /usr/local/servdesk; tar xfp -)
+
+echo "ALTER TABLE \`itvision\`.\`glpi_computers\` ADD COLUMN \`geotag\` VARCHAR(20) NULL DEFAULT NULL  AFTER \`ticket_tco\` ;" | \
+	mysql -u root --password=$dbpass
+ 
+
+# --------------------------------------------------
+# OCS INVENTORY v1.3.2
+# --------------------------------------------------
+
+wget -P /tmp http://launchpad.net/ocsinventory-server/stable-1.3/1.3.2/+download/OCSNG_UNIX_SERVER-1.3.2.tar.gz
+tar -xzf /tmp/OCSNG_UNIX_SERVER-1.3.2.tar.gz -C /usr/local
+cd /usr/local/OCSNG_UNIX_SERVER-1.3.2
+
+sed -i.orig -e "s/DB_SERVER_USER=\"ocs\"/DB_SERVER_USER=\"$user\"/" \
+        -e "s/DB_SERVER_PWD=\"ocs\"/DB_SERVER_PWD=\"$dbpass\"/" /usr/local/OCSNG_UNIX_SERVER-1.3.2/setup.sh
+
+perl -MCPAN -e 'install XML::Entities'
+echo ''
+echo '# Entrando no shell do cpan ... '
+sleep 2
+echo '##################################'
+echo '# Digite "install YAML" a seguir #'
+echo '##################################'
+sleep 2
+cpan
+/usr/local/OCSNG_UNIX_SERVER-1.3.2/setup.sh
+
+# --------------------------------------------------
+# GRAPHVIZ
+# --------------------------------------------------
+/usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/graphviz_2.26.3-1_i386.deb
+/usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/graphviz-dev_2.26.3-1_all.deb
+#/usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/libgraphviz4_2.26.3-1_i386.deb
+#/usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/libgraphviz-dev_2.26.3-1_i386.deb
+#/usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/libgv-lua_2.26.3-1_i386.deb
+/usr/bin/dpkg -i /tmp/*.deb
+/usr/bin/dot -c
+
+
+# --------------------------------------------------
+# LUA ROCKS
+# --------------------------------------------------
+luarocks install lpeg 0.9-1
+luarocks install wsapi
+luarocks install cgilua
+luarocks install orbit
+luarocks install dado
+luarocks install luagraph
 #
-cd /usr/local
-wget https://forge.indepnet.net/attachments/download/635/glpi-0.78-RC2.tar.gz
-tar zxf glpi-0.78-RC2.tar.gz
-mv glpi servdesk
-cd servdesk
-chown -R $user.$user *
-
-rootpass=$dbpass
-dbuser=servdesk
-dbpass=servdesk
-echo "CREATE DATABASE $dbuser;" | mysql -u root --password=$rootpass
-echo "CREATE USER '$dbuser'@'localhost' IDENTIFIED BY '$dbpass';" | mysql -u root --password=$rootpass mysql
-echo "GRANT ALL PRIVILEGES ON *.* TO '$dbuser'@'localhost' WITH GRANT OPTION;" | mysql -u root --password=$rootpass mysql
-echo "GRANT ALL PRIVILEGES ON *.* TO '$dbuser'@'192.168.8.1' WITH GRANT OPTION;" | mysql -u root --password=$rootpass mysql
-# Altera base de dados do glpi
-echo "ALTER TABLE `servdesk`.`glpi_locations` ADD COLUMN `geotag` VARCHAR(25) NULL DEFAULT NULL;" | mysql -u root --password=$rootpass mysql
-
-
-apt-get install php5-mysql
-cd /etc/apache2
-cp ~$user/itv/ks/servdesk.conf sites-available
-cd sites-enabled
-ln -s ../sites-available/servdesk.conf  200-servdesk
-cd /usr/local/servdesk
-chmod 777 files/ config/
-invoke-rc.d apache2 restart
-
-# Para remover o logo do glpi
-# comentar a linha 1297 (que contem a string 'fd_logo.png') do arquivo
-# /usr/local/servdesk/css/styles.css
+sed -i.orig '/^#/ a\
+. '$itvhome'/bin/lua_path' /usr/local/bin/wsapi.cgi
 
 
 
 # --------------------------------------------------
-# THE END
+# CACTI 
+# --------------------------------------------------
+# wget -P /tmp http://www.cacti.net/downloads/cacti-0.8.7g.tar.gz
+# tar zxf /tmp/cacti-0.8.7g.tar.gz -C /usr/share
+#mysqldump -u root --password=$dbpass -v cacti > /tmp/cacti.sql
+#mysql -u root --password=$dbpass itvision < /tmp/cacti.sql
+#echo "DROP DATABASE cacti;" | mysql -u root --password=$dbpass
+#chown -R $user.$user /etc/cacti/ /usr/bin/rrdtool /usr/bin/php /usr/bin/snmpwalk /usr/bin/snmpget /usr/bin/snmpbulkwalk /usr/bin/snmpgetnext /var/log/cacti /usr/share/cacti /var/lib/cacti /usr/share/lintian/overrides/cacti /usr/share/doc/cacti /usr/share/dbconfig-common/data/cacti /usr/local/share/cacti /etc/cron.d/cacti /etc/logrotate.d/cacti
 #
-apt-get autoremove
-apt-get clean
+#sed -i.orig -e "s/\$database_username='cacti';/\$database_username='$dbuser';/" \
+#	-e "s/\$basepath=''/\$basepath='/usr/share/php';/" \
+#	-e "s/\$database_default='cacti';/\$database_default='$dbname';/" \
+#	-e "s/\$database_hostname='';/\$database_hostname='localhost';/" \
+#	-e "s/\$database_port='';/\$database_port='3306';/" /etc/cacti/debian.php
+#sed -i.orig -e "s/\$database_default = \"cacti\";/\$database_default = \"$dbname\";/" \
+#	-e "s/\$database_username = \"cactiuser\";/\$database_username = \"$dbuser\";/" \
+#	-e "s/\$database_password = \"cactiuser\";/\$database_password = \"$dbpass\";/" /usr/share/cacti/site/include/global.php
+#sed -i -e "s/www-data/$user/" /etc/cron.d/cacti
+#
+#
+# --------------------------------------------------
+# UTILILITARIOS
+# --------------------------------------------------
+path="\n\nPATH=\$PATH:$itvhome/bin\n\n"
+aliases="\nalias mv='mv -i'\nalias cp='cp -i'\nalias rm='rm -i'\nalias psa='ps -ef  |grep -v \" \\[\"'"
+printf "$path"    >> /home/$user/.bashrc
+printf "$aliases" >> /home/$user/.bashrc
+printf "$aliases" >> /root/.bashrc
 
+
+# --------------------------------------------------
+# ONLY FOR DEVELOPMENT
+# --------------------------------------------------
+#echo "GRANT ALL ON '$dbname'.* TO '$dbuser'@'%' IDENTIFIED BY '$dbpass';"
+#sed -i.orig -e "s/^bind-address/#bind-address/g" /etc/mysql/my.cnf
+#/usr/sbin/service mysql restart
+
+
+# --------------------------------------------------
+# CLEAN UP & RESTART ALL PROCESSES
+# --------------------------------------------------
+/usr/sbin/invoke-rc.d apache2 start
+/usr/sbin/invoke-rc.d nagios-nrpe-server start
+/usr/sbin/invoke-rc.d nagios3 start
+/usr/sbin/invoke-rc.d ndoutils start
+/usr/sbin/invoke-rc.d nagiosgrapher start
+cd
+\rm -rf /tmp/*
+apt-get clean
+apt-get autoremove
+
+
+echo ""
+echo "======================================================================================="
+echo "# Nagios, NDOutils, Nagios Business Process, GLPI, LUA e Cacti Installation Complete! #"
+echo "======================================================================================="
+echo "#			      ********* ATTENTION *********			    	    #"
+echo "# Settings to firewall;							            #"
+echo "# accept connections port 5666 to NRPE					            #"
+echo "# accept connections port 161  to SNMP					            #"
+echo "# accept connections port 80 and 443 HTTP					            #"
+echo "======================================================================================="
+echo ""
 

@@ -1,27 +1,25 @@
 #!/usr/bin/env wsapi.cgi
 
-require "orbit"
-module("itvision", package.seeall, orbit.new)
-
--- configs ------------------------------------------------------------
-
-require "config"
+-- includes & defs ------------------------------------------------------
 require "util"
-require "view_utils"
+require "View"
 
-mapper.conn, mapper.driver = config.setup_orbdb()
+require "orbit"
+require "Model"
+module(Model.name, package.seeall,orbit.new)
 
-local ma = require "model_access"
-local mr = require "model_rules"
+local app = Model.itvision:model "app"
+local services = Model.nagios:model "services"
+local sysconfig = Model.itvision:model "sysconfig"
+
 
 -- models ------------------------------------------------------------
 
-local sysconfig = itvision:model "sysconfig"
 
 function sysconfig:select_sysconfig(id)
    local clause = ""
    if id then
-      clause = "sysconfig_id = "..id
+      clause = "id = "..id
    end
    return self:find_all(clause)
 end
@@ -32,27 +30,27 @@ function list(web)
    local A = sysconfig:select_sysconfig()
    return render_list(web, A)
 end
-itvision:dispatch_get(list, "/", "/list")
+ITvision:dispatch_get(list, "/", "/list")
 
 
 function show(web, id)
    local A = sysconfig:select_sysconfig(id)
    return render_show(web, A)
-end itvision:dispatch_get(show, "/show/(%d+)")
+end ITvision:dispatch_get(show, "/show/(%d+)")
 
 
 function edit(web, id)
    local A = sysconfig:select_sysconfig(id)
    return render_add(web, A)
 end
-itvision:dispatch_get(edit, "/edit/(%d+)")
+ITvision:dispatch_get(edit, "/edit/(%d+)")
 
 
 function update(web, id)
    local sysconfig = {}
    if id then
       local tables = "itvision_sysconfig"
-      local clause = "sysconfig_id = "..id
+      local clause = "id = "..id
       --sysconfig:new()
       sysconfig.version = web.input.version
       sysconfig.created = web.input.created
@@ -61,18 +59,18 @@ function update(web, id)
       sysconfig.monitor_dir = web.input.monitor_dir
       sysconfig.monitor_bp_dir = web.input.monitor_bp_dir
 
-      ma.update (tables, sysconfig, clause) 
+      Model.update (tables, sysconfig, clause) 
    end
 
    return web:redirect(web:link("/list"))
 end
-itvision:dispatch_post(update, "/update/(%d+)")
+ITvision:dispatch_post(update, "/update/(%d+)")
 
 
 function add(web)
    return render_add(web)
 end
-itvision:dispatch_get(add, "/add")
+ITvision:dispatch_get(add, "/add")
 
 
 function insert(web)
@@ -88,29 +86,43 @@ function insert(web)
    sysconfig:save()
    return web:redirect(web:link("/list"))
 end
-itvision:dispatch_post(insert, "/insert")
+ITvision:dispatch_post(insert, "/insert")
 
 
 function remove(web, id)
    local A = sysconfig:select_sysconfig(id)
    return render_remove(web, A)
 end
-itvision:dispatch_get(remove, "/remove/(%d+)")
+ITvision:dispatch_get(remove, "/remove/(%d+)")
 
 
 function delete(web, id)
    if id then
-      local clause = "sysconfig_id = "..id
+      local clause = "id = "..id
       local tables = "itvision_sysconfig"
-      ma.delete (tables, clause) 
+      Model.delete (tables, clause) 
    end
 
    return web:redirect(web:link("/list"))
 end
-itvision:dispatch_get(delete, "/delete/(%d+)")
+ITvision:dispatch_get(delete, "/delete/(%d+)")
 
 
-itvision:dispatch_static("/css/%.css", "/script/%.js")
+function reset_monitor(web)
+   os.reset_monitor()
+   return web:redirect(web:link("/list"))
+end
+ITvision:dispatch_get(reset_monitor, "/reset_monitor")
+
+
+function reset_monitor_db(web)
+   os.reset_monitor_db()
+   return web:redirect(web:link("/list"))
+end
+ITvision:dispatch_get(reset_monitor_db, "/reset_monitor_db")
+
+
+ITvision:dispatch_static("/css/%.css", "/script/%.js")
 
 
 -- views ------------------------------------------------------------
@@ -124,14 +136,14 @@ function render_list(web, A)
 
    for i, v in ipairs(A) do
       rows[#rows + 1] = tr{ 
-         td{ a{ href= web:link("/show/"..v.sysconfig_id), v.version} },
+         td{ a{ href= web:link("/show/"..v.id), v.version} },
          td{ v.created },
          td{ v.updated },
          td{ v.home_dir },
          td{ v.monitor_dir },
          td{ v.monitor_bp_dir },
-         td{ button_link(strings.remove, web:link("/remove/"..v.sysconfig_id), "negative") },
-         td{ button_link(strings.edit, web:link("/edit/"..v.sysconfig_id)) },
+         td{ button_link(strings.remove, web:link("/remove/"..v.id), "negative") },
+         td{ button_link(strings.edit, web:link("/edit/"..v.id)) },
       }
    end
 
@@ -152,6 +164,22 @@ function render_list(web, A)
          rows
       }
    }
+   res[#res + 1] = p{ br(), "<hr>", br() }
+   res[#res + 1] = p{ "Monitor" } 
+   res[#res + 1] = p{ button_link("Reset Monitor", web:link("/reset_monitor")) }
+   res[#res + 1] = p{ br(), br() }
+
+   res[#res + 1] = p{ br(), "<hr>", br() }
+   res[#res + 1] = p{ "Database Monitor" } 
+   res[#res + 1] = p{ button_link("Reset DB monitor", web:link("/reset_monitor_db")) }
+   res[#res + 1] = p{ br(), br() }
+
+   res[#res + 1] = p{ br(), "<hr>", br() }
+   res[#res + 1] = p{ "Remove todas as entradas das tabelas app, app_tree, app_relat,  app_object e app_relat_type: " }
+   web.prefix = "/orb/initialization"
+   res[#res + 1] = p{ button_link("Reset Database", web:link("/remove")) }
+   web.prefix = "/orb/system"
+   res[#res + 1] = p{ br(), br() }
 
    return render_layout(res)
 end
@@ -162,8 +190,8 @@ function render_show(web, A)
    local res = {}
 
    res[#res + 1] = p{ button_link(strings.add, web:link("/add")) }
-   res[#res + 1] = p{ button_link(strings.remove, web:link("/remove/"..A.sysconfig_id)) }
-   res[#res + 1] = p{ button_link(strings.edit, web:link("/edit/"..A.sysconfig_id)) }
+   res[#res + 1] = p{ button_link(strings.remove, web:link("/remove/"..A.id)) }
+   res[#res + 1] = p{ button_link(strings.edit, web:link("/edit/"..A.id)) }
    res[#res + 1] = p{ button_link(strings.list, web:link("/list")) }
    res[#res + 1] = p{ br(), br() }
 
@@ -205,7 +233,7 @@ function render_add(web, edit)
       val4 = edit.home_dir
       val5 = edit.monitor_dir
       val6 = edit.monitor_bp_dir
-      url = "/update/"..edit.sysconfig_id
+      url = "/update/"..edit.id
    else
       url = "/insert"
    end
@@ -239,12 +267,12 @@ function render_remove(web, A)
 
    if A then
       A = A[1]
-      url_ok = web:link("/delete/"..A.sysconfig_id)
+      url_ok = web:link("/delete/"..A.id)
       url_cancel = web:link("/list")
    end
 
    res[#res + 1] = p{
-      strings.exclude_quest.." "..strings.sysconfig.." "..A.version.."?",
+      strings.exclude_quest.." sysconfig "..A.version.."?",
       p{ button_link(strings.yes, web:link(url_ok)) },
       p{ button_link(strings.cancel, web:link(url_cancel)) },
    }
@@ -253,7 +281,7 @@ function render_remove(web, A)
 end
 
 
-orbit.htmlify(itvision, "render_.+")
+orbit.htmlify(ITvision, "render_.+")
 
 return _M
 

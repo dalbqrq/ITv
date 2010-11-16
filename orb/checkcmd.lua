@@ -1,58 +1,32 @@
 #!/usr/bin/env wsapi.cgi
 
--- configs ------------------------------------------------------------
+-- includes & defs ------------------------------------------------------
+require "util"
+require "View"
 
 require "orbit"
-require "config"
-require "util"
-require "view_utils"
-
-
--- config direct access to db
---local ma = require "model_access"
---local mr = require "model_rules"
-
-
--- config ITVISION mvc app
-module("itvision", package.seeall, orbit.new)
-mapper.conn, mapper.driver = config.setup_orbdb()
---local apps = itvision:model "apps"
-
-
--- config NAGIOS mvc app
---nagios = orbit.new()
---nagios.mapper.conn, nagios.mapper.driver = config.setup_orbdb()
---nagios.mapper.table_prefix = 'nagios_'
---local services = nagios:model "services"
+require "Model"
+module(Model.name, package.seeall,orbit.new)
 
 
 -- models ------------------------------------------------------------
 
---[[
-function apps:select_apps(id)
-   local clause = ""
-   if id then
-      clause = "app_id = "..id
-   end
-   return self:find_all(clause)
-end
-]]
 
 -- controllers ------------------------------------------------------------
 
 function list(web)
    return render_list(web)
 end
-itvision:dispatch_get(list, "/", "/list")
+ITvision:dispatch_get(list, "/", "/list")
 
 
 function chkexec(web)
    return render_chkexec(web, web.input.cmd, web.input.opts)
 end
-itvision:dispatch_post(chkexec, "/chkexec")
+ITvision:dispatch_post(chkexec, "/chkexec")
 
 
-itvision:dispatch_static("/css/%.css", "/script/%.js")
+ITvision:dispatch_static("/css/%.css", "/script/%.js")
 
 
 -- views ------------------------------------------------------------
@@ -100,7 +74,7 @@ function render_chkexec(web, cmd, opts)
 end
 
 
-orbit.htmlify(itvision, "render_.+")
+orbit.htmlify(ITvision, "render_.+")
 
 return _M
 

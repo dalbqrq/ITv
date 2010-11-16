@@ -1,3 +1,26 @@
 #!/bin/bash
 
-mysqldump -u ndoutils --password='itv' --add-drop-table ndoutils > /usr/local/itvision/ks/ndoutils.sql
+progdir=$(dirname $(readlink -f $0))
+. $progdir/dbconf
+
+d=`date "+%Y%m%d%H%M"`
+tmpfile=/tmp/tables
+
+if [ $# -ge 1 ]; then
+   echo "show tables like '$1_%'" | mysql -u $dbuser --password=$dbpass $dbname | grep -v Tables_in_ > $tmpfile
+   ext="_$1"
+   tables=`cat $tmpfile`
+   opt="--add-drop-table"
+
+   if [ $# -eq 2 ]; then
+      if [ $2 == "no-data" ]; then
+         opt="--add-drop-table --no-data"
+      else
+         echo usage: dumpdb [<sub-db-name>] [no-data]
+      fi
+   fi
+fi
+
+mysqldump -u $dbuser --password=$dbpass $opt $dbname $tables > /tmp/dumpdb$ext"_"$d.sql
+
+\rm -f $tmpfile

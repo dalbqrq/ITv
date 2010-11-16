@@ -1,0 +1,5 @@
+#!/bin/bash
+
+grep "command_name" /etc/nagios-plugins/config/* | cut -d: -f2
+grep "ARG[0-9]" /etc/nagios-plugins/config/* | cut -d: -f2
+

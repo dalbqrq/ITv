@@ -1,14 +1,14 @@
-module (..., package.seeall);
 
-require "config"
+require "Model"
 require "util"
 require "messages"
 
+local db = Model.db
 local dado = require "dado"
-local inst = " instance_id = "..config.db.instance_id
-local cond = ""
+local inst = " instance_id = "..db.instance_id
+local cond = nil
 
-local objecttype = {
+objecttype = {
    [1] = "Host",
    [2] = "Service",
    [3] = "Host group",
@@ -28,15 +28,19 @@ local objecttype = {
 
 ----------------------------- CONFIG ----------------------------------
 
-
-function connect ()
-   --local c = config.db
-   local c = config.servdesk_db
-   return dado.connect (c.dbname, c.dbuser, c.dbpass, c.driver)
+function set_db (db_)
+    db = db_
+    inst = " instance_id = "..db_.instance_id
 end
 
 
-function select_columns (table_) -- Retorna tabela com nome dos campos de uma tabela sql
+function connect ()
+   return dado.connect (db.dbname, db.dbuser, db.dbpass, db.driver)
+end
+
+
+function show_columns (table_) -- Retorna tabela com nome dos campos de uma tabela sql
+   local db = connect ()
    local content = {}
    local cur = assert ( db:assertexec ("show columns from "..table_))
    local row = cur:fetch ({}, "a")
@@ -71,7 +75,8 @@ function set_cond (cond_) -- include instance condition
 end
 
 
-function select (table_, cond_, extra_, columns_)
+--function select (table_, cond_, extra_, columns_)
+function query (table_, cond_, extra_, columns_)
    local db = connect ()
    local cond = set_cond (cond_)
    if not columns_ then columns_ = "*" end
@@ -96,7 +101,7 @@ end
 function insert (table_, content_)
    local db = connect ()
    if content_.instance_id then 
-      content_.instance_id = config.db.instance_id -- nao insere outras instancias
+      content_.instance_id = Model.db.instance_id -- nao insere outras instancias
    end
    assert ( db:insert (table_, content_))
    db:close ()
@@ -107,7 +112,7 @@ function update (table_, content_, cond_)
    local db = connect ()
    --cond_ = set_cond (cond_)
    if content_.instance_id then 
-      --content_.instance_id = config.db.instance_id -- nao insere outras instancias
+      --content_.instance_id = Model.db.instance_id -- nao insere outras instancias
       content_.instance_id = nil
    end
    assert ( db:update (table_, content_, cond_))

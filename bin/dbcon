@@ -1,8 +1,11 @@
 #!/bin/bash 
 
-if [ $# -eq 1 ]; then
-	echo "$1" | mysql -u ndoutils --password=itv ndoutils
+progdir=$(dirname $(readlink -f $0))
+. $progdir/dbconf
+
+if [ $# -ge 1 ]; then
+	echo "$*" | mysql -u $dbuser --password=$dbpass $dbname
 else
-	mysql -u ndoutils --password=itv ndoutils
+	mysql -u $dbuser --password=$dbpass $dbname
 fi
 

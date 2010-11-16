@@ -1,0 +1,2 @@
+#!/bin/bash
+/usr/local/nagiosbp/bin/bp_cfg2service_cfg.pl -o /etc/nagios3/apps/apps.cfg

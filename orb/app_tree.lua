@@ -1,41 +1,38 @@
 #!/usr/bin/env wsapi.cgi
 
-require "orbit"
-module("itvision", package.seeall, orbit.new)
+-- includes & defs ------------------------------------------------------
 
--- configs ------------------------------------------------------------
-
-require "config"
 require "util"
-require "view_utils"
+require "View"
 
-mapper.conn, mapper.driver = config.setup_orbdb()
+require "orbit"
+require "Model"
+module(Model.name, package.seeall,orbit.new)
 
-local ma = require "model_access"
-local mr = require "model_rules"
+local app = Model.itvision:model "app"
+local app_tree = Model.itvision:model "app_tree"
+
+
 
 -- models ------------------------------------------------------------
-
-local app_tree = itvision:model "app_tree"
-local apps = itvision:model "apps"
 
 function app_tree:select_app_tree(id)
    local clause = ""
    if id then
-      clause = "app_tree_id = "..id
+      clause = "id = "..id
    end
    return self:find_all(clause)
 end
 
 
 function app_tree:select_full_path(node)
-   return mr.select_full_path_app_tree(node)
+   return Model.select_full_path_app_tree(node)
 end 
 
-function apps:select_apps(id)
+function app:select_apps(id)
    local clause = ""
    if id then
-      clause = "app_id = "..id
+      clause = "id = "..id
    end
    return self:find_all(clause)
 end
@@ -48,13 +45,13 @@ function list(web)
    local A = app_tree:select_full_path()
    return render_list(web, A)
 end
-itvision:dispatch_get(list, "/", "/list")
+ITvision:dispatch_get(list, "/", "/list")
 
 --[[
 function show(web, id)
    local A = app_tree:select_app_tree(id)
    return render_show(web, A)
-end itvision:dispatch_get(show, "/show/(%d+)")
+end ITvision:dispatch_get(show, "/show/(%d+)")
 ]]--
 
 
@@ -63,35 +60,35 @@ function edit(web, id)
    local B = app_tree:select_app_tree(id)
    return render_add(web, A, B, nil)
 end
-itvision:dispatch_get(edit, "/edit/(%d+)")
+ITvision:dispatch_get(edit, "/edit/(%d+)")
 
 
 function update(web, id)
    local A = {}
    if id then
       local tables = "itvision_app_tree"
-      local clause = "app_tree_id = "..id
+      local clause = "id = "..id
       --A:new()
       A.name = web.input.name
 
-      ma.update (tables, A, clause) 
+      Model.update (tables, A, clause) 
    end
 
    return web:redirect(web:link("/list"))
 end
-itvision:dispatch_post(update, "/update/(%d+)")
+ITvision:dispatch_post(update, "/update/(%d+)")
 
 
 function add(web, err)
    local A = app_tree:select_full_path()
    return render_add(web, A, nil, err)
 end
-itvision:dispatch_get(add, "/add", "/add/(%d+)")
+ITvision:dispatch_get(add, "/add", "/add/(%d+)")
 
 
 function insert(web)
    local origin
-   app_tree = mr.new_app_tree()
+   app_tree = Model.new_app_tree()
    if web.input.app then
       app_tree.app_id = web.input.app_id
    else
@@ -99,76 +96,56 @@ function insert(web)
    end
 
    if tonumber(web.input.parent) > 0 then origin = web.input.parent end
-   mr.insert_node_app_tree(app_tree, origin, 1)
+   Model.insert_node_app_tree(app_tree, origin, 1)
 
    return web:redirect(web:link("/list"))
 end
-itvision:dispatch_post(insert, "/insert")
+ITvision:dispatch_post(insert, "/insert")
 
 
 function remove(web, id)
    local A = app_tree:select_app_tree(id)
    return render_remove(web, A)
 end
-itvision:dispatch_get(remove, "/remove/(%d+)")
+ITvision:dispatch_get(remove, "/remove/(%d+)")
 
 
 function delete(web, id)
    if id then
-      local clause = "app_tree_id = "..id
+      local clause = "id = "..id
       local tables = "itvision_app_tree"
-      ma.delete (tables, clause) 
+      Model.delete (tables, clause) 
    end
 
    return web:redirect(web:link("/list"))
 end
-itvision:dispatch_get(delete, "/delete/(%d+)")
+ITvision:dispatch_get(delete, "/delete/(%d+)")
 
 
-itvision:dispatch_static("/css/%.css", "/script/%.js")
+ITvision:dispatch_static("/css/%.css", "/script/%.js")
+
 
 
 -- views ------------------------------------------------------------
 
 
-function render_table(web, t)
-   local res = {}
-   res[#res + 1] = p{ table.dump(t) }
-   return render_layout(res)
-end
-
-
 function render_list(web, A)
-   local rows = {}
    local res = {}
+   local row = {}
    
-   res[#res + 1] = p{ button_link(strings.add, web:link("/add")) }
-   res[#res + 1] = p{ br(), br() }
-
    for i, v in ipairs(A) do
-      rows[#rows + 1] = tr{ 
-         td{ a{ href= web:link("/show/"..v.app_id), v.name} },
-         td{ strings.sonof },
-         td{ a{ href= web:link("/show/"..v.papp_id), v.pname} },
-         td{ button_link(strings.remove, web:link("/remove/"..v.app_tree_id), "negative") },
-         td{ button_link(strings.edit, web:link("/edit/"..v.app_tree_id)) },
+      row[#row+1] = { 
+         a{ href= web:link("/show/"..v.app_id), v.name},
+         strings.sonof,
+         a{ href= web:link("/show/"..v.papp_id), v.pname},
+         button_link(strings.remove, web:link("/remove/"..v.id), "negative"),
+         button_link(strings.edit, web:link("/edit/"..v.id)),
       }
    end
 
-   res[#res + 1]  = H("table") { border=1, cellpadding=1,
-      thead{ 
-         tr{ 
-             th{ strings.name }, 
-             th{ "." },
-             th{ strings.parent }, 
-             th{ "." },
-             th{ "." },
-         }
-      },
-      tbody{
-         rows
-      }
-   }
+   local header = { strings.name, ".", strings.parent, ".", "." }
+   res[#res+1] = render_content_header(strings.app_tree, web:link("/add"), web:link("/list"))
+   res[#res+1] = render_table(row, header)
 
    return render_layout(res)
 end
@@ -179,8 +156,8 @@ function render_show(web, A)
    local res = {}
 
    res[#res + 1] = p{ button_link(strings.add, web:link("/add")) }
-   res[#res + 1] = p{ button_link(strings.remove, web:link("/remove/"..A.app_tree_id)) }
-   res[#res + 1] = p{ button_link(strings.edit, web:link("/edit/"..A.app_tree_id)) }
+   res[#res + 1] = p{ button_link(strings.remove, web:link("/remove/"..A.id)) }
+   res[#res + 1] = p{ button_link(strings.edit, web:link("/edit/"..A.id)) }
    res[#res + 1] = p{ button_link(strings.list, web:link("/list")) }
    res[#res + 1] = p{ br(), br() }
 
@@ -214,13 +191,13 @@ function render_add(web, A, edit, err)
    if edit then
       edit = edit[1]
       val1 = edit.name
-      val2 = edit.app_tree_id
+      val2 = edit.id
       url = "/update/"..val2
    else
       url = "/insert"
    end
 
-   local r = { name=strings.root, app_tree_id=0 }
+   local r = { name=strings.root, id=0 }
    for i, v in ipairs(A) do
       table.insert(B, v)
    end
@@ -235,8 +212,8 @@ function render_add(web, A, edit, err)
       method = "post",
       action = web:link(url),
 
-      strings.name..": ", select_option("app_id", A, "app_tree_id", "name", val2), mess, br(),
-      strings.child_of..": ", select_option("parent", B, "app_tree_id", "name", val2), br(),
+      strings.name..": ", select_option("app_id", A, "id", "name", val2), mess, br(),
+      strings.child_of..": ", select_option("parent", B, "id", "name", val2), br(),
 
       p{ button_form(strings.send, "submit", "positive") },
       p{ button_form(strings.reset, "reset", "negative") },
@@ -251,7 +228,7 @@ function render_remove(web, A)
 
    if A then
       A = A[1]
-      url_ok = web:link("/delete/"..A.app_tree_id)
+      url_ok = web:link("/delete/"..A.id)
       url_cancel = web:link("/list")
    end
 
@@ -267,7 +244,7 @@ function render_remove(web, A)
 end
 
 
-orbit.htmlify(itvision, "render_.+")
+orbit.htmlify(ITvision, "render_.+")
 
 return _M
 
