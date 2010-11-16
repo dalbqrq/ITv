@@ -1,5 +1,5 @@
 
-require "Model"
+--require "Model"
 require "util"
 require "messages"
 
@@ -42,12 +42,14 @@ end
 function show_columns (table_) -- Retorna tabela com nome dos campos de uma tabela sql
    local db = connect ()
    local content = {}
-   local cur = assert ( db:assertexec ("show columns from "..table_))
+   --local cur = assert ( db:assertexec ("show columns from "..table_))
+   local cur = assert ( db:assertexec ("desc "..table_))
    local row = cur:fetch ({}, "a")
 
    while row do
-      table.insert (t, row.Field)
-      row = cur:fetch (row,"a")
+      table.insert (content, { Field=row.Field, Type=row.Type, Null=row.Null, Key=row.Key, 
+                               Default=row.Default, Extra=row.Extra  } )
+      row = cur:fetch (row, "a")
    end
    return content
 end
@@ -130,8 +132,9 @@ end
 
 function execute (stmt_)
    local db = connect ()
-   assert ( db:assertexec (stmt_))
+   local cur = assert ( db:assertexec (stmt_))
    db:close ()
+   return cur
 end
 
 
