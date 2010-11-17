@@ -160,20 +160,8 @@ dbname=$dbname
 EOF
 
 mkdir $itvhome/html/gv
+chown -R $user.$user $itvhome/html/gv
 printf "html/gv\norb/config.lua\nbin/dbconf\n" >> $itvhome/.git/info/exclude
-
-
-# --------------------------------------------------
-# GRAPHVIZ
-# --------------------------------------------------
-#/usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/graphviz_2.26.3-1_i386.deb
-#/usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/graphviz-dev_2.26.3-1_all.deb
-#/usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/libgraphviz4_2.26.3-1_i386.deb
-#/usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/libgraphviz-dev_2.26.3-1_i386.deb
-#/usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/libgv-lua_2.26.3-1_i386.deb
-#/usr/bin/dpkg -i /tmp/*.deb
-#/usr/bin/dot -c
-
 
 # --------------------------------------------------
 # NAGIOS
@@ -215,26 +203,28 @@ for f in $dir/*; do
 	-e 's/ snmp_.*/\U&/' -e 's/\tsnmp_.*/\U&/' $f
 done
 
+# --------------------------------------------------
+# NAGIOSGRAPHER
+# --------------------------------------------------
+sed -i.orig2 -e "s/process_performance_data=0/process_performance_data=1/" \
+    -e "s/^#service_perfdata_file=\/tmp\/service-perfdata/service_perfdata_file=\/var\/log\/nagiosgrapher\/service-perfdata/" \
+    -e "s/^#service_perfdata_file_template=/service_perfdata_file_template=/" \
+    -e "s/^#service_perfdata_file_mode=a/service_perfdata_file_mode=a/" \
+    -e "s/^#service_perfdata_file_processing_interval=0/service_perfdata_file_processing_interval=30/" \
+    -e "s/^#service_perfdata_file_processing_command=process-service-perfdata-file/service_perfdata_file_processing_command=process-service-perfdata-file/" /etc/nagios3/nagios.cfg
 
-# Config nagiosgrapher
-#sed -i.orig2 -e "s/process_performance_data=0/process_performance_data=1/" \
-#    -e "s/^#service_perfdata_file=\/tmp\/service-perfdata/service_perfdata_file=\/var\/lib\/nagiosgrapher\/service-perfdata/" \
-#    -e "s/cfg_dir=\/usr\/local\/nagios\/etc\/serviceext/cfg_dir=\/etc\/nagios3\/services\/serviceext/" \
-#    -e "s/^#service_perfdata_file_template=/service_perfdata_file_template=/" \
-#    -e "s/^#service_perfdata_file_mode=a/service_perfdata_file_mode=a/" \
-#    -e "s/^#service_perfdata_file_processing_interval=0/service_perfdata_file_processing_interval=30/" \
-#    -e "s/^#service_perfdata_file_processing_command=process-service-perfdata-file/service_perfdata_file_processing_command=process-service-perfdata-file/" /etc/nagios3/nagios.cfg
-#sed -i.orig -e '/# OBJECT CONFIGURATION FILE/ i\
-#cfg_dir=/etc/nagiosgrapher/ngraph.d' /etc/nagios3/nagios.cfg
-#
-#sed -i.orig -e "s/user                    nagios/user                    itv/" \
-#        -e "s/group                   nagios/group                   itv/" \
-#        -e "s/nagiosadmin/itv/" \
-#        -e "s/serviceext_path         \/etc\/nagiosgrapher\/nagios3\/serviceext/serviceext_path        \/etc\/nagios3\/services\/serviceext/" /etc/nagiosgrapher/ngraph.ncfg
-#
-#mkdir -p /etc/nagios3/services/serviceext /var/lib/nagiosgrapher/service-perfdata
-#chown -R itv.itv /var/lib/nagiosgrapher /etc/nagios3/services/serviceext /etc/nagiosgrapher /var/run/nagiosgrapher /var/log/nagiosgrapher/ngraph.log /var/cache/nagiosgrapher /usr/share/perl5/NagiosGrapher /usr/lib/nagiosgrapher /usr/sbin/nagiosgrapher
+sed -i -e '/# OBJECT CONFIGURATION FILE/ i\
+cfg_dir=/etc/nagiosgrapher' /etc/nagios3/nagios.cfg
 
+
+sed -i.orig -e "s/user                    nagios/user                    itv/" \
+        -e "s/group                   nagios/group                   itv/" \
+        -e "s/nagiosadmin/itv/" /etc/nagiosgrapher/ngraph.ncfg
+
+touch /var/log/nagiosgrapher/service-perfdata
+touch /var/lib/nagiosgrapher/ngraph.pipe
+chown -R itv.itv /var/lib/nagiosgrapher /etc/nagiosgrapher /var/run/nagiosgrapher /var/log/nagiosgrapher /var/cache/nagiosgrapher /usr/share/perl5/NagiosGrapher /usr/lib/nagiosgrapher /usr/sbin/nagiosgrapher
+cat /etc/nagiosgrapher/nagios3/commands.cfg >> /etc/nagios3/commands.cfg 
 
 # --------------------------------------------------
 # NDO UTILS - Nagios
@@ -366,19 +356,30 @@ perl -MCPAN -e 'install XML::Entities'
 
 /usr/local/OCSNG_UNIX_SERVER-1.3.2/setup.sh
 
+# --------------------------------------------------
+# GRAPHVIZ
+# --------------------------------------------------
+/usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/graphviz_2.26.3-1_i386.deb
+/usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/graphviz-dev_2.26.3-1_all.deb
+#/usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/libgraphviz4_2.26.3-1_i386.deb
+#/usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/libgraphviz-dev_2.26.3-1_i386.deb
+#/usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/libgv-lua_2.26.3-1_i386.deb
+/usr/bin/dpkg -i /tmp/*.deb
+/usr/bin/dot -c
+
 
 # --------------------------------------------------
 # LUA ROCKS
 # --------------------------------------------------
-#luarocks install lpeg 0.9-1
-#luarocks install wsapi
-#luarocks install cgilua
-#luarocks install orbit
-#luarocks install dado
-#luarocks install luagraph
+luarocks install lpeg 0.9-1
+luarocks install wsapi
+luarocks install cgilua
+luarocks install orbit
+luarocks install dado
+luarocks install luagraph
 #
-#sed -i.orig '/^#/ a\
-#. '$itvhome'/bin/lua_path' /usr/local/bin/wsapi.cgi
+sed -i.orig '/^#/ a\
+. '$itvhome'/bin/lua_path' /usr/local/bin/wsapi.cgi
 
 
 
