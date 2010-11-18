@@ -219,7 +219,7 @@ cmds = {
    USERS     = { def="$USER1$/check_users -w $ARG1$ -c $ARG2$", default=nil },
    NT        = { def="$USER1$/check_nt -H $HOSTADDRESS$ -p 12489 -v $ARG1$ $ARG2$", default=nil },
    PING      = { def="$USER1$/check_ping -H $HOSTADDRESS$ -w $ARG1$ -c $ARG2$ -p 5", default="!400.0,20%!999.0,70%" },
-   HOST_PING = { def="$USER1$/check_ping -H $HOSTADDRESS$ -w $ARG1$ -c $ARG2$ -p 5", default="!400.0,20%!999.0,70%" },
+   HOST_ALIVE = { def="$USER1$/check_ping -H $HOSTADDRESS$ -w $ARG1$ -c $ARG2$ -p 5", default="!400.0,20%!999.0,70%" },
    POP       = { def="$USER1$/check_pop -H $HOSTADDRESS$ $ARG1$", default=nil },
    SMTP      = { def="$USER1$/check_smtp -H $HOSTADDRESS$ $ARG1$", default=nil },
    SNMP      = { def="$USER1$/check_snmp -H $HOSTADDRESS$ $ARG1$", default=nil },
