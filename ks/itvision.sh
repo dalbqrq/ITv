@@ -220,8 +220,11 @@ mkdir -p /etc/nagios3/services/serviceext
 
 sed -i.orig -e "s/user                    nagios/user                    itv/" \
         -e "s/group                   nagios/group                   itv/" \
+	-e "s/serviceextinfo          \/etc\/nagios3\/serviceextinfo.cfg/serviceextinfo          \/etc\/nagios3\/conf.d\/serviceextinfo.cfg/" \
+	-e "s/serviceext_path         \/etc\/nagiosgrapher\/nagios3\/serviceext/serviceext_path         \/etc\/nagios3\/services\/serviceext/" \
         -e "s/nagiosadmin/itv/" /etc/nagiosgrapher/ngraph.ncfg
-echo"
+
+cat << EOF > /etc/nagios3/conf.d/serviceextinfo.cfg
 define hostextinfo {
         host_name               dummy
         }
@@ -229,9 +232,10 @@ define hostextinfo {
 define serviceextinfo {
         host_name               dummy
         service_description     PING
-        }" >> /etc/nagios3/conf.d/serviceextinfo.cfg
+        }
+EOF
 
-
+rm -f /etc/nagiosgrapher/nagios3/commands.cfg
 
 ln -s /etc/nagios3/services/serviceext /etc/nagiosgrapher/nagios3/serviceext
 touch /var/log/nagiosgrapher/service-perfdata
@@ -358,15 +362,15 @@ cd /usr/local/OCSNG_UNIX_SERVER-1.3.2
 sed -i.orig -e "s/DB_SERVER_USER=\"ocs\"/DB_SERVER_USER=\"$user\"/" \
         -e "s/DB_SERVER_PWD=\"ocs\"/DB_SERVER_PWD=\"$dbpass\"/" /usr/local/OCSNG_UNIX_SERVER-1.3.2/setup.sh
 
+perl -MCPAN -e 'install XML::Entities'
 echo ''
 echo '# Entrando no shell do cpan ... '
 sleep 2
 echo '##################################'
 echo '# Digite "install YAML" a seguir #'
 echo '##################################'
+sleep 2
 cpan
-perl -MCPAN -e 'install XML::Entities'
-
 /usr/local/OCSNG_UNIX_SERVER-1.3.2/setup.sh
 
 # --------------------------------------------------
@@ -442,6 +446,7 @@ printf "$aliases" >> /root/.bashrc
 /usr/sbin/invoke-rc.d nagios-nrpe-server start
 /usr/sbin/invoke-rc.d nagios3 start
 /usr/sbin/invoke-rc.d ndoutils start
+/usr/sbin/invoke-rc.d nagiosgrapher start
 cd
 \rm -rf /tmp/*
 apt-get clean
