@@ -215,12 +215,25 @@ sed -i.orig2 -e "s/process_performance_data=0/process_performance_data=1/" \
 
 sed -i -e '/# OBJECT CONFIGURATION FILE/ i\
 cfg_dir=/etc/nagiosgrapher' /etc/nagios3/nagios.cfg
+mkdir -p /etc/nagios3/services/serviceext
 
 
 sed -i.orig -e "s/user                    nagios/user                    itv/" \
         -e "s/group                   nagios/group                   itv/" \
         -e "s/nagiosadmin/itv/" /etc/nagiosgrapher/ngraph.ncfg
+echo"
+define hostextinfo {
+        host_name               dummy
+        }
 
+define serviceextinfo {
+        host_name               dummy
+        service_description     PING
+        }" >> /etc/nagios3/conf.d/serviceextinfo.cfg
+
+
+
+ln -s /etc/nagios3/services/serviceext /etc/nagiosgrapher/nagios3/serviceext
 touch /var/log/nagiosgrapher/service-perfdata
 touch /var/lib/nagiosgrapher/ngraph.pipe
 chown -R itv.itv /var/lib/nagiosgrapher /etc/nagiosgrapher /var/run/nagiosgrapher /var/log/nagiosgrapher /var/cache/nagiosgrapher /usr/share/perl5/NagiosGrapher /usr/lib/nagiosgrapher /usr/sbin/nagiosgrapher
