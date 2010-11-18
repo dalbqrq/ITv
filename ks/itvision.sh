@@ -60,7 +60,7 @@ install_pack libc6-dev # OCSNG
 install_pack libcalendar-simple-perl
 install_pack autoconf
 install_pack snmpd
-install_pack cacti
+#install_pack cacti
 install_pack libgd-gd2-perl
 install_pack perlmagick
 install_pack librrds-perl
@@ -210,8 +210,8 @@ sed -i.orig2 -e "s/process_performance_data=0/process_performance_data=1/" \
     -e "s/^#service_perfdata_file=\/tmp\/service-perfdata/service_perfdata_file=\/var\/log\/nagiosgrapher\/service-perfdata/" \
     -e "s/^#service_perfdata_file_template=/service_perfdata_file_template=/" \
     -e "s/^#service_perfdata_file_mode=a/service_perfdata_file_mode=a/" \
-    -e "s/^#service_perfdata_file_processing_interval=0/service_perfdata_file_processing_interval=30/" \
-    -e "s/^#service_perfdata_file_processing_command=process-service-perfdata-file/service_perfdata_file_processing_command=process-service-perfdata-file/" /etc/nagios3/nagios.cfg
+    -e "s/^#service_perfdata_file_processing_interval=0/service_perfdata_file_processing_interval=10/" \
+    -e "s/^#service_perfdata_file_processing_command=process-service-perfdata-file/service_perfdata_file_processing_command=ngraph-process-service-perfdata-pipe/" /etc/nagios3/nagios.cfg
 
 sed -i -e '/# OBJECT CONFIGURATION FILE/ i\
 cfg_dir=/etc/nagiosgrapher' /etc/nagios3/nagios.cfg
@@ -388,22 +388,22 @@ sed -i.orig '/^#/ a\
 # --------------------------------------------------
 # wget -P /tmp http://www.cacti.net/downloads/cacti-0.8.7g.tar.gz
 # tar zxf /tmp/cacti-0.8.7g.tar.gz -C /usr/share
-mysqldump -u root --password=$dbpass -v cacti > /tmp/cacti.sql
-mysql -u root --password=$dbpass itvision < /tmp/cacti.sql
-echo "DROP DATABASE cacti;" | mysql -u root --password=$dbpass
-chown -R $user.$user /etc/cacti/ /usr/bin/rrdtool /usr/bin/php /usr/bin/snmpwalk /usr/bin/snmpget /usr/bin/snmpbulkwalk /usr/bin/snmpgetnext /var/log/cacti /usr/share/cacti /var/lib/cacti /usr/share/lintian/overrides/cacti /usr/share/doc/cacti /usr/share/dbconfig-common/data/cacti /usr/local/share/cacti /etc/cron.d/cacti /etc/logrotate.d/cacti
-
-sed -i.orig -e "s/\$database_username='cacti';/\$database_username='$dbuser';/" \
-	-e "s/\$basepath=''/\$basepath='/usr/share/php';/" \
-	-e "s/\$database_default='cacti';/\$database_default='$dbname';/" \
-	-e "s/\$database_hostname='';/\$database_hostname='localhost';/" \
-	-e "s/\$database_port='';/\$database_port='3306';/" /etc/cacti/debian.php
-sed -i.orig -e "s/\$database_default = \"cacti\";/\$database_default = \"$dbname\";/" \
-	-e "s/\$database_username = \"cactiuser\";/\$database_username = \"$dbuser\";/" \
-	-e "s/\$database_password = \"cactiuser\";/\$database_password = \"$dbpass\";/" /usr/share/cacti/site/include/global.php
-sed -i -e "s/www-data/$user/" /etc/cron.d/cacti
-
-
+#mysqldump -u root --password=$dbpass -v cacti > /tmp/cacti.sql
+#mysql -u root --password=$dbpass itvision < /tmp/cacti.sql
+#echo "DROP DATABASE cacti;" | mysql -u root --password=$dbpass
+#chown -R $user.$user /etc/cacti/ /usr/bin/rrdtool /usr/bin/php /usr/bin/snmpwalk /usr/bin/snmpget /usr/bin/snmpbulkwalk /usr/bin/snmpgetnext /var/log/cacti /usr/share/cacti /var/lib/cacti /usr/share/lintian/overrides/cacti /usr/share/doc/cacti /usr/share/dbconfig-common/data/cacti /usr/local/share/cacti /etc/cron.d/cacti /etc/logrotate.d/cacti
+#
+#sed -i.orig -e "s/\$database_username='cacti';/\$database_username='$dbuser';/" \
+#	-e "s/\$basepath=''/\$basepath='/usr/share/php';/" \
+#	-e "s/\$database_default='cacti';/\$database_default='$dbname';/" \
+#	-e "s/\$database_hostname='';/\$database_hostname='localhost';/" \
+#	-e "s/\$database_port='';/\$database_port='3306';/" /etc/cacti/debian.php
+#sed -i.orig -e "s/\$database_default = \"cacti\";/\$database_default = \"$dbname\";/" \
+#	-e "s/\$database_username = \"cactiuser\";/\$database_username = \"$dbuser\";/" \
+#	-e "s/\$database_password = \"cactiuser\";/\$database_password = \"$dbpass\";/" /usr/share/cacti/site/include/global.php
+#sed -i -e "s/www-data/$user/" /etc/cron.d/cacti
+#
+#
 # --------------------------------------------------
 # UTILILITARIOS
 # --------------------------------------------------
