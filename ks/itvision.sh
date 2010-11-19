@@ -6,7 +6,7 @@ dbuser=$user
 dbname=itvision
 itvhome=/usr/local/itvision
 instance=IMPA
-
+hostname=uname -a |awk -F " " '{print $2}'
 function install_pack() {
 	apt-get -y install $1
 }
@@ -390,6 +390,50 @@ sleep 2
 cpan
 /usr/local/OCSNG_UNIX_SERVER-1.3.2/setup.sh
 
+
+# --------------------------------------------------
+# SMTP GMAIL APPS
+# --------------------------------------------------
+echo "configurando smtp ..."
+sleep 3
+cd /tmp
+echo " "
+echo " ################################################################## "
+echo " # ATENÇÃO PREENCHA O CERTIFICADO COM OS DADOS ABAIXO		# "
+echo " #								# "
+echo " # Country Name (2 letter code) [US]:BR				# "
+echo " # State or Province Name (full name) [New York]:Rio de Janeiro	# "
+echo " # Locality Name (eg, city) []:Rio de Janeiro			# "
+echo " # Organization Name (eg, company) []:ITvision			# "
+echo " # Organizational Unit Name (eg, section) []:			# "
+echo " # Common Name (eg, YOUR name) []:Daniel				# "
+echo " # Email Address []:alert@itvision.com.br				# "
+echo " ################################################################## "
+echo " "
+/usr/lib/ssl/misc/CA.pl -newca
+openssl req -new -nodes -subj '/CN=ITvision/O=ITvision/C=BR/ST=Rio de Janeiro/L=Rio de Janeiro/emailAddress=alert@itvision.com.br' -keyout SERVER-key.pem -out SERVER-req.pem -days 3650
+cp /tmp/demoCA/cacert.pem /tmp/SERVER-key.pem /tmp/SERVER-cert.pem /etc/postfix
+chmod 644 /etc/postfix/SERVER-cert.pem /etc/postfix/cacert.pem
+chmod 400 /etc/postfix/SERVER-key.pem
+wget -P /tmp https://www.geotrust.com/resources/root_certificates/certificates/Equifax_Secure_Certificate_Authority.cer
+cat /tmp/Equifax_Secure_Certificate_Authority.cer >> /etc/postfix/cacert.pem
+
+cat << EOF > /etc/postfix/transport
+#
+* smtp:[smtp.gmail.com]:587
+#
+EOF
+mv /etc/postfix/main.cf /etc/postfix/main.cf.orig
+cp -a $itvhome/ks/files/mail/main.cf /etc/postfix/
+cat << EOF > /etc/postfix/sasl_passwd
+[smtp.gmail.com]:587 alert@itvision.com.br:0qs+l+sd
+EOF
+
+touch /etc/postfix/generic
+postmap /etc/postfix/sasl_passwd
+postmap /etc/postfix/transport
+rm -f ~/SERVER* && rm -rf ~/demoCA* 
+
 # --------------------------------------------------
 # GRAPHVIZ
 # --------------------------------------------------
@@ -473,6 +517,7 @@ printf "export LUA_PATH='$itvhome/orb/?.lua;$itvhome/orb/inc/?.lua;/usr/local/sh
 /usr/sbin/invoke-rc.d nagiosgrapher start
 cd
 \rm -rf /tmp/*
+rm -f ~/SERVER* && rm -rf ~/demoCA*
 apt-get clean
 apt-get autoremove
 
