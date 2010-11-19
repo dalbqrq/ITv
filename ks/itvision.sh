@@ -166,6 +166,9 @@ printf "html/gv\norb/config.lua\nbin/dbconf\n" >> $itvhome/.git/info/exclude
 # --------------------------------------------------
 # NAGIOS
 # --------------------------------------------------
+echo "configurando nagios ..."
+sleep 3
+
 htpasswd -cb /etc/nagios3/htpasswd.users $user $dbpass
 sed -i.orig -e "s/nrpe_user=nagios/nrpe_user=$user/" \
 	-e "s/nrpe_group=nagios/nrpe_group=$user/" \
@@ -206,6 +209,9 @@ done
 # --------------------------------------------------
 # NAGIOSGRAPHER
 # --------------------------------------------------
+echo "configurando nagiosgrapher ..."
+sleep 3
+
 sed -i.orig2 -e "s/process_performance_data=0/process_performance_data=1/" \
     -e "s/^#service_perfdata_file=\/tmp\/service-perfdata/service_perfdata_file=\/var\/log\/nagiosgrapher\/service-perfdata/" \
     -e "s/^#service_perfdata_file_template=/service_perfdata_file_template=/" \
@@ -246,6 +252,9 @@ cat /etc/nagiosgrapher/nagios3/commands.cfg >> /etc/nagios3/commands.cfg
 # --------------------------------------------------
 # NDO UTILS - Nagios
 # --------------------------------------------------
+echo "configurando ndoutils ..."
+sleep 3
+
 chown -R $user.$user /etc/nagios3/ndomod.cfg /etc/nagios3/ndo2db.cfg /usr/lib/ndoutils /etc/init.d/ndoutils
 
 sed -i.orig -e "s/ nagios / $user /g" /etc/init.d/ndoutils
@@ -270,6 +279,9 @@ chown -R $user.$user /var/log/nagios3 /etc/init.d/nagios-nrpe-server /etc/init.d
 # --------------------------------------------------
 # BUSINESS PROCESS
 # --------------------------------------------------
+echo "configurando nagios business process ..."
+sleep 3
+
 bp=nagiosbp
 tar zxf $itvhome/ks/files/nagiosbp-0.9.5.tgz -C /usr/local/src
 cd /usr/local/src/nagios-business-process-addon-0.9.5
@@ -315,6 +327,9 @@ sed -i.orig -e "139a \\
 # --------------------------------------------------
 # GLPI
 # --------------------------------------------------
+echo "configurando glpi ..."
+sleep 3
+
 wget -P /tmp https://forge.indepnet.net/attachments/download/656/glpi-0.78.tar.gz
 tar zxf /tmp/glpi-0.78.tar.gz -C /usr/local
 cp -r /usr/local/glpi /usr/local/servdesk
@@ -354,6 +369,8 @@ echo "ALTER TABLE \`itvision\`.\`glpi_computers\` ADD COLUMN \`geotag\` VARCHAR(
 # --------------------------------------------------
 # OCS INVENTORY v1.3.2
 # --------------------------------------------------
+echo "configurando ocs inventory ..."
+sleep 3
 
 wget -P /tmp http://launchpad.net/ocsinventory-server/stable-1.3/1.3.2/+download/OCSNG_UNIX_SERVER-1.3.2.tar.gz
 tar -xzf /tmp/OCSNG_UNIX_SERVER-1.3.2.tar.gz -C /usr/local
@@ -376,18 +393,24 @@ cpan
 # --------------------------------------------------
 # GRAPHVIZ
 # --------------------------------------------------
+echo "update graphiz ..."
+sleep 3
+
 /usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/graphviz_2.26.3-1_i386.deb
 /usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/graphviz-dev_2.26.3-1_all.deb
-#/usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/libgraphviz4_2.26.3-1_i386.deb
-#/usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/libgraphviz-dev_2.26.3-1_i386.deb
-#/usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/libgv-lua_2.26.3-1_i386.deb
-/usr/bin/dpkg -i /tmp/*.deb
+/usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/libgraphviz4_2.26.3-1_i386.deb
+/usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/libgraphviz-dev_2.26.3-1_i386.deb
+/usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/libgv-lua_2.26.3-1_i386.deb
+/usr/bin/dpkg -i /tmp/*.deb 
 /usr/bin/dot -c
 
 
 # --------------------------------------------------
 # LUA ROCKS
 # --------------------------------------------------
+echo "configurando lua ..."
+sleep 3
+
 luarocks install lpeg 0.9-1
 luarocks install wsapi
 luarocks install cgilua
