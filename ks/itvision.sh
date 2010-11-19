@@ -6,7 +6,7 @@ dbuser=$user
 dbname=itvision
 itvhome=/usr/local/itvision
 instance=IMPA
-
+hostname=uname -a |awk -F " " '{print $2}'
 function install_pack() {
 	apt-get -y install $1
 }
@@ -396,7 +396,7 @@ cpan
 # --------------------------------------------------
 echo "configurando smtp ..."
 sleep 3
-cd ~
+cd /tmp
 echo " "
 echo " ################################################################## "
 echo " # ATENÇÃO PREENCHA O CERTIFICADO COM OS DADOS ABAIXO		# "
@@ -412,8 +412,12 @@ echo " ################################################################## "
 echo " "
 /usr/lib/ssl/misc/CA.pl -newca
 openssl req -new -nodes -subj '/CN=ITvision/O=ITvision/C=BR/ST=Rio de Janeiro/L=Rio de Janeiro/emailAddress=alert@itvision.com.br' -keyout SERVER-key.pem -out SERVER-req.pem -days 3650
+cp /tmp/demoCA/cacert.pem /tmp/SERVER-key.pem /tmp/SERVER-cert.pem /etc/postfix
+chmod 644 /etc/postfix/SERVER-cert.pem /etc/postfix/cacert.pem
+chmod 400 /etc/postfix/SERVER-key.pem
 wget -P /tmp https://www.geotrust.com/resources/root_certificates/certificates/Equifax_Secure_Certificate_Authority.cer
-cat /tmp/certificates/Equifax_Secure_Certificate_Authority.cer >> /etc/postfix/cacert.pem
+cat /tmp/Equifax_Secure_Certificate_Authority.cer >> /etc/postfix/cacert.pem
+
 cat << EOF > /etc/postfix/transport
 #
 * smtp:[smtp.gmail.com]:587
