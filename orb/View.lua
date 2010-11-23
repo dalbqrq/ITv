@@ -347,14 +347,15 @@ end
       strings.type..": ", select_and_or("type", default_val2), br(),
    }
 ]]
-function render_form(url, url_reset, t)
+function render_form(url, url_reset, t, line)
    url_reset = url_reset or ""
+   if line then line = br() else line = "" end
    return form{
       name = "input",
       method = "post",
       action = url,
       t,
-      br(),
+      line,
       input{ type='submit', value=strings.send,  class='submit' },
       " ",
       a{ href=url_reset, img{ src='/pics/reset.png', class='calendrier' } },

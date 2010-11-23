@@ -11,10 +11,6 @@ require "orbit"
 require "Model"
 module(Model.name, package.seeall,orbit.new)
 
---[[
-local hosts    = Model.nagios:model "hosts"
-local services = Model.nagios:model "services"
-]]
 local objects  = Model.nagios:model "objects"
 local monitors = Model.itvision:model "monitors"
 
@@ -272,21 +268,24 @@ function render_list(web, cmp, chk, msg)
 
    for i, v in ipairs(cmp) do
       local serv, ip, itemtype, name, id = "", "", "", "", ""
+      -- muitos dos ifs abaixo existem em funcao da direrenca entre as queries com Computer e as com Network
       if v.sw_name ~= "" then serv = v.sw_name.." / "..v.sv_name end
       if v.sv_id == "" then v.sv_id = 0 end
+      v.p_id = v.p_id or 0
+      v.sv_id = v.sv_id or 0
       if v.p_ip then ip = v.p_ip else ip = v.n_ip end
       if v.p_itemtype then itemtype = v.p_itemtype else itemtype = "Network" end
       if v.c_name then name = v.c_name else name = v.n_name end
       if v.c_id then id = v.c_id else id = v.n_id end
       if v.s_check_command_object_id == "" then 
          chk = ""
-         --link = a{ href= web:link("/add/"..v[1]..":"..v.c_id..":"..v.p_id..":"..v.sv_id), strings.add }
-         link = a{ href= web:link("/add/"..v[1]..":CONTINUAR_DAQUI"), strings.add }
+         link = a{ href= web:link("/add/"..v[1]..":"..id..":"..v.p_id..":"..v.sv_id), strings.add }
       else
          content = objects:select_checks(v.s_check_command_object_id)
          chk = content[1].name1
          link = "-"
       end
+
       row[#row + 1] = { 
          v[1],
          a{ href= web:link("/add/"..id), name}, 
@@ -307,10 +306,7 @@ end
 
 
 function render_confirm(web, msg)
-   local res = {}
-
-   res[#res+1] = p{ "SHOW", br(), msg }
-
+   local res = p{ "SHOW", br(), msg }
    return render_layout(res)
 end
 
@@ -319,7 +315,7 @@ function render_add(web, cmp, chk, query, default)
    local v = cmp[1]
    local row = {}
    local res = {}
-   local serv = ""
+   local serv, ip, itemtype, name, id = "", "", "", "", ""
    local s, r
    local display = ""
 
@@ -335,10 +331,16 @@ function render_add(web, cmp, chk, query, default)
       end
 
       if v.sv_id == "" then v.sv_id = 0 end
-      url = "/insert/"..v.p_id..":"..v.sv_id..":"..v.c_id..":"..v.c_name..":"..v.sw_name..":"
-            ..v.sv_name..":"..v.p_ip
+      v.p_id = v.p_id or 0
+      v.sv_id = v.sv_id or 0
+      if v.p_itemtype then itemtype = v.p_itemtype else itemtype = "Network" end
+      if v.p_ip then ip = v.p_ip else ip = v.n_ip end
+      if v.c_name then name = v.c_name else name = v.n_name end
+      if v.c_id then id = v.c_id else id = v.n_id end
 
-      -- se sv_id == 0 entao eh um host
+      url = "/insert/"..v.p_id..":"..v.sv_id..":"..id..":"..name..":"..v.sw_name..":"..v.sv_name..":"..ip
+
+      -- se sv_id == 0 entao eh um host ou um network
       if v.sv_id == 0 then 
          cmd = render_form(web:link(url), nil,
                { "<INPUT TYPE=HIDDEN NAME=\"check\" value=\"0\">", config.monitor.check_host, " " } )
@@ -351,10 +353,10 @@ function render_add(web, cmp, chk, query, default)
       --a{ href= web:link("/show/"..v.c_id), v.c_name}, 
       row[#row + 1] = { 
          v[1],
-         v.c_name,
-         v.p_ip, 
+         name,
+         ip, 
          serv,
-         v.p_itemtype,
+         itemtype,
          cmd,
       }
    end
