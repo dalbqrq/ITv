@@ -5,11 +5,19 @@ dbpass=itv
 dbuser=$user
 dbname=itvision
 itvhome=/usr/local/itvision
-instance=IMPA
-hostname=uname -a |awk -F " " '{print $2}'
+instance=ATMA
+hostname=itvision
 function install_pack() {
 	apt-get -y install $1
 }
+
+function install_msg() {
+	sep=`for _ in \`seq 60\`; do echo -n "-"; done;`
+	echo $sep; echo Configurando $1 ...; echo $sep; echo
+	sleep 3
+}
+
+echo $hostname > /etc/hostname; hostname --file /etc/hostname
 
 # --------------------------------------------------
 # INSTALL UBUNTU NATIVE PACKAGES VIA apt-get
@@ -66,6 +74,7 @@ install_pack perlmagick
 install_pack librrds-perl
 install_pack nagiosgrapher
 
+
 # --------------------------------------------------
 # STOP ALL PROCESSES
 # --------------------------------------------------
@@ -79,6 +88,8 @@ rm -rf /var/cache/nagios3/ndo.sock
 # --------------------------------------------------
 # ITVISION
 # --------------------------------------------------
+install_msg ITVISION
+
 echo "CREATE DATABASE $dbname;" | mysql -u root --password=$dbpass
 echo "CREATE USER '$dbuser'@'localhost' IDENTIFIED BY '$dbpass';" | mysql -u root --password=$dbpass
 echo "GRANT ALL PRIVILEGES ON *.* TO '$dbuser'@'localhost' WITH GRANT OPTION;" | mysql -u root --password=$dbpass
@@ -166,8 +177,7 @@ printf "html/gv\norb/config.lua\nbin/dbconf\n" >> $itvhome/.git/info/exclude
 # --------------------------------------------------
 # NAGIOS
 # --------------------------------------------------
-echo "configurando nagios ..."
-sleep 3
+install_msg NAGIOS
 
 htpasswd -cb /etc/nagios3/htpasswd.users $user $dbpass
 sed -i.orig -e "s/nrpe_user=nagios/nrpe_user=$user/" \
@@ -209,8 +219,7 @@ done
 # --------------------------------------------------
 # NAGIOSGRAPHER
 # --------------------------------------------------
-echo "configurando nagiosgrapher ..."
-sleep 3
+install_msg NAGIOSGRAPHER
 
 sed -i.orig2 -e "s/process_performance_data=0/process_performance_data=1/" \
     -e "s/^#service_perfdata_file=\/tmp\/service-perfdata/service_perfdata_file=\/var\/log\/nagiosgrapher\/service-perfdata/" \
@@ -241,7 +250,7 @@ define serviceextinfo {
         }
 EOF
 
-rm -f /etc/nagiosgrapher/nagios3/commands.cfg
+#rm -f /etc/nagiosgrapher/nagios3/commands.cfg
 
 ln -s /etc/nagios3/services/serviceext /etc/nagiosgrapher/nagios3/serviceext
 touch /var/log/nagiosgrapher/service-perfdata
@@ -252,10 +261,10 @@ cat /etc/nagiosgrapher/nagios3/commands.cfg >> /etc/nagios3/commands.cfg
 # --------------------------------------------------
 # NDO UTILS - Nagios
 # --------------------------------------------------
-echo "configurando ndoutils ..."
-sleep 3
+install_msg NDOUTILS
 
 chown -R $user.$user /etc/nagios3/ndomod.cfg /etc/nagios3/ndo2db.cfg /usr/lib/ndoutils /etc/init.d/ndoutils
+
 
 sed -i.orig -e "s/ nagios / $user /g" /etc/init.d/ndoutils
 sed -i.orig -e '/# LOG ROTATION METHOD/ i\
@@ -265,8 +274,8 @@ sed -i.orig -e "s/ndo2db_group=nagios/ndo2db_group=$user/" \
 	-e "s/db_name=ndoutils/db_name=$dbname/" \
 	-e "s/^db_user=ndoutils/db_user=$dbuser/" \
 	-e "s/\/\//\//g" /etc/nagios3/ndo2db.cfg
-sed -i -e "s/\/\//\//g" /etc/nagios3/ndomod.cfg
-sed -i -e 's/ENABLE_NDOUTILS=0/ENABLE_NDOUTILS=1/' /etc/default/ndoutils
+sed -i.orig -e "s/\/\//\//g" -e "s/instance_name=.*/instance_name=$instance/g" /etc/nagios3/ndomod.cfg
+sed -i.orig -e 's/ENABLE_NDOUTILS=0/ENABLE_NDOUTILS=1/' /etc/default/ndoutils
 
 mysqldump -u root --password=$dbpass -v ndoutils > /tmp/ndoutils.sql
 mysql -u root --password=$dbpass $dbname < /tmp/ndoutils.sql
@@ -279,8 +288,7 @@ chown -R $user.$user /var/log/nagios3 /etc/init.d/nagios-nrpe-server /etc/init.d
 # --------------------------------------------------
 # BUSINESS PROCESS
 # --------------------------------------------------
-echo "configurando nagios business process ..."
-sleep 3
+install_msg NAGIOS BUSINESS PROCESS
 
 bp=nagiosbp
 tar zxf $itvhome/ks/files/nagiosbp-0.9.5.tgz -C /usr/local/src
@@ -327,8 +335,7 @@ sed -i.orig -e "139a \\
 # --------------------------------------------------
 # GLPI
 # --------------------------------------------------
-echo "configurando glpi ..."
-sleep 3
+install_msg GLPI
 
 wget -P /tmp https://forge.indepnet.net/attachments/download/656/glpi-0.78.tar.gz
 tar zxf /tmp/glpi-0.78.tar.gz -C /usr/local
@@ -369,8 +376,7 @@ echo "ALTER TABLE \`itvision\`.\`glpi_computers\` ADD COLUMN \`geotag\` VARCHAR(
 # --------------------------------------------------
 # OCS INVENTORY v1.3.2
 # --------------------------------------------------
-echo "configurando ocs inventory ..."
-sleep 3
+install_msg OCS INVENTORY
 
 wget -P /tmp http://launchpad.net/ocsinventory-server/stable-1.3/1.3.2/+download/OCSNG_UNIX_SERVER-1.3.2.tar.gz
 tar -xzf /tmp/OCSNG_UNIX_SERVER-1.3.2.tar.gz -C /usr/local
@@ -394,8 +400,8 @@ cpan
 # --------------------------------------------------
 # SMTP GMAIL APPS
 # --------------------------------------------------
-echo "configurando smtp ..."
-sleep 3
+install_msg SMTP
+
 cd /tmp
 echo " "
 echo " ################################################################## "
@@ -452,8 +458,7 @@ sleep 3
 # --------------------------------------------------
 # LUA ROCKS
 # --------------------------------------------------
-echo "configurando lua ..."
-sleep 3
+install_msg LUA
 
 luarocks install lpeg 0.9-1
 luarocks install wsapi
@@ -470,6 +475,8 @@ sed -i.orig '/^#/ a\
 # --------------------------------------------------
 # CACTI 
 # --------------------------------------------------
+#install_msg CACTI
+#
 # wget -P /tmp http://www.cacti.net/downloads/cacti-0.8.7g.tar.gz
 # tar zxf /tmp/cacti-0.8.7g.tar.gz -C /usr/share
 #mysqldump -u root --password=$dbpass -v cacti > /tmp/cacti.sql
@@ -491,6 +498,8 @@ sed -i.orig '/^#/ a\
 # --------------------------------------------------
 # UTILILITARIOS
 # --------------------------------------------------
+install_msg UTILITARIOS
+
 path="\n\nPATH=\$PATH:$itvhome/bin\n\n"
 aliases="\nalias mv='mv -i'\nalias cp='cp -i'\nalias rm='rm -i'\nalias psa='ps -ef  |grep -v \" \\[\"'"
 printf "$path"    >> /home/$user/.bashrc
@@ -510,6 +519,7 @@ printf "export LUA_PATH='$itvhome/orb/?.lua;$itvhome/orb/inc/?.lua;/usr/local/sh
 # --------------------------------------------------
 # CLEAN UP & RESTART ALL PROCESSES
 # --------------------------------------------------
+install_msg CLEAN UP
 /usr/sbin/invoke-rc.d apache2 start
 /usr/sbin/invoke-rc.d nagios-nrpe-server start
 /usr/sbin/invoke-rc.d nagios3 start
