@@ -79,7 +79,7 @@ rm -rf /var/cache/nagios3/ndo.sock
 # --------------------------------------------------
 # ITVISION
 # --------------------------------------------------
-echo "CREATE DATABASE $dbname;" | mysql -u root --password=$dbpass
+echo "CREATE DATABASE $dbname DEFAULT CHARACTER SET utf8  DEFAULT COLLATE utf8_general_ci;" | mysql -u root --password=$dbpass
 echo "CREATE USER '$dbuser'@'localhost' IDENTIFIED BY '$dbpass';" | mysql -u root --password=$dbpass
 echo "GRANT ALL PRIVILEGES ON *.* TO '$dbuser'@'localhost' WITH GRANT OPTION;" | mysql -u root --password=$dbpass
 mysql -u root --password=$dbpass $dbname < $itvhome/ks/db/itvision.sql
@@ -205,6 +205,17 @@ for f in $dir/*; do
 	-e 's/ check_.*/\U&/' -e 's/\tcheck_.*/\U&/' -e 's/CHECK_//g' \
 	-e 's/ snmp_.*/\U&/' -e 's/\tsnmp_.*/\U&/' $f
 done
+
+sed -i "/http2'/i \\
+# 'check_http_url' command definition \\
+define command{ \\
+        command_name    HTTPURL \\
+        command_line    /usr/lib/nagios/plugins/check_http -I '\$ARG1\$' \\
+        } \\
+" $dir/http.cfg
+sed -i.orig -e "s/check_pop -H/check_pop -p 100 -H/g" $dir/mail.cfg
+sed -i.orig -e "s/check_imap -H/check_imap -p 143 -H/g" $dir/mail.cfg
+
 
 # --------------------------------------------------
 # NAGIOSGRAPHER

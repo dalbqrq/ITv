@@ -1,0 +1,14 @@
+#!/bin/bash 
+
+progdir=$(dirname $(readlink -f $0))
+. $progdir/dbconf
+
+
+if [ $# -ge 1 ]; then
+	host=$1
+	$progdir/dbcon "CREATE USER '$dbuser'@'$host' IDENTIFIED BY '$dbpass';"
+	$progdir/dbcon "GRANT ALL PRIVILEGES ON *.* TO '$dbuser'@'$host' WITH GRANT OPTION;"
+else
+	echo usage: $(basename $(readlink -f $0)) "<[hostname|ip-address]>"
+fi
+

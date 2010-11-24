@@ -103,7 +103,7 @@ ITvision:dispatch_post(update, "/update/(%d+)")
 ]]
 
 
-function add(web, query, c_id, p_id, sv_id)
+function add(web, query, c_id, p_id, sv_id, default)
    local chk = Model.select_checkcmds()
    local cmp = {}
 
@@ -125,7 +125,7 @@ function add(web, query, c_id, p_id, sv_id)
 
    return render_add(web, cmp, chk, query, default)
 end
-ITvision:dispatch_get(add, "/add/(%d+):(%d+):(%d+):(%d+)")
+ITvision:dispatch_get(add, "/add/(%d+):(%d+):(%d+):(%d+)", "/add/(%d+):(%d+):(%d+):(%d+):(%d+)")
 
 
 --[[

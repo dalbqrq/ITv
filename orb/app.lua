@@ -81,7 +81,7 @@ end
 -- controllers ------------------------------------------------------------
 
 function list(web, msg)
-   local clause
+   local clause = nil
    if web.input.app_name then clause = " name like '%"..web.input.app_name.."%' " end
 
    local A = apps:select(nil, clause)
@@ -237,7 +237,7 @@ function render_list(web, A, msg)
       row[#row+1] = {
          a{ href=lnk, v.name },
          strings["logical_"..v.type],
-         NoOrYes[v.is_active+1].name,
+         NoOrYes[tonumber(v.is_active)+1].name,
          button_link(strings.remove, web:link("/remove/"..v.id), "negative"),
          button_link(strings.edit, web:link("/edit/"..v.id..":"..v.name..":"..v.type)),
          button_link(stract, web:link("/activate/"..v.id..":"..v.is_active)) }
