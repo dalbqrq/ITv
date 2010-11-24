@@ -123,7 +123,9 @@ function add(web, query, c_id, p_id, sv_id, default)
       cmp = Model.make_query_6(c_id, p_id)
    end
 
-   return render_add(web, cmp, chk, query, default)
+   local params = { query=query, c_id=c_id, p_id=p_id, sv_id=sv_id, default=default }
+
+   return render_add(web, cmp, chk, params)
 end
 ITvision:dispatch_get(add, "/add/(%d+):(%d+):(%d+):(%d+)", "/add/(%d+):(%d+):(%d+):(%d+):(%d+)")
 
@@ -319,15 +321,15 @@ function render_confirm(web, msg)
 end
 
 
-function render_add(web, cmp, chk, query, default)
+function render_add(web, cmp, chk, params)
    local v = cmp[1]
    local row = {}
    local res = {}
    local serv, ip, itemtype, name, id = "", "", "", "", ""
-   local s, r
+   local s, r, url, url2
    local display = ""
 
-   default = default or v.s_check_command_object_id
+   --params.default = params.default or v.s_check_command_object_id
 
    local header = { "query", strings.name, "IP", "SW / Versão", strings.type, strings.command }
 
@@ -353,9 +355,16 @@ function render_add(web, cmp, chk, query, default)
          cmd = render_form(web:link(url), nil,
                { "<INPUT TYPE=HIDDEN NAME=\"check\" value=\"0\">", config.monitor.check_host, " " } )
       else
+         url2="/add/"..params.query..":"..params.c_id
+         if params.p_id    then url2 = url2 ..":"..params.p_id    end
+         if params.sv_id   then url2 = url2 ..":"..params.sv_id   end
+         --if params.default then url2 = url2 ..":"..params.default end
+         url2=web:link(url2)
+
          cmd = render_form(web:link(url), nil,
                { "Nome:", "<INPUT TYPE=TEXT NAME=\"display\" value=\""..display.."\">", 
-               select_option("check", chk, "object_id", "name1", default), " " } )
+               --select_option("check", chk, "object_id", "name1", params.default), " " } )
+               select_option_onchange("check", chk, "object_id", "name1", params.default, url2), " " } )
       end
 
       --a{ href= web:link("/show/"..v.c_id), v.c_name}, 

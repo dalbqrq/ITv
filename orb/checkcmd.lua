@@ -34,7 +34,7 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 function render_list(web)
    local res = {}
    local chk = {}
-   local path = "/usr/local/monitor/libexec"
+   local path = "/usr/lib/nagios/plugins"
    local url = "/chkexec"
 
    for file in lfs.dir(path) do
@@ -60,7 +60,7 @@ end
 
 
 function render_chkexec(web, cmd, opts)
-   local path = "/usr/local/monitor/libexec"
+   local path = "/usr/lib/nagios/plugins"
    cmd = cmd or "check_ping"
    if not opts or opts == "" then opts = "-h" end
    local chk = cmd.." "..opts

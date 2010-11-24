@@ -327,8 +327,8 @@ function render_selector_bar(web, A, id, path)
       res[#res+1] = option{ selected=selected, value=url, v.name }
    end
 
-   return { form{ H("select"){ ONCHANGE="location = this.options[this.selectedIndex].value;", res } } }
-
+   --return { form{ H("select"){ ONCHANGE="location = this.options[this.selectedIndex].value;", res } } }
+   return form{ H("select"){ ONCHANGE="location = this.options[this.selectedIndex].value;", res } }
    
 end
 
@@ -425,6 +425,65 @@ function select_option(name, T, value_idx, label_idx, default_value)
    return olist
 
 end
+
+
+function select_option_onchange(name, T, value_idx, label_idx, default_value, url)
+   local olist = {}
+
+   olist[#olist + 1] = "<select name=\""..name.."\" ONCHANGE=\"location = this.options[this.selectedIndex].label;\">"
+   for i, v in ipairs(T) do
+      if default_value then
+         if ((type(tonumber(default_value)) ~= "nil") and (tonumber(default_value) == tonumber(v[value_idx])) )
+            or ( default_value == v[value_idx] )
+         then
+            selected = "selected "
+         else
+            selected = ""
+         end
+      else
+         selected = ""
+      end
+
+      local str= ""
+      str = str..v[value_idx]
+      str = str..v[label_idx]
+      str = str..selected
+
+      olist[#olist + 1] = "<option "..selected.." value=\""..v[value_idx].."\" label=\"".. 
+                           url..":"..v[value_idx].."\">"..  v[label_idx].."</option>"
+                           --v[label_idx].."\">"..  v[label_idx].."</option>"
+
+   end
+   olist[#olist + 1] = "</select>"
+
+   return olist
+end
+
+--[[
+function render_selector_bar(web, A, id, path)
+   local url = ""
+   local res = {}
+   local selected = ""
+   local curr_app = 0
+   id = id or -1
+
+   for i, v in ipairs(A) do
+      url = web:link(path.."/"..v.id)
+      if tonumber(v.id) == tonumber(id) then
+         selected = "selected"
+         curr_app = i
+      else
+         selected = nil
+      end
+      res[#res+1] = option{ selected=selected, value=url, v.name }
+   end
+
+   --return { form{ H("select"){ ONCHANGE="location = this.options[this.selectedIndex].value;", res } } }
+   return form{ H("select"){ ONCHANGE="location = this.options[this.selectedIndex].value;", res } }
+   
+end
+]]
+
 
 
 -- YES or NO
