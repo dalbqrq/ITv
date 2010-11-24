@@ -5,8 +5,9 @@ dbpass=itv
 dbuser=$user
 dbname=itvision
 itvhome=/usr/local/itvision
-instance=ATMA
+instance=VERTO
 hostname=itvision
+
 function install_pack() {
 	apt-get -y install $1
 }
@@ -17,7 +18,7 @@ function install_msg() {
 	sleep 3
 }
 
-echo $hostname > /etc/hostname; hostname --file /etc/hostname
+sed -e "s/`hostname`/$hostname/g" /etc/hosts; echo $hostname > /etc/hostname; hostname --file /etc/hostname
 
 # --------------------------------------------------
 # INSTALL UBUNTU NATIVE PACKAGES VIA apt-get
