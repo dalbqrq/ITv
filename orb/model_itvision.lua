@@ -167,7 +167,7 @@ end
 
 
 function select_app_app_objects (id)
-   local cond_ = "no.object_id = al.object_id and al.app_id = ap.id"
+   local cond_ = "no.object_id = al.service_object_id and al.app_id = ap.id"
    if id then
       cond_ = cond_ .. " and ap.id = "..id
    end
@@ -212,16 +212,16 @@ end
 
 function select_app_relat_object (id, from, to)
    local tables_  = [[itvision_app_relats ar, nagios_objects o1, nagios_objects o2, 
-                      itvision_app_relats_type rt, itvision_apps ap]]
+                      itvision_app_relat_types rt, itvision_apps ap]]
    local cond_    = [[ar.from_object_id = o1.object_id and 
                       ar.to_object_id = o2.object_id and
-                      ar.app_relat_types_id = rt.id and
+                      ar.app_relat_type_id = rt.id and
                       ar.app_id = ap.id ]]
    local columns_ = [[o1.name1 as from_name1, o1.name2 as from_name2, 
                       o2.name1 as to_name1, o2.name2 as to_name2,
                       ar.from_object_id, ar.to_object_id,
                       ar.app_id as app_id, ap.name as app_name, 
-                      ar.app_relat_types_id, 
+                      ar.app_relat_type_id, 
                       rt.name as rtype_name, rt.type as rtype_type,
                       ar.from_object_id, ar.to_object_id ]]
 
@@ -234,19 +234,19 @@ end
 
 --[[
 select  a.name as a_name, art.name as art_name, o1.name1 as o1_name1, o1.name2 as o1_name2, o2.name1 as o2_name1, o2.name2 as o2_name2
-from itvision_apps a, itvision_app_relats ar, nagios_objects o1, nagios_objects o2, itvision_app_relats_type art
+from itvision_apps a, itvision_app_relats ar, nagios_objects o1, nagios_objects o2, itvision_app_relat_types art
 where a.id = ar.app_id and
 ar.from_object_id = o1.object_id and
 ar.to_object_id = o2.object_id and
-ar.app_relat_types_id = art.id
+ar.app_relat_type_id = art.id
 ]]
 function select_app_relat_to_graph (id)
    local columns_ = "a.name as a_name, art.name as art_name, o1.name1 as o1_name1, o1.name2 as o1_name2, o2.name1 as o2_name1, o2.name2 as o2_name2"
-   local tables_  = "itvision_apps a, itvision_app_relats ar, nagios_objects o1, nagios_objects o2, itvision_app_relats_type art"
+   local tables_  = "itvision_apps a, itvision_app_relats ar, nagios_objects o1, nagios_objects o2, itvision_app_relat_types art"
    local cond_    = "a.id = ar.app_id and \
                      ar.from_object_id = o1.object_id and \
                      ar.to_object_id = o2.object_id and \
-                     ar.app_relat_types_id = art.id and \
+                     ar.app_relat_type_id = art.id and \
                      a.id = "..id
 
    local content = query (tables_, cond_, extra_, columns_)

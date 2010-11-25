@@ -47,7 +47,7 @@ ITvision:dispatch_get(edit, "/edit/(%d+)")
 function update(web, id)
    local A = {}
    if id then
-      local tables = "itvision_app_relats_type"
+      local tables = "itvision_app_relat_types"
       local clause = "id = "..id
       --A:new()
       A.name = web.input.name
@@ -87,7 +87,7 @@ ITvision:dispatch_get(remove, "/remove/(%d+)")
 function delete(web, id)
    if id then
       local clause = "id = "..id
-      local tables = "itvision_app_relats_type"
+      local tables = "itvision_app_relat_types"
       Model.delete (tables, clause) 
    end
 

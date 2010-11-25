@@ -35,7 +35,7 @@ function app_objects:select_app_objects(id)
 end
 
 
-function app_relat:select_app_relat(id, from, to)
+function app_relats:select_app_relat(id, from, to)
    local clause = ""
    if id then
       clause = "app_id = "..id
@@ -48,7 +48,7 @@ function app_relat:select_app_relat(id, from, to)
 end
 
 
-function app_relat:delete_app_relat(id, from, to)
+function app_relats:delete_app_relat(id, from, to)
    local clause = ""
    if id and from and to then
       clause = " app_id = "..id.." and from_object_id = "..from.." and to_object_id = "..to
@@ -62,7 +62,7 @@ end
 function app_relat_types:select_app_relat_types(id)
    local clause = ""
    if id then
-      clause = "app_relat_types_id = "..id
+      clause = "app_relat_type_id = "..id
    end
    return self:find_all(clause)
 end
@@ -104,8 +104,12 @@ ITvision:dispatch_get(show, "/show/(%d+)")
 
 function add(web, id, msg)
    local APPS = apps:select_apps()
-   if id == "/" then
-      if APPS[1] then id = APPS[1].app_id else id = nil end
+   if id == "/" or id == "/add" or id == "/add/" then
+      if APPS[1] then
+         id = APPS[1].app_id
+      else
+         return render_blank(web)
+      end
    end
 
    local HST = Model.select_service_object(nil, nil, nil, nil, id, true)
@@ -118,8 +122,9 @@ function add(web, id, msg)
 
    return render_add(web, HST, SVC, APP, APPOBJ, APPS, AR, RT, id, msg)
 end
-ITvision:dispatch_get(add, "/add/(%d+)")
-ITvision:dispatch_get(add, "/add/(%d+):(.+)")
+ITvision:dispatch_get(add, "/add/", "/add/(%d+)", "/add/(%d+):(.+)")
+--ITvision:dispatch_get(add, "/add/(%d+)")
+--ITvision:dispatch_get(add, "/add/(%d+):(.+)")
 
 
 
@@ -153,16 +158,16 @@ function insert_relat(web)
    local msg = ""
    local from, to
 
-   app_relat:new()
-   app_relat.app_id = web.input.app_id
-   app_relat.from_object_id = web.input.from
-   app_relat.to_object_id = web.input.to
-   app_relat.instance_id = Model.db.instance_id
-   app_relat.app_relat_types_id = web.input.relat
+   app_relats:new()
+   app_relats.app_id = web.input.app_id
+   app_relats.from_object_id = web.input.from
+   app_relats.to_object_id = web.input.to
+   app_relats.instance_id = Model.db.instance_id
+   app_relats.app_relat_type_id = web.input.relat
 
    if not ( web.input.from and web.input.to and web.input.relat ) then
       msg = ":"..error_message(7)
-      return web:redirect(web:link("/add/"..app_relat.app_id)..msg)
+      return web:redirect(web:link("/add/"..app_relats.app_id)..msg)
    end
 
    local AR = Model.select_app_relat_object(web.input.app_id, web.input.from, web.input.to)
@@ -172,10 +177,10 @@ function insert_relat(web)
       to   = make_obj_name(v.to_name1,   v.to_name2)
       msg = ":"..error_message(8).." "..from.." -> "..to
    else
-      app_relat:save()
+      app_relats:save()
    end
 
-   return web:redirect(web:link("/add/"..app_relat.app_id)..msg)
+   return web:redirect(web:link("/add/"..app_relats.app_id)..msg)
 end
 ITvision:dispatch_post(insert_relat, "/insert_relat")
 
@@ -202,7 +207,7 @@ ITvision:dispatch_get(delete_obj, "/delete_obj/(%d+):(%d+)")
 
 
 function remove_relat(web, app_id, from, to)
-   local A = app_relat:select_app_relat(app_id, from, to)
+   local A = app_relats:select_app_relat(app_id, from, to)
    local AR = Model.select_app_relat_object(id, from, to)
    return render_remove_relat(web, A, AR)
 end
@@ -272,7 +277,7 @@ function render_list(web, APPOBJ, APPS, AR, app_id)
    -----------------------------------------------------------------------
    res[#res+1] = render_content_header(strings.application, web:link("/add/"..app_id), web:link("/list"))
    res[#res+1] = render_bar( render_selector_bar(web, APPS, app_id, "/list") )
-   res[#res+1] = render_content_header(strings.app_objects)
+   res[#res+1] = render_content_header(strings.app_object)
    header = { strings.object.." ("..strings.service.."@"..strings.host..")", strings.type, "." }
    res[#res+1] = render_table(make_app_objects_table(web, APPOBJ), header)
 
@@ -448,6 +453,14 @@ function render_remove_relat(web, A, AR)
    res[#res + 1] = button_link(strings.yes,
          web:link("/delete_relat/"..A.app_id..":"..AR.from_object_id..":"..AR.to_object_id))
    res[#res + 1] = button_link(strings.cancel, web:link("/list/"..A.app_id))
+
+   return render_layout(res)
+end
+
+
+function render_blank(web)
+   local res = {}
+   res[#res+1]  = { b{ "Não há aplicações configuradas" } } 
 
    return render_layout(res)
 end

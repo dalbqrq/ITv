@@ -516,7 +516,6 @@ function query_5(c_id, n_id, clause)
 
       ''			as m_networkports_id,
       ''			as m_softwareversions_id,
-      ''			as m_host_object_id,
       ''			as m_service_object_id,
       ''			as m_is_active,
       ''			as m_type
@@ -610,7 +609,6 @@ function query_6(c_id, n_id, clause)
 
       m.networkports_id		as m_networkports_id,
       m.softwareversions_id	as m_softwareversions_id,
-      m.host_object_id		as m_host_object_id,
       m.service_object_id	as m_service_object_id,
       m.is_active		as m_is_active,
       m.type			as m_type
@@ -622,10 +620,7 @@ function query_6(c_id, n_id, clause)
    local cond_ = [[ n.itemtype = "NetworkEquipment" and
            c.id = n.items_id and 
            n.id = m.networkports_id and
-           m.host_object_id = o.object_id and
            m.softwareversions_id is null and
-           m.host_object_id = hst.host_object_id and
-           m.host_object_id = svc.host_object_id and
            m.service_object_id = svc.service_object_id ]]
 
    if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end

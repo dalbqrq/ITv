@@ -18,7 +18,7 @@ function remove_all_apps()
    Model.delete("itvision_app_relats")
    Model.delete("itvision_apps")
    Model.delete("itvision_app_trees")
-   Model.delete("itvision_app_relats_type")
+   Model.delete("itvision_app_relat_types")
    Model.delete("itvision_sysconfig")
    return true
 end
@@ -78,21 +78,21 @@ end
 
 function init_app_relat_types ()
    local t = {}
-   local content = Model.query ("itvision_app_relats_type")
+   local content = Model.query ("itvision_app_relat_types")
 
    if content[1] == nil then
       t.name = "roda em"
       t.type = "physical"
-      Model.insert ("itvision_app_relats_type", t)
+      Model.insert ("itvision_app_relat_types", t)
       t.name = "conectado a"
       t.type = "physical"
-      Model.insert ("itvision_app_relats_type", t)
+      Model.insert ("itvision_app_relat_types", t)
       t.name = "usa"
       t.type = "logical"
-      Model.insert ("itvision_app_relats_type", t)
+      Model.insert ("itvision_app_relat_types", t)
       t.name = "faz backup em"
       t.type = "logical"
-      Model.insert ("itvision_app_relats_type", t)
+      Model.insert ("itvision_app_relat_types", t)
    end
 
 end
@@ -144,12 +144,12 @@ function init_app_tree() --  inicia tabela itvision_app_trees com app da propria
    
       -- relacionamentos
       rt = {}
-      rt = Model.query ("itvision_app_relats_type", "name = 'roda em'")
+      rt = Model.query ("itvision_app_relat_types", "name = 'roda em'")
       if rt[1] then
          t = {}
          t.app_id = app1[1].id
          t.instance_id = Model.db.instance_id
-         t.app_relat_types_id = rt[1].id
+         t.app_relat_type_id = rt[1].id
          t.from_object_id = svc[i].service_object_id
          t.to_object_id = hst[1].host_object_id
          app_rel = Model.insert_app_relat(t)
