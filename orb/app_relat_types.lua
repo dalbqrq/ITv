@@ -8,15 +8,13 @@ require "orbit"
 require "Model"
 module(Model.name, package.seeall,orbit.new)
 
-local app = Model.itvision:model "app"
-local services = Model.nagios:model "services"
-local app_relat_type = Model.itvision:model "app_relat_type"
+local app_relat_types = Model.itvision:model "app_relat_types"
 
 
 -- models ------------------------------------------------------------
 
 
-function app_relat_type:select_app_relat_type(id)
+function app_relat_types:select_app_relat_types(id)
    local clause = ""
    if id then
       clause = "id = "..id
@@ -27,20 +25,20 @@ end
 -- controllers ------------------------------------------------------------
 
 function list(web)
-   local A = app_relat_type:select_app_relat_type()
+   local A = app_relat_types:select_app_relat_types()
    return render_list(web, A)
 end
 ITvision:dispatch_get(list, "/", "/list")
 
 
 function show(web, id)
-   local A = app_relat_type:select_app_relat_type(id)
+   local A = app_relat_types:select_app_relat_types(id)
    return render_show(web, A)
 end ITvision:dispatch_get(show, "/show/(%d+)")
 
 
 function edit(web, id)
-   local A = app_relat_type:select_app_relat_type(id)
+   local A = app_relat_types:select_app_relat_types(id)
    return render_add(web, A)
 end
 ITvision:dispatch_get(edit, "/edit/(%d+)")
@@ -49,7 +47,7 @@ ITvision:dispatch_get(edit, "/edit/(%d+)")
 function update(web, id)
    local A = {}
    if id then
-      local tables = "itvision_app_relat_type"
+      local tables = "itvision_app_relats_type"
       local clause = "id = "..id
       --A:new()
       A.name = web.input.name
@@ -70,17 +68,17 @@ ITvision:dispatch_get(add, "/add")
 
 
 function insert(web)
-   app_relat_type:new()
-   app_relat_type.name = web.input.name
-   app_relat_type.type = web.input.type
-   app_relat_type:save()
+   app_relat_types:new()
+   app_relat_types.name = web.input.name
+   app_relat_types.type = web.input.type
+   app_relat_types:save()
    return web:redirect(web:link("/list"))
 end
 ITvision:dispatch_post(insert, "/insert")
 
 
 function remove(web, id)
-   local A = app_relat_type:select_app_relat_type(id)
+   local A = app_relat_types:select_app_relat_types(id)
    return render_remove(web, A)
 end
 ITvision:dispatch_get(remove, "/remove/(%d+)")
@@ -89,7 +87,7 @@ ITvision:dispatch_get(remove, "/remove/(%d+)")
 function delete(web, id)
    if id then
       local clause = "id = "..id
-      local tables = "itvision_app_relat_type"
+      local tables = "itvision_app_relats_type"
       Model.delete (tables, clause) 
    end
 
@@ -221,7 +219,7 @@ function render_remove(web, A)
 
    res[#res + 1] = p{
       --"Voce tem certeza que deseja excluir o usuario "..A.name.."?",
-      strings.exclude_quest.." "..strings.app_relat_type.." "..A.name.."?",
+      strings.exclude_quest.." "..strings.app_relat_types.." "..A.name.."?",
       p{ button_link(strings.yes, web:link(url_ok)) },
       p{ button_link(strings.cancel, web:link(url_cancel)) },
    }

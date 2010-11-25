@@ -8,16 +8,16 @@ require "orbit"
 require "Model"
 module(Model.name, package.seeall,orbit.new)
 
-local app = Model.itvision:model "app"
-local app_object = Model.itvision:model "app_object"
-local app_relat = Model.itvision:model "app_relat"
-local app_relat_type = Model.itvision:model "app_relat_type"
+local apps = Model.itvision:model "apps"
+local app_objects = Model.itvision:model "app_objects"
+local app_relats = Model.itvision:model "app_relats"
+local app_relat_types = Model.itvision:model "app_relat_types"
 local objects = Model.nagios:model "objects"
 
 
 -- models ------------------------------------------------------------
 
-function app:select_apps(id)
+function apps:select_apps(id)
    local clause = ""
    if id then
       clause = "id = "..id
@@ -26,7 +26,7 @@ function app:select_apps(id)
 end
 
 
-function app_object:select_app_objects(id)
+function app_objects:select_app_objects(id)
    local clause = ""
    if id then
       clause = "app_id = "..id
@@ -55,14 +55,14 @@ function app_relat:delete_app_relat(id, from, to)
    end
    --self:find_all(clause)
    --self:delete()
-   Model.delete("itvision_app_relat", clause)
+   Model.delete("itvision_app_relats", clause)
 end
 
 
-function app_relat_type:select_app_relat_type(id)
+function app_relat_types:select_app_relat_types(id)
    local clause = ""
    if id then
-      clause = "app_relat_type_id = "..id
+      clause = "app_relat_types_id = "..id
    end
    return self:find_all(clause)
 end
@@ -82,7 +82,7 @@ end
 -- controllers ------------------------------------------------------------
 
 function list(web, id)
-   local APPS = app:select_apps()
+   local APPS = apps:select_apps()
    if type(tonumber(id)) ~= "number" then
       if ( id == "/" or id == "/list" ) and APPS[1] ~= nil then id = APPS[1].id else id = nil end
    end
@@ -103,7 +103,7 @@ ITvision:dispatch_get(show, "/show/(%d+)")
 
 
 function add(web, id, msg)
-   local APPS = app:select_apps()
+   local APPS = apps:select_apps()
    if id == "/" then
       if APPS[1] then id = APPS[1].app_id else id = nil end
    end
@@ -114,7 +114,7 @@ function add(web, id, msg)
    --local APP = Model.select_app_service_object(nil, nil, nil, id) --TODO: 1
    local APPOBJ = Model.select_app_app_objects(id)
    local AR = Model.select_app_relat_object(id)
-   local RT = app_relat_type:select_app_relat_type()
+   local RT = app_relat_types:select_app_relat_types()
 
    return render_add(web, HST, SVC, APP, APPOBJ, APPS, AR, RT, id, msg)
 end
@@ -125,26 +125,26 @@ ITvision:dispatch_get(add, "/add/(%d+):(.+)")
 
 -- TODO: problema na inclusão de multiplos itens
 function insert_obj(web)
-   app_object:new()
+   app_objects:new()
 --local r = ""
    if type(web.input.item) == "table" then
       for i, v in ipairs(web.input.item) do
-         app_object.app_id = web.input.app_id
-         app_object.type = web.input.type
-         app_object.instance_id = Model.db.instance_id
-         app_object.object_id = v
-         app_object:save()
+         app_objects.app_id = web.input.app_id
+         app_objects.type = web.input.type
+         app_objects.instance_id = Model.db.instance_id
+         app_objects.object_id = v
+         app_objects:save()
 --r = r.."|"..v
       end
    else
-      app_object.app_id = web.input.app_id
-      app_object.type = web.input.type
-      app_object.instance_id = Model.db.instance_id
-      app_object.object_id = web.input.item
-      app_object:save()
+      app_objects.app_id = web.input.app_id
+      app_objects.type = web.input.type
+      app_objects.instance_id = Model.db.instance_id
+      app_objects.object_id = web.input.item
+      app_objects:save()
    end
 
-   return web:redirect(web:link("/add/"..app_object.app_id))
+   return web:redirect(web:link("/add/"..app_objects.app_id))
 end
 ITvision:dispatch_post(insert_obj, "/insert_obj")
 
@@ -158,7 +158,7 @@ function insert_relat(web)
    app_relat.from_object_id = web.input.from
    app_relat.to_object_id = web.input.to
    app_relat.instance_id = Model.db.instance_id
-   app_relat.app_relat_type_id = web.input.relat
+   app_relat.app_relat_types_id = web.input.relat
 
    if not ( web.input.from and web.input.to and web.input.relat ) then
       msg = ":"..error_message(7)
@@ -181,7 +181,7 @@ ITvision:dispatch_post(insert_relat, "/insert_relat")
 
 
 function remove_obj(web, app_id, obj_id)
-   local A = app:select_apps(app_id)
+   local A = apps:select_apps(app_id)
    local O = objects:select_objects(obj_id)
    return render_remove_obj(web, A, O)
 end
@@ -191,11 +191,11 @@ ITvision:dispatch_get(remove_obj, "/remove_obj/(%d+):(%d+)")
 function delete_obj(web, app_id, obj_id)
    if app_id and obj_id then
       local clause = "app_id = "..app_id.." and object_id = "..obj_id
-      local tables = "itvision_app_object"
+      local tables = "itvision_app_objects"
       Model.delete (tables, clause) 
    end
 
-   web.prefix = "/orb/app_content"
+   web.prefix = "/orb/app_objects"
    return web:redirect(web:link("/list/"..app_id))
 end
 ITvision:dispatch_get(delete_obj, "/delete_obj/(%d+):(%d+)")
@@ -221,14 +221,14 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 
 -- views ------------------------------------------------------------
 
-function make_app_object_table(web, A)
+function make_app_objects_table(web, A)
 -- TODO: 2 (acho este TODO deve ficar aqui!)
    local row = {}
 
    for i, v in ipairs(A) do
       local obj = make_obj_name(v.name1, v.name2)
 
-      --web.prefix = "/orb/app_content"
+      --web.prefix = "/orb/app_objects"
 
       row[#row + 1] = { 
          obj,
@@ -272,9 +272,9 @@ function render_list(web, APPOBJ, APPS, AR, app_id)
    -----------------------------------------------------------------------
    res[#res+1] = render_content_header(strings.application, web:link("/add/"..app_id), web:link("/list"))
    res[#res+1] = render_bar( render_selector_bar(web, APPS, app_id, "/list") )
-   res[#res+1] = render_content_header(strings.app_object)
+   res[#res+1] = render_content_header(strings.app_objects)
    header = { strings.object.." ("..strings.service.."@"..strings.host..")", strings.type, "." }
-   res[#res+1] = render_table(make_app_object_table(web, APPOBJ), header)
+   res[#res+1] = render_table(make_app_objects_table(web, APPOBJ), header)
 
    -----------------------------------------------------------------------
    -- Relacionamentos da aplicacao
@@ -305,9 +305,9 @@ function render_add(web, HST, SVC, APP, APPOBJ, APPS, AR, RT, app_id, msg)
    -----------------------------------------------------------------------
    -- Objetos da Aplicacao
    -----------------------------------------------------------------------
-   res[#res+1] = render_content_header(strings.app_object)
+   res[#res+1] = render_content_header(strings.app_objects)
    header = { strings.object.." ("..strings.service.."@"..strings.host..")", strings.type, "." }
-   res[#res+1] = render_table(make_app_object_table(web, APPOBJ), header)
+   res[#res+1] = render_table(make_app_objects_table(web, APPOBJ), header)
    res[#res+1] = br()
 
 

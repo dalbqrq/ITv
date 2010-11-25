@@ -80,11 +80,11 @@ menu_itens = {
 	{ 2, "Físico", "/orb/gviz/show" },
 	--{ 2, "Árvore", "/orb/app_tree" },
 	{ 2, "Aplicações", "/orb/app" },
-	{ 2, "Objetos & Relacionamentos", "/orb/app_content" },
+	{ 2, "Objetos & Relacionamentos", "/orb/app_objects" },
 	--{ 2, "Objetos", "/orb/app_object" },
 	--{ 2, "Relacionamento", "/orb/app_relat" },
 	{ 2, "Checagem", "/orb/probe" },
-	{ 2, "Tipo de Relacionamento", "/orb/app_relat_type" },
+	{ 2, "Tipo de Relacionamento", "/orb/app_relat_types" },
 	--{ 2, "Teste de Atividade", "/orb/probe" },
 	--{ 2, "Relatórios", "/blank.html" },
 	{ 1, "ServiceDesk", "/servdesk/front/central.php" },
@@ -579,7 +579,7 @@ local menu = {}
    menu[#menu + 1] = button_link("APPS", "/orb/app")
    menu[#menu + 1] = button_link("APP LIST", "/orb/app_object")
    menu[#menu + 1] = button_link("APP RELAC", "/orb/app_relat")
-   menu[#menu + 1] = button_link("TIPO RELAC", "/orb/app_relat_type")
+   menu[#menu + 1] = button_link("TIPO RELAC", "/orb/app_relat_types")
    menu[#menu + 1] = button_link("PROBE", "/orb/probe")
    menu[#menu + 1] = button_link("USUARIO", "/orb/user")
    menu[#menu + 1] = button_link("GRUPO", "/orb/user_group")

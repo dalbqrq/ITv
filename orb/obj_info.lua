@@ -9,25 +9,19 @@ require "orbit"
 require "Model"
 module(Model.name, package.seeall,orbit.new)
 
-local app = Model.itvision:model "app"
-local app_object = Model.itvision:model "app_object"
+local apps = Model.itvision:model "apps"
 
 
 -- models ------------------------------------------------------------
 
 -- Esta funcao recebe um ou outro parametro, nunca os dois
-function app:select(id, obj_id)
+function apps:select(id, obj_id)
    local clause = ""
    if id then clause = "id = "..id end
    if obj_id then clause = "service_object_id = "..obj_id end
-   return Model.query("itvision_app", clause)
+   return Model.query("itvision_apps", clause)
 end
 
-
-function app_object:select_app_object(obj_id)
-
-   return Model.query(clause)
-end
 
 -- controllers ------------------------------------------------------------
 
@@ -46,7 +40,7 @@ ITvision:dispatch_get(show_svc, "/svc/(%d+)")
 
 
 function show_app(web, obj_id)
-   local A = app:select(nil, obj_id)
+   local A = apps:select(nil, obj_id)
    return render_app(web, obj_id, A)
 end
 ITvision:dispatch_get(show_app, "/app/(%d+)")
@@ -63,7 +57,7 @@ ITvision:dispatch_get(map_frame, "/map_frame/(%a+):(%d+)")
 function geotag(web, objtype, obj_id)
    local A
    if objtype == "app" then
-      local cond_ = [[and m.service_object_id in (select object_id from itvision_app a, itvision_app_object ao 
+      local cond_ = [[and m.service_object_id in (select object_id from itvision_apps a, itvision_app_objects ao 
                           where a.id = ao.app_id and a.service_object_id = ]]..obj_id..[[)]]
       A = Model.query_3(nil, nil, cond_)
    elseif objtype == "hst" then

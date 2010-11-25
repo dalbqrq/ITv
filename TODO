@@ -46,6 +46,8 @@ TODO List
 
 16. Padronizar todas as funcoes de render e de model.
 
+16. A funcao 'select_host_object' do modulo 'model_itvision.lua' deve selecionar o servico 'HOST_ALIVE' de um host.
+
 ==========================================================
 
 DONE:

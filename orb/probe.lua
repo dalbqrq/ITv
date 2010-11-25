@@ -16,7 +16,7 @@ local hosts    = Model.nagios:model "hosts"
 local services = Model.nagios:model "services"
 ]]
 local objects  = Model.nagios:model "objects"
-local monitor  = Model.itvision:model "monitor"
+local monitors = Model.itvision:model "monitors"
 
 
 -- models ------------------------------------------------------------
@@ -51,7 +51,7 @@ function objects:select_checks(cmd)
 end
 
 
-function monitor:insert_monitor(networkports, softwareversions, host_object, service_object, is_active, type_)
+function monitors:insert_monitor(networkports, softwareversions, host_object, service_object, is_active, type_)
       local mon = { 
          networkports_id = networkports,
          softwareversions_id = softwareversions,
@@ -60,7 +60,7 @@ function monitor:insert_monitor(networkports, softwareversions, host_object, ser
          is_active = is_active,
          type = type_,
       }
-      Model.insert("itvision_monitor", mon)
+      Model.insert("itvision_monitors", mon)
 end
 
 
@@ -170,7 +170,7 @@ function insert(web, n_id, sv_id, c_id, c_name, s_name, sv_name, ip)
       end
       -- DEBUG: text_file_writer ("/tmp/2", "Counter: "..counter.."\n")
       svc = s[1].object_id
-      monitor:insert_monitor(n_id, nil, hst, svc, 1, "hst")
+      monitors:insert_monitor(n_id, nil, hst, svc, 1, "hst")
       msg = msg.."Check do HOST: "..c_name.." para o IP "..ip.." criado. "
       -- DEBUG:         .." (hst,svc) = ("..hst..","..svc..") "
    else
@@ -228,7 +228,7 @@ function insert(web, n_id, sv_id, c_id, c_name, s_name, sv_name, ip)
          msg = msg..error_message(12)
       else
          svc = s[1].object_id
-         monitor:insert_monitor(n_id, sv_id, hst, svc, 1, "svc")
+         monitors:insert_monitor(n_id, sv_id, hst, svc, 1, "svc")
          msg = msg.."Check do SERVIÇO: "..dpl.." HOST: ".. c_name.." COMANDO: "..chk.." criado. "
          -- DEBUG:       .." (hst,svc) = ("..hst..","..svc..") "
          -- DEBUG: msg = msg.." ||| serviceobjid"..svc.." ||| " 

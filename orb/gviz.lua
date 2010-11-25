@@ -20,7 +20,7 @@ function app:select_apps(id)
       clause = "id = "..id
    end
    --return self:find_all(clause)
-   return Model.query("itvision_app", clause, "order by id")
+   return Model.query("itvision_apps", clause, "order by id")
 end
 
 
