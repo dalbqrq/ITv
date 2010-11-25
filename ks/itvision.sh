@@ -502,11 +502,11 @@ sed -i.orig '/^#/ a\
 install_msg UTILITARIOS
 
 path="\n\nPATH=\$PATH:$itvhome/bin\n\n"
-aliases="\nalias mv='mv -i'\nalias cp='cp -i'\nalias rm='rm -i'\nalias psa='ps -ef  |grep -v \" \\[\"'"
+aliases="\nalias mv='mv -i'\nalias cp='cp -i'\nalias rm='rm -i'\nalias psa='ps -ef  |grep -v \" \\[\"'\n"
 printf "$path"    >> /home/$user/.bashrc
 printf "$aliases" >> /home/$user/.bashrc
 printf "$aliases" >> /root/.bashrc
-printf "export LUA_PATH='$itvhome/orb/?.lua;$itvhome/orb/inc/?.lua;/usr/local/share/lua/5.1/?.lua'" >> /home/$user/.bashrc
+printf "export LUA_PATH='$itvhome/orb/?.lua;$itvhome/orb/inc/?.lua;/usr/local/share/lua/5.1/?.lua'\n" >> /home/$user/.bashrc
 
 
 # --------------------------------------------------
