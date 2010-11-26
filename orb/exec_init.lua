@@ -3,5 +3,5 @@
 require "initialization"
 
 --init_config ()
-init_app_relat_type ()
-init_app_tree()
+init_app_relat_types ()
+init_app_trees()

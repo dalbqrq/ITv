@@ -90,8 +90,7 @@ rm -rf /var/cache/nagios3/ndo.sock
 # ITVISION
 # --------------------------------------------------
 install_msg ITVISION
-
-echo "CREATE DATABASE $dbname;" | mysql -u root --password=$dbpass
+echo "CREATE DATABASE $dbname DEFAULT CHARACTER SET utf8  DEFAULT COLLATE utf8_general_ci;" | mysql -u root --password=$dbpass
 echo "CREATE USER '$dbuser'@'localhost' IDENTIFIED BY '$dbpass';" | mysql -u root --password=$dbpass
 echo "GRANT ALL PRIVILEGES ON *.* TO '$dbuser'@'localhost' WITH GRANT OPTION;" | mysql -u root --password=$dbpass
 mysql -u root --password=$dbpass $dbname < $itvhome/ks/db/itvision.sql
@@ -147,7 +146,7 @@ monitor = {
         bp_script  = "/etc/init.d/ndoutils",
         bp2cfg     = "bp2cfg",
         check_host = "HOST_ALIVE",
-        check_app  = "BUSPROC_SERVICE",
+        check_app  = "BUSPROC_HOST",
         cmd_app    = "BUSPROC_STATUS",
 }
 
@@ -216,6 +215,14 @@ for f in $dir/*; do
 	-e 's/ check_.*/\U&/' -e 's/\tcheck_.*/\U&/' -e 's/CHECK_//g' \
 	-e 's/ snmp_.*/\U&/' -e 's/\tsnmp_.*/\U&/' $f
 done
+
+sed -i.orig -e "s/check_pop -H/check_pop -p 100 -H/g" $dir/mail.cfg
+sed -i.orig -e "s/check_imap -H/check_imap -p 143 -H/g" $dir/mail.cfg
+cp $itvhome/ks/files/plugin.d/* $dir
+
+# Só agora executa a inicializacao das tabelas de checkcmd
+/usr/bin/lua /usr/local/itvision/orb/inc/update_checkcmds.lua
+
 
 # --------------------------------------------------
 # NAGIOSGRAPHER
@@ -315,6 +322,7 @@ ndofs_instance_name=default
 ndo_livestatus_socket=/usr/local/nagios/var/rw/live
 EOF
 mkdir /usr/local/$bp/etc/sample
+sed -i.orig -e "s/generic-bp-service/BUSPROC_SERVICE/g" -e "s/generic-bp-detail-service/BUSPROC_SERVICE_DESABLED/g" -e "s/check_bp_status/BUSPROC_STATUS/g" /usr/local/nagiosbp/bin/bp_cfg2service_cfg.pl
 cat << EOF > $itvhome/bin/bp2cfg
 #!/bin/bash
 /usr/local/$bp/bin/bp_cfg2service_cfg.pl -o /etc/nagios3/apps/apps.cfg

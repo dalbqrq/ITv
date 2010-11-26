@@ -80,11 +80,11 @@ menu_itens = {
 	{ 2, "Físico", "/orb/gviz/show" },
 	--{ 2, "Árvore", "/orb/app_tree" },
 	{ 2, "Aplicações", "/orb/app" },
-	{ 2, "Objetos & Relacionamentos", "/orb/app_content" },
+	{ 2, "Objetos & Relacionamentos", "/orb/app_objects" },
 	--{ 2, "Objetos", "/orb/app_object" },
 	--{ 2, "Relacionamento", "/orb/app_relat" },
 	{ 2, "Checagem", "/orb/probe" },
-	{ 2, "Tipo de Relacionamento", "/orb/app_relat_type" },
+	{ 2, "Tipo de Relacionamento", "/orb/app_relat_types" },
 	--{ 2, "Teste de Atividade", "/orb/probe" },
 	--{ 2, "Relatórios", "/blank.html" },
 	{ 1, "ServiceDesk", "/servdesk/front/central.php" },
@@ -103,6 +103,7 @@ menu_itens = {
 	{ 2, "Contratos", "/servdesk/front/contract.php" },
 	{ 2, "Contatos", "/servdesk/front/contact.php" },
 	{ 1, "Administrar", "#" },
+	{ 2, "Login", "/orb/login" },
 	{ 2, "Usuários", "/servdesk/front/user.php" },
 	{ 2, "Grupos", "/servdesk/front/group.php" },
 	{ 2, "Regras", "/servdesk/front/rule.php" },
@@ -261,13 +262,20 @@ function render_table(t, h)
       hea = tr{ class="tab_bg_1", hea }
    end
 
+      local span = 1
    for r, v in ipairs(t) do
-      for c, w in ipairs(v) do
+      for c, w in pairs(v) do
+
+if c == "colspan" then 
+   span = w
+else 
          if r == 1 and h ~= nil and table.getn(h) == 0 then -- h vazio ({}) e header dentro de t
             hea[#hea+1] = th{ align="center", w }
          else                                               -- nao possui header, tudo eh linha
-            col[#col+1] = td{ w }
+            col[#col+1] = td{ colspan=span, w }
          end
+   span = 1
+end
       end
 
       if r == 1 and h ~= nil and table.getn(h) == 0 then  -- h vazio ({}) e header dentro de t
@@ -326,8 +334,8 @@ function render_selector_bar(web, A, id, path)
       res[#res+1] = option{ selected=selected, value=url, v.name }
    end
 
-   return { form{ H("select"){ ONCHANGE="location = this.options[this.selectedIndex].value;", res } } }
-
+   --return { form{ H("select"){ ONCHANGE="location = this.options[this.selectedIndex].value;", res } } }
+   return form{ H("select"){ ONCHANGE="location = this.options[this.selectedIndex].value;", res } }
    
 end
 
@@ -347,17 +355,24 @@ end
       strings.type..": ", select_and_or("type", default_val2), br(),
    }
 ]]
-function render_form(url, url_reset, t)
+function render_form(url, url_reset, t, line, button_name, iframe_target)
    url_reset = url_reset or ""
+   iframe_target = iframe_target or ""
+   local reset
+   if button_name == nil then button_name = strings.send end
+   if url_reset == nil then reset = "" else reset = url_reset end
+   if line then line = br() else line = "" end
+
    return form{
       name = "input",
       method = "post",
       action = url,
+      target = iframe_target,
       t,
-      br(),
-      input{ type='submit', value=strings.send,  class='submit' },
+      line,
+      input{ type='submit', value=button_name,  class='submit' },
       " ",
-      a{ href=url_reset, img{ src='/pics/reset.png', class='calendrier' } },
+      a{ href=reset, img{ src='/pics/reset.png', class='calendrier' } },
    }
 end
 
@@ -423,6 +438,65 @@ function select_option(name, T, value_idx, label_idx, default_value)
    return olist
 
 end
+
+
+function select_option_onchange(name, T, value_idx, label_idx, default_value, url)
+   local olist = {}
+
+   olist[#olist + 1] = "<select name=\""..name.."\" ONCHANGE=\"location = this.options[this.selectedIndex].label;\">"
+   for i, v in ipairs(T) do
+      if default_value then
+         if ((type(tonumber(default_value)) ~= "nil") and (tonumber(default_value) == tonumber(v[value_idx])) )
+            or ( default_value == v[value_idx] )
+         then
+            selected = "selected "
+         else
+            selected = ""
+         end
+      else
+         selected = ""
+      end
+
+      local str= ""
+      str = str..v[value_idx]
+      str = str..v[label_idx]
+      str = str..selected
+
+      olist[#olist + 1] = "<option "..selected.." value=\""..v[value_idx].."\" label=\"".. 
+                           url..":"..v[value_idx].."\">"..  v[label_idx].."</option>"
+                           --v[label_idx].."\">"..  v[label_idx].."</option>"
+
+   end
+   olist[#olist + 1] = "</select>"
+
+   return olist
+end
+
+--[[
+function render_selector_bar(web, A, id, path)
+   local url = ""
+   local res = {}
+   local selected = ""
+   local curr_app = 0
+   id = id or -1
+
+   for i, v in ipairs(A) do
+      url = web:link(path.."/"..v.id)
+      if tonumber(v.id) == tonumber(id) then
+         selected = "selected"
+         curr_app = i
+      else
+         selected = nil
+      end
+      res[#res+1] = option{ selected=selected, value=url, v.name }
+   end
+
+   --return { form{ H("select"){ ONCHANGE="location = this.options[this.selectedIndex].value;", res } } }
+   return form{ H("select"){ ONCHANGE="location = this.options[this.selectedIndex].value;", res } }
+   
+end
+]]
+
 
 
 -- YES or NO
@@ -579,7 +653,7 @@ local menu = {}
    menu[#menu + 1] = button_link("APPS", "/orb/app")
    menu[#menu + 1] = button_link("APP LIST", "/orb/app_object")
    menu[#menu + 1] = button_link("APP RELAC", "/orb/app_relat")
-   menu[#menu + 1] = button_link("TIPO RELAC", "/orb/app_relat_type")
+   menu[#menu + 1] = button_link("TIPO RELAC", "/orb/app_relat_types")
    menu[#menu + 1] = button_link("PROBE", "/orb/probe")
    menu[#menu + 1] = button_link("USUARIO", "/orb/user")
    menu[#menu + 1] = button_link("GRUPO", "/orb/user_group")

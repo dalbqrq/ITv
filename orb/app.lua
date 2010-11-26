@@ -9,14 +9,14 @@ require "orbit"
 require "Model"
 module(Model.name, package.seeall,orbit.new)
 
-local app        = Model.itvision:model "app"
-local app_object = Model.itvision:model "app_object"
-local app_relat  = Model.itvision:model "app_relat"
-local services   = Model.nagios:model "services"
+local apps        = Model.itvision:model "apps"
+local app_objects = Model.itvision:model "app_objects"
+local app_relats  = Model.itvision:model "app_relats"
+local services    = Model.nagios:model "services"
 
 -- models ------------------------------------------------------------
 
-function app:select(id, clause_)
+function apps:select(id, clause_)
    local clause = nil
 
    if id and clause_ then
@@ -28,14 +28,14 @@ function app:select(id, clause_)
    end
 
    extra  = " order by id "
-   return Model.query("itvision_app", clause, extra)
+   return Model.query("itvision_apps", clause, extra)
 end
 
 
-function app:update(app)
+function apps:update(app)
    local A = {}
    if app.id then
-      local tables = "itvision_app"
+      local tables = "itvision_apps"
       local clause = "id = "..app.id
       A.id = app.id
       A.service_object_id = app.service_object_id
@@ -45,7 +45,7 @@ function app:update(app)
 end
 
 
-function app_object:select(id)
+function app_objects:select(id)
    local clause = ""
    if id then
       clause = "app_id = "..id
@@ -54,7 +54,7 @@ function app_object:select(id)
 end
 
 
-function app_relat:select(id)
+function app_relats:select(id)
    local clause = ""
    if id then
       clause = "app_id = "..id
@@ -81,10 +81,10 @@ end
 -- controllers ------------------------------------------------------------
 
 function list(web, msg)
-   local clause
+   local clause = nil
    if web.input.app_name then clause = " name like '%"..web.input.app_name.."%' " end
 
-   local A = app:select(nil, clause)
+   local A = apps:select(nil, clause)
    return render_list(web, A, msg)
 end
 ITvision:dispatch_get(list, "/", "/list", "/list/(.+)")
@@ -92,9 +92,9 @@ ITvision:dispatch_post(list, "/list")
 
 
 function show(web, id)
-   local A = app:select(id)
-   local O = app_object:select(id)
-   local R = app_relat:select(id)
+   local A = apps:select(id)
+   local O = app_objects:select(id)
+   local R = app_relats:select(id)
    return render_show(web, A, O, R)
 end 
 ITvision:dispatch_get(show, "/show", "/show/(%d+)")
@@ -110,7 +110,7 @@ ITvision:dispatch_get(edit, "/edit/(%d+):(.+):(%a+)")
 function update(web, id)
    local A = {}
    if id then
-      local tables = "itvision_app"
+      local tables = "itvision_apps"
       local clause = "id = "..id
       A.name = web.input.name
       A.type = web.input.type
@@ -132,20 +132,21 @@ ITvision:dispatch_get(add, "/add")
 
 
 function insert(web)
-   app:new()
-   app.name = web.input.name
-   app.type = web.input.type
-   app.is_active = web.input.is_active
+   apps:new()
+   apps.name = web.input.name
+   apps.type = web.input.type
+   apps.is_active = web.input.is_active
    --app.service_object_id = web.input.service_object_id
-   app.instance_id = Model.db.instance_id
-   app:save()
+   apps.instance_id = Model.db.instance_id
+   apps.entities_id = 0
+   apps:save()
    return web:redirect(web:link("/list"))
 end
 ITvision:dispatch_post(insert, "/insert")
 
 
 function remove(web, id)
-   local A = app:select(id)
+   local A = apps:select(id)
    return render_remove(web, A)
 end
 ITvision:dispatch_get(remove, "/remove/(%d+)")
@@ -154,7 +155,7 @@ ITvision:dispatch_get(remove, "/remove/(%d+)")
 function delete(web, id)
    if id then
       local clause = "id = "..id
-      local tables = "itvision_app"
+      local tables = "itvision_apps"
       Model.delete (tables, clause) 
    end
 
@@ -170,17 +171,17 @@ function activate(web, id, flag)
 
    if id then
       local clause = "id = "..id
-      local tables = "itvision_app"
+      local tables = "itvision_apps"
       cols.is_active = flag
 
-      local A = app:select(id)
+      local A = apps:select(id)
       local O = Model.select_app_app_objects(id)
-      if A[1] then
+      if A[1] and O[1] then
          -- Sinaliza a app como ativa
          Model.update (tables, cols, clause) 
          -- Recria arquivo de config do business process e 
          -- servicos do nagios para as aplicacoes
-         local APPS = app:select()
+         local APPS = apps:select()
          activate_all_apps(APPS)
 
 -- TODO: 11  - o service_object_id deve ser descoberto retirando-se a possibilidade de 
@@ -194,7 +195,7 @@ function activate(web, id, flag)
             s = services:select(nil, "display_name = '"..string.toid(A[1].name).."'")
          end
          local svc = { id = A[1].id, service_object_id = s[1].service_object_id }
-         app:update(svc)
+         apps:update(svc)
 
          msg = "/"..error_message(9).." "..A[1].name
       else
@@ -229,14 +230,14 @@ function render_list(web, A, msg)
          stract = strings.deactivate
       end
 
-      web.prefix = "/orb/app_content"
+      web.prefix = "/orb/app_objects"
       local lnk = web:link("/list/"..v.id)
       web.prefix = "/orb/app"
 
       row[#row+1] = {
          a{ href=lnk, v.name },
          strings["logical_"..v.type],
-         NoOrYes[v.is_active+1].name,
+         NoOrYes[tonumber(v.is_active)+1].name,
          button_link(strings.remove, web:link("/remove/"..v.id), "negative"),
          button_link(strings.edit, web:link("/edit/"..v.id..":"..v.name..":"..v.type)),
          button_link(stract, web:link("/activate/"..v.id..":"..v.is_active)) }
@@ -253,7 +254,7 @@ end
 
 
 --[[  
-   MUDEI DE IDEIA, VOU CONTINUAR USANDO app_object.lua e app_relat.lua PARA ENTRAR
+   MUDEI DE IDEIA, VOU CONTINUAR USANDO app_object.lua e app_relats.lua PARA ENTRAR
    COM OS COMPONENTES DA APLICACAO!!!
 
    Diferente dos demais metodos "show", este serve para incluir e excluir os componentes

@@ -13,9 +13,10 @@ function select_host (cond_, extra_, columns_)
 end
 
 
+--TODO: 16 o objeto tipo host de uma aplicacao é na verdade um objeto tipo servico para o nagios.
 function select_host_object (cond_, extra_, columns_, app_id)
    local exclude = ""
-   if app_id then exclude=" and o.object_id not in ( select object_id from itvision_app_object where app_id = "..app_id..") " end
+   if app_id then exclude=" and o.object_id not in ( select service_object_id from itvision_app_objects where app_id = "..app_id..") " end
    exclude = exclude.." and o.is_active = 1 "
 
    if cond_ then cond_ = exclude.." and "..cond_ else cond_ = exclude end
@@ -52,7 +53,7 @@ function select_service_object (cond_, extra_, columns_, app, app_id, ping)
    if app ~= nil then app = " = " else app = " <> " end
    local exclude = ""
 
-   if app_id then exclude=" and o.object_id not in ( select object_id from itvision_app_object where app_id = "..app_id..") " end
+   if app_id then exclude=" and o.object_id not in ( select service_object_id from itvision_app_objects where app_id = "..app_id..") " end
    exclude = exclude.." and o.is_active = 1 "
 
    if cond_ then cond_ = exclude.." and "..cond_ else cond_ = exclude end
@@ -80,7 +81,7 @@ function select_app_service_object (cond_, extra_, columns_, app_id)
 
    if cond_ ~= nil then cond_ = " and "..cond_ else cond_ = "" end
 
-   cond_ = cond_ .. " and  service_object_id not in (select service_object_id from itvision_app)"
+   cond_ = cond_ .. " and  service_object_id not in (select service_object_id from itvision_apps)"
 
    local content = query ("nagios_services", "check_command_object_id = "..bp_id..cond_,
       extra_, columns_)
@@ -107,7 +108,7 @@ function select_ci_monitor (w_wo, itemtype)
       select c.id, n.id as nid, c.name, n.ip, n.itemtype 
       from glpi_networkports n, glpi_computers c 
       where c.id = n.items_id and itemtype="Computer"
-         and not exists (select 1 from itvision_monitor m where m.networkport_id = n.id);
+         and not exists (select 1 from itvision_monitors m where m.networkport_id = n.id);
    ]]
 
 end
@@ -136,13 +137,13 @@ end
 ----------------------------- APP ----------------------------------
 
 function select_app (cond_, extra_, columns_)
-   local content = query ("itvision_app", cond_, extra_, columns_)
+   local content = query ("itvision_apps", cond_, extra_, columns_)
    return content
 end
 
 
 function insert_app (content_)
-   local table_ = "itvision_app"
+   local table_ = "itvision_apps"
    insert (table_, content_)
    
    local content = query (table_, "name = '"..content_.name.."'")
@@ -154,23 +155,23 @@ end
 ----------------------------- APP LIST ----------------------------------
 
 function select_app_object (cond_, extra_, columns_)
-   local content = query ("itvision_app_object", cond_, extra_, columns_)
+   local content = query ("itvision_app_objects", cond_, extra_, columns_)
    return content
 end
 
 
 function select_objects_app_object (cond_, extra_, columns_)
-   local content = query ("itvision_app_object", cond_, extra_, columns_)
+   local content = query ("itvision_app_objects", cond_, extra_, columns_)
    return content
 end
 
 
 function select_app_app_objects (id)
-   local cond_ = "no.object_id = al.object_id and al.app_id = ap.id"
+   local cond_ = "no.object_id = al.service_object_id and al.app_id = ap.id"
    if id then
       cond_ = cond_ .. " and ap.id = "..id
    end
-   local tables_ = "nagios_objects no, itvision_app_object al, itvision_app ap"
+   local tables_ = "nagios_objects no, itvision_app_objects al, itvision_apps ap"
    local columns_ = [[ no.object_id, no.objecttype_id, no.name1, no.name2, al.type as obj_type, ap.id as 
 	app_id, ap.name as app_name, ap.type as app_type, ap.is_active, ap.service_object_id as service_id ]]
    --local extra_ = "order by ap.app_id, no.name1, no.name2"
@@ -181,8 +182,8 @@ end
 
 function select_app_to_graph (id)
    local columns_ = "app_id, a.name as a_name, ao.type as ao_type, o.object_id as obj_id, o.name1, o.name2, ss.current_state as curr_state"
-   local tables_  = "itvision_app a, itvision_app_object ao, nagios_services s, nagios_objects o, nagios_servicestatus ss"
-   local cond_    = "a.id = ao.app_id and ao.object_id = s.service_object_id and \
+   local tables_  = "itvision_apps a, itvision_app_objects ao, nagios_services s, nagios_objects o, nagios_servicestatus ss"
+   local cond_    = "a.id = ao.app_id and ao.service_object_id = s.service_object_id and \
                      s.service_object_id = o.object_id and s.service_object_id = ss.service_object_id and \
                      a.id = "..id
 
@@ -192,7 +193,7 @@ end
 
 
 function insert_app_object (content_)
-   local table_ = "itvision_app_object"
+   local table_ = "itvision_app_objects"
    insert (table_, content_)
    
    local content = query (table_, "app_id = '"..content_.app_id.."'")
@@ -204,14 +205,14 @@ end
 ----------------------------- APP RELAT ----------------------------------
 
 function select_app_relat (cond_, extra_, columns_)
-   local content = query ("itvision_app_relat", cond_, extra_, columns_)
+   local content = query ("itvision_app_relats", cond_, extra_, columns_)
    return content
 end
 
 
 function select_app_relat_object (id, from, to)
-   local tables_  = [[itvision_app_relat ar, nagios_objects o1, nagios_objects o2, 
-                      itvision_app_relat_type rt, itvision_app ap]]
+   local tables_  = [[itvision_app_relats ar, nagios_objects o1, nagios_objects o2, 
+                      itvision_app_relat_types rt, itvision_apps ap]]
    local cond_    = [[ar.from_object_id = o1.object_id and 
                       ar.to_object_id = o2.object_id and
                       ar.app_relat_type_id = rt.id and
@@ -233,7 +234,7 @@ end
 
 --[[
 select  a.name as a_name, art.name as art_name, o1.name1 as o1_name1, o1.name2 as o1_name2, o2.name1 as o2_name1, o2.name2 as o2_name2
-from itvision_app a, itvision_app_relat ar, nagios_objects o1, nagios_objects o2, itvision_app_relat_type art
+from itvision_apps a, itvision_app_relats ar, nagios_objects o1, nagios_objects o2, itvision_app_relat_types art
 where a.id = ar.app_id and
 ar.from_object_id = o1.object_id and
 ar.to_object_id = o2.object_id and
@@ -241,7 +242,7 @@ ar.app_relat_type_id = art.id
 ]]
 function select_app_relat_to_graph (id)
    local columns_ = "a.name as a_name, art.name as art_name, o1.name1 as o1_name1, o1.name2 as o1_name2, o2.name1 as o2_name1, o2.name2 as o2_name2"
-   local tables_  = "itvision_app a, itvision_app_relat ar, nagios_objects o1, nagios_objects o2, itvision_app_relat_type art"
+   local tables_  = "itvision_apps a, itvision_app_relats ar, nagios_objects o1, nagios_objects o2, itvision_app_relat_types art"
    local cond_    = "a.id = ar.app_id and \
                      ar.from_object_id = o1.object_id and \
                      ar.to_object_id = o2.object_id and \
@@ -254,7 +255,7 @@ end
 
 
 function insert_app_relat (content_)
-   local table_ = "itvision_app_relat"
+   local table_ = "itvision_app_relats"
    insert (table_, content_)
    
    local content = query (table_, "app_id = "..content_.app_id.." and "..
@@ -296,7 +297,7 @@ function insert_node_app_tree(content_, origin_, position_) -- Inclui novo noh
 
    if origin_ then
       -- usuario deu a origem, entao verifica se ela existe
-      content = query ("itvision_app_tree", "id = ".. origin_)
+      content = query ("itvision_app_trees", "id = ".. origin_)
    else
       -- usuario disse que é a primeira entrada. Isto eh verdade ou a arvore jah existe?
       root_id, content = select_root_app_tree()
@@ -337,13 +338,13 @@ function insert_node_app_tree(content_, origin_, position_) -- Inclui novo noh
    content_.lft    = newLft
    content_.rgt    = newRgt
 
-   execute ( "LOCK TABLE itvision_app_tree WRITE" )
+   execute ( "LOCK TABLE itvision_app_trees WRITE" )
    if origin_ then
       -- devido a set do tipo "lft = lft + 2" tive que usar execute() e nao update()
-      execute("update itvision_app_tree set lft = lft + 2 where "..condLft)
-      execute("update itvision_app_tree set rgt = rgt + 2 where "..condRgt)
+      execute("update itvision_app_trees set lft = lft + 2 where "..condLft)
+      execute("update itvision_app_trees set rgt = rgt + 2 where "..condRgt)
    end
-   insert  ( "itvision_app_tree", content_)
+   insert  ( "itvision_app_trees", content_)
    execute ( "UNLOCK TABLES" )
 
    return true, error_message(2) 
@@ -351,8 +352,8 @@ end
 
 
 function select_root_app_tree () -- Seleciona o noh raiz da arvore
-   --local root = select ("itvision_app_tree", "lft = 1")
-   local root = query ("itvision_app_tree", "lft = 1")
+   --local root = select ("itvision_app_trees", "lft = 1")
+   local root = query ("itvision_app_trees", "lft = 1")
    if root[1] then
       return root[1].id, root
    else
@@ -370,8 +371,8 @@ function select_full_path_app_tree (origin) -- Seleciona toda sub-arvore a patir
 
    columns   = [[node.id, node.instance_id, node.lft, node.rgt, node.app_id, 
                 app.name, papp.id as papp_id, papp.name as pname]]
-   tablename = [[itvision_app_tree AS node, itvision_app_tree AS parent, 
-                itvision_app as app, itvision_app as papp]]
+   tablename = [[itvision_app_trees AS node, itvision_app_trees AS parent, 
+                itvision_apps as app, itvision_apps as papp]]
    cond      = [[node.lft BETWEEN parent.lft AND parent.rgt AND parent.id = ]] .. origin .. 
                [[ AND node.app_id = app.id AND parent.app_id = papp.id]]
    extra     = [[ORDER BY node.lft]]
@@ -386,7 +387,7 @@ function select_leaf_nodes_app_tree () -- Seleciona todas as folhas da arvore
    local content = {}
 
    columns   = "*"
-   tablename = "itvision_app_tree"
+   tablename = "itvision_app_trees"
    cond      = "rgt = lft + 1"
    extra     = "ORDER BY lft"
 
@@ -404,7 +405,7 @@ function select_simple_path_app_tree (origin) -- Seleciona um unico caminho part
    local content = {}
 
    columns   = "parent.id, parent.instance_id, parent.lft, parent.rgt, parent.app_id"
-   tablename = "itvision_app_tree AS node, itvision_app_tree AS parent"
+   tablename = "itvision_app_trees AS node, itvision_app_trees AS parent"
    cond      = "node.lft BETWEEN parent.lft AND parent.rgt AND node.id = " .. origin
    extra     = "ORDER BY parent.lft"
 
@@ -422,7 +423,7 @@ function select_depth_app_tree (origin) -- Seleciona a profundidade de cada noh
 
    columns   = [[ node.id, node.instance_id, node.lft, node.rgt, node.app_id, 
             (COUNT(parent.id) - 1) AS depth ]]
-   tablename = "itvision_app_tree AS node, itvision_app_tree AS parent"
+   tablename = "itvision_app_trees AS node, itvision_app_trees AS parent"
    cond      = "node.lft BETWEEN parent.lft AND parent.rgt AND node.id = " .. origin
    extra     = "GROUP BY node.id ORDER BY parent.lft"
 
@@ -441,9 +442,9 @@ function select_depth_subtree_app_tree (origin) -- Seleciona a profundidade de c
 
    columns   = [[ node.id, node.instance_id, node.lft, node.rgt, node.app_id,
             (COUNT(parent.id) - (sub_tree.depth + 1)) AS depth ]]
-   tablename = [[ itvision_app_tree AS node, itvision_app_tree AS parent, itvision_app_tree AS sub_parent
+   tablename = [[ itvision_app_trees AS node, itvision_app_trees AS parent, itvision_app_trees AS sub_parent
             (   SELECT node.id, (COUNT(parent.id) - 1) AS depth
-            FROM itvision_app_tree AS node, itvision_app_tree AS parent
+            FROM itvision_app_trees AS node, itvision_app_trees AS parent
             WHERE node.lft BETWEEN parent.lft AND parent.rgt
             AND node.id = ]] .. origin .. [[
             GROUP BY node.id
@@ -468,10 +469,10 @@ function select_subrdinates_app_tree (origin) -- Encontra o noh subordinado imed
 
    columns   = [[ node.id, node.instance_id, node.lft, node.rgt, node.app_id,
             (COUNT(parent.id) - (sub_tree.depth + 1)) AS depth ]]
-   tablename = [[ itvision_app_tree AS node, itvision_app_tree AS parent, itvision_app_tree AS sub_parent
+   tablename = [[ itvision_app_trees AS node, itvision_app_trees AS parent, itvision_app_trees AS sub_parent
             (   SELECT node.id, (COUNT(parent.id) - 1) AS depth
-            FROM itvision_app_tree AS node,
-            itvision_app_tree AS parent
+            FROM itvision_app_trees AS node,
+            itvision_app_trees AS parent
             WHERE node.lft BETWEEN parent.lft AND parent.rgt
             AND node.id = ]] .. origin .. [[
             GROUP BY node.id

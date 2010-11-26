@@ -46,6 +46,8 @@ ul.dropdown li:hover {
 
 ul.dropdown ul {
  visibility: hidden;
+/*
+*/
  position: absolute;
  top: 100%;
  left: 0;

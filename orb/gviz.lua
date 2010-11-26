@@ -9,25 +9,25 @@ require "orbit"
 require "Model"
 module(Model.name, package.seeall,orbit.new)
 
-local app = Model.itvision:model "app"
+local apps = Model.itvision:model "apps"
 
 
 -- models ------------------------------------------------------------
 
-function app:select_apps(id)
+function apps:select_apps(id)
    local clause = nil
    if id then
       clause = "id = "..id
    end
    --return self:find_all(clause)
-   return Model.query("itvision_app", clause, "order by id")
+   return Model.query("itvision_apps", clause, "order by id")
 end
 
 
 -- controllers ---------------------------------------------------------
 
 function list(web)
-   local A = app:select_apps()
+   local A = apps:select_apps()
    return render_list(web, A)
 end
 ITvision:dispatch_get(list, "/", "/list")
@@ -37,11 +37,17 @@ ITvision:dispatch_get(list, "/", "/list")
 ]]
 function show(web, id)
    local app_name, obj_id
-   local apps = app:select_apps()
-   if id == "/show" and apps[1] then id = apps[1].id end
+   local app = apps:select_apps()
+   if id == "/show" then
+      if app[1] then 
+         id = app[1].id 
+      else
+         return render_blank(web)
+      end
+   end
    -- para presentacao Verto
-   --if id == "/show" and apps[1] then id = 31 end
-   local app = app:select_apps(id)
+   --if id == "/show" and app[1] then id = 31 end
+   --local app = apps:select_apps(id)
    local obj = Model.select_app_to_graph(id)
    local rel = Model.select_app_relat_to_graph(id)
    if app[1] then 
@@ -51,7 +57,7 @@ function show(web, id)
       app_name = "none"
       obj_id = nil
    end
-   return render_show(web, apps, app_name, id, obj, rel, obj_id)
+   return render_show(web, app, app_name, id, obj, rel, obj_id)
 end
 ITvision:dispatch_get(show,"/show", "/show/(%d+)")
 
@@ -68,7 +74,7 @@ function render_list(web, A)
 end
 
 
-function render_show(web, apps, app_name, app_id, obj, rel, obj_id)
+function render_show(web, app, app_name, app_id, obj, rel, obj_id)
    local res = {}
    local engene = "dot"
    local file_type = "png"
@@ -93,7 +99,7 @@ function render_show(web, apps, app_name, app_id, obj, rel, obj_id)
       lnkgeo = web:link("/geotag/app:"..obj_id) 
       web.prefix = "/orb/gviz"
    end
-   res[#res+1] = render_bar( render_selector_bar(web, apps, app_id, "/show") )
+   res[#res+1] = render_bar( render_selector_bar(web, app, app_id, "/show") )
    res[#res+1] = render_content_header("", nil, nil, nil, lnkgeo)
    res[#res+1] = { imgmap }
    res[#res+1] = img{ 
@@ -105,6 +111,14 @@ function render_show(web, apps, app_name, app_id, obj, rel, obj_id)
    }
  
    return render_layout(res, refresh_time)
+end
+
+
+function render_blank(web)
+   local res = {}
+   res[#res+1]  = { b{ "Não há aplicações configuradas" } } 
+
+   return render_layout(res)
 end
 
 

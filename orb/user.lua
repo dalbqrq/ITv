@@ -9,14 +9,14 @@ require "orbit"
 require "Model"
 module(Model.name, package.seeall,orbit.new)
 
-local user = Model.itvision:model "user"
-local group = Model.itvision:model "user_group"
+local users = Model.itvision:model "users"
+local user_groups = Model.itvision:model "user_groups"
 
 
 
 -- models ------------------------------------------------------------
 
-function user:select_user(id)
+function users:select_user(id)
    local clause = ""
    if id then
       clause = "user_id = "..id
@@ -24,7 +24,7 @@ function user:select_user(id)
    return self:find_all(clause)
 end
 
-function group:select_group(id)
+function user_groups:select_group(id)
    local clause = ""
    if id then
       clause = "id = "..id
@@ -32,7 +32,7 @@ function group:select_group(id)
    return self:find_all(clause)
 end
 
-function user:select_user_and_group(id)
+function users:select_user_and_group(id)
    local clause = "A.user_group_id = B.id"
 
    if id then
@@ -50,21 +50,21 @@ end
 -- controllers ------------------------------------------------------------
 
 function list(web)
-   local A = user:select_user_and_group()
+   local A = users:select_user_and_group()
    return render_list(web, A)
 end
 ITvision:dispatch_get(list, "/", "/list")
 
 
 function show(web, id)
-   local A = user:select_user_and_group(id)
+   local A = users:select_user_and_group(id)
    return render_show(web, A)
 end 
 ITvision:dispatch_get(show, "/show/(%d+)")
 
 
 function edit(web, id)
-   local A = user:select_user(id)
+   local A = users:select_user(id)
    return render_add(web, A)
 end
 ITvision:dispatch_get(edit, "/edit/(%d+)")
@@ -75,7 +75,7 @@ function update(web, id)
    if id then
       local tables = "itvision_user"
       local clause = "user_id = "..id
-      --user:new()
+      --users:new()
       A.login = web.input.login
       if web.input.password ~= "?-^&" then
          A.password = web.input.password
@@ -99,23 +99,23 @@ ITvision:dispatch_get(add, "/add")
 
 
 function insert(web)
-   user:new()
-   user.login = web.input.login
+   users:new()
+   users.login = web.input.login
    if web.input.password ~= "?-^&" then
       user.password = web.input.password
    end
-   user.user_group_id = web.input.user_group_id
-   --user.user_prefs_id = web.input.user_prefs_id
-   user.user_prefs_id = 0
-   user.instance_id = Model.db.instance_id
-   user:save()
+   users.user_group_id = web.input.user_group_id
+   --users.user_prefs_id = web.input.user_prefs_id
+   users.user_prefs_id = 0
+   users.instance_id = Model.db.instance_id
+   users:save()
    return web:redirect(web:link("/list"))
 end
 ITvision:dispatch_post(insert, "/insert")
 
 
 function remove(web, id)
-   local A = user:select_user(id)
+   local A = users:select_user(id)
    return render_remove(web, A)
 end
 ITvision:dispatch_get(remove, "/remove/(%d+)")
@@ -241,7 +241,7 @@ function render_add(web, edit)
 
       strings.login..": ", input{ type="text", name="login", value = val1 },br(),
       strings.password..": ", input{ type="password", name="password", value = val2 },br(),
-      strings.group..": ", select_option("user_group_id", group:find_all(), "id", "name", default_value), br(),
+      strings.group..": ", select_option("user_group_id", user_groups:find_all(), "id", "name", default_value), br(),
 
       p{ button_form(strings.send, "submit", "positive") },
       p{ button_form(strings.reset, "reset", "negative") },
