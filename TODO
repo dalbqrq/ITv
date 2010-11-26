@@ -36,6 +36,18 @@ TODO List
 11. O service_object_id deve ser descoberto retirando-se a possibilidade de 
     de se pegar o business_process_detail (servico desabilitado) da aplicacao.
 
+12. Colocar nomes das tabelas no plural.
+
+13. O campo object_id da tabela itvision_app_object(s) deve ser chamar service_object_id.
+
+14. Os campos enumerados is_active devem ser numericos e nao strings '0' e '1'.
+
+15. Parece que os links dos servicos nos graficos gv nao estao ok. Verificar!
+
+16. Padronizar todas as funcoes de render e de model.
+
+16. A funcao 'select_host_object' do modulo 'model_itvision.lua' deve selecionar o servico 'HOST_ALIVE' de um host.
+
 ==========================================================
 
 DONE:

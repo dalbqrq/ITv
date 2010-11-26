@@ -78,8 +78,8 @@ function make_content(obj, rel)
 --[[ TODO: 5
 
 select app_id, a.name as a_name, ao.type as ao_type, o.name1, o.name2, ss.current_state as curr_state
-from itvision_app a, itvision_app_object ao, nagios_services s, nagios_objects o, nagios_servicestatus ss,
-     itvision_monitor m, glpi_networkports n, glpi_computers c
+from itvision_apps a, itvision_app_objects ao, nagios_services s, nagios_objects o, nagios_servicestatus ss,
+     itvision_monitors m, glpi_networkports n, glpi_computers c
 where a.id = ao.app_id and ao.object_id = s.service_object_id and 
 s.service_object_id = o.object_id and s.service_object_id = ss.service_object_id and
 a.id = 1 and

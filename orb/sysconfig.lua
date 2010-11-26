@@ -8,7 +8,6 @@ require "orbit"
 require "Model"
 module(Model.name, package.seeall,orbit.new)
 
-local app = Model.itvision:model "app"
 local services = Model.nagios:model "services"
 local sysconfig = Model.itvision:model "sysconfig"
 
@@ -175,7 +174,7 @@ function render_list(web, A)
    res[#res + 1] = p{ br(), br() }
 
    res[#res + 1] = p{ br(), "<hr>", br() }
-   res[#res + 1] = p{ "Remove todas as entradas das tabelas app, app_tree, app_relat,  app_object e app_relat_type: " }
+   res[#res + 1] = p{ "Remove todas as entradas das tabelas apps, app_trees, app_relats,  app_objects e app_relat_types: " }
    web.prefix = "/orb/initialization"
    res[#res + 1] = p{ button_link("Reset Database", web:link("/remove")) }
    web.prefix = "/orb/system"

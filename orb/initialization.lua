@@ -14,11 +14,11 @@ module(Model.name, package.seeall,orbit.new)
 
 function remove_all_apps()
 
-   Model.delete("itvision_app_object")
-   Model.delete("itvision_app_relat")
-   Model.delete("itvision_app")
-   Model.delete("itvision_app_tree")
-   Model.delete("itvision_app_relat_type")
+   Model.delete("itvision_app_objects")
+   Model.delete("itvision_app_relats")
+   Model.delete("itvision_apps")
+   Model.delete("itvision_app_trees")
+   Model.delete("itvision_app_relat_types")
    Model.delete("itvision_sysconfig")
    return true
 end
@@ -43,7 +43,7 @@ ITvision:dispatch_get(remove, "/remove")
 function delete(web)
    remove_all_apps()
    init_config ()
-   init_app_relat_type ()
+   init_app_relat_types ()
    init_app_tree()
    return web:redirect(web:link("/list"))
 end 
@@ -76,29 +76,29 @@ function init_config () --  inicia tabela itvision_config
 end
 
 
-function init_app_relat_type ()
+function init_app_relat_types ()
    local t = {}
-   local content = Model.query ("itvision_app_relat_type")
+   local content = Model.query ("itvision_app_relat_types")
 
    if content[1] == nil then
       t.name = "roda em"
       t.type = "physical"
-      Model.insert ("itvision_app_relat_type", t)
+      Model.insert ("itvision_app_relat_types", t)
       t.name = "conectado a"
       t.type = "physical"
-      Model.insert ("itvision_app_relat_type", t)
+      Model.insert ("itvision_app_relat_types", t)
       t.name = "usa"
       t.type = "logical"
-      Model.insert ("itvision_app_relat_type", t)
+      Model.insert ("itvision_app_relat_types", t)
       t.name = "faz backup em"
       t.type = "logical"
-      Model.insert ("itvision_app_relat_type", t)
+      Model.insert ("itvision_app_relat_types", t)
    end
 
 end
 
 
-function init_app_tree() --  inicia tabela itvision_app_tree com app da propria maquina do itvision
+function init_app_tree() --  inicia tabela itvision_app_trees com app da propria maquina do itvision
    local app1 = {}
    local app2 = {}
    local app_lst = {}
@@ -144,7 +144,7 @@ function init_app_tree() --  inicia tabela itvision_app_tree com app da propria 
    
       -- relacionamentos
       rt = {}
-      rt = Model.query ("itvision_app_relat_type", "name = 'roda em'")
+      rt = Model.query ("itvision_app_relat_types", "name = 'roda em'")
       if rt[1] then
          t = {}
          t.app_id = app1[1].id
@@ -159,7 +159,7 @@ function init_app_tree() --  inicia tabela itvision_app_tree com app da propria 
 
 
    -- Deve-se criar a config do servico "bp" da aplicacao "ITvision" e recuperar 
-   -- o object_id desta para a inclusao da mesma na tabela itvision_app_object da
+   -- o object_id desta para a inclusao da mesma na tabela itvision_app_objects da
    -- aplicacao da INSTSTANCIA que serah criada abaixo
 
    -- aplicacao raiz do instancia
@@ -221,7 +221,7 @@ function render_remove(web)
    end
 
    res[#res + 1] = p{
-      "Remove todas as entradas das tabelas app, app_tree, app_relat,  app_object e app_relat_type?",
+      "Remove todas as entradas das tabelas app, app_tree, app_relat,  app_object e app_relat_types?",
       p{ button_link(strings.yes, web:link(url_ok)) }
    }
    res[#res + 1] = p{ button_link(strings.cancel, web:link(url_cancel)) }

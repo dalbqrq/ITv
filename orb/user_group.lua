@@ -8,14 +8,14 @@ require "orbit"
 require "Model"
 module(Model.name, package.seeall,orbit.new)
 
-local app = Model.itvision:model "app"
-local user = Model.itvision:model "user"
-local user_group = Model.itvision:model "user_group"
+local apps = Model.itvision:model "apps"
+local users = Model.itvision:model "users"
+local user_groups = Model.itvision:model "user_groups"
 
 
 -- models ------------------------------------------------------------
 
-function app:select_apps(app_id)
+function apps:select_apps(app_id)
    local clause = ""
    if app_id then
       clause = "id = "..app_id
@@ -23,7 +23,7 @@ function app:select_apps(app_id)
    return self:find_all(clause)
 end
 
-function user:select_user(user_id)
+function users:select_user(user_id)
    local clause = ""
    if user_id then
       clause = "user_id = "..user_id
@@ -31,7 +31,7 @@ function user:select_user(user_id)
    return self:find_all(clause)
 end
 
-function user_group:select_user_group(user_group_id)
+function user_groups:select_user_group(user_group_id)
    local clause = ""
    if user_group_id then
       clause = "id = "..user_group_id
@@ -40,17 +40,17 @@ function user_group:select_user_group(user_group_id)
    return self:find(user_group_id)
 end
 
-function user_group:uniq(user_group_id)
+function user_groups:uniq(user_group_id)
    return self:find(user_group_id)
 end
 
-function user_group:select_user_group_app(user_group_id)
+function user_groups:select_user_group_app(user_group_id)
    local clause = "ug.root_app = ap.id"
 
    if user_group_id then
       clause = clause.." and ug.id = "..tostring(user_group_id)
    end
-   local tables = "itvision_user_group ug, itvision_app ap"
+   local tables = "itvision_user_groups ug, itvision_apps ap"
    local cols = "ap.name as name, ap.type as type, ug.name as ugname, ug.id, ap.id as app_id"
    local res = Model.select (tables, clause, "", cols) 
 
@@ -60,21 +60,21 @@ end
 -- controllers ------------------------------------------------------------
 
 function list(web)
-   local ug = user_group:select_user_group_app()
+   local ug = user_groups:select_user_group_app()
    return render_list(web, ug)
 end
 ITvision:dispatch_get(list, "/", "/list")
 
 
 function show(web, user_group_id)
-   local ug = user_group:select_user_group_app(user_group_id)
+   local ug = user_groups:select_user_group_app(user_group_id)
    return render_show(web, ug)
 end
 ITvision:dispatch_get(show, "/show/(%d+)")
 
 
 function edit(web, user_group_id)
-   local ug = user_group:select_user_group_app(user_group_id)
+   local ug = user_groups:select_user_group_app(user_group_id)
    return render_add(web, ug)
 end
 ITvision:dispatch_get(edit, "/edit/(%d+)")
@@ -83,9 +83,9 @@ ITvision:dispatch_get(edit, "/edit/(%d+)")
 function update(web, user_group_id)
    local A = {}
    if user_group_id then
-      local tables = "itvision_user_group"
+      local tables = "itvision_user_groups"
       local clause = "id = "..user_group_id
-      --user_group:new()
+      --user_groups:new()
       A.name = web.input.name
       A.root_app = web.input.root_app
 
@@ -104,18 +104,18 @@ ITvision:dispatch_get(add, "/add")
 
 
 function insert(web)
-   user_group:new()
-   user_group.name = web.input.name
-   user_group.root_app = web.input.root_app
-   user_group.instance_id = Model.db.instance_id
-   user_group:save()
+   user_groups:new()
+   user_groups.name = web.input.name
+   user_groups.root_app = web.input.root_app
+   user_groups.instance_id = Model.db.instance_id
+   user_groups:save()
    return web:redirect(web:link("/list"))
 end
 ITvision:dispatch_post(insert, "/insert")
 
 
 function remove(web, user_group_id)
-   local ug = user_group:select_user_group(user_group_id)
+   local ug = user_groups:select_user_group(user_group_id)
    return render_remove(web, ug)
 end
 ITvision:dispatch_get(remove, "/remove/(%d+)")
@@ -124,7 +124,7 @@ ITvision:dispatch_get(remove, "/remove/(%d+)")
 function delete(web, user_group_id)
    if user_group_id then
       local clause = "id = "..user_group_id
-      local tables = "itvision_user_group"
+      local tables = "itvision_user_groups"
       Model.delete (tables, clause) 
    end
 
@@ -252,7 +252,7 @@ function render_add(web, edit)
    --[[
    local sel = ""
    local ap_list = {} 
-   local ap = app:find_all()
+   local ap = apps:find_all()
 
    for i, v in ipairs(ap) do
       if edit and (tonumber(edit.app_id) == tonumber(v.app_id)) then
@@ -271,7 +271,7 @@ function render_add(web, edit)
       action = web:link(url),
 
       strings.user_group_name..": ", input{ type="text", name="name", value = val }, br(),
-      strings.application..": ", select_option("root_app", app:find_all(), "app_id", "name", default_value),br(),
+      strings.application..": ", select_option("root_app", apps:find_all(), "app_id", "name", default_value),br(),
 
       --[[
       strings.application..": ", H("select"){ name="root_app",  ap_list }, br(),

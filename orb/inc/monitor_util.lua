@@ -16,7 +16,7 @@ function make_obj_name(host, service)
    end
    if service ~= config.monitor.check_host then
       if name ~= "" then
-         name = "@"..name
+         name = " @ "..name
       else
          name = " (app)"..name
       end
@@ -54,6 +54,8 @@ end
 function insert_service_cfg_file (hostname, display_name, check_cmd)
    if not  ( display_name and hostname and check_cmd ) then return false end
    local content, cmd, filename
+   --local c, p = get_checkcmd(check_cmd)
+   --local chk = ""
 
    filename = config.monitor.dir.."/services/"..hostname.."-"..display_name.."-"..check_cmd..".cfg"
 
@@ -189,7 +191,7 @@ function insert_bp_cfg_file()
    cmd = cmd .. " -o "..config.monitor.dir.."/apps/apps.cfg"
 
    os.capture(cmd)
-   text_file_writer("/tmp/cmd.out", cmd)
+   -- DEBUG: text_file_writer("/tmp/cmd.out", cmd)
 end
 
 
@@ -209,7 +211,9 @@ cmds = {
    DHCP      = { def="$USER1$/check_dhcp $ARG1$", default=nil },
    FTP       = { def="$USER1$/check_ftp -H $HOSTADDRESS$ $ARG1$", default=nil },
    HPJD      = { def="$USER1$/check_hpjd -H $HOSTADDRESS$ $ARG1$", default=nil },
-   HTTP      = { def="$USER1$/check_http -I $HOSTADDRESS$ $ARG1$", default="" },
+   HTTP      = { def="$USER1$/check_http -I $HOSTADDRESS$", default="" },
+   HTTPNAME  = { def="$USER1$/check_http -H $HOSTNAME$ $ARG1$", default="" },
+   HTTPURL   = { def="$USER1$/check_http -I $ARG1$", default="" },
    IMAP      = { def="$USER1$/check_imap -H $HOSTADDRESS$ $ARG1$", default=nil },
    DISK      = { def="$USER1$/check_disk -w $ARG1$ -c $ARG2$ -p $ARG3$", default=nil },
    LOAD      = { def="$USER1$/check_load -w $ARG1$ -c $ARG2$", default=nil },
@@ -219,6 +223,8 @@ cmds = {
    USERS     = { def="$USER1$/check_users -w $ARG1$ -c $ARG2$", default=nil },
    NT        = { def="$USER1$/check_nt -H $HOSTADDRESS$ -p 12489 -v $ARG1$ $ARG2$", default=nil },
    PING      = { def="$USER1$/check_ping -H $HOSTADDRESS$ -w $ARG1$ -c $ARG2$ -p 5", default="!400.0,20%!999.0,70%" },
+-- DEPRICATED!
+   HOST_PING = { def="$USER1$/check_ping -H $HOSTADDRESS$ -w $ARG1$ -c $ARG2$ -p 5", default="!400.0,20%!999.0,70%" },
    HOST_ALIVE = { def="$USER1$/check_ping -H $HOSTADDRESS$ -w $ARG1$ -c $ARG2$ -p 5", default="!400.0,20%!999.0,70%" },
    POP       = { def="$USER1$/check_pop -H $HOSTADDRESS$ $ARG1$", default=nil },
    SMTP      = { def="$USER1$/check_smtp -H $HOSTADDRESS$ $ARG1$", default=nil },

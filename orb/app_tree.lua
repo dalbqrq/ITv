@@ -9,14 +9,14 @@ require "orbit"
 require "Model"
 module(Model.name, package.seeall,orbit.new)
 
-local app = Model.itvision:model "app"
-local app_tree = Model.itvision:model "app_tree"
+local apps = Model.itvision:model "apps"
+local app_treess = Model.itvision:model "app_treess"
 
 
 
 -- models ------------------------------------------------------------
 
-function app_tree:select_app_tree(id)
+function app_trees:select_app_trees(id)
    local clause = ""
    if id then
       clause = "id = "..id
@@ -25,11 +25,11 @@ function app_tree:select_app_tree(id)
 end
 
 
-function app_tree:select_full_path(node)
-   return Model.select_full_path_app_tree(node)
+function app_trees:select_full_path(node)
+   return Model.select_full_path_app_trees(node)
 end 
 
-function app:select_apps(id)
+function apps:select_apps(id)
    local clause = ""
    if id then
       clause = "id = "..id
@@ -42,22 +42,22 @@ end
 -- controllers ------------------------------------------------------------
 
 function list(web)
-   local A = app_tree:select_full_path()
+   local A = app_trees:select_full_path()
    return render_list(web, A)
 end
 ITvision:dispatch_get(list, "/", "/list")
 
 --[[
 function show(web, id)
-   local A = app_tree:select_app_tree(id)
+   local A = app_trees:select_app_trees(id)
    return render_show(web, A)
 end ITvision:dispatch_get(show, "/show/(%d+)")
 ]]--
 
 
 function edit(web, id)
-   local A = app_tree:select_full_path()
-   local B = app_tree:select_app_tree(id)
+   local A = app_trees:select_full_path()
+   local B = app_trees:select_app_trees(id)
    return render_add(web, A, B, nil)
 end
 ITvision:dispatch_get(edit, "/edit/(%d+)")
@@ -66,7 +66,7 @@ ITvision:dispatch_get(edit, "/edit/(%d+)")
 function update(web, id)
    local A = {}
    if id then
-      local tables = "itvision_app_tree"
+      local tables = "itvision_app_treess"
       local clause = "id = "..id
       --A:new()
       A.name = web.input.name
@@ -80,7 +80,7 @@ ITvision:dispatch_post(update, "/update/(%d+)")
 
 
 function add(web, err)
-   local A = app_tree:select_full_path()
+   local A = app_trees:select_full_path()
    return render_add(web, A, nil, err)
 end
 ITvision:dispatch_get(add, "/add", "/add/(%d+)")
@@ -88,15 +88,15 @@ ITvision:dispatch_get(add, "/add", "/add/(%d+)")
 
 function insert(web)
    local origin
-   app_tree = Model.new_app_tree()
+   app_trees = Model.new_app_trees()
    if web.input.app then
-      app_tree.app_id = web.input.app_id
+      app_trees.app_id = web.input.app_id
    else
       return web:redirect(web:link("/add/0"))
    end
 
    if tonumber(web.input.parent) > 0 then origin = web.input.parent end
-   Model.insert_node_app_tree(app_tree, origin, 1)
+   Model.insert_node_app_trees(app_trees, origin, 1)
 
    return web:redirect(web:link("/list"))
 end
@@ -104,7 +104,7 @@ ITvision:dispatch_post(insert, "/insert")
 
 
 function remove(web, id)
-   local A = app_tree:select_app_tree(id)
+   local A = app_trees:select_app_trees(id)
    return render_remove(web, A)
 end
 ITvision:dispatch_get(remove, "/remove/(%d+)")
@@ -113,7 +113,7 @@ ITvision:dispatch_get(remove, "/remove/(%d+)")
 function delete(web, id)
    if id then
       local clause = "id = "..id
-      local tables = "itvision_app_tree"
+      local tables = "itvision_app_treess"
       Model.delete (tables, clause) 
    end
 
@@ -144,7 +144,7 @@ function render_list(web, A)
    end
 
    local header = { strings.name, ".", strings.parent, ".", "." }
-   res[#res+1] = render_content_header(strings.app_tree, web:link("/add"), web:link("/list"))
+   res[#res+1] = render_content_header(strings.app_trees, web:link("/add"), web:link("/list"))
    res[#res+1] = render_table(row, header)
 
    return render_layout(res)
