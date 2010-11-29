@@ -1,4 +1,5 @@
 require "Model"
+require "study/tab"
 
 --[[
 
@@ -422,12 +423,13 @@ function query_4(c_id, n_id, sv_id, clause)
 
    local cond_ = [[ n.itemtype = "Computer" and
            c.id = n.items_id and 
-           n.id = m.networkports_id and
            c.id = csv.computers_id and
+           n.id = m.networkports_id and
            csv.softwareversions_id = sv.id and
            sv.softwares_id = s.id and
+
            m.softwareversions_id = csv.softwareversions_id and
-             m.service_object_id = ss.service_object_id and
+           m.service_object_id = ss.service_object_id and
            m.service_object_id = svc.service_object_id
            ]]
 
@@ -639,22 +641,21 @@ end
 
 function select_monitors(clause)
    local q = {}
-   local q1 = query_1(nil, nil, clause)
-   local q2 = query_2(nil, nil, nil, clause)
-   local q3 = query_3(nil, nil, clause)
-   local q4 = query_4(nil, nil, nil, clause)
-   local q5 = query_5(nil, nil, clause)
-   local q6 = query_6(nil, nil, clause)
+   local q1 = make_query_1(nil, nil, clause)
+   local q2 = make_query_2(nil, nil, nil, clause)
+   local q3 = make_query_3(nil, nil, clause)
+   local q4 = make_query_4(nil, nil, nil, clause)
+   local q5 = make_query_5(nil, clause)
 
    for _,v in ipairs(q1) do table.insert(q, v) end
    for _,v in ipairs(q2) do table.insert(q, v) end
    for _,v in ipairs(q3) do table.insert(q, v) end
    for _,v in ipairs(q4) do table.insert(q, v) end
    for _,v in ipairs(q5) do table.insert(q, v) end
-   for _,v in ipairs(q6) do table.insert(q, v) end
+   --for _,v in ipairs(q6) do table.insert(q, v) end
 
    table.sort(q, function (a, b) 
-      return a.c_name..a.n_ip..a.s_name..a.sv_name < b.c_name..b.n_ip..b.s_name..b.sv_name  end )
+      return a.c_name..a.p_ip..a.sw_name..a.sv_name < b.c_name..b.p_ip..b.sw_name..b.sv_name  end )
 
    return q
 end

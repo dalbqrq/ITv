@@ -51,12 +51,14 @@ function objects:select_checks(cmd)
 end
 
 
-function monitors:insert_monitor(networkports, softwareversions, host_object, service_object, is_active, type_)
+function monitors:insert_monitor(networkports, softwareversions, service_object, is_active, type_)
       local mon = { 
+         instance_id = Model.db.instance_id,
+         entities_id = 0,
          networkports_id = networkports,
          softwareversions_id = softwareversions,
-         host_object_id = host_object,
          service_object_id = service_object,
+         networkequipments_id = nil,
          is_active = is_active,
          type = type_,
       }
@@ -101,24 +103,24 @@ ITvision:dispatch_post(update, "/update/(%d+)")
 ]]
 
 
-function add(web, query, c_id, n_id, sv_id)
+function add(web, query, c_id, p_id, sv_id)
    local chk = Model.select_checkcmds()
    local cmp = {}
 
    query = tonumber(query)
 
    if query == 1 then
-      cmp = Model.query_1(c_id, n_id)
+      cmp = Model.make_query_1(c_id, p_id)
    elseif query == 2 then
-      cmp = Model.query_2(c_id, n_id, sv_id)
+      cmp = Model.make_query_2(c_id, p_id, sv_id)
    elseif query == 3 then
-      cmp = Model.query_3(c_id, n_id)
+      cmp = Model.make_query_3(c_id, p_id)
    elseif query == 4 then
-      cmp = Model.query_4(c_id, n_id, sv_id)
+      cmp = Model.make_query_4(c_id, p_id, sv_id)
    elseif query == 5 then
-      cmp = Model.query_5(c_id, n_id)
+      cmp = Model.make_query_5(n_id) -- network nao tem c_id e sim n_id e nao possui p
    elseif query == 6 then
-      cmp = Model.query_6(c_id, n_id)
+      cmp = Model.make_query_6(c_id, p_id)
    end
 
    return render_add(web, cmp, chk, query, default)
@@ -130,19 +132,17 @@ ITvision:dispatch_get(add, "/add/(%d+):(%d+):(%d+):(%d+)")
    insert()
 
    sv_id == 0 significa que entrada nao possui software associado e eh somente uma maquina
-   s_name e sv_name == no_software_code entao os nomes sao nulos e isto é um host e nao um service
+   sw_name e sv_name == no_software_code entao os nomes sao nulos e isto é um host e nao um service
 ]]
-function insert(web, n_id, sv_id, c_id, c_name, s_name, sv_name, ip)
+function insert(web, p_id, sv_id, c_id, c_name, sw_name, sv_name, ip)
    -- hostname passa aqui a ser uma composicao do proprio hostname com o ip a ser monitorado
    local hostname = string.gsub(string.toid(c_name).."-"..ip,"(%s+)","_")
-   local software = string.toid(s_name.." "..sv_name)
+   local software = string.toid(sw_name.." "..sv_name)
    local cmd, hst, svc, dpl, chk, h, s
    local msg = ""
-   local content
-   local counter
+   local content, counter
 
    h = objects:select(hostname)
-
 
    ------------------------------------------------------
    -- cria check host e service ping caso nao exista
@@ -159,7 +159,6 @@ function insert(web, n_id, sv_id, c_id, c_name, s_name, sv_name, ip)
          h = objects:select(hostname)
       end
       -- DEBUG: text_file_writer ("/tmp/1", "Counter: "..counter.."\n")
-      hst = h[1].object_id
       s = objects:select(hostname, config.monitor.check_host)
       -- caso service ainda nao tenha sido incluido aguarde e tente novamente
       counter = 0
@@ -170,21 +169,13 @@ function insert(web, n_id, sv_id, c_id, c_name, s_name, sv_name, ip)
       end
       -- DEBUG: text_file_writer ("/tmp/2", "Counter: "..counter.."\n")
       svc = s[1].object_id
-      monitors:insert_monitor(n_id, nil, hst, svc, 1, "hst")
+      monitors:insert_monitor(p_id, nil, svc, 1, "hst")
       msg = msg.."Check do HOST: "..c_name.." para o IP "..ip.." criado. "
       -- DEBUG:         .." (hst,svc) = ("..hst..","..svc..") "
    else
-      hst = h[1].object_id
       msg = msg.."Check do HOST: "..c_name.." já existe! "
    end   
 
-   h = objects:select(hostname)
-   counter = 0
-   while h[1] == nil do
-      counter = counter + 1
-      for i = 1,loop do x = i/2 end -- aguarde...
-      h = objects:select(hostname)
-   end
    -- DEBUG: text_file_writer ("/tmp/3", "Counter: "..counter.."\n")
    if h[1] == nil then 
       msg = msg..error_message(11)
@@ -208,7 +199,7 @@ function insert(web, n_id, sv_id, c_id, c_name, s_name, sv_name, ip)
       chk = Model.query("nagios_objects", clause)
       if chk[1] then chk = chk[1].name1 end
 
-      dpl = string.gsub(string.gsub(web.input.display,"(%p+)","_")," ","_")
+      dpl = string.toid(web.input.display)
       if dpl == "" then 
          dpl = software
       end
@@ -228,7 +219,8 @@ function insert(web, n_id, sv_id, c_id, c_name, s_name, sv_name, ip)
          msg = msg..error_message(12)
       else
          svc = s[1].object_id
-         monitors:insert_monitor(n_id, sv_id, hst, svc, 1, "svc")
+         --DEPRICATED: monitors:insert_monitor(p_id, sv_id, hst, svc, 1, "svc")
+         monitors:insert_monitor(p_id, sv_id, svc, 1, "svc")
          msg = msg.."Check do SERVIÇO: "..dpl.." HOST: ".. c_name.." COMANDO: "..chk.." criado. "
          -- DEBUG:       .." (hst,svc) = ("..hst..","..svc..") "
          -- DEBUG: msg = msg.." ||| serviceobjid"..svc.." ||| " 
@@ -279,23 +271,28 @@ function render_list(web, cmp, chk, msg)
    --local header =  { strings.name, "IP", "Software / Versão", strings.type, strings.command, "." }
 
    for i, v in ipairs(cmp) do
-      local serv = ""
-      if v.s_name ~= "" then serv = v.s_name.." / "..v.sv_name end
+      local serv, ip, itemtype, name, id = "", "", "", "", ""
+      if v.sw_name ~= "" then serv = v.sw_name.." / "..v.sv_name end
       if v.sv_id == "" then v.sv_id = 0 end
-      if v.svc_check_command_object_id == "" then 
+      if v.p_ip then ip = v.p_ip else ip = v.n_ip end
+      if v.p_itemtype then itemtype = v.p_itemtype else itemtype = "Network" end
+      if v.c_name then name = v.c_name else name = v.n_name end
+      if v.c_id then id = v.c_id else id = v.n_id end
+      if v.s_check_command_object_id == "" then 
          chk = ""
-         link = a{ href= web:link("/add/"..v[1]..":"..v.c_id..":"..v.n_id..":"..v.sv_id), strings.add }
+         --link = a{ href= web:link("/add/"..v[1]..":"..v.c_id..":"..v.p_id..":"..v.sv_id), strings.add }
+         link = a{ href= web:link("/add/"..v[1]..":CONTINUAR_DAQUI"), strings.add }
       else
-         content = objects:select_checks(v.svc_check_command_object_id)
+         content = objects:select_checks(v.s_check_command_object_id)
          chk = content[1].name1
          link = "-"
       end
       row[#row + 1] = { 
          v[1],
-         a{ href= web:link("/add/"..v.c_id), v.c_name}, 
-         v.n_ip, 
+         a{ href= web:link("/add/"..id), name}, 
+         ip, 
          serv,
-         v.n_itemtype,
+         itemtype,
          chk,
          link }
    end
@@ -326,20 +323,20 @@ function render_add(web, cmp, chk, query, default)
    local s, r
    local display = ""
 
-   default = default or v.svc_check_command_object_id
+   default = default or v.s_check_command_object_id
 
    local header = { "query", strings.name, "IP", "SW / Versão", strings.type, strings.command }
 
    if v then
-      if v.s_name ~= "" then 
-         serv = v.s_name.." / "..v.sv_name
+      if v.sw_name ~= "" then 
+         serv = v.sw_name.." / "..v.sv_name
       else 
-         v.s_name = no_software_code; v.sv_name = no_software_code
+         v.sw_name, v.sv_name = no_software_code, no_software_code
       end
 
       if v.sv_id == "" then v.sv_id = 0 end
-      url = "/insert/"..v.n_id..":"..v.sv_id..":"..v.c_id..":"..v.c_name..":"..v.s_name..":"
-            ..v.sv_name..":"..v.n_ip
+      url = "/insert/"..v.p_id..":"..v.sv_id..":"..v.c_id..":"..v.c_name..":"..v.sw_name..":"
+            ..v.sv_name..":"..v.p_ip
 
       -- se sv_id == 0 entao eh um host
       if v.sv_id == 0 then 
@@ -355,9 +352,9 @@ function render_add(web, cmp, chk, query, default)
       row[#row + 1] = { 
          v[1],
          v.c_name,
-         v.n_ip, 
+         v.p_ip, 
          serv,
-         v.n_itemtype,
+         v.p_itemtype,
          cmd,
       }
    end
@@ -367,7 +364,7 @@ function render_add(web, cmp, chk, query, default)
 
    for _,c in ipairs(chk) do
       if c.object_id == default then
-         --s = config.monitor.dir.."/libexec/"..c.name1.." -H "..v.n_ip.." "
+         --s = config.monitor.dir.."/libexec/"..c.name1.." -H "..v.p_ip.." "
          --r = os.capture(s)
       end
    end

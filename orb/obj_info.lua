@@ -26,14 +26,14 @@ end
 -- controllers ------------------------------------------------------------
 
 function show_hst(web, obj_id)
-   local A = Model.query_3(nil, nil, " and m.service_object_id = "..obj_id)
+   local A = Model.make_query_3(nil, nil, " and m.service_object_id = "..obj_id)
    return render_hst(web, obj_id, A)
 end
 ITvision:dispatch_get(show_hst, "/hst/(%d+)")
 
 
 function show_svc(web, obj_id)
-   local A = Model.query_4(nil, nil, nil, " and m.service_object_id = "..obj_id)
+   local A = Model.make_query_4(nil, nil, nil, " and m.service_object_id = "..obj_id)
    return render_svc(web, obj_id, A)
 end
 ITvision:dispatch_get(show_svc, "/svc/(%d+)")
@@ -59,9 +59,9 @@ function geotag(web, objtype, obj_id)
    if objtype == "app" then
       local cond_ = [[and m.service_object_id in (select object_id from itvision_apps a, itvision_app_objects ao 
                           where a.id = ao.app_id and a.service_object_id = ]]..obj_id..[[)]]
-      A = Model.query_3(nil, nil, cond_)
+      A = Model.make_query_3(nil, nil, cond_)
    elseif objtype == "hst" then
-      A = Model.query_3(nil, nil, " and m.service_object_id = "..obj_id)
+      A = Model.make_query_3(nil, nil, " and m.service_object_id = "..obj_id)
    end
 
    return render_geotag(web, obj_id, objtype, A)
@@ -115,7 +115,7 @@ function render_svc(web, obj_id, A)
       }
    end
 
-   res[#res+1] = render_content_header(A[1].s_name.." / "..A[1].sv_name, nil, nil)
+   res[#res+1] = render_content_header(A[1].sw_name.." / "..A[1].sv_name, nil, nil)
    res[#res+1] = render_table(row, nil)
 
    return render_layout(res)
@@ -165,7 +165,7 @@ function render_geotag(web, obj_id, objtype, A)
          marker_maker = marker_maker .. "var marker"..i.." = new google.maps.Marker({ position: location"..i..", map: map, icon: "..icon.." });\n"
          marker_maker = marker_maker .. "//marker"..i..".setTitle(\"VERTO\");\n"
          marker_maker = marker_maker .. "var infowindow"..i.." = new google.maps.InfoWindow( \n"
-         marker_maker = marker_maker .. "{ content: \""..v.c_name.."<br>"..v.n_ip.."<br>Funcionmaneto: "..service_alert[tonumber(v.ss_current_state)].name.."<br><a href='/servdesk/front/computer.form.php?id="..v.c_id.."'>CMDB</a>\", size: new google.maps.Size(50,50) });\n" 
+         marker_maker = marker_maker .. "{ content: \""..v.c_name.."<br>"..v.p_ip.."<br>Funcionmaneto: "..service_alert[tonumber(v.ss_current_state)].name.."<br><a href='/servdesk/front/computer.form.php?id="..v.c_id.."'>CMDB</a>\", size: new google.maps.Size(50,50) });\n" 
          marker_maker = marker_maker .. "google.maps.event.addListener(marker"..i..", 'click', function() { infowindow"..i..".open(map,marker"..i.."); });\n"
       end
    end
