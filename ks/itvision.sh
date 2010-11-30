@@ -355,6 +355,8 @@ echo "<?php
 ?>" > /usr/local/servdesk/config/config_db.php
 chmod 600 /usr/local/servdesk/config/config_db.php
 chown $user.$user /usr/local/servdesk/config/config_db.php
+cp -a /usr/local/servdesk/config/config_db.php /usr/local/glpi/config/config_db.php
+
 echo "Alias /servdesk "/usr/local/servdesk"
 <Directory "/usr/local/servdesk">
     Options None
@@ -362,6 +364,14 @@ echo "Alias /servdesk "/usr/local/servdesk"
     Order allow,deny
     Allow from all
 </Directory>"  >> /etc/apache2/conf.d/servdesk.conf
+
+echo "Alias /glpi "/usr/local/glpi"
+<Directory "/usr/local/glpi">
+    Options None
+    AllowOverride None
+    Order allow,deny
+    Allow from all
+</Directory>"  >> /etc/apache2/conf.d/glpi.conf
 
 cp $itvhome/ks/db/glpi.sql.gz /tmp
 gunzip /tmp/glpi.sql.gz
