@@ -137,7 +137,7 @@ function insert_obj(web)
          app_objects.app_id = web.input.app_id
          app_objects.type = web.input.type
          app_objects.instance_id = Model.db.instance_id
-         app_objects.object_id = v
+         app_objects.service_object_id = v
          app_objects:save()
 --r = r.."|"..v
       end
@@ -145,7 +145,7 @@ function insert_obj(web)
       app_objects.app_id = web.input.app_id
       app_objects.type = web.input.type
       app_objects.instance_id = Model.db.instance_id
-      app_objects.object_id = web.input.item
+      app_objects.service_object_id = web.input.item
       app_objects:save()
    end
 
@@ -215,7 +215,7 @@ ITvision:dispatch_get(remove_relat, "/remove_relat/(%d+):(%d+):(%d+)")
 
 
 function delete_relat(web, app_id, from, to)
-   app_relat:delete_app_relat(app_id, from, to)
+   app_relats:delete_app_relat(app_id, from, to)
    return web:redirect(web:link("/list/"..app_id))
 end
 ITvision:dispatch_get(delete_relat, "/delete_relat/(%d+):(%d+):(%d+)")
@@ -310,7 +310,7 @@ function render_add(web, HST, SVC, APP, APPOBJ, APPS, AR, RT, app_id, msg)
    -----------------------------------------------------------------------
    -- Objetos da Aplicacao
    -----------------------------------------------------------------------
-   res[#res+1] = render_content_header(strings.app_objects)
+   res[#res+1] = render_content_header(strings.app_object)
    header = { strings.object.." ("..strings.service.."@"..strings.host..")", strings.type, "." }
    res[#res+1] = render_table(make_app_objects_table(web, APPOBJ), header)
    res[#res+1] = br()

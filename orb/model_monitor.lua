@@ -645,16 +645,26 @@ function select_monitors(clause)
    local q2 = make_query_2(nil, nil, nil, clause)
    local q3 = make_query_3(nil, nil, clause)
    local q4 = make_query_4(nil, nil, nil, clause)
+   clause = string.gsub(clause, "c.", "n.")
    local q5 = make_query_5(nil, clause)
+   local q6 = make_query_6(nil, clause)
 
    for _,v in ipairs(q1) do table.insert(q, v) end
    for _,v in ipairs(q2) do table.insert(q, v) end
    for _,v in ipairs(q3) do table.insert(q, v) end
    for _,v in ipairs(q4) do table.insert(q, v) end
    for _,v in ipairs(q5) do table.insert(q, v) end
-   --for _,v in ipairs(q6) do table.insert(q, v) end
+   for _,v in ipairs(q6) do table.insert(q, v) end
 
    table.sort(q, function (a, b) 
+      a.c_name  = a.c_name  or ""
+      a.p_ip    = a.p_ip    or ""
+      a.sw_name = a.sw_name or ""
+      a.sv_name = a.sv_name or ""
+      b.c_name  = b.c_name  or ""
+      b.p_ip    = b.p_ip    or ""
+      b.sw_name = b.sw_name or ""
+      b.sv_name = b.sv_name or ""
       return a.c_name..a.p_ip..a.sw_name..a.sv_name < b.c_name..b.p_ip..b.sw_name..b.sv_name  end )
 
    return q

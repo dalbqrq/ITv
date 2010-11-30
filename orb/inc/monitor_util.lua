@@ -16,7 +16,7 @@ function make_obj_name(host, service)
    end
    if service ~= config.monitor.check_host then
       if name ~= "" then
-         name = "@"..name
+         name = " @ "..name
       else
          name = " (app)"..name
       end
@@ -189,7 +189,7 @@ function insert_bp_cfg_file()
    cmd = cmd .. " -o "..config.monitor.dir.."/apps/apps.cfg"
 
    os.capture(cmd)
-   text_file_writer("/tmp/cmd.out", cmd)
+   -- DEBUG: text_file_writer("/tmp/cmd.out", cmd)
 end
 
 

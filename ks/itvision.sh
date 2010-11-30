@@ -135,7 +135,7 @@ monitor = {
         bp_script  = "/etc/init.d/ndoutils",
         bp2cfg     = "bp2cfg",
         check_host = "HOST_ALIVE",
-        check_app  = "BUSPROC_SERVICE",
+        check_app  = "BUSPROC_HOST",
         cmd_app    = "BUSPROC_STATUS",
 }
 
@@ -306,6 +306,7 @@ ndofs_instance_name=default
 ndo_livestatus_socket=/usr/local/nagios/var/rw/live
 EOF
 mkdir /usr/local/$bp/etc/sample
+sed -i.orig -e "s/generic-bp-service/BUSPROC_SERVICE/g" -e "s/generic-bp-detail-service/BUSPROC_SERVICE_DESABLED/g" -e "s/check_bp_status/BUSPROC_STATUS/g" /usr/local/nagiosbp/bin/bp_cfg2service_cfg.pl
 cat << EOF > $itvhome/bin/bp2cfg
 #!/bin/bash
 /usr/local/$bp/bin/bp_cfg2service_cfg.pl -o /etc/nagios3/apps/apps.cfg

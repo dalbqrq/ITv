@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.1.41, for debian-linux-gnu (x86_64)
+-- MySQL dump 10.13  Distrib 5.1.41, for debian-linux-gnu (i486)
 --
--- Host: localhost    Database: ndoutils
+-- Host: localhost    Database: itvision
 -- ------------------------------------------------------
--- Server version	5.1.41-3ubuntu12
+-- Server version	5.1.41-3ubuntu12.7
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -16,75 +16,67 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `itvision_app`
+-- Table structure for table `itvision_app_objects`
 --
 
-DROP TABLE IF EXISTS `itvision_app`;
+DROP TABLE IF EXISTS `itvision_app_objects`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `itvision_app` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `instance_id` smallint(6) NOT NULL,
-  `name` varchar(45) NOT NULL,
-  `type` enum('and','or') NOT NULL DEFAULT 'and',
-  `is_active` enum('0','1') NOT NULL DEFAULT '0',
-  `service_object_id` int(11) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `fk_instance_id10` (`instance_id`),
-  KEY `fk_object_id6` (`service_object_id`),
-  CONSTRAINT `fk_instance_id10` FOREIGN KEY (`instance_id`) REFERENCES `nagios_instances` (`instance_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `fk_instance_id17` FOREIGN KEY (`instance_id`) REFERENCES `nagios_instances` (`instance_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `fk_object_id6` FOREIGN KEY (`service_object_id`) REFERENCES `nagios_objects` (`object_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `itvision_app`
---
-
-LOCK TABLES `itvision_app` WRITE;
-/*!40000 ALTER TABLE `itvision_app` DISABLE KEYS */;
-/*!40000 ALTER TABLE `itvision_app` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `itvision_app_object`
---
-
-DROP TABLE IF EXISTS `itvision_app_object`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `itvision_app_object` (
+CREATE TABLE `itvision_app_objects` (
   `app_id` int(11) NOT NULL,
   `instance_id` smallint(6) NOT NULL,
-  `object_id` int(11) NOT NULL,
-  `type` enum('app','hst','svc') NOT NULL,
+  `service_object_id` int(11) NOT NULL,
+  `type` enum('app','hst','svc') CHARACTER SET latin1 NOT NULL,
   KEY `fk_app_id4` (`app_id`),
-  KEY `fk_object_id3` (`object_id`),
+  KEY `fk_object_id3` (`service_object_id`),
   KEY `fk_instance_id11` (`instance_id`),
-  CONSTRAINT `fk_app_id6` FOREIGN KEY (`app_id`) REFERENCES `itvision_app` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `fk_instance_id11` FOREIGN KEY (`instance_id`) REFERENCES `nagios_instances` (`instance_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `fk_object_id3` FOREIGN KEY (`object_id`) REFERENCES `nagios_objects` (`object_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  CONSTRAINT `fk_app_id6` FOREIGN KEY (`app_id`) REFERENCES `itvision_apps` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_object_id3` FOREIGN KEY (`service_object_id`) REFERENCES `nagios_objects` (`object_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `itvision_app_object`
+-- Dumping data for table `itvision_app_objects`
 --
 
-LOCK TABLES `itvision_app_object` WRITE;
-/*!40000 ALTER TABLE `itvision_app_object` DISABLE KEYS */;
-/*!40000 ALTER TABLE `itvision_app_object` ENABLE KEYS */;
+LOCK TABLES `itvision_app_objects` WRITE;
+/*!40000 ALTER TABLE `itvision_app_objects` DISABLE KEYS */;
+/*!40000 ALTER TABLE `itvision_app_objects` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `itvision_app_relat`
+-- Table structure for table `itvision_app_relat_types`
 --
 
-DROP TABLE IF EXISTS `itvision_app_relat`;
+DROP TABLE IF EXISTS `itvision_app_relat_types`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `itvision_app_relat` (
+CREATE TABLE `itvision_app_relat_types` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(45) CHARACTER SET latin1 NOT NULL,
+  `type` enum('physical','logical') CHARACTER SET latin1 DEFAULT 'logical',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `itvision_app_relat_types`
+--
+
+LOCK TABLES `itvision_app_relat_types` WRITE;
+/*!40000 ALTER TABLE `itvision_app_relat_types` DISABLE KEYS */;
+INSERT INTO `itvision_app_relat_types` VALUES (1,'roda em','physical'),(2,'conectado a','physical'),(3,'usa','logical'),(4,'faz backup em','logical');
+/*!40000 ALTER TABLE `itvision_app_relat_types` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `itvision_app_relats`
+--
+
+DROP TABLE IF EXISTS `itvision_app_relats`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `itvision_app_relats` (
   `instance_id` smallint(6) NOT NULL,
   `app_relat_type_id` int(11) NOT NULL,
   `app_id` int(11) NOT NULL,
@@ -95,56 +87,28 @@ CREATE TABLE `itvision_app_relat` (
   KEY `fk_instance_id12` (`instance_id`),
   KEY `fk_object_id7` (`from_object_id`),
   KEY `fk_object_id8` (`to_object_id`),
-  CONSTRAINT `fk_id1` FOREIGN KEY (`app_relat_type_id`) REFERENCES `itvision_app_relat_type` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `fk_id2` FOREIGN KEY (`app_id`) REFERENCES `itvision_app` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `fk_instance_id12` FOREIGN KEY (`instance_id`) REFERENCES `nagios_instances` (`instance_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `fk_object_id7` FOREIGN KEY (`from_object_id`) REFERENCES `nagios_objects` (`object_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `fk_object_id8` FOREIGN KEY (`to_object_id`) REFERENCES `nagios_objects` (`object_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  CONSTRAINT `fk_id1` FOREIGN KEY (`app_relat_type_id`) REFERENCES `itvision_app_relat_types` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `fk_id2` FOREIGN KEY (`app_id`) REFERENCES `itvision_apps` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `itvision_app_relat`
+-- Dumping data for table `itvision_app_relats`
 --
 
-LOCK TABLES `itvision_app_relat` WRITE;
-/*!40000 ALTER TABLE `itvision_app_relat` DISABLE KEYS */;
-/*!40000 ALTER TABLE `itvision_app_relat` ENABLE KEYS */;
+LOCK TABLES `itvision_app_relats` WRITE;
+/*!40000 ALTER TABLE `itvision_app_relats` DISABLE KEYS */;
+/*!40000 ALTER TABLE `itvision_app_relats` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `itvision_app_relat_type`
+-- Table structure for table `itvision_app_trees`
 --
 
-DROP TABLE IF EXISTS `itvision_app_relat_type`;
+DROP TABLE IF EXISTS `itvision_app_trees`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `itvision_app_relat_type` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(45) NOT NULL,
-  `type` enum('physical','logical') DEFAULT 'logical',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `itvision_app_relat_type`
---
-
-LOCK TABLES `itvision_app_relat_type` WRITE;
-/*!40000 ALTER TABLE `itvision_app_relat_type` DISABLE KEYS */;
-INSERT INTO `itvision_app_relat_type` VALUES (1,'roda em','physical'),(2,'conectado a','physical'),(3,'usa','logical'),(4,'faz backup em','logical');
-/*!40000 ALTER TABLE `itvision_app_relat_type` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `itvision_app_tree`
---
-
-DROP TABLE IF EXISTS `itvision_app_tree`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `itvision_app_tree` (
+CREATE TABLE `itvision_app_trees` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `instance_id` smallint(6) NOT NULL,
   `app_id` int(11) NOT NULL,
@@ -153,54 +117,88 @@ CREATE TABLE `itvision_app_tree` (
   PRIMARY KEY (`id`),
   KEY `fk_app_id5` (`app_id`),
   KEY `fk_instance_id16` (`instance_id`),
-  CONSTRAINT `fk_app_id5` FOREIGN KEY (`app_id`) REFERENCES `itvision_app` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `fk_instance_id16` FOREIGN KEY (`instance_id`) REFERENCES `nagios_instances` (`instance_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+  CONSTRAINT `fk_app_id5` FOREIGN KEY (`app_id`) REFERENCES `itvision_apps` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `itvision_app_tree`
+-- Dumping data for table `itvision_app_trees`
 --
 
-LOCK TABLES `itvision_app_tree` WRITE;
-/*!40000 ALTER TABLE `itvision_app_tree` DISABLE KEYS */;
-/*!40000 ALTER TABLE `itvision_app_tree` ENABLE KEYS */;
+LOCK TABLES `itvision_app_trees` WRITE;
+/*!40000 ALTER TABLE `itvision_app_trees` DISABLE KEYS */;
+/*!40000 ALTER TABLE `itvision_app_trees` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `itvision_monitor`
+-- Table structure for table `itvision_apps`
 --
 
-DROP TABLE IF EXISTS `itvision_monitor`;
+DROP TABLE IF EXISTS `itvision_apps`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `itvision_monitor` (
-  `networkports_id` int(11) NOT NULL,
-  `softwareversions_id` int(11) DEFAULT NULL,
-  `host_object_id` int(11) NOT NULL,
+CREATE TABLE `itvision_apps` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `instance_id` smallint(6) NOT NULL,
+  `entities_id` int(11) NOT NULL DEFAULT '0',
+  `name` varchar(45) COLLATE utf8_unicode_ci NOT NULL,
+  `type` enum('and','or') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'and',
+  `is_active` tinyint(4) NOT NULL DEFAULT '0',
+  `service_object_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_instance_id10` (`instance_id`),
+  KEY `fk_object_id6` (`service_object_id`),
+  CONSTRAINT `fk_instance_id20` FOREIGN KEY (`instance_id`) REFERENCES `nagios_instances` (`instance_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `fk_instance_id27` FOREIGN KEY (`instance_id`) REFERENCES `nagios_instances` (`instance_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `fk_object_id26` FOREIGN KEY (`service_object_id`) REFERENCES `nagios_objects` (`object_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `itvision_apps`
+--
+
+LOCK TABLES `itvision_apps` WRITE;
+/*!40000 ALTER TABLE `itvision_apps` DISABLE KEYS */;
+/*!40000 ALTER TABLE `itvision_apps` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `itvision_monitors`
+--
+
+DROP TABLE IF EXISTS `itvision_monitors`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `itvision_monitors` (
+  `instance_id` smallint(6) NOT NULL DEFAULT '0',
+  `entities_id` int(11) NOT NULL DEFAULT '0',
   `service_object_id` int(11) NOT NULL,
-  `is_active` enum('0','1') NOT NULL DEFAULT '0',
+  `networkports_id` int(11) DEFAULT NULL,
+  `softwareversions_id` int(11) DEFAULT NULL,
+  `networkequipments_id` int(11) DEFAULT NULL,
+  `is_active` tinyint(4) NOT NULL DEFAULT '0',
   `type` enum('hst','svc') NOT NULL DEFAULT 'hst'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `itvision_monitor`
+-- Dumping data for table `itvision_monitors`
 --
 
-LOCK TABLES `itvision_monitor` WRITE;
-/*!40000 ALTER TABLE `itvision_monitor` DISABLE KEYS */;
-/*!40000 ALTER TABLE `itvision_monitor` ENABLE KEYS */;
+LOCK TABLES `itvision_monitors` WRITE;
+/*!40000 ALTER TABLE `itvision_monitors` DISABLE KEYS */;
+/*!40000 ALTER TABLE `itvision_monitors` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `itvision_site_tree`
+-- Table structure for table `itvision_site_trees`
 --
 
-DROP TABLE IF EXISTS `itvision_site_tree`;
+DROP TABLE IF EXISTS `itvision_site_trees`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `itvision_site_tree` (
+CREATE TABLE `itvision_site_trees` (
   `site_tree_id` int(11) NOT NULL AUTO_INCREMENT,
   `instance_id` smallint(6) NOT NULL,
   `lft` int(11) NOT NULL,
@@ -209,19 +207,17 @@ CREATE TABLE `itvision_site_tree` (
   `service_object_id` int(11) NOT NULL,
   PRIMARY KEY (`site_tree_id`,`instance_id`),
   KEY `fk_instance_id1` (`instance_id`),
-  KEY `fk_object_id1` (`service_object_id`),
-  CONSTRAINT `fk_instance_id1` FOREIGN KEY (`instance_id`) REFERENCES `nagios_instances` (`instance_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `fk_object_id1` FOREIGN KEY (`service_object_id`) REFERENCES `nagios_objects` (`object_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Tree to organize ITvision instances';
+  KEY `fk_object_id1` (`service_object_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Tree to organize ITvision instances';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `itvision_site_tree`
+-- Dumping data for table `itvision_site_trees`
 --
 
-LOCK TABLES `itvision_site_tree` WRITE;
-/*!40000 ALTER TABLE `itvision_site_tree` DISABLE KEYS */;
-/*!40000 ALTER TABLE `itvision_site_tree` ENABLE KEYS */;
+LOCK TABLES `itvision_site_trees` WRITE;
+/*!40000 ALTER TABLE `itvision_site_trees` DISABLE KEYS */;
+/*!40000 ALTER TABLE `itvision_site_trees` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -236,14 +232,14 @@ CREATE TABLE `itvision_sysconfig` (
   `instance_id` smallint(6) NOT NULL,
   `created` datetime NOT NULL,
   `updated` datetime NOT NULL,
-  `version` varchar(45) NOT NULL,
-  `home_dir` varchar(45) NOT NULL,
-  `monitor_dir` varchar(45) NOT NULL,
-  `monitor_bp_dir` varchar(45) NOT NULL,
+  `version` varchar(45) CHARACTER SET latin1 NOT NULL,
+  `home_dir` varchar(45) CHARACTER SET latin1 NOT NULL,
+  `monitor_dir` varchar(45) CHARACTER SET latin1 NOT NULL,
+  `monitor_bp_dir` varchar(45) CHARACTER SET latin1 NOT NULL,
   PRIMARY KEY (`id`,`instance_id`),
   KEY `fk_instance_id7` (`instance_id`),
   CONSTRAINT `fk_instance_id7` FOREIGN KEY (`instance_id`) REFERENCES `nagios_instances` (`instance_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=18446744073709551615 DEFAULT CHARSET=latin1 COMMENT='ITvision system configuration';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='ITvision system configuration';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -256,61 +252,29 @@ LOCK TABLES `itvision_sysconfig` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `itvision_user`
+-- Table structure for table `itvision_user_groups`
 --
 
-DROP TABLE IF EXISTS `itvision_user`;
+DROP TABLE IF EXISTS `itvision_user_groups`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `itvision_user` (
-  `user_id` int(11) NOT NULL AUTO_INCREMENT,
-  `instance_id` smallint(6) NOT NULL,
-  `login` varchar(45) NOT NULL,
-  `password` varchar(45) NOT NULL,
-  `user_group_id` int(11) NOT NULL,
-  `user_prefs_id` int(11) NOT NULL,
-  PRIMARY KEY (`user_id`,`user_group_id`,`user_prefs_id`,`instance_id`),
-  KEY `fk_user_group_id1` (`user_group_id`),
-  KEY `fk_user_prefs_id1` (`user_prefs_id`,`instance_id`),
-  CONSTRAINT `fk_user_group_id1` FOREIGN KEY (`user_group_id`) REFERENCES `itvision_user_group` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `fk_user_prefs_id1` FOREIGN KEY (`user_prefs_id`) REFERENCES `itvision_user_prefs` (`user_prefs_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `itvision_user`
---
-
-LOCK TABLES `itvision_user` WRITE;
-/*!40000 ALTER TABLE `itvision_user` DISABLE KEYS */;
-/*!40000 ALTER TABLE `itvision_user` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `itvision_user_group`
---
-
-DROP TABLE IF EXISTS `itvision_user_group`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `itvision_user_group` (
+CREATE TABLE `itvision_user_groups` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(45) NOT NULL,
+  `name` varchar(45) CHARACTER SET latin1 NOT NULL,
   `root_app` int(11) DEFAULT NULL,
   `instance_id` smallint(6) NOT NULL,
   PRIMARY KEY (`id`,`instance_id`),
-  KEY `fk_instance_id6` (`instance_id`),
-  CONSTRAINT `fk_instance_id6` FOREIGN KEY (`instance_id`) REFERENCES `nagios_instances` (`instance_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=latin1;
+  KEY `fk_instance_id6` (`instance_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `itvision_user_group`
+-- Dumping data for table `itvision_user_groups`
 --
 
-LOCK TABLES `itvision_user_group` WRITE;
-/*!40000 ALTER TABLE `itvision_user_group` DISABLE KEYS */;
-/*!40000 ALTER TABLE `itvision_user_group` ENABLE KEYS */;
+LOCK TABLES `itvision_user_groups` WRITE;
+/*!40000 ALTER TABLE `itvision_user_groups` DISABLE KEYS */;
+/*!40000 ALTER TABLE `itvision_user_groups` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -327,7 +291,7 @@ CREATE TABLE `itvision_user_prefs` (
   PRIMARY KEY (`user_prefs_id`,`instance_id`),
   KEY `fk_instance_id9` (`instance_id`),
   CONSTRAINT `fk_instance_id9` FOREIGN KEY (`instance_id`) REFERENCES `nagios_instances` (`instance_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -337,6 +301,35 @@ CREATE TABLE `itvision_user_prefs` (
 LOCK TABLES `itvision_user_prefs` WRITE;
 /*!40000 ALTER TABLE `itvision_user_prefs` DISABLE KEYS */;
 /*!40000 ALTER TABLE `itvision_user_prefs` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `itvision_users`
+--
+
+DROP TABLE IF EXISTS `itvision_users`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `itvision_users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `instance_id` smallint(6) NOT NULL,
+  `login` varchar(45) NOT NULL,
+  `password` varchar(45) NOT NULL,
+  `user_group_id` int(11) NOT NULL,
+  `user_prefs_id` int(11) NOT NULL,
+  PRIMARY KEY (`user_id`,`user_group_id`,`user_prefs_id`,`instance_id`),
+  KEY `fk_user_group_id1` (`user_group_id`),
+  KEY `fk_user_prefs_id1` (`user_prefs_id`,`instance_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `itvision_users`
+--
+
+LOCK TABLES `itvision_users` WRITE;
+/*!40000 ALTER TABLE `itvision_users` DISABLE KEYS */;
+/*!40000 ALTER TABLE `itvision_users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -348,4 +341,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2010-10-31 16:20:19
+-- Dump completed on 2010-11-29 19:13:41

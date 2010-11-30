@@ -103,6 +103,7 @@ menu_itens = {
 	{ 2, "Contratos", "/servdesk/front/contract.php" },
 	{ 2, "Contatos", "/servdesk/front/contact.php" },
 	{ 1, "Administrar", "#" },
+	{ 2, "Login", "/orb/login" },
 	{ 2, "Usuários", "/servdesk/front/user.php" },
 	{ 2, "Grupos", "/servdesk/front/group.php" },
 	{ 2, "Regras", "/servdesk/front/rule.php" },
