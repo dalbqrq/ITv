@@ -4,14 +4,14 @@ require "Model"
 cmds = {
 
    DHCP = {
-         command="$USER1$/check_dhcp",
+         command="check_dhcp",
          args={
             { sequence=nil, flag="-s", variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP"},
          },
       },
 
    HTTP = {
-         command="$USER1$/check_http",
+         command="check_http",
          args={
             { sequence=nil, flag="-I", variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP"},
             { sequence=nil, flag="-H", variable="$HOSTADDRESS$", default_value=nil, description="Hostname"},
@@ -19,14 +19,14 @@ cmds = {
       },
 
    HTTPURL = {
-         command="$USER1$/check_http",
+         command="check_http",
          args={
             { sequence=1, flag="-I", variable="$ARG1$", default_value=nil, description="Endereço IP"},
          },
       },
 
    PING = {
-         command="$USER1$/check_ping",
+         command="check_ping",
          args={
             { sequence=nil, flag="-H", variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP"},
             { sequence=1,   flag="-w", variable="$ARG1$", default_value="400.0,20%", description="Tempo de resposta e percentual de perda para alerta ANORMAL"},
@@ -35,9 +35,9 @@ cmds = {
          },
       },
 
-   --HOST_ALIVE = {
-   HOST_PING = {
-         command="$USER1$/check_ping",
+   --HOST_PING = {
+   HOST_ALIVE = {
+         command="check_ping",
          args={
             { sequence=nil, flag="-H", variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP"},
             { sequence=1,   flag="-w", variable="$ARG1$", default_value="400.0,20%", description="Tempo de resposta e percentual de perda para alerta ANORMAL"},
@@ -47,35 +47,35 @@ cmds = {
       },
 
    POP = {
-         command="$USER1$/check_pop" ,
+         command="check_pop" ,
          args={
             { sequence=nil, flag="-H", variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP"},
          },
       },
 
    SMTP = {
-         command="$USER1$/check_smtp",
+         command="check_smtp",
          args={
             { sequence=nil, flag="-H", variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP"},
          },
       },
 
    IMAP = {
-         command="$USER1$/check_imap",
+         command="check_imap",
          args={
             { sequence=nil, flag="-H", variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP"},
          },
       },
 
    SSH = {
-         command="$USER1$/check_ssh" ,
+         command="check_ssh" ,
          args={
             { sequence=nil, flag=nil, variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP"},
          },
       },
 
    TCP = {
-         command="$USER1$/check_tcp" ,
+         command="check_tcp" ,
          args={
             { sequence=nil, flag="-H", variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP"},
             { sequence=1, flag="-p", variable="$ARG1$", default_value=nil, description="Número da porta"},
@@ -83,7 +83,7 @@ cmds = {
       },
 
    UDP = {
-         command="$USER1$/check_udp" ,
+         command="check_udp" ,
          args={
             { sequence=nil, flag="-H", variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP"},
             { sequence=1, flag="-p", variable="$ARG1$ ", default_value=nil, description="Número da porta"},
@@ -97,6 +97,7 @@ function update_checkcmd_params()
    Model.delete("itvision_checkcmds")
    Model.delete("itvision_checkcmd_params")
    for i, v in pairs(cmds) do
+      print(i)
       q = Model.query("nagios_objects", "name1 = '"..i.."'")
       if q[1] then id = q[1].object_id else id='NULL' end
 
@@ -113,10 +114,11 @@ function update_checkcmd_params()
          Model.insert("itvision_checkcmd_params", w)
       end
 
+      print()
    end
 end
 
 
---update_checkcmd_params()
+update_checkcmd_params()
 
 

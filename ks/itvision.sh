@@ -216,6 +216,9 @@ define command{ \\
 sed -i.orig -e "s/check_pop -H/check_pop -p 100 -H/g" $dir/mail.cfg
 sed -i.orig -e "s/check_imap -H/check_imap -p 143 -H/g" $dir/mail.cfg
 
+# Só agora executa a inicializacao das tabelas de checkcmd
+/usr/bin/lua /usr/local/itvision/orb/inc/update_checkcmds.lua
+
 
 # --------------------------------------------------
 # NAGIOSGRAPHER

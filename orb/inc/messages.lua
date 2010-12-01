@@ -67,6 +67,9 @@ strgs.pt_BR = {
 	inventory = "Inventário",	
 	sn = "Número Serial",
 	search = "Pesquisar",
+	value = "Valor",
+	parameter = "Parametro",
+	test = "Testar",
 
 }
 
@@ -134,6 +137,9 @@ strgs.us = {
 	inventory = "Inventory",	
 	sn = "Serial Number",
 	search = "Search",
+	value = "Value",
+	parameter = "Parameter",
+	test = "Test",
 }
 
 

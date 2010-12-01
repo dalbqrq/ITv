@@ -451,24 +451,3 @@ function select_monitors(clause)
    return q
 end
 
-
-function select_checkcmds()
-   local table_ = [[ nagios_objects o, itvision_checkcmds c ]]
-   local cond_ = [[ objecttype_id = 12 and is_active = 1 and 
-      o.object_id = c.cmd_object_id
-   ]]
-
-   return Model.query(table_, cond_)
-end
-
-function select_checkcmd_params(id)
-   local table_ = [[ nagios_objects o, itvision_checkcmds c, itvision_checkcmd_params p ]]
-   local cond_ = [[ objecttype_id = 12 and is_active = 1 and 
-      o.object_id = c.cmd_object_id and
-      c.id = p.checkcmds_id and
-      c.id = ]].. id
-
-   return Model.query(table_, cond_)
-end
-
-

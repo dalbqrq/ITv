@@ -321,6 +321,31 @@ function render_confirm(web, msg)
 end
 
 
+function render_checkcmd_test(web, cur_cmd)
+   local row, cmd, url = {}, "", ""
+   local c, p, k
+   local header = { strings.parameter.." #", strings.value, strings.description }
+
+   web.prefix = "/orb//checkcmd"
+   c, p, k = get_checkcmd(cur_cmd)
+   url = web:link("/"..c)
+
+
+   for i, v in ipairs(p) do
+      row[#row + 1] = { 
+         i,
+         { "<INPUT TYPE=TEXT NAME=cmd\""..i.."\" value=\""..v.default_value.."\">" },
+         v.description 
+      }
+   end
+
+   res[#res+1] =  { br(), strings.parameter.."s do comando "..k[1].name1, br() }
+   res[#res+1] =  render_form(web:link(url), strings.test, render_table(row, header), "check" )
+
+   return res
+end
+
+
 function render_add(web, cmp, chk, params)
    local v = cmp[1]
    local row = {}
@@ -329,7 +354,7 @@ function render_add(web, cmp, chk, params)
    local s, r, url, url2
    local display = ""
 
-   --params.default = params.default or v.s_check_command_object_id
+   params.default = params.default or chk[1].object_id
 
    local header = { "query", strings.name, "IP", "SW / Versão", strings.type, strings.command }
 
@@ -380,6 +405,9 @@ function render_add(web, cmp, chk, params)
 
    res[#res+1] = render_content_header("Checagem", web:link("/add"), web:link("/list"))
    res[#res+1] = render_table(row, header)
+
+   res[#res+1] = render_checkcmd_test(web, params.default)
+   res[#res+1] = iframe{name="check", src=web:link("/"), width="100%",  height="300", frameborder=0}
 
    for _,c in ipairs(chk) do
       if c.object_id == default then
