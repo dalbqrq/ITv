@@ -18,7 +18,7 @@ function install_msg() {
 	sleep 3
 }
 
-sed -e "s/`hostname`/$hostname/g" /etc/hosts; echo $hostname > /etc/hostname; hostname --file /etc/hostname
+sed -i -e "s/`hostname`/$hostname/g" /etc/hosts; echo $hostname > /etc/hostname; hostname --file /etc/hostname
 
 # --------------------------------------------------
 # INSTALL UBUNTU NATIVE PACKAGES VIA apt-get
@@ -166,7 +166,7 @@ chown -R $user.$user bin
 
 cat << EOF > $itvhome/bin/dbconf
 dbuser=$dbuser
-dbpass=itv
+dbpass=$dbpass
 dbname=$dbname
 EOF
 
@@ -220,9 +220,6 @@ sed -i.orig -e "s/check_pop -H/check_pop -p 100 -H/g" $dir/mail.cfg
 sed -i.orig -e "s/check_imap -H/check_imap -p 143 -H/g" $dir/mail.cfg
 cp $itvhome/ks/files/plugin.d/* $dir
 
-# Só agora executa a inicializacao das tabelas de checkcmd
-/usr/bin/lua /usr/local/itvision/orb/inc/update_checkcmds.lua
-
 
 # --------------------------------------------------
 # NAGIOSGRAPHER
@@ -241,8 +238,8 @@ cfg_dir=/etc/nagiosgrapher' /etc/nagios3/nagios.cfg
 mkdir -p /etc/nagios3/services/serviceext
 
 
-sed -i.orig -e "s/user                    nagios/user                    itv/" \
-        -e "s/group                   nagios/group                   itv/" \
+sed -i.orig -e "s/user                    nagios/user                    $user/" \
+        -e "s/group                   nagios/group                   $user/" \
 	-e "s/serviceextinfo          \/etc\/nagios3\/serviceextinfo.cfg/serviceextinfo          \/etc\/nagios3\/conf.d\/serviceextinfo.cfg/" \
 	-e "s/serviceext_path         \/etc\/nagiosgrapher\/nagios3\/serviceext/serviceext_path         \/etc\/nagios3\/services\/serviceext/" \
         -e "s/nagiosadmin/itv/" /etc/nagiosgrapher/ngraph.ncfg
@@ -263,8 +260,8 @@ EOF
 ln -s /etc/nagios3/services/serviceext /etc/nagiosgrapher/nagios3/serviceext
 touch /var/log/nagiosgrapher/service-perfdata
 touch /var/lib/nagiosgrapher/ngraph.pipe
-chown -R itv.itv /var/lib/nagiosgrapher /etc/nagiosgrapher /var/run/nagiosgrapher /var/log/nagiosgrapher /var/cache/nagiosgrapher /usr/share/perl5/NagiosGrapher /usr/lib/nagiosgrapher /usr/sbin/nagiosgrapher
-cat /etc/nagiosgrapher/nagios3/commands.cfg >> /etc/nagios3/commands.cfg 
+chown -R $user.$user /var/lib/nagiosgrapher /etc/nagiosgrapher /var/run/nagiosgrapher /var/log/nagiosgrapher /var/cache/nagiosgrapher /usr/share/perl5/NagiosGrapher /usr/lib/nagiosgrapher /usr/sbin/nagiosgrapher
+#cat /etc/nagiosgrapher/nagios3/commands.cfg >> /etc/nagios3/commands.cfg 
 
 echo << EOF > /usr/share/nagios3/htdocs/grapher.html
 <html><head>
@@ -369,6 +366,8 @@ echo "<?php
 ?>" > /usr/local/servdesk/config/config_db.php
 chmod 600 /usr/local/servdesk/config/config_db.php
 chown $user.$user /usr/local/servdesk/config/config_db.php
+cp -a /usr/local/servdesk/config/config_db.php /usr/local/glpi/config/config_db.php
+
 echo "Alias /servdesk "/usr/local/servdesk"
 <Directory "/usr/local/servdesk">
     Options None
@@ -376,6 +375,14 @@ echo "Alias /servdesk "/usr/local/servdesk"
     Order allow,deny
     Allow from all
 </Directory>"  >> /etc/apache2/conf.d/servdesk.conf
+
+echo "Alias /glpi "/usr/local/glpi"
+<Directory "/usr/local/glpi">
+    Options None
+    AllowOverride None
+    Order allow,deny
+    Allow from all
+</Directory>"  >> /etc/apache2/conf.d/glpi.conf
 
 cp $itvhome/ks/db/glpi.sql.gz /tmp
 gunzip /tmp/glpi.sql.gz
@@ -433,8 +440,10 @@ echo " ################################################################## "
 echo " "
 /usr/lib/ssl/misc/CA.pl -newca
 openssl req -new -nodes -subj '/CN=ITvision/O=ITvision/C=BR/ST=Rio de Janeiro/L=Rio de Janeiro/emailAddress=alert@itvision.com.br' -keyout SERVER-key.pem -out SERVER-req.pem -days 3650
-cp /tmp/demoCA/cacert.pem /tmp/SERVER-key.pem /tmp/SERVER-cert.pem /etc/postfix
-chmod 644 /etc/postfix/SERVER-cert.pem /etc/postfix/cacert.pem
+#cp /tmp/demoCA/cacert.pem /tmp/SERVER-key.pem /tmp/SERVER-cert.pem /etc/postfix
+#chmod 644 /etc/postfix/SERVER-cert.pem /etc/postfix/cacert.pem
+cp /tmp/demoCA/cacert.pem /tmp/SERVER-key.pem /tmp/SERVER-req.pem /etc/postfix
+chmod 644 /etc/postfix/SERVER-req.pem /etc/postfix/cacert.pem
 chmod 400 /etc/postfix/SERVER-key.pem
 wget -P /tmp https://www.geotrust.com/resources/root_certificates/certificates/Equifax_Secure_Certificate_Authority.cer
 cat /tmp/Equifax_Secure_Certificate_Authority.cer >> /etc/postfix/cacert.pem
@@ -458,8 +467,7 @@ rm -f ~/SERVER* && rm -rf ~/demoCA*
 # --------------------------------------------------
 # GRAPHVIZ
 # --------------------------------------------------
-echo "update graphiz ..."
-sleep 3
+install_msq GRAPHVIZ
 
 /usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/graphviz_2.26.3-1_i386.deb
 /usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/graphviz-dev_2.26.3-1_all.deb
@@ -545,6 +553,16 @@ cd
 rm -f ~/SERVER* && rm -rf ~/demoCA*
 apt-get clean
 apt-get autoremove
+
+
+# --------------------------------------------------
+# POS-CONFIGURACAO
+# --------------------------------------------------
+install_msg POS-CONFIGURACAO
+
+# Só agora executa a inicializacao das tabelas de checkcmd
+source /home/$user/.bashrc
+/usr/bin/lua /usr/local/itvision/orb/inc/update_checkcmds.lua
 
 
 echo ""
