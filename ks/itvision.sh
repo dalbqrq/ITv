@@ -266,6 +266,12 @@ touch /var/lib/nagiosgrapher/ngraph.pipe
 chown -R itv.itv /var/lib/nagiosgrapher /etc/nagiosgrapher /var/run/nagiosgrapher /var/log/nagiosgrapher /var/cache/nagiosgrapher /usr/share/perl5/NagiosGrapher /usr/lib/nagiosgrapher /usr/sbin/nagiosgrapher
 cat /etc/nagiosgrapher/nagios3/commands.cfg >> /etc/nagios3/commands.cfg 
 
+echo << EOF > /usr/share/nagios3/htdocs/grapher.html
+<html><head>
+<meta http-equiv="REFRESH" content="0;url=/nagios3/cgi-bin/graphs.cgi">
+</HEAD></HTML>
+EOF
+
 # --------------------------------------------------
 # NDO UTILS - Nagios
 # --------------------------------------------------
