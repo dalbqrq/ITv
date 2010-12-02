@@ -15,11 +15,26 @@ module(Model.name, package.seeall,orbit.new)
 
 -- controllers ------------------------------------------------------------
 
+function blank(web)
+   return render_blank(web)
+end
+ITvision:dispatch_get(blank, "/blank")
+
 
 function chkexec(web)
-   return render_chkexec(web, web.input.cmd, web.input.opts)
+   local flags, opts = {}, {}
+   local cmd = web.input.cmd
+   --local count = web.input.count
+   local count = web.input["count"]
+
+   for i = 1,count do
+      flags[#flags+1] = web.input["flag"..i]
+      opts[#opts+1]   = web.input["opt"..i]
+   end
+
+   return render_chkexec(web, cmd, count, flags, opts)
 end
-ITvision:dispatch_post(chkexec, "/", "/(.+)")
+ITvision:dispatch_post(chkexec, "/")
 
 
 ITvision:dispatch_static("/css/%.css", "/script/%.js")
@@ -28,18 +43,31 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 -- views ------------------------------------------------------------
 
 
-function render_chkexec(web, cmd, opts)
+function render_chkexec(web, cmd, count, flags, opts)
    local path = "/usr/lib/nagios/plugins"
-   cmd = cmd or "check_ping"
-   if not opts or opts == "" then opts = "-h" end
-   local chk = cmd.." "..opts
+   local chk = path.."/"..cmd.." "
    local res = {}
-
-   res[#res+1] = p{ chk }, br{}, br{}
-   res[#res+1] = p{ os.capture(path.."/"..chk, true) }, br(), br()
-   res[#res+1] = p{ button_link("Exec", web:link("/list")) }
+   local err = false
+   
+   for i = 1,count do
+      if flags[i] == nil then flags[i] = "" end
+      --if opts[i] == nil then opts[i] = "opt"..i end
+      if opts[i] == "" or opts[i] == nil then opts[i] = ""; err = true end
+      chk = chk ..flags[i].." "..opts[i].." "
+   end
+ 
+   if err == true then
+      res[#res+1] = { br(), br(), strings.fillall }
+   else
+      res[#res+1] = { br(), br(), os.capture(chk, true) }
+   end
 
    return render_layout(res)
+end
+
+
+function render_blank(web)
+   return render_layout()
 end
 
 

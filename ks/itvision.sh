@@ -206,15 +206,9 @@ for f in $dir/*; do
 	-e 's/ snmp_.*/\U&/' -e 's/\tsnmp_.*/\U&/' $f
 done
 
-sed -i "/http2'/i \\
-# 'check_http_url' command definition \\
-define command{ \\
-        command_name    HTTPURL \\
-        command_line    /usr/lib/nagios/plugins/check_http -I '\$ARG1\$' \\
-        } \\
-" $dir/http.cfg
 sed -i.orig -e "s/check_pop -H/check_pop -p 100 -H/g" $dir/mail.cfg
 sed -i.orig -e "s/check_imap -H/check_imap -p 143 -H/g" $dir/mail.cfg
+cp $itvhome/ks/files/plugin.d/* $dir
 
 # Só agora executa a inicializacao das tabelas de checkcmd
 /usr/bin/lua /usr/local/itvision/orb/inc/update_checkcmds.lua

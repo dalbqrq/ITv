@@ -14,14 +14,20 @@ cmds = {
          command="check_http",
          args={
             { sequence=nil, flag="-I", variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP"},
-            { sequence=nil, flag="-H", variable="$HOSTADDRESS$", default_value=nil, description="Hostname"},
+         },
+      },
+
+   HTTPNAME = {
+         command="check_http",
+         args={
+            { sequence=nil, flag="-H", variable="$HOSTNAME$", default_value=nil, description="Hostname"},
          },
       },
 
    HTTPURL = {
          command="check_http",
          args={
-            { sequence=1, flag="-I", variable="$ARG1$", default_value=nil, description="Endereço IP"},
+            { sequence=1, flag="-I", variable="$ARG1$", default_value=nil, description="URL (Endereço de página web)"},
          },
       },
 
@@ -31,7 +37,7 @@ cmds = {
             { sequence=nil, flag="-H", variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP"},
             { sequence=1,   flag="-w", variable="$ARG1$", default_value="400.0,20%", description="Tempo de resposta e percentual de perda para alerta ANORMAL"},
             { sequence=2,   flag="-c", variable="$ARG2$", default_value="999.0,70%", description="Tempo de resposta e percentual de perda para alerta CRITICO"},
-            { sequence=nil, flag="-p", variable="5", default_value=nil, description="Número de pacotes"},
+            { sequence=nil, flag="-p", variable="5", default_value="5", description="Número de pacotes"},
          },
       },
 
@@ -42,7 +48,7 @@ cmds = {
             { sequence=nil, flag="-H", variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP"},
             { sequence=1,   flag="-w", variable="$ARG1$", default_value="400.0,20%", description="Tempo de resposta e percentual de perda para alerta ANORMAL"},
             { sequence=2,   flag="-c", variable="$ARG2$", default_value="999.0,70%", description="Tempo de resposta e percentual de perda para alerta CRITICO"},
-            { sequence=nil, flag="-p", variable="5", default_value=nil, description="Número de pacotes"},
+            { sequence=nil, flag="-p", variable="5", default_value="5", description="Número de pacotes"},
          },
       },
 

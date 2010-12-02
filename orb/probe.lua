@@ -321,26 +321,43 @@ function render_confirm(web, msg)
 end
 
 
-function render_checkcmd_test(web, cur_cmd)
+function render_checkcmd_test(web, cur_cmd, name, ip)
    local row, cmd, url = {}, "", ""
-   local c, p, k
+   local c, p
+   local readonly = ""
+   local hidden = {}
    local header = { strings.parameter.." #", strings.value, strings.description }
 
-   web.prefix = "/orb//checkcmd"
-   c, p, k = get_checkcmd(cur_cmd)
-   url = web:link("/"..c)
+   web.prefix = "/orb/checkcmd"
+   c, p = get_checkcmd(cur_cmd)
+   url = web:link("")
 
+   hidden = { 
+      "<INPUT TYPE=HIDDEN NAME=\"cmd\" value=\""..c[1].command.."\">",
+      "<INPUT TYPE=HIDDEN NAME=\"count\" value=\""..#p.."\">" 
+   }
 
    for i, v in ipairs(p) do
+      if v.sequence == nil then readonly="readonly=\"readonly\"" else readonly="" end
+      if v.variable == "$HOSTNAME$" then
+         value = name
+      elseif v.variable == "$HOSTADDRESS$" then
+         value = ip
+      else
+         v.default_value = v.default_value or ""
+         value = v.default_value
+      end
+      v.flag = v.flag or ""
       row[#row + 1] = { 
          i,
-         { "<INPUT TYPE=TEXT NAME=cmd\""..i.."\" value=\""..v.default_value.."\">" },
+         { "<INPUT TYPE=HIDDEN NAME=\"flag"..i.."\" value=\""..v.flag.."\">" ,
+           "<INPUT TYPE=TEXT NAME=\"opt"..i.."\" value=\""..value.."\" "..readonly..">" },
          v.description 
       }
    end
 
-   res[#res+1] =  { br(), strings.parameter.."s do comando "..k[1].name1, br() }
-   res[#res+1] =  render_form(web:link(url), strings.test, render_table(row, header), "check" )
+   res[#res+1] = center{ br(), br(), strings.parameter.."s do comando "..c[1].name1, br() }
+   res[#res+1] = center{ render_form(web:link(url), nil, {hidden, render_table(row, header)}, "check", strings.test, "check" ) }
 
    return res
 end
@@ -356,7 +373,8 @@ function render_add(web, cmp, chk, params)
 
    params.default = params.default or chk[1].object_id
 
-   local header = { "query", strings.name, "IP", "SW / Versão", strings.type, strings.command }
+   --local header = { "query", strings.name, "IP", "SW / Versão", strings.type, strings.command }
+   local header = { strings.name, "IP", "SW / Versão", strings.type, strings.command }
 
    if v then
       if v.sw_name ~= nil then 
@@ -392,9 +410,9 @@ function render_add(web, cmp, chk, params)
                select_option_onchange("check", chk, "object_id", "name1", params.default, url2), " " } )
       end
 
-      --a{ href= web:link("/show/"..v.c_id), v.c_name}, 
+         --a{ href= web:link("/show/"..v.c_id), v.c_name}, 
+         --v[1],
       row[#row + 1] = { 
-         v[1],
          name,
          ip, 
          serv,
@@ -403,11 +421,22 @@ function render_add(web, cmp, chk, params)
       }
    end
 
+--[[
+   if v.sv_id ~= 0 then 
+      row[#row + 1] = { colspan=6, text=render_checkcmd_test(web, params.default, name, ip) } 
+   end
+]]
+
+-- VER: http://stackoverflow.com/questions/942772/html-form-with-two-submit-buttons-and-two-target-attributes
+
    res[#res+1] = render_content_header("Checagem", web:link("/add"), web:link("/list"))
    res[#res+1] = render_table(row, header)
 
-   res[#res+1] = render_checkcmd_test(web, params.default)
-   res[#res+1] = iframe{name="check", src=web:link("/"), width="100%",  height="300", frameborder=0}
+   if v.sv_id ~= 0 then 
+      res[#res+1] = render_checkcmd_test(web, params.default, name, ip)
+      res[#res+1] = iframe{name="check", src=web:link("/blank"), width="100%",  height="300", frameborder=0}
+   end
+
 
    for _,c in ipairs(chk) do
       if c.object_id == default then

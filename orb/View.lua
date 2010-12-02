@@ -262,13 +262,20 @@ function render_table(t, h)
       hea = tr{ class="tab_bg_1", hea }
    end
 
+      local span = 1
    for r, v in ipairs(t) do
-      for c, w in ipairs(v) do
+      for c, w in pairs(v) do
+
+if c == "colspan" then 
+   span = w
+else 
          if r == 1 and h ~= nil and table.getn(h) == 0 then -- h vazio ({}) e header dentro de t
             hea[#hea+1] = th{ align="center", w }
          else                                               -- nao possui header, tudo eh linha
-            col[#col+1] = td{ w }
+            col[#col+1] = td{ colspan=span, w }
          end
+   span = 1
+end
       end
 
       if r == 1 and h ~= nil and table.getn(h) == 0 then  -- h vazio ({}) e header dentro de t
@@ -348,18 +355,24 @@ end
       strings.type..": ", select_and_or("type", default_val2), br(),
    }
 ]]
-function render_form(url, url_reset, t, line)
+function render_form(url, url_reset, t, line, button_name, iframe_target)
    url_reset = url_reset or ""
+   iframe_target = iframe_target or ""
+   local reset
+   if button_name == nil then button_name = strings.send end
+   if url_reset == nil then reset = "" else reset = url_reset end
    if line then line = br() else line = "" end
+
    return form{
       name = "input",
       method = "post",
       action = url,
+      target = iframe_target,
       t,
       line,
-      input{ type='submit', value=strings.send,  class='submit' },
+      input{ type='submit', value=button_name,  class='submit' },
       " ",
-      a{ href=url_reset, img{ src='/pics/reset.png', class='calendrier' } },
+      a{ href=reset, img{ src='/pics/reset.png', class='calendrier' } },
    }
 end
 

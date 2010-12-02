@@ -70,6 +70,8 @@ strgs.pt_BR = {
 	value = "Valor",
 	parameter = "Parametro",
 	test = "Testar",
+	wait = "Por favor aguarde...", 
+	fillall = "Por favor preencha todos os parametros.", 
 
 }
 
@@ -140,6 +142,8 @@ strgs.us = {
 	value = "Value",
 	parameter = "Parameter",
 	test = "Test",
+	wait = "Please wait...", 
+	fillall = "Please fill all parameters.", 
 }
 
 

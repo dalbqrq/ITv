@@ -54,6 +54,8 @@ end
 function insert_service_cfg_file (hostname, display_name, check_cmd)
    if not  ( display_name and hostname and check_cmd ) then return false end
    local content, cmd, filename
+   --local c, p = get_checkcmd(check_cmd)
+   --local chk = ""
 
    filename = config.monitor.dir.."/services/"..hostname.."-"..display_name.."-"..check_cmd..".cfg"
 
@@ -209,7 +211,9 @@ cmds = {
    DHCP      = { def="$USER1$/check_dhcp $ARG1$", default=nil },
    FTP       = { def="$USER1$/check_ftp -H $HOSTADDRESS$ $ARG1$", default=nil },
    HPJD      = { def="$USER1$/check_hpjd -H $HOSTADDRESS$ $ARG1$", default=nil },
-   HTTP      = { def="$USER1$/check_http -I $HOSTADDRESS$ $ARG1$", default="" },
+   HTTP      = { def="$USER1$/check_http -I $HOSTADDRESS$", default="" },
+   HTTPNAME  = { def="$USER1$/check_http -H $HOSTNAME$ $ARG1$", default="" },
+   HTTPURL   = { def="$USER1$/check_http -I $ARG1$", default="" },
    IMAP      = { def="$USER1$/check_imap -H $HOSTADDRESS$ $ARG1$", default=nil },
    DISK      = { def="$USER1$/check_disk -w $ARG1$ -c $ARG2$ -p $ARG3$", default=nil },
    LOAD      = { def="$USER1$/check_load -w $ARG1$ -c $ARG2$", default=nil },
