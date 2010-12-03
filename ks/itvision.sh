@@ -272,6 +272,7 @@ touch /var/lib/nagiosgrapher/ngraph.pipe
 chown -R $user.$user /var/lib/nagiosgrapher /etc/nagiosgrapher /var/run/nagiosgrapher /var/log/nagiosgrapher /var/cache/nagiosgrapher /usr/share/perl5/NagiosGrapher /usr/lib/nagiosgrapher /usr/sbin/nagiosgrapher
 cat /etc/nagiosgrapher/nagios3/commands.cfg >> /etc/nagios3/commands.cfg 
 rm -f /etc/nagiosgrapher/nagios3/commands.cfg
+echo '<HTML><HEAD><META http-equiv="REFRESH" content="0;url=/nagios3/cgi-bin/graphs.cgi"></HEAD></HTML>'  > /usr/share/nagios3/htdocs/graphs.html
 
 
 
@@ -419,6 +420,9 @@ cpan -i XML::Entities
 cpan -i YAML
 \rm -f /tmp/ans; for i in `seq 16`; do echo >> /tmp/ans; done
 /usr/local/OCSNG_UNIX_SERVER-1.3.2/setup.sh < /tmp/ans
+
+sed -e "/Alias \/ocsreports/a \\
+Alias /ocs /ocsinventory-bla/bla" ocsinventory-reports.conf
 
 
 
@@ -581,6 +585,21 @@ source /home/$user/.bashrc
 
 
 echo ""
+echo "======================================================================================="
+echo "# Sites instalados:                                                                   #"
+echo "======================================================================================="
+echo "# 			                                                            #"
+echo "# http://localhost			ITvision	      		    	    #"
+echo "# http://localhost/servdesk		Service Desk do ITvision	    	    #"
+echo "# http://localhost/glpi			GLPI		      		    	    #"
+echo "# http://localhost/ocs			OCS-Inventory (Reports)		    	    #"
+echo "# http://localhost/nagios3		Nagios		      		    	    #"
+echo "# http://localhost/nagios3/graphs.html	NagiosGrapher	      		    	    #"
+echo "# 			                                                            #"
+echo "======================================================================================="
+echo
+echo
+echo
 echo "======================================================================================="
 echo "# Nagios, NDOutils, Nagios Business Process, GLPI, LUA e Cacti Installation Complete! #"
 echo "======================================================================================="
