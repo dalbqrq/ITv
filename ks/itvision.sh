@@ -432,18 +432,17 @@ Alias /ocs /ocsinventory-bla/bla" ocsinventory-reports.conf
 install_msg SMTP
 
 cd /tmp
-cat << EOF > ans
-$dbpass
-BR
-Rio de Janeiro
-Rio de Janeiro
-ITvision
+sed -i.orig -e 's/AU/BR/' \
+        -e 's/Some-State/Rio de Janeiro/' \
+        -e 's/Locality Name (eg, city)/Rio de Janeiro/' \
+        -e 's/Internet Widgits Pty Ltd/ITvision/' \
+        -e 's/#organizationalUnitName_default =/organizationalUnitName_default  = ITvision Monitor/' \
+        -e 's/Email Address/alert@itvison.com.br/' \
+        -e 's/Common Name (eg, YOUR name)/Daniel Lins/' /usr/lib/ssl/openssl.cnf
 
-ITvision Monitor
-alert@itvision.com.br
-EOF
-/usr/lib/ssl/misc/CA.pl -newca < /tmp/ans
-openssl req -new -nodes -subj '/CN=ITvision/O=ITvision/C=BR/ST=Rio de Janeiro/L=Rio de Janeiro/emailAddress=alert@itvision.com.br' -keyout SERVER-key.pem -out SERVER-cert.pem -days 3650
+/usr/lib/ssl/misc/CA.pl -newca
+openssl req -new -nodes -subj '/CN=ITvision/O=ITvision/C=BR/ST=Rio de Janeiro/L=Rio de Janeiro/emailAddress=alert@itvision.com.br' -keyout SERVER-key.pem -out SERVER-req.pem -days 3650
+openssl ca -out SERVER-cert.pem -infiles SERVER-req.pem
 cp /tmp/demoCA/cacert.pem /tmp/SERVER-key.pem /tmp/SERVER-cert.pem /etc/postfix
 chmod 644 /etc/postfix/SERVER-cert.pem /etc/postfix/cacert.pem
 chmod 400 /etc/postfix/SERVER-key.pem
@@ -559,7 +558,8 @@ install_msg CLEAN UP
 /usr/sbin/invoke-rc.d nagios-nrpe-server stop
 /usr/sbin/invoke-rc.d apache2 stop
 /usr/sbin/invoke-rc.d nagiosgrapher stop
-
+/usr/sbin/invoke-rc.d postfix stop
+/usr/sbin/invoke-rc.d postfix start
 /usr/sbin/invoke-rc.d apache2 start
 /usr/sbin/invoke-rc.d nagios-nrpe-server start
 /usr/sbin/invoke-rc.d nagios3 start
