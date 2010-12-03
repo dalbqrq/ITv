@@ -3,13 +3,14 @@ require "Model"
 
 cmds = {
 
+--[[
    DHCP = {
          command="check_dhcp",
          args={
             { sequence=nil, flag="-s", variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP"},
          },
       },
-
+]]
    HTTP = {
          command="check_http",
          args={
@@ -23,14 +24,14 @@ cmds = {
             { sequence=nil, flag="-H", variable="$HOSTNAME$", default_value=nil, description="Hostname"},
          },
       },
-
+--[[
    HTTPURL = {
          command="check_http",
          args={
             { sequence=1, flag="-I", variable="$ARG1$", default_value=nil, description="URL (Endereço de página web)"},
          },
       },
-
+]]
    PING = {
          command="check_ping",
          args={
@@ -80,6 +81,7 @@ cmds = {
          },
       },
 
+--[[
    TCP = {
          command="check_tcp" ,
          args={
@@ -95,7 +97,7 @@ cmds = {
             { sequence=1, flag="-p", variable="$ARG1$ ", default_value=nil, description="Número da porta"},
          },
       },
-
+]]
 }
 
 

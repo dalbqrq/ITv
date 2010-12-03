@@ -140,7 +140,7 @@ function insert(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, ip)
    -- hostname passa aqui a ser uma composicao do proprio hostname com o ip a ser monitorado
    local hostname = string.gsub(string.toid(c_name).."-"..ip,"(%s+)","_")
    local software = string.toid(sw_name.." "..sv_name)
-   local cmd, hst, svc, dpl, chk, h, s
+   local cmd, hst, svc, dpl, chk, chk_name, chk_id, h, s
    local msg = ""
    local content, counter
 
@@ -150,8 +150,11 @@ function insert(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, ip)
    -- cria check host e service ping caso nao exista
    ------------------------------------------------------
    if h[1] == nil then
+      chk = Model.query("nagios_objects", "name1 = '"..config.monitor.check_host.."'")
+      if chk[1] then chk_name = chk[1].name1; chk_id = chk[1].object_id end
+
       cmd = insert_host_cfg_file (hostname, c_name, ip)
-      cmd = insert_service_cfg_file (hostname, config.monitor.check_host, config.monitor.check_host)
+      cmd = insert_service_cfg_file (hostname, config.monitor.check_host, config.monitor.check_host, chk_id, false)
       h = objects:select(hostname)
       -- caso host ainda nao tenha sido incluido aguarde e tente novamente
       counter = 0
@@ -199,13 +202,13 @@ function insert(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, ip)
          clause = "object_id = "..web.input.check
       end
       chk = Model.query("nagios_objects", clause)
-      if chk[1] then chk = chk[1].name1 end
+      if chk[1] then chk_name = chk[1].name1; chk_id = chk[1].object_id end
 
       dpl = string.toid(web.input.display)
       if dpl == "" then 
          dpl = software
       end
-      cmd = insert_service_cfg_file (hostname, dpl, chk)
+      cmd = insert_service_cfg_file (hostname, dpl, chk_name, chk_id, true)
       s = objects:select(hostname, dpl)
 
       -- caso service ainda nao tenha sido incluido aguarde e tente novamente
@@ -222,7 +225,7 @@ function insert(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, ip)
       else
          svc = s[1].object_id
          monitors:insert_monitor(p_id, sv_id, n_id, svc, 1, "svc")
-         msg = msg.."Check do SERVIÇO: "..dpl.." HOST: ".. c_name.." COMANDO: "..chk.." criado. "
+         msg = msg.."Check do SERVIÇO: "..dpl.." HOST: ".. c_name.." COMANDO: "..chk_name.." criado. "
          -- DEBUG:       .." (hst,svc) = ("..hst..","..svc..") "
          -- DEBUG: msg = msg.." ||| serviceobjid"..svc.." ||| " 
       end
@@ -329,7 +332,7 @@ function render_checkcmd_test(web, cur_cmd, name, ip)
    local header = { strings.parameter.." #", strings.value, strings.description }
 
    web.prefix = "/orb/checkcmd"
-   c, p = get_checkcmd(cur_cmd)
+   c, p = get_allcheck_params(cur_cmd)
    url = web:link("")
 
    hidden = { 
