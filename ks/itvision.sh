@@ -1,4 +1,7 @@
 #!/bin/bash
+# --------------------------------------------------
+# ITvision MONITOR INSTALL for Ubuntu 10.04.1
+# --------------------------------------------------
 
 user=itv
 dbpass=itv
@@ -20,6 +23,8 @@ function install_msg() {
 
 sed -i -e "s/`hostname`/$hostname/g" /etc/hosts; echo $hostname > /etc/hostname; hostname --file /etc/hostname
 
+
+
 # --------------------------------------------------
 # INSTALL UBUNTU NATIVE PACKAGES VIA apt-get
 # --------------------------------------------------
@@ -37,6 +42,7 @@ install_pack graphviz-dev
 install_pack unzip
 install_pack wget
 install_pack vim
+install_pack ntp
 install_pack libreadline6-dev
 install_pack lua5.1
 install_pack liblua5.1-0
@@ -76,6 +82,7 @@ install_pack librrds-perl
 install_pack nagiosgrapher
 
 
+
 # --------------------------------------------------
 # STOP ALL PROCESSES
 # --------------------------------------------------
@@ -83,7 +90,9 @@ install_pack nagiosgrapher
 /usr/sbin/invoke-rc.d nagios3 stop
 /usr/sbin/invoke-rc.d nagios-nrpe-server stop
 /usr/sbin/invoke-rc.d apache2 stop
+/usr/sbin/invoke-rc.d nagiosgrapher stop
 rm -rf /var/cache/nagios3/ndo.sock
+
 
 
 # --------------------------------------------------
@@ -174,6 +183,8 @@ mkdir $itvhome/html/gv
 chown -R $user.$user $itvhome/html/gv
 printf "html/gv\norb/config.lua\nbin/dbconf\n" >> $itvhome/.git/info/exclude
 
+
+
 # --------------------------------------------------
 # NAGIOS
 # --------------------------------------------------
@@ -196,8 +207,6 @@ cfg_dir=/etc/nagios3/services \\
 cfg_dir=/etc/nagios3/contacts" /etc/nagios3/nagios.cfg
 sed -i.orig -e "s/chown nagios:nagios/chown $user:root/" /etc/init.d/nagios3
 sed -i.orig -e "s/chown nagios/chown $user/" /etc/init.d/nagios-nrpe-server
-sed -i.orig -e "s/root/$user/" -e "s/Root/Admin/" \
-	-e "s/root@localhost/webmaster@itvision.com.br/" /etc/nagios3/conf.d/contacts_nagios2.cfg
 
 mkdir -p /etc/nagios3/orig/conf.d /etc/nagios3/hosts /etc/nagios3/services /etc/nagios3/apps /etc/nagios3/contacts
 mv /etc/nagios3/*.orig /etc/nagios3/orig
@@ -209,7 +218,7 @@ dir=/etc/nagios-plugins/config
 cp -r $dir $dir".orig"
 
 for f in $dir/*; do
- sed -i -e 's/check-rpc/check_rpc/g' -e 's/check-nfs/check_nfs/g' \
+sed -i -e 's/check-rpc/check_rpc/g' -e 's/check-nfs/check_nfs/g' \
 	-e 's/traffic_average/\U&/' \
 	-e 's/ssh_disk/\U&/' \
 	-e 's/ check_.*/\U&/' -e 's/\tcheck_.*/\U&/' -e 's/CHECK_//g' \
@@ -221,6 +230,7 @@ sed -i.orig -e "s/check_imap -H/check_imap -p 143 -H/g" $dir/mail.cfg
 cp $itvhome/ks/files/plugin.d/* $dir
 
 
+
 # --------------------------------------------------
 # NAGIOSGRAPHER
 # --------------------------------------------------
@@ -230,6 +240,7 @@ sed -i.orig2 -e "s/process_performance_data=0/process_performance_data=1/" \
     -e "s/^#service_perfdata_file=\/tmp\/service-perfdata/service_perfdata_file=\/var\/log\/nagiosgrapher\/service-perfdata/" \
     -e "s/^#service_perfdata_file_template=/service_perfdata_file_template=/" \
     -e "s/^#service_perfdata_file_mode=a/service_perfdata_file_mode=a/" \
+    -e "s/^#service_perfdata_command=process-service-perfdata/service_perfdata_command=process-service-perfdata/" \
     -e "s/^#service_perfdata_file_processing_interval=0/service_perfdata_file_processing_interval=10/" \
     -e "s/^#service_perfdata_file_processing_command=process-service-perfdata-file/service_perfdata_file_processing_command=ngraph-process-service-perfdata-pipe/" /etc/nagios3/nagios.cfg
 
@@ -255,13 +266,14 @@ define serviceextinfo {
         }
 EOF
 
-#rm -f /etc/nagiosgrapher/nagios3/commands.cfg
-
 ln -s /etc/nagios3/services/serviceext /etc/nagiosgrapher/nagios3/serviceext
 touch /var/log/nagiosgrapher/service-perfdata
 touch /var/lib/nagiosgrapher/ngraph.pipe
 chown -R $user.$user /var/lib/nagiosgrapher /etc/nagiosgrapher /var/run/nagiosgrapher /var/log/nagiosgrapher /var/cache/nagiosgrapher /usr/share/perl5/NagiosGrapher /usr/lib/nagiosgrapher /usr/sbin/nagiosgrapher
-#cat /etc/nagiosgrapher/nagios3/commands.cfg >> /etc/nagios3/commands.cfg 
+cat /etc/nagiosgrapher/nagios3/commands.cfg >> /etc/nagios3/commands.cfg 
+rm -f /etc/nagiosgrapher/nagios3/commands.cfg
+
+
 
 echo << EOF > /usr/share/nagios3/htdocs/grapher.html
 <html><head>
@@ -344,6 +356,7 @@ sed -i.orig -e "139a \\
   </tr>" /usr/share/nagios3/htdocs/side.html
 
 
+
 # --------------------------------------------------
 # GLPI
 # --------------------------------------------------
@@ -351,10 +364,9 @@ install_msg GLPI
 
 wget -P /tmp https://forge.indepnet.net/attachments/download/656/glpi-0.78.tar.gz
 tar zxf /tmp/glpi-0.78.tar.gz -C /usr/local
-cp -r /usr/local/glpi /usr/local/servdesk
+mv /usr/local/glpi /usr/local/servdesk
+tar zxf /tmp/glpi-0.78.tar.gz -C /usr/local
 chown -R $user.$user /usr/local/glpi /usr/local/servdesk
-
-# TODO: DUPLICAR CORRETAMENTE O GLPI
 
 echo "<?php
  class DB extends DBmysql {
@@ -366,7 +378,7 @@ echo "<?php
 ?>" > /usr/local/servdesk/config/config_db.php
 chmod 600 /usr/local/servdesk/config/config_db.php
 chown $user.$user /usr/local/servdesk/config/config_db.php
-cp -a /usr/local/servdesk/config/config_db.php /usr/local/glpi/config/config_db.php
+# PRECEISA, DEVO ?????? cp -a /usr/local/servdesk/config/config_db.php /usr/local/glpi/config/config_db.php
 
 echo "Alias /servdesk "/usr/local/servdesk"
 <Directory "/usr/local/servdesk">
@@ -395,6 +407,7 @@ echo "ALTER TABLE \`itvision\`.\`glpi_computers\` ADD COLUMN \`geotag\` VARCHAR(
 	mysql -u root --password=$dbpass
  
 
+
 # --------------------------------------------------
 # OCS INVENTORY v1.3.2
 # --------------------------------------------------
@@ -407,16 +420,12 @@ cd /usr/local/OCSNG_UNIX_SERVER-1.3.2
 sed -i.orig -e "s/DB_SERVER_USER=\"ocs\"/DB_SERVER_USER=\"$user\"/" \
         -e "s/DB_SERVER_PWD=\"ocs\"/DB_SERVER_PWD=\"$dbpass\"/" /usr/local/OCSNG_UNIX_SERVER-1.3.2/setup.sh
 
-perl -MCPAN -e 'install XML::Entities'
-echo ''
-echo '# Entrando no shell do cpan ... '
-sleep 2
-echo '##################################'
-echo '# Digite "install YAML" a seguir #'
-echo '##################################'
-sleep 2
-cpan
-/usr/local/OCSNG_UNIX_SERVER-1.3.2/setup.sh
+#perl -MCPAN -e 'install XML::Entities'
+cpan -i XML::Entities
+cpan -i YAML
+\rm -f /tmp/ans; for i in `seq 16`; do echo >> /tmp/ans; done
+/usr/local/OCSNG_UNIX_SERVER-1.3.2/setup.sh < /tmp/ans
+
 
 
 # --------------------------------------------------
@@ -425,25 +434,20 @@ cpan
 install_msg SMTP
 
 cd /tmp
-echo " "
-echo " ################################################################## "
-echo " # ATENÇÃO PREENCHA O CERTIFICADO COM OS DADOS ABAIXO		# "
-echo " #								# "
-echo " # Country Name (2 letter code) [US]:BR				# "
-echo " # State or Province Name (full name) [New York]:Rio de Janeiro	# "
-echo " # Locality Name (eg, city) []:Rio de Janeiro			# "
-echo " # Organization Name (eg, company) []:ITvision			# "
-echo " # Organizational Unit Name (eg, section) []:			# "
-echo " # Common Name (eg, YOUR name) []:Daniel				# "
-echo " # Email Address []:alert@itvision.com.br				# "
-echo " ################################################################## "
-echo " "
-/usr/lib/ssl/misc/CA.pl -newca
-openssl req -new -nodes -subj '/CN=ITvision/O=ITvision/C=BR/ST=Rio de Janeiro/L=Rio de Janeiro/emailAddress=alert@itvision.com.br' -keyout SERVER-key.pem -out SERVER-req.pem -days 3650
-#cp /tmp/demoCA/cacert.pem /tmp/SERVER-key.pem /tmp/SERVER-cert.pem /etc/postfix
-#chmod 644 /etc/postfix/SERVER-cert.pem /etc/postfix/cacert.pem
-cp /tmp/demoCA/cacert.pem /tmp/SERVER-key.pem /tmp/SERVER-req.pem /etc/postfix
-chmod 644 /etc/postfix/SERVER-req.pem /etc/postfix/cacert.pem
+cat << EOF > ans
+$dbpass
+BR
+Rio de Janeiro
+Rio de Janeiro
+ITvision
+
+ITvision Monitor
+alert@itvision.com.br
+EOF
+/usr/lib/ssl/misc/CA.pl -newca < /tmp/ans
+openssl req -new -nodes -subj '/CN=ITvision/O=ITvision/C=BR/ST=Rio de Janeiro/L=Rio de Janeiro/emailAddress=alert@itvision.com.br' -keyout SERVER-key.pem -out SERVER-cert.pem -days 3650
+cp /tmp/demoCA/cacert.pem /tmp/SERVER-key.pem /tmp/SERVER-cert.pem /etc/postfix
+chmod 644 /etc/postfix/SERVER-cert.pem /etc/postfix/cacert.pem
 chmod 400 /etc/postfix/SERVER-key.pem
 wget -P /tmp https://www.geotrust.com/resources/root_certificates/certificates/Equifax_Secure_Certificate_Authority.cer
 cat /tmp/Equifax_Secure_Certificate_Authority.cer >> /etc/postfix/cacert.pem
@@ -464,6 +468,8 @@ postmap /etc/postfix/sasl_passwd
 postmap /etc/postfix/transport
 rm -f ~/SERVER* && rm -rf ~/demoCA* 
 
+
+
 # --------------------------------------------------
 # GRAPHVIZ
 # --------------------------------------------------
@@ -476,6 +482,7 @@ install_msq GRAPHVIZ
 /usr/bin/wget -P /tmp http://www.graphviz.org/pub/graphviz/stable/ubuntu/ub9.04/i386/libgv-lua_2.26.3-1_i386.deb
 /usr/bin/dpkg -i /tmp/*.deb 
 /usr/bin/dot -c
+
 
 
 # --------------------------------------------------
@@ -518,6 +525,9 @@ sed -i.orig '/^#/ a\
 #sed -i -e "s/www-data/$user/" /etc/cron.d/cacti
 #
 #
+
+
+
 # --------------------------------------------------
 # UTILILITARIOS
 # --------------------------------------------------
@@ -531,6 +541,7 @@ printf "$aliases" >> /root/.bashrc
 printf "export LUA_PATH='$itvhome/orb/?.lua;$itvhome/orb/inc/?.lua;/usr/local/share/lua/5.1/?.lua'\n" >> /home/$user/.bashrc
 
 
+
 # --------------------------------------------------
 # ONLY FOR DEVELOPMENT
 # --------------------------------------------------
@@ -539,10 +550,18 @@ printf "export LUA_PATH='$itvhome/orb/?.lua;$itvhome/orb/inc/?.lua;/usr/local/sh
 #/usr/sbin/service mysql restart
 
 
+
 # --------------------------------------------------
 # CLEAN UP & RESTART ALL PROCESSES
 # --------------------------------------------------
 install_msg CLEAN UP
+
+/usr/sbin/invoke-rc.d ndoutils stop
+/usr/sbin/invoke-rc.d nagios3 stop
+/usr/sbin/invoke-rc.d nagios-nrpe-server stop
+/usr/sbin/invoke-rc.d apache2 stop
+/usr/sbin/invoke-rc.d nagiosgrapher stop
+
 /usr/sbin/invoke-rc.d apache2 start
 /usr/sbin/invoke-rc.d nagios-nrpe-server start
 /usr/sbin/invoke-rc.d nagios3 start
@@ -551,8 +570,10 @@ install_msg CLEAN UP
 cd
 \rm -rf /tmp/*
 rm -f ~/SERVER* && rm -rf ~/demoCA*
-apt-get clean
-apt-get autoremove
+apt-get -y -f install
+apt-get -y clean
+apt-get -y autoremove
+
 
 
 # --------------------------------------------------
