@@ -1,0 +1,32 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="style.css"/>
+<script>
+   function changeHead(headPage) {
+      parent.headFrame.location.href = headPage;
+   }
+   function changeBase(headPage, bodyPage) {
+      parent.headFrame.location.href = headPage;
+      parent.bodyFrame.location.href = bodyPage;
+   }
+</script>
+</head>
+
+<body>
+
+<ul id="tablist">
+<li><a href="http://www.cssdrive.com">CSS Drive</a></li>
+<li><a href="head1.html">Yahoo</a></li>
+<li><a class="current" href="head2.html">google</a></li>
+<li><a href="http://www.news.com">News.com</a></li>
+</ul>
+
+<ul id="subtablist">
+<li><a class="current" href="http://www.cssdrive.com">Outra forma</a></li>
+<li><a href="javascript:void(0);" onClick="changePage('1.html', 'head.html')">Graficos</a></li>
+<li><a href="javascript:void(0);" onClick="changePage('2.html', 'head.html')">Relatorios</a></li>
+<li><a href="http://www.news.com">Akira</a></li>
+</ul>
+
+</body>
+</html>

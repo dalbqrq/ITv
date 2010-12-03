@@ -1,0 +1,28 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="style.css"/>
+<script>
+   function changePage(strPage) {
+      parent.baseFrame.location.href = strPage;
+   }
+</script>
+</head>
+
+<body>
+
+<ul id="tablist">
+<li><a href="http://www.cssdrive.com">CSS Drive</a></li>
+<li><a class="current" href="head1.html">Yahoo</a></li>
+<li><a href="head2.html">google</a></li>
+<li><a href="http://www.news.com">News.com</a></li>
+</ul>
+
+<ul id="subtablist">
+<li><a class="current" href="http://www.cssdrive.com">Instalacao</a></li>
+<li><a href="javascript:void(0);" onClick="changePage('1.html')">Monitoracao</a></li>
+<li><a href="javascript:void(0);" onClick="changePage('2.html')">Mais uym teste</a></li>
+<li><a href="http://www.news.com">Akida</a></li>
+</ul>
+
+</body>
+</html>
