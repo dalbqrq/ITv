@@ -373,7 +373,6 @@ echo "<?php
 ?>" > /usr/local/servdesk/config/config_db.php
 chmod 600 /usr/local/servdesk/config/config_db.php
 chown $user.$user /usr/local/servdesk/config/config_db.php
-# PRECEISA, DEVO ?????? cp -a /usr/local/servdesk/config/config_db.php /usr/local/glpi/config/config_db.php
 
 echo "Alias /servdesk "/usr/local/servdesk"
 <Directory "/usr/local/servdesk">
@@ -391,14 +390,19 @@ echo "Alias /glpi "/usr/local/glpi"
     Allow from all
 </Directory>"  >> /etc/apache2/conf.d/glpi.conf
 
-cp $itvhome/ks/db/glpi.sql.gz /tmp
-gunzip /tmp/glpi.sql.gz
-mysql -u $dbuser --password=$dbpass $dbname < /tmp/glpi.sql
+if [ -z "$migra_glpi" ]; then
+    cp -a /usr/local/servdesk/config/config_db.php /usr/local/glpi/config/config_db.php
+    cp $itvhome/ks/db/glpi.sql.gz /tmp
+    gunzip /tmp/glpi.sql.gz
+    mysql -u $dbuser --password=$dbpass $dbname < /tmp/glpi.sql
+fi     
 
 cd $itvhome/ks/servdesk
 tar cf - * | ( cd /usr/local/servdesk; tar xfp -)
 
 echo "ALTER TABLE \`itvision\`.\`glpi_computers\` ADD COLUMN \`geotag\` VARCHAR(20) NULL DEFAULT NULL  AFTER \`ticket_tco\` ;" | \
+	mysql -u root --password=$dbpass
+echo "ALTER TABLE \`itvision\`.\`glpi_networkequipments\` ADD COLUMN \`geotag\` VARCHAR(20) NULL DEFAULT NULL  AFTER \`ticket_tco\` ;" | \
 	mysql -u root --password=$dbpass
  
 
