@@ -12,6 +12,7 @@ module(Model.name, package.seeall,orbit.new)
 local apps        = Model.itvision:model "apps"
 local app_objects = Model.itvision:model "app_objects"
 local app_relats  = Model.itvision:model "app_relats"
+local objects     = Model.nagios:model "objects"
 local services    = Model.nagios:model "services"
 
 -- models ------------------------------------------------------------
@@ -60,6 +61,17 @@ function app_relats:select(id)
       clause = "app_id = "..id
    end
    return self:find_all(clause)
+end
+
+
+function objects:select_app(name2)
+   if name2 then
+      clause = "name2 = '"..name2.."' and name1 = '"..config.monitor.check_app.."' and is_active = 1"
+   else
+      clause = nil
+   end
+
+   return Model.query("nagios_objects", clause)
 end
 
 
@@ -184,17 +196,15 @@ function activate(web, id, flag)
          local APPS = apps:select()
          activate_all_apps(APPS)
 
--- TODO: 11  - o service_object_id deve ser descoberto retirando-se a possibilidade de 
---             de se pegar o business_process_detail (servico desabilitado) da aplicacao.
-         local s = services:select(nil, "display_name = '"..string.toid(A[1].name).."'")
+         local s = objects:select_app(string.toid(A[1].name))
          -- caso host ainda nao tenha sido incluido aguarde e tente novamente
          counter = 0
          while s[1] == nil do
             counter = counter + 1
             for i = 1,loop do x = i/2 end -- aguarde...
-            s = services:select(nil, "display_name = '"..string.toid(A[1].name).."'")
+            s = objects:select_app(string.toid(A[1].name))
          end
-         local svc = { id = A[1].id, service_object_id = s[1].service_object_id }
+         local svc = { id = A[1].id, service_object_id = s[1].object_id }
          apps:update(svc)
 
          msg = "/"..error_message(9).." "..A[1].name

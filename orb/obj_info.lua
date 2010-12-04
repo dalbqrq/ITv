@@ -101,22 +101,51 @@ end
 
 function render_svc(web, obj_id, A)
    local res = {}
-   local row = {}
+   local row
 
-   for i, v in pairs(A[1]) do
+   A = A[1]
+--[[
+   for i, v in pairs(A) do
       row[#row+1] = {
          i, v,
---[[
-         a{ href=lnk, v.name },
-         strings["logical_"..v.type],
-         NoOrYes[v.is_active+1].name,
-         button_link(strings.edit, web:link("/edit/"..v.id..":"..v.name..":"..v.type)),
-]]
       }
    end
+]]
 
-   res[#res+1] = render_content_header(A[1].sw_name.." / "..A[1].sv_name, nil, nil)
+   -------------------------
+   -- COMPUTER INFOS
+   -------------------------
+   row = {}
+   row[#row+1] = { "Nome", A.c_name }
+   row[#row+1] = { "IP", A.p_ip }
+   row[#row+1] = { "Contato", A.c_contact }
+   row[#row+1] = { "Numero", A.c_contact_num }
+   row[#row+1] = { "Inventário", A.c_otherserial }
+
+   res[#res+1] = render_content_header("Hardware", nil, nil)
    res[#res+1] = render_table(row, nil)
+
+
+   -------------------------
+   -- SOFTWARE INFOS
+   -------------------------
+   row = {}
+   row[#row+1] = { "Software", A.sw_name }
+   row[#row+1] = { "Versão", A.sv_name }
+
+   res[#res+1] = render_content_header("Software", nil, nil)
+   res[#res+1] = render_table(row, nil)
+
+  
+   -------------------------
+   -- STATUS INFOS
+   -------------------------
+   row = {}
+   row[#row+1] = { "Status", "STATUS" }
+
+   res[#res+1] = render_content_header("Status", nil, nil)
+   res[#res+1] = render_table(row, nil)
+  
 
    return render_layout(res)
 end

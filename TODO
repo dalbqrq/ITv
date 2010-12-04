@@ -1,7 +1,7 @@
 
 TODO List
 
-0. Criar uma check_command PING_ITV para ser de uso exclusivo da configuracao dos hosts que
+ok 0. Criar uma check_command PING_ITV para ser de uso exclusivo da configuracao dos hosts que
    devem possuir um service "ping". Pois basta alterar o config.lua
 
 1. a query da funcao select_app_service_object() [model_itvision.lua] nao deve retornar apps 
@@ -19,7 +19,7 @@ TODO List
    que seja a soma de queries ligando servicestatus à computador e a softwareversion. PArte
    inicial da query em Graph.lua no local onde entrará o link através do mapa da imagem.
 
-6. Quando incluir entrada em itvision_monitor, identificar se o monitoramento é de uma app.
+ok 6. Quando incluir entrada em itvision_monitor, identificar se o monitoramento é de uma app.
    Mais IMPORTANTE ainda, talvez seja bom incluir o campor "service_host_object_id", ou seja,
    o servico "HOSTYPE" nesta tabela.
 
@@ -28,19 +28,19 @@ TODO List
 8. Nas queries de 1 a 6, escluir as inativas e que sao templates tanto com relacao aos computadores
    quando com relacao aos softwares.
 
-9. Colocar refresh nas paginas com status app, svc e hsts.
+ok 9. Colocar refresh nas paginas com status app, svc e hsts.
 
 10. IMPORTANTE!!! há um bug relacionado aos services das apps, que mistura os business services  
     habilitados e desabilitados. Parece que o itvision_monitor usa o desabilitado!!!
 
-11. O service_object_id deve ser descoberto retirando-se a possibilidade de 
+ok 11. O service_object_id deve ser descoberto retirando-se a possibilidade de 
     de se pegar o business_process_detail (servico desabilitado) da aplicacao.
 
-12. Colocar nomes das tabelas no plural.
+ok 12. Colocar nomes das tabelas no plural.
 
-13. O campo object_id da tabela itvision_app_object(s) deve ser chamar service_object_id.
+ok 13. O campo object_id da tabela itvision_app_object(s) deve ser chamar service_object_id.
 
-14. Os campos enumerados is_active devem ser numericos e nao strings '0' e '1'.
+ok 14. Os campos enumerados is_active devem ser numericos e nao strings '0' e '1'.
 
 15. Parece que os links dos servicos nos graficos gv nao estao ok. Verificar!
 

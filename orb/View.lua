@@ -574,7 +574,7 @@ function select_hst_or_svc_or_app(name, default)
 end
 
 
-function render_content_header(name, add, list, edit, geotag)
+function render_content_header(name, add, list, edit, geotag, back)
    local myul = { li{ a{href='#', class='here', title="'"..name.."'", name} }, }
 
    myul[#myul+1] = li{ "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" }
@@ -593,6 +593,10 @@ function render_content_header(name, add, list, edit, geotag)
 
    if geotag then
       myul[#myul+1] = li{ a{ href=geotag,img{ src='/pics/icon32.png', title='GeoVision', alt='Geotag'} } }
+   end
+
+   if back then
+      myul[#myul+1] = li{ a{ href="#", onClick="history.go(-1)", "Back" } }
    end
 
    return div{ id='menu_navigate', div { id='c_ssmenu2', ul{ myul } } }

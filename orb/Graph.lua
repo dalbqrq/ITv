@@ -65,14 +65,17 @@ function make_content(obj, rel)
          elseif v.ao_type == 'svc' then
             name = v.name1.."-"..v.name2
             label = v.name2  -- DEBUG ..":"..v.curr_state
+            url   = "/orb/obj_info/"..v.ao_type.."/"..v.obj_id
             shape = "ellipse"
          elseif v.ao_type == 'app' then
             name = v.name2
             label = v.name2  --DEBUG ..":"..v.curr_state
             url   = "/orb/obj_info/"..v.ao_type.."/"..v.obj_id
             shape = "hexagon"
-            shape = "diamond"
             shape = "invhouse"
+            shape = "octagon"
+            shape = "triangle"
+            shape = "diamond"
          end
 
 --[[ TODO: 5

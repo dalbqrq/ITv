@@ -1,0 +1,137 @@
+c_autoupdatesystems_id	0
+c_comment	
+c_computermodels_id	0
+c_computertypes_id	1
+c_contact	
+c_contact_num	
+c_date_mod	2010-11-03 13:25:43
+c_domains_id	0
+c_entities_id	0
+c_groups_id	0
+c_id	1
+c_is_deleted	0
+c_is_ocs_import	0
+c_is_template	0
+c_locations_id	0
+c_manufacturers_id	0
+c_name	localhost
+c_networks_id	0
+c_operatingsystems_id	1
+c_operatingsystemservicepacks_id	0
+c_operatingsystemversions_id	0
+c_os_license_number	
+c_os_licenseid	
+c_otherserial	
+c_serial	
+c_states_id	1
+c_ticket_tco	0.0000
+c_users_id	0
+c_users_id_tech	2
+csv_computers_id	1
+csv_id	2
+csv_softwareversions_id	2
+m_entities_id	0
+m_instance_id	1
+m_is_active	1
+m_networkports_id	1
+m_service_object_id	176
+m_softwareversions_id	2
+m_type	svc
+o_instance_id	1
+o_is_active	1
+o_name1	localhost-127.0.0.1
+o_name2	MySql_Ver_14_14
+o_object_id	176
+o_objecttype_id	2
+p_entities_id	0
+p_gateway	
+p_id	1
+p_ip	127.0.0.1
+p_is_recursive	0
+p_items_id	1
+p_itemtype	Computer
+p_logical_number	0
+p_mac	
+p_name	
+p_netmask	
+p_netpoints_id	0
+p_networkinterfaces_id	1
+p_subnet	
+s_action_url	
+s_active_checks_enabled	1
+s_check_command_args	400.0,20%!999.0,70%
+s_check_command_object_id	87
+s_check_interval	5
+s_check_timeperiod_object_id	158
+s_config_type	1
+s_display_name	MySql_Ver_14_14
+s_event_handler_enabled	1
+s_eventhandler_command_args	
+s_eventhandler_command_object_id	0
+s_failure_prediction_enabled	1
+s_failure_prediction_options	
+s_first_notification_delay	0
+s_flap_detection_enabled	1
+s_flap_detection_on_critical	1
+s_flap_detection_on_ok	1
+s_flap_detection_on_unknown	1
+s_flap_detection_on_warning	1
+s_freshness_checks_enabled	0
+s_freshness_threshold	0
+s_high_flap_threshold	0
+s_host_object_id	174
+s_icon_image	
+s_icon_image_alt	
+s_instance_id	1
+s_is_volatile	0
+s_low_flap_threshold	0
+s_max_check_attempts	4
+s_notes	
+s_notes_url	
+s_notification_interval	0
+s_notification_timeperiod_object_id	158
+s_notifications_enabled	1
+s_notify_on_critical	1
+s_notify_on_downtime	0
+s_notify_on_flapping	0
+s_notify_on_recovery	1
+s_notify_on_unknown	1
+s_notify_on_warning	1
+s_obsess_over_service	1
+s_passive_checks_enabled	1
+s_process_performance_data	1
+s_retain_nonstatus_information	1
+s_retain_status_information	1
+s_retry_interval	1
+s_service_id	314
+s_service_object_id	176
+s_stalk_on_critical	0
+s_stalk_on_ok	0
+s_stalk_on_unknown	0
+s_stalk_on_warning	0
+sv_comment	
+sv_entities_id	0
+sv_id	2
+sv_is_recursive	0
+sv_name	Ver 14.14
+sv_softwares_id	2
+sv_states_id	1
+sw_comment	
+sw_date_mod	2010-11-03 13:29:32
+sw_entities_id	0
+sw_groups_id	0
+sw_id	2
+sw_is_deleted	0
+sw_is_helpdesk_visible	1
+sw_is_recursive	0
+sw_is_template	0
+sw_is_update	0
+sw_locations_id	0
+sw_manufacturers_id	0
+sw_name	MySql
+sw_operatingsystems_id	1
+sw_softwarecategories_id	0
+sw_softwares_id	0
+sw_ticket_tco	0.0000
+sw_users_id	2
+sw_users_id_tech	2

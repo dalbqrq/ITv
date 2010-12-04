@@ -268,7 +268,7 @@ end
 ----------------------------------------------------------------------
 --  QUERY 3 - computador com porta sem software e com monitor - monitoracao de host onde o service eh ping
 ----------------------------------------------------------------------
-function make_query_3(c_id, p_id, sv_id, clause)
+function make_query_3(c_id, p_id, clause)
    t = { "c", "p", "o", "s", "m" }
    n = { "csv", "sv", "sw" }
 
@@ -387,37 +387,6 @@ end
 --  END of the QUERIES
 ----------------------------------------------------------------------
 
-
---[[ Funcao para mostrar como usar este modulo: ]]
-function how_to_use()
-   local a, b
---[[
-   print(make_where("a", "ao"))
-   print(make_where("m", "sv"))
-   print(make_where("sv", "sw"))
-   print(make_where("m", "p"))
-   print(make_where("p", "m"))
-   print(make_where("m", "ss"))
-   print(make_where("m", "n"))
-   print(make_where("m", "sw"))
-
-   a = make_columns({"a", "ao"})
-   a = make_where({"a", "ao"})
-   a = make_tables({"a", "ao"})
-   a = make_query_general({"a", "ao", "o", "m", })
-]]
-   a = make_query_1()
-   a = make_query_2()
-   a = make_query_3()
-   a = make_query_4()
-   a = make_query_2(1,1,2)
-   a = make_query_6()
-   a = make_query_5()
-   if type(a) == "string" then print(a) end
-end
-
---how_to_use()
-           
 -- A FUNCAO ABAIXO JUNTA O RESULTADO DE TODAS AS QUERIES (1 à 6) EM UM UNICO RESULT SET
 
 function select_monitors(clause)
@@ -450,4 +419,37 @@ function select_monitors(clause)
 
    return q
 end
+
+
+--[[ Funcao para mostrar como usar este modulo: ]]
+function how_to_use()
+   local a, b
+--[[
+   print(make_where("a", "ao"))
+   print(make_where("m", "sv"))
+   print(make_where("sv", "sw"))
+   print(make_where("m", "p"))
+   print(make_where("p", "m"))
+   print(make_where("m", "ss"))
+   print(make_where("m", "n"))
+   print(make_where("m", "sw"))
+
+   a = make_columns({"a", "ao"})
+   a = make_where({"a", "ao"})
+   a = make_tables({"a", "ao"})
+   a = make_query_general({"a", "ao", "o", "m", })
+   a = make_query_1()
+   a = make_query_2()
+   a = make_query_3()
+   a = make_query_4()
+   a = make_query_2(1,1,2)
+   a = make_query_6()
+   a = make_query_5()
+]]
+   a = make_query_3(nil, nil, " and m.service_object_id = 181")
+   if type(a) == "string" then print(a) end
+end
+
+how_to_use()
+           
 

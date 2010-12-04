@@ -195,7 +195,7 @@ ITvision:dispatch_get(remove_obj, "/remove_obj/(%d+):(%d+)")
 
 function delete_obj(web, app_id, obj_id)
    if app_id and obj_id then
-      local clause = "app_id = "..app_id.." and object_id = "..obj_id
+      local clause = "app_id = "..app_id.." and service_object_id = "..obj_id
       local tables = "itvision_app_objects"
       Model.delete (tables, clause) 
    end

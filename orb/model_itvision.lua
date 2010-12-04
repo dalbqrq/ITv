@@ -71,8 +71,6 @@ function select_service_object (cond_, extra_, columns_, app, app_id, ping)
       "s.service_object_id = o.object_id and s.check_command_object_id"..app..bp_id..cond_, 
       extra_, columns_)
 
-daniel
-text_file_writer("/tmp/q1", "select * from nagios_services s, nagios_objects o where s.service_object_id = o.object_id and s.check_command_object_id"..app..bp_id..cond_)
    return content
 end
 
