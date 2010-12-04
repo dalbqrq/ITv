@@ -55,13 +55,17 @@ ITvision:dispatch_get(map_frame, "/map_frame/(%a+):(%d+)")
 
 
 function geotag(web, objtype, obj_id)
-   local A
+   local A, B
    if objtype == "app" then
-      local cond_ = [[and m.service_object_id in (select object_id from itvision_apps a, itvision_app_objects ao 
+      local cond_ = [[and m.service_object_id in (select ao.service_object_id from itvision_apps a, itvision_app_objects ao 
                           where a.id = ao.app_id and a.service_object_id = ]]..obj_id..[[)]]
       A = Model.make_query_3(nil, nil, cond_)
+      B = Model.make_query_6(nil, cond_)
+      for _,v in ipairs(B) do table.insert(A, v) end
    elseif objtype == "hst" then
       A = Model.make_query_3(nil, nil, " and m.service_object_id = "..obj_id)
+      B = Model.make_query_6(nil, " and m.service_object_id = "..obj_id)
+      for _,v in ipairs(B) do table.insert(A, v) end
    end
 
    return render_geotag(web, obj_id, objtype, A)
@@ -181,16 +185,18 @@ end
 
 function render_geotag(web, obj_id, objtype, A)
    local res = {obj_id, objtype}
-   local latlon = ""
+   local geotag, latlon = "", ""
 
    local marker_maker = ""
 
    for i, v in ipairs(A) do
       if v.ss_current_state then
-         res[#res+1] = " | "..v.c_geotag.." | "
+         if v.c_geotag == nil then geotag = v.n_geotag else geotag = v.c_geotag end
+         geotag = geotag or ""
+         res[#res+1] = " | "..geotag.." | "
          local icon = service_alert[tonumber(v.ss_current_state)].color_name
 
-         marker_maker = marker_maker .. "var location"..i.." = new google.maps.LatLng("..v.c_geotag..");\n"
+         marker_maker = marker_maker .. "var location"..i.." = new google.maps.LatLng("..geotag..");\n"
          marker_maker = marker_maker .. "var marker"..i.." = new google.maps.Marker({ position: location"..i..", map: map, icon: "..icon.." });\n"
          marker_maker = marker_maker .. "//marker"..i..".setTitle(\"VERTO\");\n"
          marker_maker = marker_maker .. "var infowindow"..i.." = new google.maps.InfoWindow( \n"
@@ -201,6 +207,8 @@ function render_geotag(web, obj_id, objtype, A)
 
    marker_maker = "function marker_maker() { \n"..marker_maker.."\n}"
    res[#res+1] = " | "..marker_maker.." | "
+
+text_file_writer("/tmp/mark", marker_maker )
 
    --return render_layout(res)
    return render_map(marker_maker)

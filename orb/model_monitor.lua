@@ -209,7 +209,7 @@ end
 ----------------------------------------------------------------------
 function make_query_1(c_id, p_id, clause)
    t = { "c", "p" }
-   n = { "csv", "sv", "sw", "o", "s", "m" }
+   n = { "csv", "sv", "sw", "o", "s", "m", "ss" }
 
    local columns_ = make_columns(t)
    local _,nulls_ = make_columns(n)
@@ -225,7 +225,7 @@ function make_query_1(c_id, p_id, clause)
 
    if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
    if p_id  then cond_ = cond_ .. " and p.id = "  .. p_id  end
-   if clause  then cond_ = cond_ .. clause end
+   if clause  then cond_ = cond_ .. " " .. clause end
 
    local q = Model.query(tables_, cond_, nil, columns_)
    for _,v in ipairs(q) do table.insert(v, 1, 1) end
@@ -239,7 +239,7 @@ end
 ----------------------------------------------------------------------
 function make_query_2(c_id, p_id, sv_id, clause)
    t = { "c", "p", "csv", "sv", "sw" }
-   n = { "o", "s", "m" }
+   n = { "o", "s", "m", "ss" }
 
    local columns_ = make_columns(t)
    local _,nulls_ = make_columns(n)
@@ -256,7 +256,7 @@ function make_query_2(c_id, p_id, sv_id, clause)
    if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
    if p_id  then cond_ = cond_ .. " and p.id = "  .. p_id  end
    if sv_id then cond_ = cond_ .. " and sv.id = " .. sv_id end
-   if clause  then cond_ = cond_ .. clause end
+   if clause  then cond_ = cond_ .. " " .. clause end
 
    local q = Model.query(tables_, cond_, nil, columns_)
    for _,v in ipairs(q) do table.insert(v, 1, 2) end
@@ -269,7 +269,7 @@ end
 --  QUERY 3 - computador com porta sem software e com monitor - monitoracao de host onde o service eh ping
 ----------------------------------------------------------------------
 function make_query_3(c_id, p_id, clause)
-   t = { "c", "p", "o", "s", "m" }
+   t = { "c", "p", "o", "s", "m", "ss" }
    n = { "csv", "sv", "sw" }
 
    local columns_ = make_columns(t)
@@ -286,7 +286,7 @@ function make_query_3(c_id, p_id, clause)
 
    if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
    if p_id  then cond_ = cond_ .. " and p.id = "  .. p_id  end
-   if clause  then cond_ = cond_ .. clause end
+   if clause  then cond_ = cond_ .. " " .. clause end
 
    local q = Model.query(tables_, cond_, nil, columns_)
    for _,v in ipairs(q) do table.insert(v, 1, 1) end
@@ -299,7 +299,7 @@ end
 --  QUERY 4 - computador com porta com software e com monitor - monitoracao de service 
 ----------------------------------------------------------------------
 function make_query_4(c_id, p_id, sv_id, clause)
-   t = { "c", "p", "csv", "sv", "sw", "o", "s", "m" }
+   t = { "c", "p", "csv", "sv", "sw", "o", "s", "m", "ss" }
    n = { }
 
    local columns_ = make_columns(t)
@@ -313,7 +313,7 @@ function make_query_4(c_id, p_id, sv_id, clause)
    if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
    if p_id  then cond_ = cond_ .. " and p.id = "  .. p_id  end
    if sv_id then cond_ = cond_ .. " and sv.id = " .. sv_id end
-   if clause  then cond_ = cond_ .. clause end
+   if clause  then cond_ = cond_ .. " " .. clause end
 
    local q = Model.query(tables_, cond_, nil, columns_)
    for _,v in ipairs(q) do table.insert(v, 1, 4) end
@@ -327,7 +327,7 @@ end
 ----------------------------------------------------------------------
 function make_query_5(n_id, clause)
    t = { "n" }
-   n = { "csv", "sv", "sw", "o", "s", "m" }
+   n = { "csv", "sv", "sw", "o", "s", "m", "ss" }
 
    local columns_ = make_columns(t)
    local _,nulls_ = make_columns(n)
@@ -341,7 +341,7 @@ function make_query_5(n_id, clause)
    columns_ = columns_..",\n"..nulls_
 
    if n_id  then cond_ = cond_ .. " and n.id = "  .. n_id  end
-   if clause  then cond_ = cond_ .. clause end
+   if clause  then cond_ = cond_ .. " " .. clause end
 
    local q = Model.query(tables_, cond_, nil, columns_)
    for _,v in ipairs(q) do 
@@ -358,7 +358,7 @@ end
 --  QUERY 6 - network sem porta sem software e com monitor - monitoracao de host onde o service eh ping
 ----------------------------------------------------------------------
 function make_query_6(n_id, clause)
-   t = { "n", "o", "s", "m" }
+   t = { "n", "o", "s", "m", "ss" }
    n = { "csv", "sv", "sw" }
 
    local columns_ = make_columns(t)
@@ -369,7 +369,7 @@ function make_query_6(n_id, clause)
    columns_ = columns_..",\n"..nulls_
 
    if n_id  then cond_ = cond_ .. " and n.id = "  .. n_id  end
-   if clause  then cond_ = cond_ .. clause end
+   if clause  then cond_ = cond_ .. " " .. clause end
 
    local q = Model.query(tables_, cond_, nil, columns_)
    for _,v in ipairs(q) do 
@@ -446,10 +446,11 @@ function how_to_use()
    a = make_query_6()
    a = make_query_5()
 ]]
+   a = make_query_6(nil, " and m.service_object_id = 181")
    a = make_query_3(nil, nil, " and m.service_object_id = 181")
    if type(a) == "string" then print(a) end
 end
 
-how_to_use()
+--how_to_use()
            
 
