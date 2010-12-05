@@ -55,17 +55,21 @@ ITvision:dispatch_get(map_frame, "/map_frame/(%a+):(%d+)")
 
 
 function geotag(web, objtype, obj_id)
-   local A, B
+   local q, A, B = {}, {}, {}
    if objtype == "app" then
       local cond_ = [[and m.service_object_id in (select ao.service_object_id from itvision_apps a, itvision_app_objects ao 
                           where a.id = ao.app_id and a.service_object_id = ]]..obj_id..[[)]]
       A = Model.make_query_3(nil, nil, cond_)
       B = Model.make_query_6(nil, cond_)
-      for _,v in ipairs(B) do table.insert(A, v) end
+      for _,v in ipairs(A) do table.insert(q, v) end
+      for _,v in ipairs(B) do table.insert(q, v) end
+
+text_file_writer("/tmp/r", cond_)
    elseif objtype == "hst" then
       A = Model.make_query_3(nil, nil, " and m.service_object_id = "..obj_id)
       B = Model.make_query_6(nil, " and m.service_object_id = "..obj_id)
-      for _,v in ipairs(B) do table.insert(A, v) end
+      for _,v in ipairs(A) do table.insert(q, v) end
+      for _,v in ipairs(B) do table.insert(q, v) end
    end
 
    return render_geotag(web, obj_id, objtype, A)
