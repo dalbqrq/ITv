@@ -4,13 +4,13 @@ require "Model"
         +------------+    +-------------------------+    +-----------------+      +----------+
         |  glpi_     |----| glpi_                   |----|  glpi_          |------|  glpi_   |
         | COMPUTER   |    |COMPUTER_SOFTWAREVERSION |    | SOFTWAREVERSION |      | SOFTWARE |
-        +------------+    +-------------------------+    +-----------------+      +----------+
+        | NET_EQUIP_ |    +-------------------------+    +-----------------+      +----------+
+        +------------+                                          |
               |                                                 |
-              |                                                 |
-        +-------------+                                    +-----------+     +------------+
-        |  glpi_      |------------------------------------| itvision_ |-----|  glpi_     | 
-        | NETWORKPORT |                                    | MONITOR   |     | NET_EQUIP_ |
-        +-------------+                                    +-----------+     +------------+
+        +-------------+                                    +-----------+
+        |  glpi_      |------------------------------------| itvision_ |
+        | NETWORKPORT |                                    | MONITOR   |
+        +-------------+                                    +-----------+
                                                                 |
                                                                 |
                                                            +---------------+
@@ -25,8 +25,8 @@ require "Model"
         QUERY 2 - computador com porta com software e sem monitor
         QUERY 3 - computador com porta sem software e com monitor - monitoracao de host onde o service eh ping
         QUERY 4 - computador com porta com software e com monitor - monitoracao de service 
-        QUERY 5 - network sem porta sem software e sem monitor
-        QUERY 6 - network sem porta sem software e com monitor - monitoracao de host onde o service eh ping
+        QUERY 5 - network com porta sem software e sem monitor
+        QUERY 6 - network com porta sem software e com monitor - monitoracao de host onde o service eh ping
 
 ]]
 
@@ -46,7 +46,8 @@ local tables = {
    ss =  { name="nagios_servicestatus",            ao="service_object_id", m="service_object_id", o="service_object_id", 
                                                       s="service_object_id" },
    c =   { name="glpi_computers",                  p="id", csv="id" },
-   n =   { name="glpi_networkequipments",          m="id" },
+   --n =   { name="glpi_networkequipments",          m="id" },
+   n =   { name="glpi_networkequipments",          p="id", csv="id" },
    p =   { name="glpi_networkports",               m="id", c="items_id", n="items_id" },
    csv = { name="glpi_computers_softwareversions", c="computers_id", sv="softwareversions_id" },
    sv =  { name="glpi_softwareversions",           m="id", csv="id", sw="softwares_id" },
@@ -182,25 +183,24 @@ end
 
 
 --[[
-        +------------+    +-------------------------+    +-----------------+      +----------+
-        | COMPUTER   |----|COMPUTER_SOFTWAREVERSION |----| SOFTWAREVERSION |------| SOFTWARE |
-        +------------+    +-------------------------+    +-----------------+      +----------+
+        +-------------+    +-------------------------+    +-----------------+      +----------+
+        | COMPUTER ou |----|COMPUTER_SOFTWAREVERSION |----| SOFTWAREVERSION |------| SOFTWARE |
+        | NET_EQUIPM. |    +-------------------------+    +-----------------+      +----------+
+        +-------------+                                         |
               |                                                 |
-        +-------------+                                    +-----------+     +------------+
-        | NETWORKPORT |------------------------------------| MONITOR   |-----| NET_EQUIP_ |
-        +-------------+                                    +-----------+     +------------+
+        +-------------+                                    +-----------+
+        | NETWORKPORT |------------------------------------| MONITOR   |
+        +-------------+                                    +-----------+
                                                                 |
                                                            +---------------+
         +-------------+         +-------------+            | OBJECTS  .or. |
         | apps        |---------| app_objects |------------| SERVICES .or. |
         +-------------+         +-------------+            | SERVICESTATUS |
                                                            +---------------+
-        QUERY 1 - computador com porta sem software e sem monitor
-        QUERY 2 - computador com porta com software e sem monitor
-        QUERY 3 - computador com porta sem software e com monitor - monitoracao de host onde o service eh ping
-        QUERY 4 - computador com porta com software e com monitor - monitoracao de service 
-        QUERY 5 - network sem porta sem software e sem monitor
-        QUERY 6 - network sem porta sem software e com monitor - monitoracao de host onde o service eh ping
+        QUERY 1 - computador/networkequip com porta sem software e sem monitor
+        QUERY 2 - computador              com porta com software e sem monitor
+        QUERY 3 - computador/networkequip com porta sem software e com monitor - monitoracao de host onde o service eh ping
+        QUERY 4 - computador              com porta com software e com monitor - monitoracao de service 
 
 ]]
 
@@ -208,27 +208,44 @@ end
 --  QUERY 1 - computador com porta sem software e sem monitor
 ----------------------------------------------------------------------
 function make_query_1(c_id, p_id, clause)
-   t = { "c", "p" }
-   n = { "csv", "sv", "sw", "o", "s", "m", "ss" }
+   local q = {}
+   local ictype, it = { "c", "n" }, ""
 
-   local columns_ = make_columns(t)
-   local _,nulls_ = make_columns(n)
-   local tables_  = make_tables(t)
-   local cond_    = make_where(t)
+   for _,ic in ipairs(ictype) do
+      local r = {}
+      local t = { ic, "p" }
+      local n = { "csv", "sv", "sw", "o", "s", "m", "ss" }
 
-   cond_ = cond_ .. [[ 
-      and p.itemtype = "Computer" 
-      and not exists (select 1 from itvision_monitors m2 where m2.networkports_id = p.id)
-   ]]
+      local columns_ = make_columns(t)
+      local _,nulls_ = make_columns(n)
+      local tables_  = make_tables(t)
+      local cond_    = make_where(t)
 
-   columns_ = columns_..",\n"..nulls_
+      -- os nomes dos campos tanto de computers como os de networkequipment comecam com c_
+      if ic == "n" then 
+         columns_ = string.gsub(columns_, "as n_", "as c_") 
+         it = "'NetworkEquipment'"
+      else 
+         it = "'Computer'"
+      end 
 
-   if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
-   if p_id  then cond_ = cond_ .. " and p.id = "  .. p_id  end
-   if clause  then cond_ = cond_ .. " " .. clause end
+      cond_ = cond_ .. [[ 
+         and p.itemtype = ]]..it..[[
+         and not exists (select 1 from itvision_monitors m2 where m2.networkports_id = p.id)
+      ]]
 
-   local q = Model.query(tables_, cond_, nil, columns_)
-   for _,v in ipairs(q) do table.insert(v, 1, 1) end
+      columns_ = columns_..",\n"..nulls_
+
+      if c_id  then cond_ = cond_ .. " and "..ic..".id = "  .. c_id  end
+      if p_id  then cond_ = cond_ .. " and p.id = "  .. p_id  end
+      if clause  then cond_ = cond_ .. " " .. clause end
+
+      r = Model.query(tables_, cond_, nil, columns_)
+      for _,v in ipairs(r) do table.insert(v, 1, 1) end
+      for _,v in ipairs(r) do table.insert(q, v) end
+      --print ("\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n")
+   end
+
    return q
    --return "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n"
 end
@@ -238,6 +255,7 @@ end
 --  QUERY 2 - computador com porta com software e sem monitor
 ----------------------------------------------------------------------
 function make_query_2(c_id, p_id, sv_id, clause)
+   local q = {}
    t = { "c", "p", "csv", "sv", "sw" }
    n = { "o", "s", "m", "ss" }
 
@@ -258,7 +276,7 @@ function make_query_2(c_id, p_id, sv_id, clause)
    if sv_id then cond_ = cond_ .. " and sv.id = " .. sv_id end
    if clause  then cond_ = cond_ .. " " .. clause end
 
-   local q = Model.query(tables_, cond_, nil, columns_)
+   q = Model.query(tables_, cond_, nil, columns_)
    for _,v in ipairs(q) do table.insert(v, 1, 2) end
    return q
    --return "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n"
@@ -269,27 +287,44 @@ end
 --  QUERY 3 - computador com porta sem software e com monitor - monitoracao de host onde o service eh ping
 ----------------------------------------------------------------------
 function make_query_3(c_id, p_id, clause)
-   t = { "c", "p", "o", "s", "m", "ss" }
-   n = { "csv", "sv", "sw" }
+   local q = {}
+   local ictype, it = { "c", "n" }, ""
 
-   local columns_ = make_columns(t)
-   local _,nulls_ = make_columns(n)
-   local tables_  = make_tables(t)
-   local cond_    = make_where(t)
+   for _,ic in ipairs(ictype) do
+      local r = {}
+      local t = { ic, "p", "o", "s", "m", "ss" }
+      local n = { "csv", "sv", "sw" }
 
-   cond_ = cond_ .. [[ 
-      and p.itemtype = "Computer" 
-      and m.softwareversions_id is null
-   ]]
+      local columns_ = make_columns(t)
+      local _,nulls_ = make_columns(n)
+      local tables_  = make_tables(t)
+      local cond_    = make_where(t)
 
-   columns_ = columns_..",\n"..nulls_
+      -- os nomes dos campos tanto de computers como os de networkequipment comecam com c_
+      if ic == "n" then 
+         columns_ = string.gsub(columns_, "as n_", "as c_") 
+         it = "'NetworkEquipment'"
+      else 
+         it = "'Computer'"
+      end 
 
-   if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
-   if p_id  then cond_ = cond_ .. " and p.id = "  .. p_id  end
-   if clause  then cond_ = cond_ .. " " .. clause end
+      cond_ = cond_ .. [[ 
+         and p.itemtype = ]]..it..[[
+         and m.softwareversions_id is null
+      ]]
 
-   local q = Model.query(tables_, cond_, nil, columns_)
-   for _,v in ipairs(q) do table.insert(v, 1, 1) end
+      columns_ = columns_..",\n"..nulls_
+
+      if c_id  then cond_ = cond_ .. " and "..ic..".id = "  .. c_id  end
+      if p_id  then cond_ = cond_ .. " and p.id = "  .. p_id  end
+      if clause  then cond_ = cond_ .. " " .. clause end
+
+      r = Model.query(tables_, cond_, nil, columns_)
+      for _,v in ipairs(r) do table.insert(v, 1, 3) end
+      for _,v in ipairs(r) do table.insert(q, v) end
+      --print ("\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n")
+   end
+
    return q
    --return "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n"
 end
@@ -299,6 +334,7 @@ end
 --  QUERY 4 - computador com porta com software e com monitor - monitoracao de service 
 ----------------------------------------------------------------------
 function make_query_4(c_id, p_id, sv_id, clause)
+   local q = {}
    t = { "c", "p", "csv", "sv", "sw", "o", "s", "m", "ss" }
    n = { }
 
@@ -315,71 +351,12 @@ function make_query_4(c_id, p_id, sv_id, clause)
    if sv_id then cond_ = cond_ .. " and sv.id = " .. sv_id end
    if clause  then cond_ = cond_ .. " " .. clause end
 
-   local q = Model.query(tables_, cond_, nil, columns_)
+   q = Model.query(tables_, cond_, nil, columns_)
    for _,v in ipairs(q) do table.insert(v, 1, 4) end
    return q
    --return "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n"
 end
 
-
-----------------------------------------------------------------------
---  QUERY 5 - network sem porta sem software e sem monitor
-----------------------------------------------------------------------
-function make_query_5(n_id, clause)
-   t = { "n" }
-   n = { "csv", "sv", "sw", "o", "s", "m", "ss" }
-
-   local columns_ = make_columns(t)
-   local _,nulls_ = make_columns(n)
-   local tables_  = make_tables(t)
-   -- NAO PRECISA! local cond_    = make_where(t)
-
-   cond_ = [[ 
-      not exists (select 1 from itvision_monitors m2 where m2.networkequipments_id = n.id)
-   ]]
-
-   columns_ = columns_..",\n"..nulls_
-
-   if n_id  then cond_ = cond_ .. " and n.id = "  .. n_id  end
-   if clause  then cond_ = cond_ .. " " .. clause end
-
-   local q = Model.query(tables_, cond_, nil, columns_)
-   for _,v in ipairs(q) do 
-      v.p_ip = v.p_ip or v.n_ip
-      v.c_name = v.c_name or v.n_name
-      table.insert(v, 1, 5)
-   end
-   return q
-   --return "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n"
-end
-
-
-----------------------------------------------------------------------
---  QUERY 6 - network sem porta sem software e com monitor - monitoracao de host onde o service eh ping
-----------------------------------------------------------------------
-function make_query_6(n_id, clause)
-   t = { "n", "o", "s", "m", "ss" }
-   n = { "csv", "sv", "sw" }
-
-   local columns_ = make_columns(t)
-   local _,nulls_ = make_columns(n)
-   local tables_  = make_tables(t)
-   local cond_    = make_where(t)
-
-   columns_ = columns_..",\n"..nulls_
-
-   if n_id  then cond_ = cond_ .. " and n.id = "  .. n_id  end
-   if clause  then cond_ = cond_ .. " " .. clause end
-
-   local q = Model.query(tables_, cond_, nil, columns_)
-   for _,v in ipairs(q) do 
-      v.p_ip = v.p_ip or v.n_ip
-      v.c_name = v.c_name or v.n_name
-      table.insert(v, 1, 6)
-   end
-   return q
-   --return "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n"
-end
 
 
 
@@ -395,16 +372,11 @@ function select_monitors(clause)
    local q2 = make_query_2(nil, nil, nil, clause)
    local q3 = make_query_3(nil, nil, clause)
    local q4 = make_query_4(nil, nil, nil, clause)
-   clause = string.gsub(clause, "c.", "n.")
-   local q5 = make_query_5(nil, clause)
-   local q6 = make_query_6(nil, clause)
 
    for _,v in ipairs(q1) do table.insert(q, v) end
    for _,v in ipairs(q2) do table.insert(q, v) end
    for _,v in ipairs(q3) do table.insert(q, v) end
    for _,v in ipairs(q4) do table.insert(q, v) end
-   for _,v in ipairs(q5) do table.insert(q, v) end
-   for _,v in ipairs(q6) do table.insert(q, v) end
 
    table.sort(q, function (a, b) 
       a.c_name  = a.c_name  or ""
@@ -423,7 +395,7 @@ end
 
 --[[ Funcao para mostrar como usar este modulo: ]]
 function how_to_use()
-   local a, b
+   local a, b = {}, {}
 --[[
    print(make_where("a", "ao"))
    print(make_where("m", "sv"))
@@ -443,12 +415,20 @@ function how_to_use()
    a = make_query_3()
    a = make_query_4()
    a = make_query_2(1,1,2)
-   a = make_query_6()
-   a = make_query_5()
-]]
-   a = make_query_6(nil, " and m.service_object_id = 181")
    a = make_query_3(nil, nil, " and m.service_object_id = 181")
    if type(a) == "string" then print(a) end
+
+   a = make_query_1()
+   print("count: ", table.getn(a))
+   for i,v in ipairs(a) do 
+      print(i, v.c_id, v.p_itemtype) 
+   end
+
+   for i,v in ipairs(a) do
+      print("Q: ",table.getn(a), v.c_name, v.p_itemtype) 
+   end
+]]
+
 end
 
 --how_to_use()
