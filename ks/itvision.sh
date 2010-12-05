@@ -406,10 +406,13 @@ fi
 cd $itvhome/ks/servdesk
 tar cf - * | ( cd /usr/local/servdesk; tar xfp -)
 
-echo "ALTER TABLE \`itvision\`.\`glpi_computers\` ADD COLUMN \`geotag\` VARCHAR(20) NULL DEFAULT NULL  AFTER \`ticket_tco\` ;" | \
-	mysql -u root --password=$dbpass
-echo "ALTER TABLE \`itvision\`.\`glpi_networkequipments\` ADD COLUMN \`geotag\` VARCHAR(20) NULL DEFAULT NULL  AFTER \`ticket_tco\` ;" | \
-	mysql -u root --password=$dbpass
+
+echo "ALTER TABLE itvision.glpi_computers ADD COLUMN alias VARCHAR(30) NULL DEFAULT NULL  AFTER ticket_tco ;" | mysql -u root --password=$dbpass
+echo "ALTER TABLE itvision.glpi_computers ADD COLUMN itv_key VARCHAR(30) NULL DEFAULT NULL  AFTER ticket_tco ;" | mysql -u root --password=$dbpass
+echo "ALTER TABLE itvision.glpi_computers ADD COLUMN geotag VARCHAR(20) NULL DEFAULT NULL  AFTER ticket_tco ;" | mysql -u root --password=$dbpass
+echo "ALTER TABLE itvision.glpi_networkequipments ADD COLUMN geotag VARCHAR(20) NULL DEFAULT NULL  AFTER ticket_tco ;" | mysql -u root --password=$dbpass
+echo "ALTER TABLE itvision.glpi_networkequipments ADD COLUMN alias VARCHAR(30) NULL DEFAULT NULL  AFTER ticket_tco ;" | mysql -u root --password=$dbpass
+echo "ALTER TABLE itvision.glpi_networkequipments ADD COLUMN itv_key VARCHAR(30) NULL DEFAULT NULL  AFTER ticket_tco ;" | mysql -u root --password=$dbpass
  
 
 

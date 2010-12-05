@@ -228,10 +228,10 @@ CREATE TABLE `itvision_monitors` (
   `service_object_id` int(11) NOT NULL,
   `networkports_id` int(11) NOT NULL,
   `softwareversions_id` int(11) DEFAULT NULL,
-  `networkequipments_id` int(11) DEFAULT NULL,
   `is_active` tinyint(4) NOT NULL DEFAULT '0',
   `type` enum('hst','svc') CHARACTER SET latin1 NOT NULL DEFAULT 'hst'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+-- `networkequipments_id` int(11) DEFAULT NULL,
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --

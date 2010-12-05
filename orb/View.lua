@@ -178,6 +178,8 @@ function render_layout(inner_html, refresh_time)
          title("ITvision"),
          meta{ ["http-equiv"] = "Content-Type", content = "text/html; charset=utf-8" },
          refresh,
+         meta{ ["http-equiv"] = "Cache-Control", content = "No-Cache" },
+         meta{ ["http-equiv"] = "Pragma",        content = "No-Cache" },
          link{ href="/pics/favicon.ico", rel="shortcut icon" },
          link{ href="/css/style.css", media="screen", rel="stylesheet", type="text/css" },
          link{ href="/css/glpi_styles.css", media="screen", rel="stylesheet", type="text/css" },

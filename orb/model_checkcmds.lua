@@ -16,7 +16,8 @@ function select_checkcmds(id, hide_check_host)
 
    local extra_ = [[ order by name1 ]]
 
-   --DEBUG: id = id or ""; text_file_writer ("/tmp/7"..id, "select * from ".. table_ .." where ".. cond_ .. " ".. extra_..";\n\n" )
+   --DEBUG: 
+id = id or ""; text_file_writer ("/tmp/7"..id, "select * from ".. table_ .." where ".. cond_ .. " ".. extra_..";\n\n" )
    return Model.query(table_, cond_, extra_)
 end
 
@@ -63,9 +64,10 @@ function get_check_params(id)
    local counter, ui, x = 0, 0, 0
    while c[1] == nil do
       counter = counter + 1
-      for i = 1,loop do x = i/2 end -- aguarde...
+      os.sleep(1)
       c = select_checkcmds(id, true)
    end
+   text_file_writer("/tmp/contour_chkcmd", tostring(counter))
 
    local p = select_checkcmd_params(c[1].id, true)
    return c, p

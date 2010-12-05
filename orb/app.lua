@@ -201,11 +201,12 @@ function activate(web, id, flag)
          counter = 0
          while s[1] == nil do
             counter = counter + 1
-            for i = 1,loop do x = i/2 end -- aguarde...
+            os.sleep(1)
             s = objects:select_app(string.toid(A[1].name))
          end
          local svc = { id = A[1].id, service_object_id = s[1].object_id }
          apps:update(svc)
+         text_file_writer("/tmp/contour_activate", tostring(counter))
 
          msg = "/"..error_message(9).." "..A[1].name
       else

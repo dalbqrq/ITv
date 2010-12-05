@@ -118,10 +118,6 @@ function add(web, query, c_id, p_id, sv_id, default)
       cmp = Model.make_query_3(c_id, p_id)
    elseif query == 4 then
       cmp = Model.make_query_4(c_id, p_id, sv_id)
-   elseif query == 5 then
-      cmp = Model.make_query_5(n_id) -- network nao tem c_id e sim n_id e nao possui p
-   elseif query == 6 then
-      cmp = Model.make_query_6(c_id, p_id)
    end
 
    local params = { query=query, c_id=c_id, p_id=p_id, sv_id=sv_id, default=default }
@@ -161,18 +157,20 @@ function insert(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, ip)
       counter = 0
       while h[1] == nil do
          counter = counter + 1
-         for i = 1,loop do x = i/2 end -- aguarde...
+         os.sleep(1)
          h = objects:select(hostname)
       end
+      text_file_writer("/tmp/contour_insert_h", tostring(counter))
       -- DEBUG: text_file_writer ("/tmp/1", "Counter: "..counter.."\n")
       s = objects:select(hostname, config.monitor.check_host)
       -- caso service ainda nao tenha sido incluido aguarde e tente novamente
       counter = 0
       while s[1] == nil do
          counter = counter + 1
-         for i = 1,loop do x = i/2 end -- aguarde...
+         os.sleep(1)
          s = objects:select(hostname, config.monitor.check_host)
       end
+      text_file_writer("/tmp/contour_insert_ha", tostring(counter))
       -- DEBUG: text_file_writer ("/tmp/2", "Counter: "..counter.."\n")
       svc = s[1].object_id
       monitors:insert_monitor(p_id, nil, n_id, svc, 1, "hst")
@@ -218,9 +216,10 @@ function insert(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, ip)
       counter = 0
       while s[1] == nil do
          counter = counter + 1
-         for i = 1,loop do x = i/2 end -- aguarde...
+         os.sleep(1)
          s = objects:select(hostname, dpl)
       end
+      text_file_writer("/tmp/contour_insert_s", tostring(counter))
       -- DEBUG: text_file_writer ("/tmp/6", "Counter: "..counter.."\n")
 
       if s[1] == nil then 

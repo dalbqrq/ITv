@@ -238,7 +238,7 @@ function make_query_1(c_id, p_id, clause)
 
       if c_id  then cond_ = cond_ .. " and "..ic..".id = "  .. c_id  end
       if p_id  then cond_ = cond_ .. " and p.id = "  .. p_id  end
-      if clause  then cond_ = cond_ .. " " .. clause end
+      if clause  then cond_ = cond_ .. " and " .. clause end
 
       r = Model.query(tables_, cond_, nil, columns_)
       for _,v in ipairs(r) do table.insert(v, 1, 1) end
@@ -274,7 +274,7 @@ function make_query_2(c_id, p_id, sv_id, clause)
    if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
    if p_id  then cond_ = cond_ .. " and p.id = "  .. p_id  end
    if sv_id then cond_ = cond_ .. " and sv.id = " .. sv_id end
-   if clause  then cond_ = cond_ .. " " .. clause end
+   if clause  then cond_ = cond_ .. " and " .. clause end
 
    q = Model.query(tables_, cond_, nil, columns_)
    for _,v in ipairs(q) do table.insert(v, 1, 2) end
@@ -317,7 +317,7 @@ function make_query_3(c_id, p_id, clause)
 
       if c_id  then cond_ = cond_ .. " and "..ic..".id = "  .. c_id  end
       if p_id  then cond_ = cond_ .. " and p.id = "  .. p_id  end
-      if clause  then cond_ = cond_ .. " " .. clause end
+      if clause  then cond_ = cond_ .. " and " .. clause end
 
       r = Model.query(tables_, cond_, nil, columns_)
       for _,v in ipairs(r) do table.insert(v, 1, 3) end
@@ -349,7 +349,7 @@ function make_query_4(c_id, p_id, sv_id, clause)
    if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
    if p_id  then cond_ = cond_ .. " and p.id = "  .. p_id  end
    if sv_id then cond_ = cond_ .. " and sv.id = " .. sv_id end
-   if clause  then cond_ = cond_ .. " " .. clause end
+   if clause  then cond_ = cond_ .. " and " .. clause end
 
    q = Model.query(tables_, cond_, nil, columns_)
    for _,v in ipairs(q) do table.insert(v, 1, 4) end
@@ -393,6 +393,35 @@ function select_monitors(clause)
 end
 
 
+function select_monitors_app_objs(app_id)
+   local q = {}
+   local objs = Model.select_app_object("app_id = "..app_id)
+
+   for _,o in ipairs(objs) do
+      local clause = "m.service_object_id = "..o.service_object_id
+      local q3 = make_query_3(nil, nil, clause)
+      local q4 = make_query_4(nil, nil, nil, clause)
+
+      for _,v in ipairs(q3) do table.insert(q, v) end
+      for _,v in ipairs(q4) do table.insert(q, v) end
+   end
+
+   table.sort(q, function (a, b) 
+      a.c_name  = a.c_name  or ""
+      a.p_ip    = a.p_ip    or ""
+      a.sw_name = a.sw_name or ""
+      a.sv_name = a.sv_name or ""
+      b.c_name  = b.c_name  or ""
+      b.p_ip    = b.p_ip    or ""
+      b.sw_name = b.sw_name or ""
+      b.sv_name = b.sv_name or ""
+      return a.c_name..a.p_ip..a.sw_name..a.sv_name < b.c_name..b.p_ip..b.sw_name..b.sv_name  end )
+
+   return q
+end
+
+
+
 --[[ Funcao para mostrar como usar este modulo: ]]
 function how_to_use()
    local a, b = {}, {}
@@ -415,7 +444,7 @@ function how_to_use()
    a = make_query_3()
    a = make_query_4()
    a = make_query_2(1,1,2)
-   a = make_query_3(nil, nil, " and m.service_object_id = 181")
+   a = make_query_3(nil, nil, "m.service_object_id = 181")
    if type(a) == "string" then print(a) end
 
    a = make_query_1()
@@ -428,6 +457,13 @@ function how_to_use()
       print("Q: ",table.getn(a), v.c_name, v.p_itemtype) 
    end
 ]]
+
+   print("========================")
+   a = select_monitors_app_objs(5)
+
+   for i,v in ipairs(a) do
+      print("A: ",table.getn(a), v.c_name, v.s_name, v.sv_name, v.p_itemtype) 
+   end
 
 end
 

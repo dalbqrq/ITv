@@ -535,10 +535,22 @@ class Computer extends CommonDBTM {
                              $this->getType(), $this->fields["entities_id"]);
       autocompletionTextField($this, 'name', array('value' => $objectName));
       echo "</td>";
+
+// -------------------------- daniel@itvision.com.br - INCLUIDO
+      echo "<td>".'Chave'."&nbsp;:</td>";
+      echo "<td>"; autocompletionTextField($this,'itv_key'); echo "</td>";
+      echo "</tr>";
+
+      echo "<tr class='tab_bg_1'>";
+      echo "<td>".'Alias'."&nbsp;:</td>";
+      echo "<td>"; autocompletionTextField($this,'alias'); echo "</td>";
+// -------------------------- 
+
       echo "<td>".$LANG['state'][0]."&nbsp;:</td>";
       echo "<td>";
       Dropdown::show('State', array('value' => $this->fields["states_id"]));
       echo "</td></tr>\n";
+
 
       echo "<tr class='tab_bg_1'>";
       echo "<td>".$LANG['common'][15]."&nbsp;: </td>";
@@ -833,6 +845,18 @@ class Computer extends CommonDBTM {
       $tab[157]['linkfield'] = '';
       $tab[157]['name']      = 'Geotag';
       $tab[157]['datatype']  = 'text';
+
+      $tab[158]['table']     = $this->getTable();
+      $tab[158]['field']     = 'itv_key';
+      $tab[158]['linkfield'] = '';
+      $tab[158]['name']      = 'Chave';
+      $tab[158]['datatype']  = 'text';
+
+      $tab[159]['table']     = $this->getTable();
+      $tab[159]['field']     = 'alias';
+      $tab[159]['linkfield'] = '';
+      $tab[159]['name']      = 'Alias';
+      $tab[159]['datatype']  = 'text';
 // -------------------------- daniel@itvision.com.br
 
 

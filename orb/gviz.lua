@@ -48,7 +48,8 @@ function show(web, id)
    -- para presentacao Verto
    --if id == "/show" and app[1] then id = 31 end
    --local app = apps:select_apps(id)
-   local obj = Model.select_app_to_graph(id)
+   --local obj = Model.select_app_to_graph(id)
+   local obj = Model.select_monitors_app_objs(id)
    local rel = Model.select_app_relat_to_graph(id)
    if app[1] then 
       app_name = app[1].name

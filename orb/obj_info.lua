@@ -26,14 +26,14 @@ end
 -- controllers ------------------------------------------------------------
 
 function show_hst(web, obj_id)
-   local A = Model.make_query_3(nil, nil, " and m.service_object_id = "..obj_id)
+   local A = Model.make_query_3(nil, nil, "m.service_object_id = "..obj_id)
    return render_hst(web, obj_id, A)
 end
 ITvision:dispatch_get(show_hst, "/hst/(%d+)")
 
 
 function show_svc(web, obj_id)
-   local A = Model.make_query_4(nil, nil, nil, " and m.service_object_id = "..obj_id)
+   local A = Model.make_query_4(nil, nil, nil, "m.service_object_id = "..obj_id)
    return render_svc(web, obj_id, A)
 end
 ITvision:dispatch_get(show_svc, "/svc/(%d+)")
@@ -60,16 +60,8 @@ function geotag(web, objtype, obj_id)
       local cond_ = [[and m.service_object_id in (select ao.service_object_id from itvision_apps a, itvision_app_objects ao 
                           where a.id = ao.app_id and a.service_object_id = ]]..obj_id..[[)]]
       A = Model.make_query_3(nil, nil, cond_)
-      B = Model.make_query_6(nil, cond_)
-      for _,v in ipairs(A) do table.insert(q, v) end
-      for _,v in ipairs(B) do table.insert(q, v) end
-
-text_file_writer("/tmp/r", cond_)
    elseif objtype == "hst" then
-      A = Model.make_query_3(nil, nil, " and m.service_object_id = "..obj_id)
-      B = Model.make_query_6(nil, " and m.service_object_id = "..obj_id)
-      for _,v in ipairs(A) do table.insert(q, v) end
-      for _,v in ipairs(B) do table.insert(q, v) end
+      A = Model.make_query_3(nil, nil, "m.service_object_id = "..obj_id)
    end
 
    return render_geotag(web, obj_id, objtype, A)

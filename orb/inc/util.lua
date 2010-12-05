@@ -253,6 +253,11 @@ function os.capture(cmd, raw)
 end
 
 
+function os.sleep(seg)
+   os.capture("sleep "..tonumber(seg))
+end
+
+
 function os.reset_monitor()
    return os.capture("/usr/sbin/invoke-rc.d nagios3 reload")
 end

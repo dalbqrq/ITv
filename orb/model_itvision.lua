@@ -161,12 +161,6 @@ function select_app_object (cond_, extra_, columns_)
 end
 
 
-function select_objects_app_object (cond_, extra_, columns_)
-   local content = query ("itvision_app_objects", cond_, extra_, columns_)
-   return content
-end
-
-
 function select_app_app_objects (id)
    local cond_ = "no.object_id = al.service_object_id and al.app_id = ap.id"
    if id then

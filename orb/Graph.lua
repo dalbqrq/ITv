@@ -59,17 +59,20 @@ function make_content(obj, rel)
          if v.ao_type == 'hst' then
             name = v.name1
             if not show_ip then name = string.gsub(name,"-(.+)", "") end
-            label = v.name1  -- DEBUG ..":"..v.curr_state
+            label = v.name1  
+-- DEBUG ..":"..v.curr_state
             url   = "/orb/obj_info/"..v.ao_type.."/"..v.obj_id
             shape = "box"
          elseif v.ao_type == 'svc' then
             name = v.name1.."-"..v.name2
-            label = v.name2  -- DEBUG ..":"..v.curr_state
+            label = v.name2  
+-- DEBUG ..":"..v.curr_state
             url   = "/orb/obj_info/"..v.ao_type.."/"..v.obj_id
             shape = "ellipse"
          elseif v.ao_type == 'app' then
             name = v.name2
-            label = v.name2  --DEBUG ..":"..v.curr_state
+            label = v.name2  
+--DEBUG ..":"..v.curr_state
             url   = "/orb/obj_info/"..v.ao_type.."/"..v.obj_id
             shape = "hexagon"
             shape = "invhouse"

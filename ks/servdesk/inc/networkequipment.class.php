@@ -308,10 +308,20 @@ class NetworkEquipment extends CommonDBTM {
                              $this->getType(), $this->fields["entities_id"]);
       autocompletionTextField($this, "name", array('value' => $objectName));
       echo "</td>";
+// -------------------------- daniel@itvision.com.br - INCLUIDO
+      echo "<td>".'Chave'."&nbsp;:</td>";
+      echo "<td>"; autocompletionTextField($this,'itv_key'); echo "</td>";
+      echo "</tr>";
+
+      echo "<tr class='tab_bg_1'>";
+      echo "<td>".'Alias'."&nbsp;:</td>";
+      echo "<td>"; autocompletionTextField($this,'alias'); echo "</td>";
+
       echo "<td>".$LANG['state'][0]."&nbsp;:</td>";
       echo "<td>";
-      Dropdown::show('State', array('value' => $this->fields["states_id"]));
-      echo "</td></tr>";
+      Dropdown::show('State', array('value' => $this->fields["states_id"])); echo "</td>";
+      echo "</tr>";
+// -------------------------- daniel@itvision.com.br
 
       echo "<tr class='tab_bg_1'>";
       echo "<td>".$LANG['common'][15]."&nbsp;:</td>";
@@ -390,12 +400,11 @@ class NetworkEquipment extends CommonDBTM {
       echo "<td>";
       Dropdown::show('Domain', array('value' => $this->fields["domains_id"]));
       echo "</td>";
-      echo "<td rowspan='7'>".$LANG['common'][25]."&nbsp;:</td>";
-      echo "<td rowspan='7'>
+      echo "<td rowspan='5'>".$LANG['common'][25]."&nbsp;:</td>";
+      echo "<td rowspan='5'>
             <textarea cols='45' rows='8' name='comment' >".$this->fields["comment"]."</textarea>";
       echo "</td></tr>";
-// -------------------------- daniel@itvision.com.br
-
+/*
       echo "<tr class='tab_bg_1'>";
       echo "<td>".$LANG['networking'][14]."&nbsp;:</td>";
       echo "<td>";
@@ -407,6 +416,8 @@ class NetworkEquipment extends CommonDBTM {
       echo "<td>";
       autocompletionTextField($this, "mac");
       echo "</td></tr>";
+*/
+// -------------------------- daniel@itvision.com.br
 
       echo "<tr class='tab_bg_1'>";
       echo "<td>".$LANG['setup'][71]."&nbsp;:</td>";
@@ -467,6 +478,18 @@ class NetworkEquipment extends CommonDBTM {
       $tab[157]['linkfield'] = '';
       $tab[157]['name']      = 'Geotag';
       $tab[157]['datatype']  = 'text';
+
+      $tab[158]['table']     = $this->getTable();
+      $tab[158]['field']     = 'itv_key';
+      $tab[158]['linkfield'] = '';
+      $tab[158]['name']      = 'Chave';
+      $tab[158]['datatype']  = 'text';
+
+      $tab[159]['table']     = $this->getTable();
+      $tab[159]['field']     = 'alias';
+      $tab[159]['linkfield'] = '';
+      $tab[159]['name']      = 'Alias';
+      $tab[159]['datatype']  = 'text';
 // -------------------------- daniel@itvision.com.br
 
       $tab += Location::getSearchOptionsToAdd();
