@@ -98,7 +98,15 @@ string.toid = function (str)
    return string.gsub(string.gsub(str,"(%p+)"," "),"(%s+)","_")
 end
 
+string.extract_latlon = function(str)
+   str = string.gsub(str, "%s+", "")
+   local b, c = string.find(str, ",")
 
+   local lat = string.sub(str,1,b-1)
+   local lon = string.sub(str,b+1,-1)
+
+   return lat, lon
+end
 
 ----------------------------- CSV ----------------------------------
 

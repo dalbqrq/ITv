@@ -57,10 +57,10 @@ ITvision:dispatch_get(map_frame, "/map_frame/(%a+):(%d+)")
 function geotag(web, objtype, obj_id)
    local q, A, B, app = {}, {}, {}, {}
    if objtype == "app" then
-      local cond_ = [[and m.service_object_id in (select ao.service_object_id from itvision_apps a, itvision_app_objects ao 
-                          where a.id = ao.app_id and a.service_object_id = ]]..obj_id..[[)]]
       app = apps:select(nil, obj_id) 
-      A = Model.make_query_3(nil, nil, app[1].id , nil)
+
+      A = Model.tree(app[1].id)
+
    elseif objtype == "hst" then
       A = Model.make_query_3(nil, nil, nil, "m.service_object_id = "..obj_id)
    end
@@ -183,8 +183,28 @@ end
 function render_geotag(web, obj_id, objtype, A)
    local res = {obj_id, objtype}
    local geotag, latlon = "", ""
+   local marker_maker, position = "", ""
+   local minlat, maxlat, minlon, maxlon  = 1000, -1000, 1000, -1000
 
-   local marker_maker = ""
+   for i, v in ipairs(A) do
+      if v.c_geotag then
+         local lat, lon = string.extract_latlon(v.c_geotag)
+         lat, lon = tonumber(lat), tonumber(lon)
+
+         position = position .. "<!-- "..v.c_geotag.." -->\n"
+         if lat < minlat then minlat = lat end
+         if lon < minlon then minlon = lon end
+         if lat > maxlat then maxlat = lat end
+         if lon > maxlon then maxlon = lon end
+      end
+   end
+
+   position = position .. "var southWest = new google.maps.LatLng("..tostring(minlat)..","..tostring(minlon)..");\n"
+   position = position .. "var northEast = new google.maps.LatLng("..tostring(maxlat)..","..tostring(maxlon)..");\n"
+   position = position .. "var bounds = new google.maps.LatLngBounds(southWest,northEast);\n"
+   position = position .. "map.fitBounds(bounds);\n\n"
+
+   marker_maker = marker_maker .. position
 
    for i, v in ipairs(A) do
       if v.ss_current_state then

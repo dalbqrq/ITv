@@ -247,7 +247,7 @@ function make_query_1(c_id, p_id, clause)
       for _,v in ipairs(r) do table.insert(v, 1, 1) end
       for _,v in ipairs(r) do table.insert(q, v) end
 
-      if DEBUG then print ("\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
+      --if DEBUG then print ("\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
    end
 
    return q
@@ -283,7 +283,7 @@ function make_query_2(c_id, p_id, sv_id, clause)
    q = Model.query(tables_, cond_, nil, columns_)
    for _,v in ipairs(q) do table.insert(v, 1, 2) end
 
-   if DEBUG then print( "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
+   --if DEBUG then print( "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
 
    return q
 end
@@ -336,7 +336,7 @@ function make_query_3(c_id, p_id, a_id, clause)
       for _,v in ipairs(r) do table.insert(v, 1, 3) end
       for _,v in ipairs(r) do table.insert(q, v) end
 
-      if DEBUG then print ("\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
+      --if DEBUG then print ("\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
    end
 
    return q
@@ -373,7 +373,7 @@ function make_query_4(c_id, p_id, sv_id, a_id, clause)
    q = Model.query(tables_, cond_, nil, columns_)
    for _,v in ipairs(q) do table.insert(v, 1, 4) end
 
-   if DEBUG then print( "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
+   --if DEBUG then print( "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
 
    return q
 end
@@ -405,7 +405,7 @@ function make_query_5(a_id, clause)
    q = Model.query(tables_, cond_, nil, columns_)
    for _,v in ipairs(q) do table.insert(v, 1, 5) end
 
-   if DEBUG then print( "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
+   --if DEBUG then print( "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
 
    return q
 end
@@ -446,22 +446,8 @@ function select_monitors(clause)
 end
 
 
-function select_monitors_app_objs(app_id)
+function select_monitors_app_objs(app_id, clause)
    local q = {}
---[[
-   local objs = Model.select_app_object("app_id = "..app_id)
-
-   if objs == nil then return nil end
-
-   for _,o in ipairs(objs) do
-      local clause = "m.service_object_id = "..o.service_object_id
-      local q3 = make_query_3(nil, nil, nil, clause)
-      local q4 = make_query_4(nil, nil, nil, nil, clause)
-
-      for _,v in ipairs(q3) do table.insert(q, v) end
-      for _,v in ipairs(q4) do table.insert(q, v) end
-   end
-]]
 
    local q3 = make_query_3(nil, nil, app_id, clause)
    local q4 = make_query_4(nil, nil, nil, app_id, clause)
@@ -484,6 +470,31 @@ function select_monitors_app_objs(app_id)
 
    return q
 end
+
+
+function tree(app_id, show_svc)
+   local q = {}
+   local clause = nil
+
+   if show_svc ~= true then
+      clause = "ao.type = 'hst'"
+   end
+
+   local q3 = make_query_3(nil, nil, app_id, clause)
+   local q4 = make_query_4(nil, nil, nil, app_id, clause)
+   for _,v in ipairs(q3) do table.insert(q, v) end
+   for _,v in ipairs(q4) do table.insert(q, v) end
+
+   local q5 = make_query_5(app_id, nil)
+   for _,v in ipairs(q5) do 
+      local content = Model.query("itvision_apps", "service_object_id = "..v.ao_service_object_id)
+      local q_ = tree(content[1].id, show_svc)
+      for _,v in ipairs(q_) do table.insert(q, v) end
+   end
+
+   return q
+end
+
 
 
 
@@ -522,21 +533,28 @@ function how_to_use()
    end
 ]]
 
+--[[
    print("========================")
-   a = select_monitors_app_objs(44)
+   a = select_monitors_app_objs(8)
 
    for i,v in ipairs(a) do
       print("A: ",table.getn(a), v.c_name, v.s_name, v.sv_name, v.p_itemtype, v.ao_type) 
    end
---[[
-   a = make_query_5()
-   a = make_query_5(44)
+
+   a = make_query_5(5)
    if type(a) == "string" then print(a) end
    print("count: ", table.getn(a))
    for i,v in ipairs(a) do 
-      print("A: ",v.a_id, v.a_name, v.o_name1, v.o_name2, v.ss_current_state) 
+      print("A: ",v.ao_type, v.ao_service_object_id, v.a_id, v.a_name, v.o_name1, v.o_name2, v.ss_current_state) 
    end
 ]]
+
+   a = tree(8)
+
+   for i,v in ipairs(a) do
+      print("A: ",table.getn(a), v.c_name, v.s_name, v.sv_name, v.p_itemtype, v.ao_type, v.c_geotag) 
+   end
+
 
 end
 
