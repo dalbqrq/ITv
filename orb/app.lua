@@ -81,7 +81,7 @@ end
 -- controllers ------------------------------------------------------------
 
 function list(web, msg)
-   local clause
+   local clause = nil
    if web.input.app_name then clause = " name like '%"..web.input.app_name.."%' " end
 
    local A = apps:select(nil, clause)
@@ -137,7 +137,8 @@ function insert(web)
    apps.type = web.input.type
    apps.is_active = web.input.is_active
    --app.service_object_id = web.input.service_object_id
-   app.instance_id = Model.db.instance_id
+   apps.instance_id = Model.db.instance_id
+   apps.entities_id = 0
    apps:save()
    return web:redirect(web:link("/list"))
 end
@@ -175,7 +176,7 @@ function activate(web, id, flag)
 
       local A = apps:select(id)
       local O = Model.select_app_app_objects(id)
-      if A[1] then
+      if A[1] and O[1] then
          -- Sinaliza a app como ativa
          Model.update (tables, cols, clause) 
          -- Recria arquivo de config do business process e 
@@ -236,7 +237,7 @@ function render_list(web, A, msg)
       row[#row+1] = {
          a{ href=lnk, v.name },
          strings["logical_"..v.type],
-         NoOrYes[v.is_active+1].name,
+         NoOrYes[tonumber(v.is_active)+1].name,
          button_link(strings.remove, web:link("/remove/"..v.id), "negative"),
          button_link(strings.edit, web:link("/edit/"..v.id..":"..v.name..":"..v.type)),
          button_link(stract, web:link("/activate/"..v.id..":"..v.is_active)) }

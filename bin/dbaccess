@@ -1,0 +1,12 @@
+#!/bin/bash 
+
+progdir=$(dirname $(readlink -f $0))
+. $progdir/dbconf
+
+if [ $# -ge 1 ]; then
+	echo "CREATE USER '$dbuser'@'$1' IDENTIFIED BY '$dbpass';" | mysql -u root --password=$dbpass
+	echo "GRANT ALL PRIVILEGES ON *.* TO '$dbuser'@'$1' WITH GRANT OPTION;" | mysql -u root --password=$dbpass
+else
+	echo "Usage: dbaccess <hostname>"
+fi
+

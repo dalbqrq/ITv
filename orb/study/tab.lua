@@ -86,7 +86,8 @@ function make_columns(a)
 
          for c = 1,36-string.len(f.Field)-string.len(alias) do spc = spc.." " end
          s = s.."   "..alias.."."..f.Field..spc.."as "..alias.."_"..f.Field --.."\n"
-         n = n.."   ''                                   as "..alias.."_"..f.Field --.."\n"
+         --n = n.."   ''                                   as "..alias.."_"..f.Field --.."\n"
+         n = n.."   null                                 as "..alias.."_"..f.Field --.."\n"
       end
    end
 
@@ -225,10 +226,10 @@ function make_query_1(c_id, p_id, clause)
    if p_id  then cond_ = cond_ .. " and p.id = "  .. p_id  end
    if clause  then cond_ = cond_ .. clause end
 
-   --return "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n"
    local q = Model.query(tables_, cond_, nil, columns_)
    for _,v in ipairs(q) do table.insert(v, 1, 1) end
    return q
+   --return "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n"
 end
 
 
@@ -256,10 +257,10 @@ function make_query_2(c_id, p_id, sv_id, clause)
    if sv_id then cond_ = cond_ .. " and sv.id = " .. sv_id end
    if clause  then cond_ = cond_ .. clause end
 
-   --return "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n"
    local q = Model.query(tables_, cond_, nil, columns_)
    for _,v in ipairs(q) do table.insert(v, 1, 2) end
    return q
+   --return "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n"
 end
 
 
@@ -286,10 +287,10 @@ function make_query_3(c_id, p_id, sv_id, clause)
    if p_id  then cond_ = cond_ .. " and p.id = "  .. p_id  end
    if clause  then cond_ = cond_ .. clause end
 
-   --return "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n"
    local q = Model.query(tables_, cond_, nil, columns_)
    for _,v in ipairs(q) do table.insert(v, 1, 1) end
    return q
+   --return "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n"
 end
 
 
@@ -313,10 +314,10 @@ function make_query_4(c_id, p_id, sv_id, clause)
    if sv_id then cond_ = cond_ .. " and sv.id = " .. sv_id end
    if clause  then cond_ = cond_ .. clause end
 
-   --return "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n"
    local q = Model.query(tables_, cond_, nil, columns_)
    for _,v in ipairs(q) do table.insert(v, 1, 4) end
    return q
+   --return "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n"
 end
 
 
@@ -341,7 +342,6 @@ function make_query_5(n_id, clause)
    if n_id  then cond_ = cond_ .. " and n.id = "  .. n_id  end
    if clause  then cond_ = cond_ .. clause end
 
-   --return "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n"
    local q = Model.query(tables_, cond_, nil, columns_)
    for _,v in ipairs(q) do 
       v.p_ip = v.p_ip or v.n_ip
@@ -349,12 +349,37 @@ function make_query_5(n_id, clause)
       table.insert(v, 1, 5)
    end
    return q
+   --return "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n"
 end
 
 
 ----------------------------------------------------------------------
 --  QUERY 6 - network sem porta sem software e com monitor - monitoracao de host onde o service eh ping
 ----------------------------------------------------------------------
+function make_query_6(n_id, clause)
+   t = { "n", "o", "s", "m" }
+   n = { "csv", "sv", "sw" }
+
+   local columns_ = make_columns(t)
+   local _,nulls_ = make_columns(n)
+   local tables_  = make_tables(t)
+   local cond_    = make_where(t)
+
+   columns_ = columns_..",\n"..nulls_
+
+   if n_id  then cond_ = cond_ .. " and n.id = "  .. n_id  end
+   if clause  then cond_ = cond_ .. clause end
+
+   local q = Model.query(tables_, cond_, nil, columns_)
+   for _,v in ipairs(q) do 
+      v.p_ip = v.p_ip or v.n_ip
+      v.c_name = v.c_name or v.n_name
+      table.insert(v, 1, 6)
+   end
+   return q
+   --return "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n"
+end
+
 
 
 ----------------------------------------------------------------------
@@ -385,8 +410,11 @@ function how_to_use()
    a = make_query_3()
    a = make_query_4()
    a = make_query_2(1,1,2)
+   a = make_query_6()
+   a = make_query_5()
    if type(a) == "string" then print(a) end
 end
 
-
 how_to_use()
+
+

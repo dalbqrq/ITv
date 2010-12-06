@@ -16,7 +16,7 @@ function make_obj_name(host, service)
    end
    if service ~= config.monitor.check_host then
       if name ~= "" then
-         name = "@"..name
+         name = " @ "..name
       else
          name = " (app)"..name
       end
@@ -51,18 +51,31 @@ define host{
 end
 
 
-function insert_service_cfg_file (hostname, display_name, check_cmd)
-   if not  ( display_name and hostname and check_cmd ) then return false end
+function insert_service_cfg_file (hostname, display_name, chk_name, chk_id, hide_check_host)
+   if not  ( display_name and hostname and chk_name and chk_id ) then return false end
    local content, cmd, filename
+   local c, p
 
-   filename = config.monitor.dir.."/services/"..hostname.."-"..display_name.."-"..check_cmd..".cfg"
+   if hide_check_host then
+      c, p = get_check_params(chk_id)
+   else
+      c, p = get_checkhost_params(chk_id)
+   end
+
+   local chk = chk_name
+      
+   for i,v in ipairs(p) do
+      chk = chk.."!"..v.default_value 
+   end
+
+   filename = config.monitor.dir.."/services/"..hostname.."-"..display_name.."-"..chk_name..".cfg"
 
    local text = [[
 define service{
         use]].."\t\t\t"..[[generic-service
         host_name]].."\t\t"..hostname..[[ 
         service_description]].."\t"..display_name..[[ 
-        check_command]].."\t\t"..check_cmd..cmds[check_cmd].default..[[ 
+        check_command]].."\t\t"..chk..[[ 
         } 
 ]]
 
@@ -189,7 +202,7 @@ function insert_bp_cfg_file()
    cmd = cmd .. " -o "..config.monitor.dir.."/apps/apps.cfg"
 
    os.capture(cmd)
-   text_file_writer("/tmp/cmd.out", cmd)
+   -- DEBUG: text_file_writer("/tmp/cmd.out", cmd)
 end
 
 
@@ -203,13 +216,14 @@ check_local_load!5.0,4.0,3.0!10.0,6.0,4.0
 check_local_swap!20!10
 check_ssh
 check_http
-]]
 
 cmds = {
    DHCP      = { def="$USER1$/check_dhcp $ARG1$", default=nil },
    FTP       = { def="$USER1$/check_ftp -H $HOSTADDRESS$ $ARG1$", default=nil },
    HPJD      = { def="$USER1$/check_hpjd -H $HOSTADDRESS$ $ARG1$", default=nil },
-   HTTP      = { def="$USER1$/check_http -I $HOSTADDRESS$ $ARG1$", default="" },
+   HTTP      = { def="$USER1$/check_http -I $HOSTADDRESS$", default="" },
+   HTTPNAME  = { def="$USER1$/check_http -H $HOSTNAME$ $ARG1$", default="" },
+   HTTPURL   = { def="$USER1$/check_http -I $ARG1$", default="" },
    IMAP      = { def="$USER1$/check_imap -H $HOSTADDRESS$ $ARG1$", default=nil },
    DISK      = { def="$USER1$/check_disk -w $ARG1$ -c $ARG2$ -p $ARG3$", default=nil },
    LOAD      = { def="$USER1$/check_load -w $ARG1$ -c $ARG2$", default=nil },
@@ -219,7 +233,6 @@ cmds = {
    USERS     = { def="$USER1$/check_users -w $ARG1$ -c $ARG2$", default=nil },
    NT        = { def="$USER1$/check_nt -H $HOSTADDRESS$ -p 12489 -v $ARG1$ $ARG2$", default=nil },
    PING      = { def="$USER1$/check_ping -H $HOSTADDRESS$ -w $ARG1$ -c $ARG2$ -p 5", default="!400.0,20%!999.0,70%" },
--- DEPRICATED!
    HOST_PING = { def="$USER1$/check_ping -H $HOSTADDRESS$ -w $ARG1$ -c $ARG2$ -p 5", default="!400.0,20%!999.0,70%" },
    HOST_ALIVE = { def="$USER1$/check_ping -H $HOSTADDRESS$ -w $ARG1$ -c $ARG2$ -p 5", default="!400.0,20%!999.0,70%" },
    POP       = { def="$USER1$/check_pop -H $HOSTADDRESS$ $ARG1$", default=nil },
@@ -230,7 +243,6 @@ cmds = {
    UDP       = { def="$USER1$/check_udp -H $HOSTADDRESS$ -p $ARG1$ $ARG2$", default=nil },
 }
 
-
-
+]]
 
 

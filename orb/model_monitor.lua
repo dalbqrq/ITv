@@ -1,641 +1,422 @@
 require "Model"
-require "study/tab"
 
 --[[
+        +------------+    +-------------------------+    +-----------------+      +----------+
+        |  glpi_     |----| glpi_                   |----|  glpi_          |------|  glpi_   |
+        | COMPUTER   |    |COMPUTER_SOFTWAREVERSION |    | SOFTWAREVERSION |      | SOFTWARE |
+        +------------+    +-------------------------+    +-----------------+      +----------+
+              |                                                 |
+              |                                                 |
+        +-------------+                                    +-----------+     +------------+
+        |  glpi_      |------------------------------------| itvision_ |-----|  glpi_     | 
+        | NETWORKPORT |                                    | MONITOR   |     | NET_EQUIP_ |
+        +-------------+                                    +-----------+     +------------+
+                                                                |
+                                                                |
+                                                           +---------------+
+        +-------------+         +-------------+            | nagios_       |
+        | itvision_   |---------| itvision_   |----------- | OBJECTS  .or. |
+        | apps        |         | app_objects |            | SERVICES .or. |
+        +-------------+         +-------------+            | SERVICESTATUS |
+                                                           +---------------+
 
-   PRIMEIRO VAMOS FAZER ALGUMAS QUERIES DE TESTE, COMBINANDO AS TABELAS MAIS IMPORTANTS DESTES RELACIONAMENTOS 
-   ENTRE A BASE DO NAGIOS, GLPI E DO ITVISION. DE FATO, A TABELA itvision_monitors FOI CONCEBIDA JUTAMENTE PARA
-   RELACIONAR O CMDB DO GLPI AS TABELAS QUE DEFINEM UMA MONITORACAO. ELAS TEM O SEGUINTE DIAGRAMA:
-
-
-   +-----------+        +-------------------------+      +-----------------+      +----------+
-   |  glpi_    |--------| glpi_                   |------|  glpi_          |------|  glpi_   |
-   | COMPUTER  |        |COMPUTER_SOFTWAREVERSION |      | SOFTWAREVERSION |      | SOFTWARE |
-   +-----------+        +-------------------------+      +-----------------+      +----------+
-         |                                                       |
-         |                                                       |
-   +-------------+                                          +-----------+
-   |  glpi_      |------------------------------------------| itvision_ |
-   | NETWORKPORT |                                          | MONITOR   |
-   +-------------+                                          +-----------+
-                                                                 |
-                                                                 |
-                                                            +-----------+
-                                                            | nagios_   |
-                                                            | OBJECTS   |
-                                                            +-----------+
-                                                             |         |
-                                                             |         |
-                                                   +-----------+      +------------+
-                                                   | nagios_   |      | nagios_    |
-                                                   | HOSTS     |      | SERVICES   |
-                                                   +-----------+      +------------+
-
-
-
-   COMO OS RESULTADOS DESSAS QUERIES DEVEM SER JUNTADOS EM UMA ÚNICA LISTA, A LISTA DE CAMPOS DEVE SER 
-   EXATAMENTE A MESMA ONDE O CONTEUDO DAS COLUNAS QUE NAO EXISTIREM SERÃO DE VALOR ''''.
-
-   ESTAS DEVERÃO SER AS QUERIES DEFINITIVAS QUE VIRARÃO FUNCÕES EM UM MÓDULO LUA DO PROJETO ITvision
-   SÃO ELAS:
 
         QUERY 1 - computador com porta sem software e sem monitor
         QUERY 2 - computador com porta com software e sem monitor
         QUERY 3 - computador com porta sem software e com monitor - monitoracao de host onde o service eh ping
         QUERY 4 - computador com porta com software e com monitor - monitoracao de service 
-        QUERY 5 - network com porta sem software e sem monitor
-        QUERY 6 - network com porta sem software e com monitor - monitoracao de host onde o service eh ping
+        QUERY 5 - network sem porta sem software e sem monitor
+        QUERY 6 - network sem porta sem software e com monitor - monitoracao de host onde o service eh ping
+
 ]]
 
 
---   QUERY 1 - computador com porta sem software e sem monitor
+local tables = { 
+--[[
+   O valor dos 'aliases' é a resposta da pergunta: Qual é o campo da tabela 'name' que será usado para ligar com a tabela a 'alias'?
+   Ou seja, é a chave estrangeira.
+]]
+   a =   { name="itvision_apps",                   ao="id", } ,
+   ao =  { name="itvision_app_objects",            a="app_id", o="serivce_object_id", s="serivce_object_id", ss="serivce_object_id" } ,
+   m =   { name="itvision_monitors",               o="service_object_id", s="service_object_id", ss="service_object_id", 
+                                                      n="networkequipments_id", p="networkports_id", sv="softwareversions_id" },
+   o =   { name="nagios_objects",                  ao="object_id", m="object_id", s="object_id", ss="object_id" }, 
+   s =   { name="nagios_services",                 ao="service_object_id", m="service_object_id", o="service_object_id", 
+                                                      ss="service_object_id" },
+   ss =  { name="nagios_servicestatus",            ao="service_object_id", m="service_object_id", o="service_object_id", 
+                                                      s="service_object_id" },
+   c =   { name="glpi_computers",                  p="id", csv="id" },
+   n =   { name="glpi_networkequipments",          m="id" },
+   p =   { name="glpi_networkports",               m="id", c="items_id", n="items_id" },
+   csv = { name="glpi_computers_softwareversions", c="computers_id", sv="softwareversions_id" },
+   sv =  { name="glpi_softwareversions",           m="id", csv="id", sw="softwares_id" },
+   sw =  { name="glpi_softwares",                  sv="id" },
+}
 
-function query_1(c_id, n_id, clause)
 
-   local columns_ = [[
-      c.id			as c_id,
-      c.entities_id		as c_entities_id,
-      c.name			as c_name,
-      c.serial			as c_serial,
-      c.otherserial		as c_otherserial,
-      c.locations_id		as c_locations_id,
-      c.is_template		as c_is_template,
-      c.is_deleted		as c_is_deleted,
-      c.states_id		as c_states_id,
-      c.geotag			as c_geotag,
-
-      n.id			as n_id,
-      n.items_id		as n_items_id,
-      n.itemtype		as n_itemtype,
-      n.entities_id		as n_entities_id,
-      n.logical_number		as n_logical_number,
-      n.name			as n_name,
-      n.ip			as n_ip,
-
-      ''			as csv_id,
-      ''			as csv_computers_id,
-      ''			as csv_softwareversions_id,
-
-      ''			as sv_id,
-      ''			as sv_entities_id,
-      ''			as sv_softwares_id,
-      ''			as sv_states_id,
-      ''			as sv_name,
-      ''			as sv_comment,
-
-      ''			as s_id,
-      ''			as s_entities_id,
-      ''			as s_is_recursive,
-      ''			as s_name,
-      ''			as s_locations_id,
-      ''			as s_is_deleted,
-      ''			as s_is_template,
-
-      ''			as o_object_id,
-      ''			as o_instance_id,
-      ''			as o_objecttype_id,
-      ''			as o_name1,
-      ''			as o_name2,
-      ''			as o_is_active,
-
-      ''			as hst_host_id,
-      ''			as hst_instance_id,
-      ''			as hst_host_object_id,
-      ''			as hst_alias,
-      ''			as hst_display_name,
-      ''			as hst_address,
-      ''			as hst_check_command_object_id,
-      ''			as hst_check_command_args,
-
-      ''			as svc_service_id,
-      ''			as svc_instance_id,
-      ''			as svc_host_object_id,
-      ''			as svc_service_object_id,
-      ''			as svc_display_name,
-      ''			as svc_check_command_object_id,
-      ''			as svc_check_command_args,
-
-      ''			as m_networkports_id,
-      ''			as m_softwareversions_id,
-      ''			as m_service_object_id,
-      ''			as m_is_active,
-      ''			as m_type
-      ]]
-
-   local table_ = [[glpi_computers c, glpi_networkports n]]
-
-   local cond_ = [[ n.itemtype = "Computer" and
-           c.id = n.items_id and 
-           not exists (select 1 from itvision_monitors m where m.networkports_id = n.id)]]
-
-   if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
-   if n_id  then cond_ = cond_ .. " and n.id = "  .. n_id  end
-   if clause  then cond_ = cond_ .. clause end
-
-   local q = Model.query(table_, cond_, nil, columns_)
-   for _,v in ipairs(q) do table.insert(v, 1, 1) end
-
-   return q
-
-end
-
-
-           
---   QUERY 2 - computador com porta com software e sem monitor
-
-function query_2(c_id, n_id, sv_id, clause)
-
-   local columns_ = [[
-      c.id			as c_id,
-      c.entities_id		as c_entities_id,
-      c.name			as c_name,
-      c.serial			as c_serial,
-      c.otherserial		as c_otherserial,
-      c.locations_id		as c_locations_id,
-      c.is_template		as c_is_template,
-      c.is_deleted		as c_is_deleted,
-      c.states_id		as c_states_id,
-      c.geotag			as c_geotag,
-
-      n.id			as n_id,
-      n.items_id		as n_items_id,
-      n.itemtype		as n_itemtype,
-      n.entities_id		as n_entities_id,
-      n.logical_number		as n_logical_number,
-      n.name			as n_name,
-      n.ip			as n_ip,
-
-      csv.id			as csv_id,
-      csv.computers_id		as csv_computers_id,
-      csv.softwareversions_id	as csv_softwareversions_id,
-
-      sv.id			as sv_id,
-      sv.entities_id		as sv_entities_id,
-      sv.softwares_id		as sv_softwares_id,
-      sv.states_id		as sv_states_id,
-      sv.name			as sv_name,
-      sv.comment		as sv_comment,
-
-      s.id			as s_id,
-      s.entities_id		as s_entities_id,
-      s.is_recursive		as s_is_recursive,
-      s.name			as s_name,
-      s.locations_id		as s_locations_id,
-      s.is_deleted		as s_is_deleted,
-      s.is_template		as s_is_template,
-
-      ''			as o_object_id,
-      ''			as o_instance_id,
-      ''			as o_objecttype_id,
-      ''			as o_name1,
-      ''			as o_name2,
-      ''			as o_is_active,
-
-      ''			as hst_host_id,
-      ''			as hst_instance_id,
-      ''			as hst_host_object_id,
-      ''			as hst_alias,
-      ''			as hst_display_name,
-      ''			as hst_address,
-      ''			as hst_check_command_object_id,
-      ''			as hst_check_command_args,
-
-      ''			as svc_service_id,
-      ''			as svc_instance_id,
-      ''			as svc_host_object_id,
-      ''			as svc_service_object_id,
-      ''			as svc_display_name,
-      ''			as svc_check_command_object_id,
-      ''			as svc_check_command_args,
-
-      ''			as m_networkports_id,
-      ''			as m_softwareversions_id,
-      ''			as m_service_object_id,
-      ''			as m_is_active,
-      ''			as m_type
-      ]]
-
-   local table_ = [[ glpi_computers c, glpi_networkports n, glpi_computers_softwareversions csv, 
-                     glpi_softwareversions sv, glpi_softwares s]]
-
-   local cond_ = [[ n.itemtype = "Computer" and
-           c.id = n.items_id and 
-           c.id = csv.computers_id and
-           csv.softwareversions_id = sv.id and
-           sv.softwares_id = s.id and
-           not exists (select 1 from itvision_monitors m where m.networkports_id = n.id 
-                                 and m.softwareversions_id = sv.id)]]
-
-   if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
-   if n_id  then cond_ = cond_ .. " and n.id = "  .. n_id  end
-   if sv_id then cond_ = cond_ .. " and sv.id = " .. sv_id end
-   if clause  then cond_ = cond_ .. clause end
-
-   local q = Model.query(table_, cond_, nil, columns_)
-   for _,v in ipairs(q) do table.insert(v, 1, 2) end
-
-   return q
-end
-
-
-
---   QUERY 3 - computador com porta sem software e com monitor - monitoracao de host onde o service eh ping
-
-
-function query_3(c_id, n_id, clause)
-
-   local columns_ = [[
-      c.id			as c_id,
-      c.entities_id		as c_entities_id,
-      c.name			as c_name,
-      c.serial			as c_serial,
-      c.otherserial		as c_otherserial,
-      c.locations_id		as c_locations_id,
-      c.is_template		as c_is_template,
-      c.is_deleted		as c_is_deleted,
-      c.states_id		as c_states_id,
-      c.geotag			as c_geotag,
-
-      n.id			as n_id,
-      n.items_id		as n_items_id,
-      n.itemtype		as n_itemtype,
-      n.entities_id		as n_entities_id,
-      n.logical_number		as n_logical_number,
-      n.name			as n_name,
-      n.ip			as n_ip,
-
-      ''			as csv_id,
-      ''			as csv_computers_id,
-      ''			as csv_softwareversions_id,
-
-      ''			as sv_id,
-      ''			as sv_entities_id,
-      ''			as sv_softwares_id,
-      ''			as sv_states_id,
-      ''			as sv_name,
-      ''			as sv_comment,
-
-      ''			as s_id,
-      ''			as s_entities_id,
-      ''			as s_is_recursive,
-      ''			as s_name,
-      ''			as s_locations_id,
-      ''			as s_is_deleted,
-      ''			as s_is_template,
-
-      o.object_id		as o_object_id,
-      o.instance_id		as o_instance_id,
-      o.objecttype_id		as o_objecttype_id,
-      o.name1			as o_name1,
-      o.name2			as o_name2,
-      o.is_active		as o_is_active,
-
-      svc.service_id		as svc_service_id,
-      svc.instance_id		as svc_instance_id,
-      svc.host_object_id	as svc_host_object_id,
-      svc.service_object_id	as svc_service_object_id,
-      svc.display_name		as svc_display_name,
-      svc.check_command_object_id	as svc_check_command_object_id,
-      svc.check_command_args	as svc_check_command_args,
-
-      m.networkports_id		as m_networkports_id,
-      m.softwareversions_id	as m_softwareversions_id,
-      m.service_object_id	as m_service_object_id,
-      m.is_active		as m_is_active,
-      m.type			as m_type,
-
-      ss.current_state          as ss_current_state
-      ]]
-
-   local table_ = [[ glpi_computers c, glpi_networkports n,
-                     nagios_objects o, nagios_services svc, nagios_servicestatus ss,
-                     itvision_monitors m
-                  ]]
-
-
-   local cond_ = [[ n.itemtype = "Computer" and
-           c.id = n.items_id and 
-           m.networkports_id = n.id and
-           m.softwareversions_id is null and
-           m.service_object_id = o.object_id and
-           m.service_object_id = ss.service_object_id and
-           m.service_object_id = svc.service_object_id 
-           ]]
-
-
-   if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
-   if n_id  then cond_ = cond_ .. " and n.id = "  .. n_id  end
-   if clause  then cond_ = cond_ .. clause end
-
-   local q = Model.query(table_, cond_, nil, columns_)
-   for _,v in ipairs(q) do table.insert(v, 1, 3) end
-
-   return q
-end
-
-
-
---   QUERY 4 - computador com porta com software e com monitor - monitoracao de service por isso tem software associado
-
-function query_4(c_id, n_id, sv_id, clause)
-
-   local columns_ = [[
-      c.id			as c_id,
-      c.entities_id		as c_entities_id,
-      c.name			as c_name,
-      c.serial			as c_serial,
-      c.otherserial		as c_otherserial,
-      c.locations_id		as c_locations_id,
-      c.is_template		as c_is_template,
-      c.is_deleted		as c_is_deleted,
-      c.states_id		as c_states_id,
-      c.geotag			as c_geotag,
-
-      n.id			as n_id,
-      n.items_id		as n_items_id,
-      n.itemtype		as n_itemtype,
-      n.entities_id		as n_entities_id,
-      n.logical_number		as n_logical_number,
-      n.name			as n_name,
-      n.ip			as n_ip,
-
-      csv.id			as csv_id,
-      csv.computers_id		as csv_computers_id,
-      csv.softwareversions_id	as csv_softwareversions_id,
-
-      sv.id			as sv_id,
-      sv.entities_id		as sv_entities_id,
-      sv.softwares_id		as sv_softwares_id,
-      sv.states_id		as sv_states_id,
-      sv.name			as sv_name,
-      sv.comment		as sv_comment,
-
-      s.id			as s_id,
-      s.entities_id		as s_entities_id,
-      s.is_recursive		as s_is_recursive,
-      s.name			as s_name,
-      s.locations_id		as s_locations_id,
-      s.is_deleted		as s_is_deleted,
-      s.is_template		as s_is_template,
-
-      hst.host_id		as hst_host_id,
-      hst.instance_id		as hst_instance_id,
-      hst.host_object_id	as hst_host_object_id,
-      hst.alias			as hst_alias,
-      hst.display_name		as hst_display_name,
-      hst.address		as hst_address,
-      hst.check_command_object_id	as hst_check_command_object_id,
-      hst.check_command_args	as hst_check_command_args,
-
-      svc.service_id		as svc_service_id,
-      svc.instance_id		as svc_instance_id,
-      svc.host_object_id	as svc_host_object_id,
-      svc.service_object_id	as svc_service_object_id,
-      svc.display_name		as svc_display_name,
-      svc.check_command_object_id	as svc_check_command_object_id,
-      svc.check_command_args	as svc_check_command_args,
-
-      m.networkports_id		as m_networkports_id,
-      m.softwareversions_id	as m_softwareversions_id,
-      m.service_object_id	as m_service_object_id,
-      m.is_active		as m_is_active,
-      m.type			as m_type,
-
-      ss.current_state          as ss_current_state,
-      hs.current_state          as hs_current_state
-      ]]
 --[[ 
-      o.object_id		as o_object_id,
-      o.instance_id		as o_instance_id,
-      o.objecttype_id		as o_objecttype_id,
-      o.name1			as o_name1,
-      o.name2			as o_name2,
-      o.is_active		as o_is_active,
+   A funcao make_columns() recebe uma string com um alias de tabela ou uma tabela com aliases de tabelas e
+   retorna duas strings: s, n
 
-      nagios_objects o,
-
+   - Uma (s) com a lista de colunas de uma tabale, precedida pelo alias da tabela e seguido do novo
+   nome da coluna composto por: alias"_"name_coluna
+   - Outra (n) somente com os supostos novos nomes para colunas que de fato nao existem. O objetivo 
+   disso é criar queries em seguencia cuja lista de campos seja homogênia.
 ]]
+function make_columns(a)
+   local s, n = "", ""
+   local t = {}
+   local alias
 
-   local table_ = [[ glpi_computers c, glpi_networkports n, glpi_computers_softwareversions csv, 
-                     glpi_softwareversions sv, glpi_softwares s,
-                     nagios_hosts hst, nagios_services svc, nagios_servicestatus ss, nagios_hoststatus hs,
-                     itvision_monitors m]]
+   if type(a) == "string" then
+      table.insert(t, a)
+   else 
+      t = a
+   end
+  
+   for _, alias in ipairs(t) do
+      local q = show_columns(tables[alias].name)
 
-   local cond_ = [[ n.itemtype = "Computer" and
-           c.id = n.items_id and 
-           c.id = csv.computers_id and
-           n.id = m.networkports_id and
-           csv.softwareversions_id = sv.id and
-           sv.softwares_id = s.id and
+      for _,f in pairs(q) do
+         --DEBUG: print(f.Field, f.Key)
+         local spc = ""
+         if s ~= "" then 
+            s = s..",\n"
+            n = n..",\n"
+         end
 
-           m.softwareversions_id = csv.softwareversions_id and
-           m.service_object_id = ss.service_object_id and
-           m.service_object_id = svc.service_object_id
-           ]]
+         for c = 1,36-string.len(f.Field)-string.len(alias) do spc = spc.." " end
+         s = s.."   "..alias.."."..f.Field..spc.."as "..alias.."_"..f.Field --.."\n"
+         --n = n.."   ''                                   as "..alias.."_"..f.Field --.."\n"
+         n = n.."   null                                 as "..alias.."_"..f.Field --.."\n"
+      end
+   end
 
-   if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
-   if n_id  then cond_ = cond_ .. " and n.id = "  .. n_id  end
-   if sv_id then cond_ = cond_ .. " and sv.id = " .. sv_id end
-   if clause  then cond_ = cond_ .. clause end
+   return s, n
+end
 
-   local q = Model.query(table_, cond_, nil, columns_)
-   for _,v in ipairs(q) do table.insert(v, 1, 4) end
 
-   return q
+
+function make_columns_code()
+   local r = ""
+
+   for alias,t in pairs(tables) do
+      local s, n = "", ""
+
+      s = "-- "..t.name.." as "..alias.."\n"
+      s = s.."local cols_"..t.name.." {\n"
+      n = "local null_"..t.name.." {\n"
+
+      make_columns(alias)
+
+      s = s.."}\n\n"
+      n = n.."}\n\n"
+      r = r..n..s
+   end
+
+   return r
+end
+
+
+function make_tables(a)
+   local s = ""
+   local t = {}
+
+   if type(a) == "string" then
+      table.insert(t, a)
+   else 
+      t = a
+   end
+
+   for _, alias in ipairs(t) do
+      if s ~= "" then s = s..",\n" end
+      s = s.."   "..tables[alias].name.." "..alias
+   end
+
+   return s
+end
+
+
+--[[ a -> tabela com dois ou mais  aliases de nomes de tabela ]]
+function make_where(a)
+   local w = ""
+   local i, j
+   local t = a
+
+   if type(t) ~= "table" and #t < 2 then
+      return ""
+   end
+
+   for i = 1,#t-1 do
+      for j = 2,#t do
+         m, n = t[i], t[j]
+         local from, to = tables[m][n], tables[n][m]
+         if from and to then 
+            if w ~= "" then w = w.." and\n" end
+            w = w.."   "..m.."."..from.." = "..n.."."..to
+         end
+      end
+   end
+
+   return w
+end
+
+
+
+--[[ a -> string ou tabela com os aliases de nomes de tabela ]]
+function make_quer_generaly(a)
+   local t = {}
+
+   if type(a) == "string" then
+      table.insert(t, a)
+   else 
+      t = a
+   end
+
+   local columns_ = make_columns(t)
+   local tables_  = make_tables(t)
+   local cond_    = make_where(t)
+
+   return "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n"
 end
 
 
 --[[
-  AS DUAS PROXIMAS QUERIES SAO RELACIONADAS A TABELA DE "NetworkEquipment" E REPRODUZEM 
-  AS QUERIES 1 E 3 
+        +------------+    +-------------------------+    +-----------------+      +----------+
+        | COMPUTER   |----|COMPUTER_SOFTWAREVERSION |----| SOFTWAREVERSION |------| SOFTWARE |
+        +------------+    +-------------------------+    +-----------------+      +----------+
+              |                                                 |
+        +-------------+                                    +-----------+     +------------+
+        | NETWORKPORT |------------------------------------| MONITOR   |-----| NET_EQUIP_ |
+        +-------------+                                    +-----------+     +------------+
+                                                                |
+                                                           +---------------+
+        +-------------+         +-------------+            | OBJECTS  .or. |
+        | apps        |---------| app_objects |------------| SERVICES .or. |
+        +-------------+         +-------------+            | SERVICESTATUS |
+                                                           +---------------+
+        QUERY 1 - computador com porta sem software e sem monitor
+        QUERY 2 - computador com porta com software e sem monitor
+        QUERY 3 - computador com porta sem software e com monitor - monitoracao de host onde o service eh ping
+        QUERY 4 - computador com porta com software e com monitor - monitoracao de service 
+        QUERY 5 - network sem porta sem software e sem monitor
+        QUERY 6 - network sem porta sem software e com monitor - monitoracao de host onde o service eh ping
+
 ]]
 
---   QUERY 5 - network com porta sem software e sem monitor
+----------------------------------------------------------------------
+--  QUERY 1 - computador com porta sem software e sem monitor
+----------------------------------------------------------------------
+function make_query_1(c_id, p_id, clause)
+   t = { "c", "p" }
+   n = { "csv", "sv", "sw", "o", "s", "m" }
 
-function query_5(c_id, n_id, clause)
+   local columns_ = make_columns(t)
+   local _,nulls_ = make_columns(n)
+   local tables_  = make_tables(t)
+   local cond_    = make_where(t)
 
-   local columns_ = [[
-      c.id			as c_id,
-      c.entities_id		as c_entities_id,
-      c.name			as c_name,
-      c.serial			as c_serial,
-      c.otherserial		as c_otherserial,
-      c.locations_id		as c_locations_id,
-      c.is_template		as c_is_template,
-      c.is_deleted		as c_is_deleted,
-      c.states_id		as c_states_id,
+   cond_ = cond_ .. [[ 
+      and p.itemtype = "Computer" 
+      and not exists (select 1 from itvision_monitors m2 where m2.networkports_id = p.id)
+   ]]
 
-      n.id			as n_id,
-      n.items_id		as n_items_id,
-      n.itemtype		as n_itemtype,
-      n.entities_id		as n_entities_id,
-      n.logical_number		as n_logical_number,
-      n.name			as n_name,
-      n.ip			as n_ip,
-
-      ''			as csv_id,
-      ''			as csv_computers_id,
-      ''			as csv_softwareversions_id,
-
-      ''			as sv_id,
-      ''			as sv_entities_id,
-      ''			as sv_softwares_id,
-      ''			as sv_states_id,
-      ''			as sv_name,
-      ''			as sv_comment,
-
-      ''			as s_id,
-      ''			as s_entities_id,
-      ''			as s_is_recursive,
-      ''			as s_name,
-      ''			as s_locations_id,
-      ''			as s_is_deleted,
-      ''			as s_is_template,
-
-      ''			as o_object_id,
-      ''			as o_instance_id,
-      ''			as o_objecttype_id,
-      ''			as o_name1,
-      ''			as o_name2,
-      ''			as o_is_active,
-
-      ''			as hst_host_id,
-      ''			as hst_instance_id,
-      ''			as hst_host_object_id,
-      ''			as hst_alias,
-      ''			as hst_display_name,
-      ''			as hst_address,
-      ''			as hst_check_command_object_id,
-      ''			as hst_check_command_args,
-
-      ''			as svc_service_id,
-      ''			as svc_instance_id,
-      ''			as svc_host_object_id,
-      ''			as svc_service_object_id,
-      ''			as svc_display_name,
-      ''			as svc_check_command_object_id,
-      ''			as svc_check_command_args,
-
-      ''			as m_networkports_id,
-      ''			as m_softwareversions_id,
-      ''			as m_service_object_id,
-      ''			as m_is_active,
-      ''			as m_type
-      ]]
-
-   local table_ = [[glpi_networkequipments c, glpi_networkports n]]
-
-   local cond_ = [[ n.itemtype = "NetworkEquipment" and
-           c.id = n.items_id and 
-           not exists (select 1 from itvision_monitors m where m.networkports_id = n.id)]]
+   columns_ = columns_..",\n"..nulls_
 
    if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
+   if p_id  then cond_ = cond_ .. " and p.id = "  .. p_id  end
+   if clause  then cond_ = cond_ .. clause end
+
+   local q = Model.query(tables_, cond_, nil, columns_)
+   for _,v in ipairs(q) do table.insert(v, 1, 1) end
+   return q
+   --return "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n"
+end
+
+
+----------------------------------------------------------------------
+--  QUERY 2 - computador com porta com software e sem monitor
+----------------------------------------------------------------------
+function make_query_2(c_id, p_id, sv_id, clause)
+   t = { "c", "p", "csv", "sv", "sw" }
+   n = { "o", "s", "m" }
+
+   local columns_ = make_columns(t)
+   local _,nulls_ = make_columns(n)
+   local tables_  = make_tables(t)
+   local cond_    = make_where(t)
+
+   cond_ = cond_ .. [[ 
+      and p.itemtype = "Computer" 
+      and not exists (select 1 from itvision_monitors m2 where m2.networkports_id = p.id and m2.softwareversions_id = sv.id)
+   ]]
+
+   columns_ = columns_..",\n"..nulls_
+
+   if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
+   if p_id  then cond_ = cond_ .. " and p.id = "  .. p_id  end
+   if sv_id then cond_ = cond_ .. " and sv.id = " .. sv_id end
+   if clause  then cond_ = cond_ .. clause end
+
+   local q = Model.query(tables_, cond_, nil, columns_)
+   for _,v in ipairs(q) do table.insert(v, 1, 2) end
+   return q
+   --return "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n"
+end
+
+
+----------------------------------------------------------------------
+--  QUERY 3 - computador com porta sem software e com monitor - monitoracao de host onde o service eh ping
+----------------------------------------------------------------------
+function make_query_3(c_id, p_id, sv_id, clause)
+   t = { "c", "p", "o", "s", "m" }
+   n = { "csv", "sv", "sw" }
+
+   local columns_ = make_columns(t)
+   local _,nulls_ = make_columns(n)
+   local tables_  = make_tables(t)
+   local cond_    = make_where(t)
+
+   cond_ = cond_ .. [[ 
+      and p.itemtype = "Computer" 
+      and m.softwareversions_id is null
+   ]]
+
+   columns_ = columns_..",\n"..nulls_
+
+   if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
+   if p_id  then cond_ = cond_ .. " and p.id = "  .. p_id  end
+   if clause  then cond_ = cond_ .. clause end
+
+   local q = Model.query(tables_, cond_, nil, columns_)
+   for _,v in ipairs(q) do table.insert(v, 1, 1) end
+   return q
+   --return "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n"
+end
+
+
+----------------------------------------------------------------------
+--  QUERY 4 - computador com porta com software e com monitor - monitoracao de service 
+----------------------------------------------------------------------
+function make_query_4(c_id, p_id, sv_id, clause)
+   t = { "c", "p", "csv", "sv", "sw", "o", "s", "m" }
+   n = { }
+
+   local columns_ = make_columns(t)
+   local tables_  = make_tables(t)
+   local cond_    = make_where(t)
+
+   cond_ = cond_ .. [[ 
+      and p.itemtype = "Computer" 
+   ]]
+
+   if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
+   if p_id  then cond_ = cond_ .. " and p.id = "  .. p_id  end
+   if sv_id then cond_ = cond_ .. " and sv.id = " .. sv_id end
+   if clause  then cond_ = cond_ .. clause end
+
+   local q = Model.query(tables_, cond_, nil, columns_)
+   for _,v in ipairs(q) do table.insert(v, 1, 4) end
+   return q
+   --return "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n"
+end
+
+
+----------------------------------------------------------------------
+--  QUERY 5 - network sem porta sem software e sem monitor
+----------------------------------------------------------------------
+function make_query_5(n_id, clause)
+   t = { "n" }
+   n = { "csv", "sv", "sw", "o", "s", "m" }
+
+   local columns_ = make_columns(t)
+   local _,nulls_ = make_columns(n)
+   local tables_  = make_tables(t)
+   -- NAO PRECISA! local cond_    = make_where(t)
+
+   cond_ = [[ 
+      not exists (select 1 from itvision_monitors m2 where m2.networkequipments_id = n.id)
+   ]]
+
+   columns_ = columns_..",\n"..nulls_
+
    if n_id  then cond_ = cond_ .. " and n.id = "  .. n_id  end
    if clause  then cond_ = cond_ .. clause end
 
-   local q = Model.query(table_, cond_, nil, columns_)
-   for _,v in ipairs(q) do table.insert(v, 1, 5) end
-
+   local q = Model.query(tables_, cond_, nil, columns_)
+   for _,v in ipairs(q) do 
+      v.p_ip = v.p_ip or v.n_ip
+      v.c_name = v.c_name or v.n_name
+      table.insert(v, 1, 5)
+   end
    return q
+   --return "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n"
+end
+
+
+----------------------------------------------------------------------
+--  QUERY 6 - network sem porta sem software e com monitor - monitoracao de host onde o service eh ping
+----------------------------------------------------------------------
+function make_query_6(n_id, clause)
+   t = { "n", "o", "s", "m" }
+   n = { "csv", "sv", "sw" }
+
+   local columns_ = make_columns(t)
+   local _,nulls_ = make_columns(n)
+   local tables_  = make_tables(t)
+   local cond_    = make_where(t)
+
+   columns_ = columns_..",\n"..nulls_
+
+   if n_id  then cond_ = cond_ .. " and n.id = "  .. n_id  end
+   if clause  then cond_ = cond_ .. clause end
+
+   local q = Model.query(tables_, cond_, nil, columns_)
+   for _,v in ipairs(q) do 
+      v.p_ip = v.p_ip or v.n_ip
+      v.c_name = v.c_name or v.n_name
+      table.insert(v, 1, 6)
+   end
+   return q
+   --return "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n"
 end
 
 
 
+----------------------------------------------------------------------
+--  END of the QUERIES
+----------------------------------------------------------------------
 
---   QUERY 6 - network com porta sem software e com monitor - monitoracao de host onde o service eh ping
 
+--[[ Funcao para mostrar como usar este modulo: ]]
+function how_to_use()
+   local a, b
+--[[
+   print(make_where("a", "ao"))
+   print(make_where("m", "sv"))
+   print(make_where("sv", "sw"))
+   print(make_where("m", "p"))
+   print(make_where("p", "m"))
+   print(make_where("m", "ss"))
+   print(make_where("m", "n"))
+   print(make_where("m", "sw"))
 
-function query_6(c_id, n_id, clause)
-
-   local columns_ = [[
-      c.id			as c_id,
-      c.entities_id		as c_entities_id,
-      c.name			as c_name,
-      c.serial			as c_serial,
-      c.otherserial		as c_otherserial,
-      c.locations_id		as c_locations_id,
-      c.is_template		as c_is_template,
-      c.is_deleted		as c_is_deleted,
-      c.states_id		as c_states_id,
-
-      n.id			as n_id,
-      n.items_id		as n_items_id,
-      n.itemtype		as n_itemtype,
-      n.entities_id		as n_entities_id,
-      n.logical_number		as n_logical_number,
-      n.name			as n_name,
-      n.ip			as n_ip,
-
-      ''			as csv_id,
-      ''			as csv_computers_id,
-      ''			as csv_softwareversions_id,
-
-      ''			as sv_id,
-      ''			as sv_entities_id,
-      ''			as sv_softwares_id,
-      ''			as sv_states_id,
-      ''			as sv_name,
-      ''			as sv_comment,
-
-      ''			as s_id,
-      ''			as s_entities_id,
-      ''			as s_is_recursive,
-      ''			as s_name,
-      ''			as s_locations_id,
-      ''			as s_is_deleted,
-      ''			as s_is_template,
-
-      o.object_id		as o_object_id,
-      o.instance_id		as o_instance_id,
-      o.objecttype_id		as o_objecttype_id,
-      o.name1			as o_name1,
-      o.name2			as o_name2,
-      o.is_active		as o_is_active,
-
-      hst.host_id		as hst_host_id,
-      hst.instance_id		as hst_instance_id,
-      hst.host_object_id	as hst_host_object_id,
-      hst.alias			as hst_alias,
-      hst.display_name		as hst_display_name,
-      hst.address		as hst_address,
-      hst.check_command_object_id	as hst_check_command_object_id,
-      hst.check_command_args	as hst_check_command_args,
-
-      svc.service_id		as svc_service_id,
-      svc.instance_id		as svc_instance_id,
-      svc.host_object_id	as svc_host_object_id,
-      svc.service_object_id	as svc_service_object_id,
-      svc.display_name		as svc_display_name,
-      svc.check_command_object_id	as svc_check_command_object_id,
-      svc.check_command_args	as svc_check_command_args,
-
-      m.networkports_id		as m_networkports_id,
-      m.softwareversions_id	as m_softwareversions_id,
-      m.service_object_id	as m_service_object_id,
-      m.is_active		as m_is_active,
-      m.type			as m_type
-      ]]
-
-   local table_ = [[ glpi_networkequipments c, glpi_networkports n,
-                     nagios_objects o, nagios_hosts hst, nagios_services svc, itvision_monitors m]]
-
-   local cond_ = [[ n.itemtype = "NetworkEquipment" and
-           c.id = n.items_id and 
-           n.id = m.networkports_id and
-           m.softwareversions_id is null and
-           m.service_object_id = svc.service_object_id ]]
-
-   if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
-   if n_id  then cond_ = cond_ .. " and n.id = "  .. n_id  end
-   if clause  then cond_ = cond_ .. clause end
-
-   local q = Model.query(table_, cond_, nil, columns_)
-   for _,v in ipairs(q) do table.insert(v, 1, 6) end
-
-   return q
+   a = make_columns({"a", "ao"})
+   a = make_where({"a", "ao"})
+   a = make_tables({"a", "ao"})
+   a = make_query_general({"a", "ao", "o", "m", })
+]]
+   a = make_query_1()
+   a = make_query_2()
+   a = make_query_3()
+   a = make_query_4()
+   a = make_query_2(1,1,2)
+   a = make_query_6()
+   a = make_query_5()
+   if type(a) == "string" then print(a) end
 end
 
-
+--how_to_use()
            
 -- A FUNCAO ABAIXO JUNTA O RESULTADO DE TODAS AS QUERIES (1 à 6) EM UM UNICO RESULT SET
 
@@ -645,29 +426,28 @@ function select_monitors(clause)
    local q2 = make_query_2(nil, nil, nil, clause)
    local q3 = make_query_3(nil, nil, clause)
    local q4 = make_query_4(nil, nil, nil, clause)
+   clause = string.gsub(clause, "c.", "n.")
    local q5 = make_query_5(nil, clause)
+   local q6 = make_query_6(nil, clause)
 
    for _,v in ipairs(q1) do table.insert(q, v) end
    for _,v in ipairs(q2) do table.insert(q, v) end
    for _,v in ipairs(q3) do table.insert(q, v) end
    for _,v in ipairs(q4) do table.insert(q, v) end
    for _,v in ipairs(q5) do table.insert(q, v) end
-   --for _,v in ipairs(q6) do table.insert(q, v) end
+   for _,v in ipairs(q6) do table.insert(q, v) end
 
    table.sort(q, function (a, b) 
+      a.c_name  = a.c_name  or ""
+      a.p_ip    = a.p_ip    or ""
+      a.sw_name = a.sw_name or ""
+      a.sv_name = a.sv_name or ""
+      b.c_name  = b.c_name  or ""
+      b.p_ip    = b.p_ip    or ""
+      b.sw_name = b.sw_name or ""
+      b.sv_name = b.sv_name or ""
       return a.c_name..a.p_ip..a.sw_name..a.sv_name < b.c_name..b.p_ip..b.sw_name..b.sv_name  end )
 
    return q
 end
-
-
-function select_checkcmds()
-   local table_ = [[ nagios_objects ]]
-   local cond_ = [[ objecttype_id = 12 and is_active = 1 and name1 not in 
-      ('check-host-alive', 'notify-host-by-email', 'notify-service-by-email', 'process-host-perfdata', 
-       'process-service-perfdata', 'return_true') ]]
-
-   return Model.query(table_, cond_)
-end
-
 

@@ -25,4 +25,5 @@ require "model_access"
 require "model_itvision"
 require "model_glpi"
 require "model_monitor"
+require "model_checkcmds"
 
