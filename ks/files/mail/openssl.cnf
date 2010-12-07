@@ -147,7 +147,7 @@ commonName_default		= Daniel Lins
 commonName_max			= 64
 
 emailAddress			= alert@itvison.com.br
-emailAddress			= alert@itvison.com.br
+emailAddress_default		= alert@itvison.com.br
 emailAddress_max		= 64
 
 # SET-ex3			= SET extension number 3
