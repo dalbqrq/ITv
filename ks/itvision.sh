@@ -436,13 +436,7 @@ Alias /ocs /ocsinventory-bla/bla" ocsinventory-reports.conf
 install_msg SMTP
 
 cd /tmp
-sed -i.orig -e 's/AU/BR/' \
-        -e 's/Some-State/Rio de Janeiro/' \
-        -e 's/Locality Name (eg, city)/Rio de Janeiro/' \
-        -e 's/Internet Widgits Pty Ltd/ITvision/' \
-        -e 's/#organizationalUnitName_default =/organizationalUnitName_default  = ITvision Monitor/' \
-        -e 's/Email Address/alert@itvison.com.br/' \
-        -e 's/Common Name (eg, YOUR name)/Daniel Lins/' /usr/lib/ssl/openssl.cnf
+cp $itvhome/ks/files/mail/openssl.cnf /usr/lib/ssl
 
 /usr/lib/ssl/misc/CA.pl -newca
 openssl req -new -nodes -subj '/CN=ITvision/O=ITvision/C=BR/ST=Rio de Janeiro/L=Rio de Janeiro/emailAddress=alert@itvision.com.br' -keyout SERVER-key.pem -out SERVER-req.pem -days 3650
