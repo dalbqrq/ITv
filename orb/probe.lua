@@ -104,7 +104,8 @@ ITvision:dispatch_post(update, "/update/(%d+)")
 
 
 function add(web, query, c_id, p_id, sv_id, default)
-   local chk = Model.select_checkcmds()
+   local chk = Model.select_checkcmds(nil, true)
+-- get_allcheck_params()
    local cmp = {}
 
    query = tonumber(query)
@@ -202,12 +203,14 @@ function insert(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, ip)
          clause = "object_id = "..web.input.check
       end
       chk = Model.query("nagios_objects", clause)
+      -- DEBUG: text_file_writer ("/tmp/4", "clause: "..clause.."\n")
       if chk[1] then chk_name = chk[1].name1; chk_id = chk[1].object_id end
 
       dpl = string.toid(web.input.display)
       if dpl == "" then 
          dpl = software
       end
+      -- DEBUG: text_file_writer ("/tmp/5", "chk_name: "..chk_name.."\n".."chk_id: "..chk_id)
       cmd = insert_service_cfg_file (hostname, dpl, chk_name, chk_id, true)
       s = objects:select(hostname, dpl)
 
@@ -218,7 +221,7 @@ function insert(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, ip)
          for i = 1,loop do x = i/2 end -- aguarde...
          s = objects:select(hostname, dpl)
       end
-      -- DEBUG: text_file_writer ("/tmp/4", "Counter: "..counter.."\n")
+      -- DEBUG: text_file_writer ("/tmp/6", "Counter: "..counter.."\n")
 
       if s[1] == nil then 
          msg = msg..error_message(12)
@@ -309,7 +312,7 @@ function render_list(web, cmp, chk, msg)
          link }
    end
 
-   res[#res+1] = render_content_header("Checagem", web:link("/add"), web:link("/list"))
+   res[#res+1] = render_content_header("Checagem", nil, web:link("/list"))
    if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ msg } end
    res[#res+1] = render_form_bar( render_filter(web), strings.search, web:link("/list"), web:link("/list") )
    res[#res+1] = render_table(row, header)
@@ -432,7 +435,7 @@ function render_add(web, cmp, chk, params)
 
 -- VER: http://stackoverflow.com/questions/942772/html-form-with-two-submit-buttons-and-two-target-attributes
 
-   res[#res+1] = render_content_header("Checagem", web:link("/add"), web:link("/list"))
+   res[#res+1] = render_content_header("Checagem", nil, web:link("/list"))
    res[#res+1] = render_table(row, header)
 
    if v.sv_id ~= 0 then 

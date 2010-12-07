@@ -1,4 +1,5 @@
 require "Model"
+require "util"
 
 function select_checkcmds(id, hide_check_host)
    local table_ = [[ nagios_objects o, itvision_checkcmds c ]]
@@ -15,6 +16,7 @@ function select_checkcmds(id, hide_check_host)
 
    local extra_ = [[ order by name1 ]]
 
+   --DEBUG: id = id or ""; text_file_writer ("/tmp/7"..id, "select * from ".. table_ .." where ".. cond_ .. " ".. extra_..";\n\n" )
    return Model.query(table_, cond_, extra_)
 end
 
@@ -27,11 +29,12 @@ function select_checkcmd_params(id, exclude_fixed_params)
       c.id = ]].. id
 
    if exclude_fixed_params then
-      cond_ = cond_ .. [[ and .sequence is not null ]]
+      cond_ = cond_ .. [[ and p.sequence is not null ]]
    end
 
    local extra_ = [[ order by p.sequence ]]
 
+   --DEBUG: id = id or ""; text_file_writer ("/tmp/8"..id, "select * from ".. table_ .." where ".. cond_ .. " ".. extra_..";\n\n" )
    return Model.query(table_, cond_, extra_)
 end
 
@@ -46,6 +49,24 @@ end
 
 function get_check_params(id)
    local c = select_checkcmds(id, true)
+
+   --[[ DEBUG
+   if c[1] == nil then
+      text_file_writer ("/tmp/9",id )
+   end
+   ]]
+
+   -- Este temporizador foi colocado aqui em funcao de comportamenteo estranho
+   -- identificado com o DEBUG acima. Curiosamente a query nao retornava o 
+   -- valor apesar de existir a entrada. O loop abaixo insite na tentativa e
+   -- acaba conseguindo.
+   local counter, ui, x = 0, 0, 0
+   while c[1] == nil do
+      counter = counter + 1
+      for i = 1,loop do x = i/2 end -- aguarde...
+      c = select_checkcmds(id, true)
+   end
+
    local p = select_checkcmd_params(c[1].id, true)
    return c, p
 end
@@ -56,6 +77,7 @@ function get_allcheck_params(id)
    local p = select_checkcmd_params(c[1].id, false)
    return c, p
 end
+
 
 function how_to_use(object_id)
    local c, p = get_allcheck_params(object_id)

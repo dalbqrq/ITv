@@ -580,19 +580,19 @@ function render_content_header(name, add, list, edit, geotag)
    myul[#myul+1] = li{ "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" }
 
    if add then
-      myul[#myul+1] = li{ a{ href="'"..add.."'", img{ src='/servdesk/pics/menu_add.png', title='Adicionar', alt='Adicionar'} } }
+      myul[#myul+1] = li{ a{ href=add, img{ src='/servdesk/pics/menu_add.png', title='Adicionar', alt='Adicionar'} } }
    end
 
    if list then
-      myul[#myul+1] = li{ a{ href="'"..list.."'",img{ src='/servdesk/pics/menu_search.png', title='Pesquisar', alt='Pesquisar'} } }
+      myul[#myul+1] = li{ a{ href=list,img{ src='/servdesk/pics/menu_search.png', title='Pesquisar', alt='Pesquisar'} } }
    end
 
    if edit then
-      myul[#myul+1] = li{ a{ href="'"..edit.."'",img{ src='/servdesk/pics/edit.png', title='Editar', alt='Editar'} } }
+      myul[#myul+1] = li{ a{ href=edit,img{ src='/servdesk/pics/edit.png', title='Editar', alt='Editar'} } }
    end
 
    if geotag then
-      myul[#myul+1] = li{ a{ href="'"..geotag.."'",img{ src='/pics/icon32.png', title='GeoVision', alt='Geotag'} } }
+      myul[#myul+1] = li{ a{ href=geotag,img{ src='/pics/icon32.png', title='GeoVision', alt='Geotag'} } }
    end
 
    return div{ id='menu_navigate', div { id='c_ssmenu2', ul{ myul } } }

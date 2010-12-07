@@ -324,7 +324,7 @@ function render_add(web, HST, SVC, APP, APPOBJ, APPS, AR, RT, app_id, msg)
    local hst = { render_form(web:link(url_app), web:link("/add/"..app_id),
                { H("select") { size=list_size, style="width: 100%;", name="item", opt_hst }, br(),
                  input{ type="hidden", name="app_id", value=app_id },
-                 input{ type="hidden", name="type", value="hst" } } ) }
+                 input{ type="hidden", name="type", value="hst" } }, true, strings.add ) }
    
 
    -- LISTA DE SERVICES PARA SEREM INCLUIDOS ---------------------------------
@@ -335,18 +335,18 @@ function render_add(web, HST, SVC, APP, APPOBJ, APPS, AR, RT, app_id, msg)
    local svc = { render_form(web:link(url_app), web:link("/add/"..app_id),
                { H("select") { size=list_size, style="width: 100%;", name="item", opt_svc }, br(),
                  input{ type="hidden", name="app_id", value=app_id },
-                 input{ type="hidden", name="type", value="svc" } } ) }
+                 input{ type="hidden", name="type", value="svc" } }, true, strings.add ) }
 
 
-   -- LISTA DE APPLIC PARA SEREM INCLUIDOS ---------------------------------
+   -- LISTA DE APPLIC PARA SEREM INCLUIDAS ---------------------------------
    local opt_app = {}
    for i,v in ipairs(APP) do
       opt_app[#opt_app+1] = option{ value=v.object_id, v.name2 }
-   end  
+   end
    local app = { render_form(web:link(url_app), web:link("/add/"..app_id),
                { H("select") { size=list_size, style="width: 100%;", name="item", opt_app }, br(),
                  input{ type="hidden", name="app_id", value=app_id },
-                 input{ type="hidden", name="type", value="app" } } ) }
+                 input{ type="hidden", name="type", value="app" } }, true, strings.add ) }
 
 
    header = { strings.host, strings.service, strings.application }
