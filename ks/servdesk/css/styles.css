@@ -34,7 +34,7 @@
 /* ################--------------- Default style  ---------------#################### */
 
 body{
-	font-family: 'Bitstream Vera Sans', arial, Tahoma, 'Sans serif';
+	font-family:Verdana, Arial, Helvetica, sans-serif;
 	font-size: 12px;
 	margin: 0;
 	padding: 0;
@@ -72,7 +72,7 @@ img{
 }
 
 small{  
-	font-family: verdana;
+	font-family:Verdana, Arial, Helvetica, sans-serif;
 	font-size: 10px;
 
 } 
@@ -482,7 +482,7 @@ td { }
 /* (obsolète mais encore utilisés)							*/
 
 .icon_consol_hov, .icon_consol{
-	font-family: "Trebuchet MS", Tahoma, Arial, Helvetica, sans-serif;
+	font-family:Verdana, Arial, Helvetica, sans-serif;
 	font-size : 12px;
 	font-weight: bold;
 	padding: 4px;
@@ -547,7 +547,7 @@ ul.autocomp   li.selected { background-color: #FFF6CF; }
 
 
 .tracking_hour{
-	font-family: verdana;
+	font-family:Verdana, Arial, Helvetica, sans-serif;
 	font-size: 10px;
 }
 
@@ -833,7 +833,7 @@ ul#onglet li.actif a {
 	text-decoration: none;
 	padding: 3px;
 	font-size: 10px;
-	font-family:  Verdana,Arial,Helvetica,sans-serif;
+	font-family: Verdana,Arial,Helvetica,sans-serif;
 	font-weight: bold;
 }
 
@@ -849,7 +849,7 @@ ul#onglet span.fake{
 	text-decoration: none;
 	padding: 3px;
 	font-size: 10px;
-	font-family:  Verdana,Arial,Helvetica,sans-serif;
+	font-family: Verdana,Arial,Helvetica,sans-serif;
 	font-weight: bold;
 	cursor:pointer;
 
@@ -934,7 +934,7 @@ ul#onglet span.fake{
 	margin-left: auto;
 	margin-right: auto;
 	background:url("../pics/login_glpi.png")  no-repeat;
-	font-family : Verdana,Arial,Helvetica,sans-serif;
+	font-family: Verdana,Arial,Helvetica,sans-serif;
 	font-size : 12px;
 	color :#659900;
 	font-weight: bold;
@@ -1010,7 +1010,7 @@ padding:0;
 }
 
 #boxlogin legend {
-	font-family:"Trebuchet MS",Verdana,Geneva,Arial,Helvetica,sans-serif;
+	font-family: Verdana,Arial,Helvetica,sans-serif;
 	font-size: 15px;
 	font-weight: 700;
 	background-color: transparent;
@@ -1048,6 +1048,7 @@ padding:0;
 
 .sous_logo {
 	font-family: arial;
+	font-family: Verdana,Arial,Helvetica,sans-serif;
 	font-size: 9px;
 	color: #eeeeee;
 	text-decoration: none;
@@ -1138,7 +1139,7 @@ div#c_recherche form{
 div#c_recherche form div#champRecherche input{
 	border: 1px solid #000;
 	height: 14px;
-	font-family: 'Bitstream Vera Sans', arial, Tahoma, 'Sans serif';
+	font-family: Verdana,Arial,Helvetica,sans-serif;
 	font-size: 11px;
 }
 
@@ -1151,7 +1152,7 @@ div#c_recherche form div#boutonRecherche{
 }
 
 div#c_recherche form div#boutonRecherche input{
-	font-family: 'Bitstream Vera Sans', arial, Tahoma, 'Sans serif';
+	font-family: Verdana,Arial,Helvetica,sans-serif;
 	font-size: 0.7em;
 	width: 15px;
 	height: 15px;
@@ -1453,7 +1454,7 @@ div#show_all_menu{
 	text-align: center;
 	margin: 0;
 	padding: 1px .5em;
-	font-family: helvetica,arial,sans-serif;
+	font-family: Verdana,Arial,Helvetica,sans-serif;
 	font-size: 10px;
 	font-weight: bold;
 	background-color: #fff;
@@ -1477,7 +1478,7 @@ div#show_all_menu{
 	text-align: center;
 	margin: 0;
 	padding: 1px .5em;
-	font-family: helvetica,arial,sans-serif;
+	font-family: Verdana,Arial,Helvetica,sans-serif;
 	font-size: 10px;
 	font-weight: bold;
 	background-color: #fff;

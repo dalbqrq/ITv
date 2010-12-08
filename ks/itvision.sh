@@ -287,6 +287,8 @@ echo << EOF > /usr/share/nagios3/htdocs/grapher.html
 </HEAD></HTML>
 EOF
 
+sed -i.orig -e "s/NagiosGrapher by NETWAYS GMBH/ITvision/g" /usr/lib/cgi-bin/nagiosgrapher/rrd2-system.cgi
+
 # --------------------------------------------------
 # NDO UTILS - Nagios
 # --------------------------------------------------
