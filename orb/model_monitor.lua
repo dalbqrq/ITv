@@ -396,6 +396,7 @@ function select_monitors(clause)
    local q3 = make_query_3(nil, nil, clause)
    local q4 = make_query_4(nil, nil, nil, clause)
    clause = string.gsub(clause, "c.", "n.")
+   clause = string.gsub(clause, "c_", "n_")
    local q5 = make_query_5(nil, clause)
    local q6 = make_query_6(nil, clause)
 
@@ -446,8 +447,9 @@ function how_to_use()
    a = make_query_6()
    a = make_query_5()
 ]]
-   a = make_query_6(nil, " and m.service_object_id = 181")
    a = make_query_3(nil, nil, " and m.service_object_id = 181")
+   a = make_query_6(nil, [[ and m.service_object_id in (select ao.service_object_id from itvision_apps a, itvision_app_objects ao 
+                          where a.id = ao.app_id and a.service_object_id = 356)]])
    if type(a) == "string" then print(a) end
 end
 
