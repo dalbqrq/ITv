@@ -379,7 +379,6 @@ echo "<?php
 ?>" > /usr/local/servdesk/config/config_db.php
 chmod 600 /usr/local/servdesk/config/config_db.php
 chown $user.$user /usr/local/servdesk/config/config_db.php
-# PRECEISA, DEVO ?????? cp -a /usr/local/servdesk/config/config_db.php /usr/local/glpi/config/config_db.php
 
 echo "Alias /servdesk "/usr/local/servdesk"
 <Directory "/usr/local/servdesk">
@@ -397,9 +396,12 @@ echo "Alias /glpi "/usr/local/glpi"
     Allow from all
 </Directory>"  >> /etc/apache2/conf.d/glpi.conf
 
-cp $itvhome/ks/db/glpi.sql.gz /tmp
-gunzip /tmp/glpi.sql.gz
-mysql -u $dbuser --password=$dbpass $dbname < /tmp/glpi.sql
+if [ -z "$migra_glpi" ]; then
+    cp -a /usr/local/servdesk/config/config_db.php /usr/local/glpi/config/config_db.php
+    cp $itvhome/ks/db/glpi.sql.gz /tmp
+    gunzip /tmp/glpi.sql.gz
+    mysql -u $dbuser --password=$dbpass $dbname < /tmp/glpi.sql
+fi     
 
 cd $itvhome/ks/servdesk
 tar cf - * | ( cd /usr/local/servdesk; tar xfp -)
@@ -440,18 +442,11 @@ Alias /ocs /ocsinventory-bla/bla" ocsinventory-reports.conf
 install_msg SMTP
 
 cd /tmp
-cat << EOF > ans
-$dbpass
-BR
-Rio de Janeiro
-Rio de Janeiro
-ITvision
+cp $itvhome/ks/files/mail/openssl.cnf /usr/lib/ssl
 
-ITvision Monitor
-alert@itvision.com.br
-EOF
-/usr/lib/ssl/misc/CA.pl -newca < /tmp/ans
-openssl req -new -nodes -subj '/CN=ITvision/O=ITvision/C=BR/ST=Rio de Janeiro/L=Rio de Janeiro/emailAddress=alert@itvision.com.br' -keyout SERVER-key.pem -out SERVER-cert.pem -days 3650
+/usr/lib/ssl/misc/CA.pl -newca
+openssl req -new -nodes -subj '/CN=ITvision/O=ITvision/C=BR/ST=Rio de Janeiro/L=Rio de Janeiro/emailAddress=alert@itvision.com.br' -keyout SERVER-key.pem -out SERVER-req.pem -days 3650
+openssl ca -out SERVER-cert.pem -infiles SERVER-req.pem
 cp /tmp/demoCA/cacert.pem /tmp/SERVER-key.pem /tmp/SERVER-cert.pem /etc/postfix
 chmod 644 /etc/postfix/SERVER-cert.pem /etc/postfix/cacert.pem
 chmod 400 /etc/postfix/SERVER-key.pem
@@ -567,7 +562,8 @@ install_msg CLEAN UP
 /usr/sbin/invoke-rc.d nagios-nrpe-server stop
 /usr/sbin/invoke-rc.d apache2 stop
 /usr/sbin/invoke-rc.d nagiosgrapher stop
-
+/usr/sbin/invoke-rc.d postfix stop
+/usr/sbin/invoke-rc.d postfix start
 /usr/sbin/invoke-rc.d apache2 start
 /usr/sbin/invoke-rc.d nagios-nrpe-server start
 /usr/sbin/invoke-rc.d nagios3 start
