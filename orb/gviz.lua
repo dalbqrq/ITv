@@ -1,19 +1,16 @@
 #!/usr/bin/env wsapi.cgi
 --[[ 
-
   How to Make a Text Link Submit A Form:
   http://www.thesitewizard.com/archive/textsubmit.shtml
 
   FORMS I HTML4
   http://www.w3.org/2007/03/html-forms/#(1)
-
 ]]
-
 require "Model"
 require "config"
-module(Model.name, package.seeall, orbit.new)
 require "messages"
 
+module(Model.name, package.seeall, orbit.new)
 
 
 local scrt = [[

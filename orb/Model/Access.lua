@@ -1,5 +1,3 @@
-
---require "Model"
 require "util"
 require "messages"
 

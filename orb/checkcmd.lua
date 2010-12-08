@@ -1,12 +1,11 @@
 #!/usr/bin/env wsapi.cgi
 
 -- includes & defs ------------------------------------------------------
+require "Model"
+require "View"
 require "util"
 require "monitor_util"
-require "View"
 
-require "orbit"
-require "Model"
 module(Model.name, package.seeall,orbit.new)
 
 

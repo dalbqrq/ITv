@@ -1,9 +1,7 @@
+module("Itvision", package.seeall)
 
-require "Model"
 require "util"
 require "messages"
-require "model_access"
-
 
 ----------------------------- HOSTS ----------------------------------
 

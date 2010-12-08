@@ -1,7 +1,0 @@
-#!/usr/bin/env wsapi.cgi
-
-require "computer"
-
-return itvision
-
-

@@ -1,19 +1,17 @@
 #!/usr/bin/env wsapi.cgi
 
 -- includes & defs ------------------------------------------------------
-local no_software_code = "_no_software_code_"
-
+require "Model"
+require "View"
 require "util"
 require "monitor_util"
-require "View"
 
-require "orbit"
-require "Model"
 module(Model.name, package.seeall,orbit.new)
 
 local objects  = Model.nagios:model "objects"
 local monitors = Model.itvision:model "monitors"
 
+local no_software_code = "_no_software_code_"
 
 -- models ------------------------------------------------------------
 

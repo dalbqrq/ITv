@@ -1,8 +1,6 @@
+module("Glpi", package.seeall)
 
-require "Model"
 require "util"
-require "model_access"
-
 
 ----------------------------- COMPUTERS ----------------------------------
 

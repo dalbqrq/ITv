@@ -1,11 +1,10 @@
 #!/usr/bin/env wsapi.cgi
 
 -- includes & defs ------------------------------------------------------
-require "util"
-require "View"
-
-require "orbit"
 require "Model"
+require "View"
+require "util"
+
 module(Model.name, package.seeall,orbit.new)
 
 local apps = Model.itvision:model "apps"

@@ -1,12 +1,10 @@
 #!/usr/bin/env wsapi.cgi
 
 -- includes & defs ------------------------------------------------------
-
-require "util"
-require "View"
-
-require "orbit"
 require "Model"
+require "View"
+require "util"
+
 module(Model.name, package.seeall,orbit.new)
 
 local apps = Model.itvision:model "apps"
@@ -26,7 +24,7 @@ end
 
 
 function app_trees:select_full_path(node)
-   return Model.select_full_path_app_trees(node)
+   --return Model.select_full_path_app_trees(node)
 end 
 
 function apps:select_apps(id)
@@ -88,7 +86,7 @@ ITvision:dispatch_get(add, "/add", "/add/(%d+)")
 
 function insert(web)
    local origin
-   app_trees = Model.new_app_trees()
+   --app_trees = Model.new_app_trees()
    if web.input.app then
       app_trees.app_id = web.input.app_id
    else

@@ -21,9 +21,5 @@ itvision = make_model ( 'itvision' )
 nagios   = make_model ( 'nagios' )
 glpi     = make_model ( 'glpi' )
 
-require "model_access"
-require "model_itvision"
-require "model_glpi"
-require "model_monitor"
-require "model_checkcmds"
+require "Access"
 

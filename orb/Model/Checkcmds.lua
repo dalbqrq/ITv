@@ -1,4 +1,5 @@
-require "Model"
+module("Checkcmds", package.seeall)
+
 require "util"
 
 function select_checkcmds(id, hide_check_host)

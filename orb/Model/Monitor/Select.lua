@@ -1,7 +1,7 @@
 require "Model"
 
-local DEBUG = true
 local DEBUG = false
+local DEBUG = true
 
 --[[
         +------------+    +-------------------------+    +-----------------+      +----------+
@@ -38,7 +38,6 @@ local tables = {
    Ou seja, é a chave estrangeira.
 ]]
    a =   { name="itvision_apps",                   ao="id", } ,
-   --ao =  { name="itvision_app_objects",            a="app_id", o="service_object_id", s="service_object_id", ss="service_object_id" } ,
    ao =  { name="itvision_app_objects",            a="app_id", o="service_object_id" } ,
    m =   { name="itvision_monitors",               o="service_object_id", s="service_object_id", ss="service_object_id", 
                                                       n="networkequipments_id", p="networkports_id", sv="softwareversions_id" },
