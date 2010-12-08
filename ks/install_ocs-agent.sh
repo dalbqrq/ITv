@@ -15,6 +15,7 @@ if [ "$OS" == "Linux" ]; then
         RELEASE=(`cat /etc/issue |awk -F" " '{print $1}'`)
                 else if [ "$OS" == "SunOS" ]; then
                 REALEASE="SunOS"
+		echo "Verificar manual em http://wiki.ocsinventory-ng.org/images/e/e9/OCS_-_How_to_Compile_and_Install_OCS_Inventory_NG_Agent_under_Solaris.pdf"
                         else
                         echo "Sistema operacional não reconhecido"
                 fi
