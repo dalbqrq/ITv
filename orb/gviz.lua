@@ -51,13 +51,9 @@ function show(web, id)
    --local obj = Model.select_app_to_graph(id)
    local obj = Model.select_monitors_app_objs(id)
    local rel = Model.select_app_relat_to_graph(id)
-   if app[1] then 
-      app_name = app[1].name
-      obj_id = app[1].service_object_id
-   else 
-      app_name = "none"
-      obj_id = nil
-   end
+   app_name = app[1].name
+   obj_id = app[1].service_object_id
+
    return render_show(web, app, app_name, id, obj, rel, obj_id)
 end
 ITvision:dispatch_get(show,"/show", "/show/(%d+)")

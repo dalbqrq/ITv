@@ -21,12 +21,10 @@ require "Model"
                                                            +---------------+
 
 
-        QUERY 1 - computador com porta sem software e sem monitor
-        QUERY 2 - computador com porta com software e sem monitor
-        QUERY 3 - computador com porta sem software e com monitor - monitoracao de host onde o service eh ping
-        QUERY 4 - computador com porta com software e com monitor - monitoracao de service 
-        QUERY 5 - network com porta sem software e sem monitor
-        QUERY 6 - network com porta sem software e com monitor - monitoracao de host onde o service eh ping
+        QUERY 1 - computador/networkequip com porta sem software e sem monitor
+        QUERY 2 - computador              com porta com software e sem monitor
+        QUERY 3 - computador/networkequip com porta sem software e com monitor - monitoracao de host onde o service eh ping
+        QUERY 4 - computador              com porta com software e com monitor - monitoracao de service 
 
 ]]
 
@@ -46,7 +44,6 @@ local tables = {
    ss =  { name="nagios_servicestatus",            ao="service_object_id", m="service_object_id", o="service_object_id", 
                                                       s="service_object_id" },
    c =   { name="glpi_computers",                  p="id", csv="id" },
-   --n =   { name="glpi_networkequipments",          m="id" },
    n =   { name="glpi_networkequipments",          p="id", csv="id" },
    p =   { name="glpi_networkports",               m="id", c="items_id", n="items_id" },
    csv = { name="glpi_computers_softwareversions", c="computers_id", sv="softwareversions_id" },
@@ -397,6 +394,8 @@ function select_monitors_app_objs(app_id)
    local q = {}
    local objs = Model.select_app_object("app_id = "..app_id)
 
+   if obj == nil then return nil end
+
    for _,o in ipairs(objs) do
       local clause = "m.service_object_id = "..o.service_object_id
       local q3 = make_query_3(nil, nil, clause)
@@ -426,7 +425,7 @@ end
 function how_to_use()
    local a, b = {}, {}
 --[[
-   print(make_where("a", "ao"))
+   erint(make_where("a", "ao"))
    print(make_where("m", "sv"))
    print(make_where("sv", "sw"))
    print(make_where("m", "p"))
@@ -445,18 +444,18 @@ function how_to_use()
    a = make_query_4()
    a = make_query_2(1,1,2)
    a = make_query_3(nil, nil, "m.service_object_id = 181")
+]]
+   a = make_query_4()
    if type(a) == "string" then print(a) end
-
-   a = make_query_1()
    print("count: ", table.getn(a))
    for i,v in ipairs(a) do 
-      print(i, v.c_id, v.p_itemtype) 
+      print("A: ",table.getn(a), v.c_name, v.s_name, v.sv_name, v.p_itemtype) 
    end
 
+--[[
    for i,v in ipairs(a) do
       print("Q: ",table.getn(a), v.c_name, v.p_itemtype) 
    end
-]]
 
    print("========================")
    a = select_monitors_app_objs(5)
@@ -464,9 +463,9 @@ function how_to_use()
    for i,v in ipairs(a) do
       print("A: ",table.getn(a), v.c_name, v.s_name, v.sv_name, v.p_itemtype) 
    end
+]]
 
 end
 
 --how_to_use()
-           
 

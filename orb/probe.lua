@@ -69,10 +69,10 @@ end
 -- controllers ------------------------------------------------------------
 
 function list(web, msg)
-   local clause = ""
-   if web.input.hostname  then clause = clause.." and c.name like '%"..web.input.hostname.."%' " end
-   if web.input.inventory then clause = clause.." and c.otherserial like '%"..web.input.inventory.."%' " end
-   if web.input.sn        then clause = clause.." and c.serial like '%"..web.input.sn.."%' " end
+   local clause
+   if web.input.hostname  then clause = clause.."c.name like '%"..web.input.hostname.."%' " end
+   if web.input.inventory then clause = clause.."c.otherserial like '%"..web.input.inventory.."%' " end
+   if web.input.sn        then clause = clause.."c.serial like '%"..web.input.sn.."%' " end
 
    local cmp = Model.select_monitors(clause)
    local chk = Model.select_checkcmds()
@@ -232,6 +232,9 @@ function insert(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, ip)
          -- DEBUG: msg = msg.." ||| serviceobjid"..svc.." ||| " 
       end
    end
+
+   os.reset_monitor() -- isto estah aqui pois as vezes o probe nao aparece na lista mesmo que itvivion_monitor
+                      -- e nagios_objects tenham sido criados
 
    return web:redirect(web:link("/list/"..msg..""))
 end

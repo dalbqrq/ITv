@@ -16,8 +16,7 @@ function select_checkcmds(id, hide_check_host)
 
    local extra_ = [[ order by name1 ]]
 
-   --DEBUG: 
-id = id or ""; text_file_writer ("/tmp/7"..id, "select * from ".. table_ .." where ".. cond_ .. " ".. extra_..";\n\n" )
+   --DEBUG: id = id or ""; text_file_writer ("/tmp/7"..id, "select * from ".. table_ .." where ".. cond_ .. " ".. extra_..";\n\n" )
    return Model.query(table_, cond_, extra_)
 end
 
