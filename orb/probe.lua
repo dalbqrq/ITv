@@ -289,7 +289,7 @@ function render_list(web, cmp, chk, msg)
       v.n_id = v.n_id or 0
       v.p_id = v.p_id or 0
       v.sv_id = v.sv_id or 0
-      if v.p_itemtype then itemtype = v.p_itemtype else itemtype = "Network" end
+      if v.p_itemtype then itemtype = v.p_itemtype else itemtype = "NetworkEquipment" end
       if v.p_ip then ip = v.p_ip else ip = v.n_ip end
       if v.c_name then name = v.c_name else name = v.n_name end
 
@@ -395,7 +395,7 @@ function render_add(web, cmp, chk, params)
       v.n_id = v.n_id or 0
       v.p_id = v.p_id or 0
       v.sv_id = v.sv_id or 0
-      if v.p_itemtype then itemtype = v.p_itemtype else itemtype = "Network" end
+      if v.p_itemtype then itemtype = v.p_itemtype else itemtype = "NetworkEquipment" end
       if v.p_ip then ip = v.p_ip else ip = v.n_ip end
       if v.c_name then name = v.c_name else name = v.n_name end
 
