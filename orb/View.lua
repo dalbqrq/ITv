@@ -197,8 +197,7 @@ function render_map(marker_maker, center, google_key)
    --center = center or "-22.966849,-43.243217" -- IMPA
    --center = center or "-22.865104,-43.430157" -- Av Bradil
    center = center or "-22.88604,-43.229721" -- Av Brasil - Celula 01
-   --google_key = google_key or "ABQIAAAAsqOIUfpoX_G_Pw0Ar48BRhS64UBg-UePRXM9viX4hk4iiwv9HRSiOpB5WKHSB9ZBy9mHRo7Ycwp9JA" --www.impa.br
-   google_key = google_key or "ABQIAAAAsqOIUfpoX_G_Pw0Ar48BRhRtyMmS1TXEK_DXFnd23B1n8zvUnRT_9hDq4-PHCmE33vrSdHVrdUyjgw" --itv.impa.br
+   google_key = google_key or config.view.google_maps_key
 
    java_code = [[
 // http://code.google.com/apis/maps/documentation/javascript/events.html
