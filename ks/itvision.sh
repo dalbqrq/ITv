@@ -159,12 +159,17 @@ monitor = {
         cmd_app    = "BUSPROC_STATUS",
 }
 
+view = {
+        google_map_key = "ABQIAAAAsqOIUfpoX_G_Pw0Ar48BRhRtyMmS1TXEK_DXFnd23B1n8zvUnRT_9hDq4-PHCmE33vrSdHVrdUyjgw" --itv.impa.br
+}
+
 path = {
         itvision = "$itvhome",
 }
 
 language = "pt_BR"
 EOF
+chown -R $user.$user $itvhome/orb/config.lua
 
 
 cd /home/$user
