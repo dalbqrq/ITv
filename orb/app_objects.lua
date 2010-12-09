@@ -2,6 +2,8 @@
 
 -- includes & defs ------------------------------------------------------
 require "Model"
+require "Itvision"
+require "Monitor"
 require "View"
 require "util"
 require "monitor_util"

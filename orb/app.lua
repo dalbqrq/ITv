@@ -2,6 +2,7 @@
 
 -- includes & defs ------------------------------------------------------
 require "Model"
+require "Itvision"
 require "View"
 require "util"
 require "monitor_util"
@@ -195,7 +196,7 @@ function activate(web, id, flag)
 --text_file_writer("/tmp/1", id.." : "..flag)
 
       local A = apps:select(id)
-      local O = Model.select_app_app_objects(id)
+      local O = Itvision.select_app_app_objects(id)
       if A[1] and O[1] then
          -- Sinaliza a app como ativa
          Model.update (tables, cols, clause) 

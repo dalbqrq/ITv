@@ -2,6 +2,7 @@
 
 -- includes & defs ------------------------------------------------------
 require "Model"
+require "Monitor"
 require "View"
 require "util"
 require "state"
@@ -25,14 +26,14 @@ end
 -- controllers ------------------------------------------------------------
 
 function show_hst(web, obj_id)
-   local A = Model.make_query_3(nil, nil, nil, "m.service_object_id = "..obj_id)
+   local A = Monitor.make_query_3(nil, nil, nil, "m.service_object_id = "..obj_id)
    return render_hst(web, obj_id, A)
 end
 ITvision:dispatch_get(show_hst, "/hst/(%d+)")
 
 
 function show_svc(web, obj_id)
-   local A = Model.make_query_4(nil, nil, nil, nil, "m.service_object_id = "..obj_id)
+   local A = Monitor.make_query_4(nil, nil, nil, nil, "m.service_object_id = "..obj_id)
    return render_svc(web, obj_id, A)
 end
 ITvision:dispatch_get(show_svc, "/svc/(%d+)")
@@ -58,10 +59,10 @@ function geotag(web, objtype, obj_id)
    if objtype == "app" then
       app = apps:select(nil, obj_id) 
 
-      A = Model.tree(app[1].id)
+      A = Monitor.tree(app[1].id)
 
    elseif objtype == "hst" then
-      A = Model.make_query_3(nil, nil, nil, "m.service_object_id = "..obj_id)
+      A = Monitor.make_query_3(nil, nil, nil, "m.service_object_id = "..obj_id)
    end
 
    return render_geotag(web, obj_id, objtype, A)

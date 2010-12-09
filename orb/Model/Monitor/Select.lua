@@ -204,6 +204,8 @@ end
 
 ]]
 
+local g_excludes = [[ and c.is_deleted = 0 and c.is_template = 0 and c.states_id = 1 ]]
+
 ----------------------------------------------------------------------
 --  QUERY 1 - computador com porta sem software e sem monitor
 ----------------------------------------------------------------------
@@ -224,23 +226,24 @@ function make_query_1(c_id, p_id, clause)
       -- os nomes dos campos tanto de computers como os de networkequipment comecam com c_
       if ic == "n" then 
          columns_ = string.gsub(columns_, "as n_", "as c_") 
+         excludes = string.gsub(g_excludes, "c%.", "n.")
+         if clause then clause = string.gsub(clause, "c%.", "n.") end
          it = "'NetworkEquipment'"
-         cond_ = cond_ .. [[ and n.states_id = 1 ]] -- estado deve ser ativo!
       else 
+         excludes = g_excludes
          it = "'Computer'"
-         cond_ = cond_ .. [[ and c.states_id = 1 ]] -- estado deve ser ativo!
       end 
 
       cond_ = cond_ .. [[ 
          and p.itemtype = ]]..it..[[
          and not exists (select 1 from itvision_monitors m2 where m2.networkports_id = p.id)
-      ]]
+      ]] .. excludes
 
       columns_ = columns_..",\n"..nulls_
 
       if c_id  then cond_ = cond_ .. " and "..ic..".id = "  .. c_id  end
       if p_id  then cond_ = cond_ .. " and p.id = "  .. p_id  end
-      if clause  then cond_ = cond_ .. " and " .. clause end
+      if clause then cond_ = cond_ .. " and " .. clause end
 
       r = Model.query(tables_, cond_, nil, columns_)
       for _,v in ipairs(r) do table.insert(v, 1, 1) end
@@ -269,8 +272,7 @@ function make_query_2(c_id, p_id, sv_id, clause)
    cond_ = cond_ .. [[ 
       and p.itemtype = "Computer" 
       and not exists (select 1 from itvision_monitors m2 where m2.networkports_id = p.id and m2.softwareversions_id = sv.id)
-      and c.states_id = 1 
-   ]]-- estado deve ser ativo!
+   ]] .. g_excludes
 
    columns_ = columns_..",\n"..nulls_
 
@@ -312,17 +314,18 @@ function make_query_3(c_id, p_id, a_id, clause)
       -- os nomes dos campos tanto de computers como os de networkequipment comecam com c_
       if ic == "n" then 
          columns_ = string.gsub(columns_, "as n_", "as c_") 
+         excludes = string.gsub(g_excludes, "c%.", "n.")
+         if clause then clause = string.gsub(clause, "c%.", "n.") end
          it = "'NetworkEquipment'"
-         cond_ = cond_ .. [[ and n.states_id = 1 ]] -- estado deve ser ativo!
       else 
+         excludes = g_excludes
          it = "'Computer'"
-         cond_ = cond_ .. [[ and c.states_id = 1 ]] -- estado deve ser ativo!
       end 
 
       cond_ = cond_ .. [[ 
          and p.itemtype = ]]..it..[[
          and m.softwareversions_id is null
-      ]]
+      ]] .. excludes
 
       columns_ = columns_..",\n"..nulls_
 
@@ -360,8 +363,7 @@ function make_query_4(c_id, p_id, sv_id, a_id, clause)
 
    cond_ = cond_ .. [[ 
       and p.itemtype = "Computer" 
-      and c.states_id = 1 
-   ]]-- estado deve ser ativo!
+   ]] .. g_excludes
 
    if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
    if p_id  then cond_ = cond_ .. " and p.id = "  .. p_id  end
@@ -394,7 +396,6 @@ function make_query_5(a_id, clause)
    local cond_    = make_where(t)
 
    cond_ = cond_ .. [[ 
-      and a.is_active = 1
       and o.name1 = ']]..config.monitor.check_app..[[' 
    ]]
 

@@ -2,6 +2,8 @@
 
 -- includes & defs ------------------------------------------------------
 require "Model"
+require "Monitor"
+require "Checkcmds"
 require "View"
 require "util"
 require "monitor_util"
@@ -67,13 +69,21 @@ end
 -- controllers ------------------------------------------------------------
 
 function list(web, msg)
-   local clause
-   if web.input.hostname  then clause = clause.."c.name like '%"..web.input.hostname.."%' " end
-   if web.input.inventory then clause = clause.."c.otherserial like '%"..web.input.inventory.."%' " end
-   if web.input.sn        then clause = clause.."c.serial like '%"..web.input.sn.."%' " end
+   local clause = nil
+   if web.input.hostname  then clause = "c.name like '%"..web.input.hostname.."%' " end
+   if web.input.inventory then 
+      local a = ""
+      if clause then a = " and " end
+      clause = clause..a.."c.otherserial like '%"..web.input.inventory.."%' "
+   end
+   if web.input.sn then 
+      local a = ""
+      if clause then a = " and " end
+      clause = clause..a.."c.serial like '%"..web.input.sn.."%' "
+   end
 
-   local cmp = Model.select_monitors(clause)
-   local chk = Model.select_checkcmds()
+   local cmp = Monitor.select_monitors(clause)
+   local chk = Checkcmds.select_checkcmds()
 
    return render_list(web, cmp, chk, msg)
 end
@@ -102,20 +112,20 @@ ITvision:dispatch_post(update, "/update/(%d+)")
 
 
 function add(web, query, c_id, p_id, sv_id, default)
-   local chk = Model.select_checkcmds(nil, true)
+   local chk = Checkcmds.select_checkcmds(nil, true)
 -- get_allcheck_params()
    local cmp = {}
 
    query = tonumber(query)
 
    if query == 1 then
-      cmp = Model.make_query_1(c_id, p_id)
+      cmp = Monitor.make_query_1(c_id, p_id)
    elseif query == 2 then
-      cmp = Model.make_query_2(c_id, p_id, sv_id)
+      cmp = Monitor.make_query_2(c_id, p_id, sv_id)
    elseif query == 3 then
-      cmp = Model.make_query_3(c_id, p_id)
+      cmp = Monitor.make_query_3(c_id, p_id)
    elseif query == 4 then
-      cmp = Model.make_query_4(c_id, p_id, sv_id)
+      cmp = Monitor.make_query_4(c_id, p_id, sv_id)
    end
 
    local params = { query=query, c_id=c_id, p_id=p_id, sv_id=sv_id, default=default }
@@ -158,7 +168,7 @@ function insert(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, ip)
          os.sleep(1)
          h = objects:select(hostname)
       end
-      text_file_writer("/tmp/contour_insert_h", tostring(counter))
+      --text_file_writer("/tmp/contour_insert_h", tostring(counter))
       -- DEBUG: text_file_writer ("/tmp/1", "Counter: "..counter.."\n")
       s = objects:select(hostname, config.monitor.check_host)
       -- caso service ainda nao tenha sido incluido aguarde e tente novamente
@@ -168,7 +178,7 @@ function insert(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, ip)
          os.sleep(1)
          s = objects:select(hostname, config.monitor.check_host)
       end
-      text_file_writer("/tmp/contour_insert_ha", tostring(counter))
+      --text_file_writer("/tmp/contour_insert_ha", tostring(counter))
       -- DEBUG: text_file_writer ("/tmp/2", "Counter: "..counter.."\n")
       svc = s[1].object_id
       monitors:insert_monitor(p_id, nil, n_id, svc, 1, "hst")

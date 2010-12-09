@@ -7,6 +7,8 @@
   http://www.w3.org/2007/03/html-forms/#(1)
 ]]
 require "Model"
+require "Monitor"
+require "Itvision"
 require "config"
 require "messages"
 
@@ -644,8 +646,8 @@ function show(web, id)
    --if id == "/show" and app[1] then id = 31 end
    --local app = apps:select_apps(id)
    --local obj = Model.select_app_to_graph(id)
-   local obj = Model.select_monitors_app_objs(id)
-   local rel = Model.select_app_relat_to_graph(id)
+   local obj = Monitor.select_monitors_app_objs(id)
+   local rel = Itvision.select_app_relat_to_graph(id)
    app_name = app[1].name
    obj_id = app[1].service_object_id
 

@@ -1,7 +1,8 @@
-
+require "Model"
+require "Itvision"
+require "Checkcmds"
 require "config"
 require "util"
-require "Model"
 
 local cfg_dir = config.monitor.dir.."/etc/itvision/"
 
@@ -57,9 +58,9 @@ function insert_service_cfg_file (hostname, display_name, chk_name, chk_id, hide
    local c, p
 
    if hide_check_host then
-      c, p = get_check_params(chk_id)
+      c, p = Checkcmds.get_check_params(chk_id)
    else
-      c, p = get_checkhost_params(chk_id)
+      c, p = Checkcmds.get_checkhost_params(chk_id)
    end
 
    local chk = chk_name
@@ -173,7 +174,7 @@ function activate_all_apps(apps)
    local file_name = config.monitor.bp_dir.."/etc/nagios-bp.conf"
 
    for i, v  in ipairs(apps) do
-      local objs = Model.select_app_app_objects(v.id)
+      local objs = Itvision.select_app_app_objects(v.id)
       if objs[1] then s = s .. activate_app(v, objs, v.is_active) end
    end
 
