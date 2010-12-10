@@ -465,39 +465,12 @@ function select_option_onchange(name, T, value_idx, label_idx, default_value, ur
 
       olist[#olist + 1] = "<option "..selected.." value=\""..v[value_idx].."\" label=\"".. 
                            url..":"..v[value_idx].."\">"..  v[label_idx].."</option>"
-                           --v[label_idx].."\">"..  v[label_idx].."</option>"
 
    end
    olist[#olist + 1] = "</select>"
 
    return olist
 end
-
---[[
-function render_selector_bar(web, A, id, path)
-   local url = ""
-   local res = {}
-   local selected = ""
-   local curr_app = 0
-   id = id or -1
-
-   for i, v in ipairs(A) do
-      url = web:link(path.."/"..v.id)
-      if tonumber(v.id) == tonumber(id) then
-         selected = "selected"
-         curr_app = i
-      else
-         selected = nil
-      end
-      res[#res+1] = option{ selected=selected, value=url, v.name }
-   end
-
-   --return { form{ H("select"){ ONCHANGE="location = this.options[this.selectedIndex].value;", res } } }
-   return form{ H("select"){ ONCHANGE="location = this.options[this.selectedIndex].value;", res } }
-   
-end
-]]
-
 
 
 -- YES or NO
@@ -570,6 +543,7 @@ function choose_name(opts, id)
    return "noname"
 end
 
+
 function select_hst_or_svc_or_app(name, default)
    return select_option(name, HostOrServiceOrApp, "id", "name", default)
 end
@@ -603,66 +577,4 @@ function render_content_header(name, add, list, edit, geotag, back)
    return div{ id='menu_navigate', div { id='c_ssmenu2', ul{ myul } } }
 end
 
-
-function render_map_old(web, lat, lon)
-
-    s = [[
-<html>
-<head>
-<META HTTP-EQUIV="Content-Type" CONTENT="text/html;charset=ISO-8859-1">
-<title>Exemplo de Google Maps API</title>
-<script src="http://maps.google.com/maps?file=api&v=2&key=#SUA CHAVE GOOGLE MAPS#" type="text/javascript"></script>
-<script type="text/javascript">
-   //<![CDATA[
-   
-   //função para carregar um mapa de Google. 
-   //Esta função é chamada quando a página termina de carregar. Evento onload
-   function load() {
-      //comprovamos se o navegador é compatível com os mapas de google
-      if (GBrowserIsCompatible()) {
-         //instanciamos um mapa com GMap, passando-lhe uma referência à camada ou <div> onde quisermos mostrar o mapa
-         var map = new GMap2(document.getElementById("map"));   
-         //centralizamos o mapa em uma latitude e longitude desejadas
-         map.setCenter(new GLatLng(]]..lat..[[,]]..lon..[[), 18);   
-         //adicionamos controles ao mapa, para interação com o usuário
-         map.setMapType(G_SATELLITE_MAP)
-         map.addControl(new GLargeMapControl());
-         map.addControl(new GMapTypeControl()); 
-         //daniel  map.addControl(new GOverviewMapControl()); ;
-      }
-   }
-   
-   //] ]>
-   </script>
-</head>
-<body onload="load()" onunload="GUnload()">
-<div id="map" style="width: 615px; height: 400px"></div>
-</body>
-</html>
-]]
-
-    return s
-end
-
-
--- ESTE MODO DE FAZER MENU ESTAh OBSOLETO --
-function button_link(label, link, class)
-   class = class or "none"
-   return [[<div class="buttons"> <a href="]]..link..
-          [[" class="]]..class..[[">]]..label..[[ </a> </div>]]
-end
-
--- ESTE MODO DE FAZER MENU ESTAh OBSOLETO --
-local menu = {}
-   menu[#menu + 1] = button_link("ARVORE APPS", "/orb/app_tree")
-   menu[#menu + 1] = button_link("APPS", "/orb/app")
-   menu[#menu + 1] = button_link("APP LIST", "/orb/app_object")
-   menu[#menu + 1] = button_link("APP RELAC", "/orb/app_relat")
-   menu[#menu + 1] = button_link("TIPO RELAC", "/orb/app_relat_types")
-   menu[#menu + 1] = button_link("PROBE", "/orb/probe")
-   menu[#menu + 1] = button_link("USUARIO", "/orb/user")
-   menu[#menu + 1] = button_link("GRUPO", "/orb/user_group")
-   menu[#menu + 1] = button_link("CHECK CMDS", "/orb/checkcmd")
-   menu[#menu + 1] = button_link("SISTEMA", "/orb/sysconfig")
-   menu[#menu + 1] = "<br><br><br><p><br><p> "
 

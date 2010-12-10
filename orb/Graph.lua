@@ -64,19 +64,19 @@ text_file_writer("/tmp/"..v.o_object_id, v.o_object_id)
             if not show_ip then name = string.gsub(name,"-(.+)", "") end
             label = v.o_name1  
 -- DEBUG ..":"..v.curr_state
-            url   = "/orb/obj_info/"..v.ao_type.."/"..v.object_id
+            url   = "/orb/obj_info/"..v.ao_type.."/"..v.o_object_id
             shape = "box"
          elseif v.ao_type == 'svc' then
             name = v.o_name1.."-"..v.o_name2
             label = v.o_name2  
 -- DEBUG ..":"..v.curr_state
-            url   = "/orb/obj_info/"..v.ao_type.."/"..v.object_id
+            url   = "/orb/obj_info/"..v.ao_type.."/"..v.o_object_id
             shape = "ellipse"
          elseif v.ao_type == 'app' then
-            name = v.name2
-            label = v.name2  
+            name = v.o_name2
+            label = v.o_name2  
 --DEBUG ..":"..v.curr_state
-            url   = "/orb/obj_info/"..v.ao_type.."/"..v.object_id
+            url   = "/orb/obj_info/"..v.ao_type.."/"..v.o_object_id
             shape = "hexagon"
             shape = "invhouse"
             shape = "octagon"

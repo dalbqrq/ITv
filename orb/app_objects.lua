@@ -119,13 +119,13 @@ function add(web, id, msg)
    local extra   = [[ order by o.name1, o.name2 ]]
 
    clause = [[ and o.name1 <> 'dummy' and o.name2 = ']]..config.monitor.check_host..[[' ]]
-   local HST = Model.make_query_3(nil, nil, exclude .. clause .. extra)
+   local HST = Model.make_query_3(nil, nil, nil, exclude .. clause .. extra)
 
    --local SVC = Model.select_service_object(nil, nil, nil, nil, id, nil)
    clause = [[ and o.name2 <> ']]..config.monitor.check_host..[[' ]]
-   local SVC = Model.make_query_4(nil, nil, nil, exclude .. clause .. extra)
+   local SVC = Model.make_query_4(nil, nil, nil, nil, exclude .. clause .. extra)
 
-   local APP = Model.select_service_object(nil, nil, nil, true)
+   local APP = Model.select_service_object(nil, nil, nil, true, id)
    --local APP = Model.select_app_service_object(nil, nil, nil, id) --TODO: 1
 
    local APPOBJ = Model.select_app_app_objects(id)
