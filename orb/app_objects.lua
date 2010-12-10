@@ -103,6 +103,7 @@ ITvision:dispatch_get(show, "/show/(%d+)")
 
 
 function add(web, id, msg)
+   local clause
    local APPS = apps:select_apps()
    if id == "/" or id == "/add" or id == "/add/" then
       if APPS[1] then
@@ -112,19 +113,29 @@ function add(web, id, msg)
       end
    end
 
-   local HST = Model.select_service_object(nil, nil, nil, nil, id, true)
-   local SVC = Model.select_service_object(nil, nil, nil, nil, id, nil)
+   --local HST = Model.select_service_object(nil, nil, nil, nil, id, true)
+   local exclude = [[ o.object_id not in ( select service_object_id from itvision_app_objects where app_id = ]]..id..[[) 
+                      and o.is_active = 1 ]]
+   local extra   = [[ order by o.name1, o.name2 ]]
+
+   clause = [[ and o.name1 <> 'dummy' and o.name2 = ']]..config.monitor.check_host..[[' ]]
+   local HST = Model.make_query_3(nil, nil, exclude .. clause .. extra)
+
+   --local SVC = Model.select_service_object(nil, nil, nil, nil, id, nil)
+   clause = [[ and o.name2 <> ']]..config.monitor.check_host..[[' ]]
+   local SVC = Model.make_query_4(nil, nil, nil, exclude .. clause .. extra)
+
    local APP = Model.select_service_object(nil, nil, nil, true)
    --local APP = Model.select_app_service_object(nil, nil, nil, id) --TODO: 1
+
    local APPOBJ = Model.select_app_app_objects(id)
    local AR = Model.select_app_relat_object(id)
    local RT = app_relat_types:select_app_relat_types()
 
    return render_add(web, HST, SVC, APP, APPOBJ, APPS, AR, RT, id, msg)
+
 end
 ITvision:dispatch_get(add, "/add/", "/add/(%d+)", "/add/(%d+):(.+)")
---ITvision:dispatch_get(add, "/add/(%d+)")
---ITvision:dispatch_get(add, "/add/(%d+):(.+)")
 
 
 
@@ -304,6 +315,8 @@ function render_add(web, HST, SVC, APP, APPOBJ, APPS, AR, RT, app_id, msg)
    local list_size = 2
    local header = ""
 
+text_file_writer("/tmp/q3", table.getn(SVC))
+
    res[#res+1] = render_content_header(strings.application, web:link("/add/"..app_id), web:link("/list"))
    res[#res+1] = render_bar( render_selector_bar(web, APPS, app_id, "/add") )
 
@@ -319,7 +332,7 @@ function render_add(web, HST, SVC, APP, APPOBJ, APPS, AR, RT, app_id, msg)
    -- LISTA DE HOSTS PARA SEREM INCLUIDOS ---------------------------------
    local opt_hst = {}
    for i,v in ipairs(HST) do
-     opt_hst[#opt_hst+1] = option{ value=v.object_id, v.name1 }
+     opt_hst[#opt_hst+1] = option{ value=v.o_object_id, v.o_name1 }
    end
    local hst = { render_form(web:link(url_app), web:link("/add/"..app_id),
                { H("select") { size=list_size, style="width: 100%;", name="item", opt_hst }, br(),
@@ -330,7 +343,7 @@ function render_add(web, HST, SVC, APP, APPOBJ, APPS, AR, RT, app_id, msg)
    -- LISTA DE SERVICES PARA SEREM INCLUIDOS ---------------------------------
    local opt_svc = {}
    for i,v in ipairs(SVC) do
-      opt_svc[#opt_svc+1] = option{ value=v.object_id, make_obj_name(v.name1, v.name2) }
+      opt_svc[#opt_svc+1] = option{ value=v.o_object_id, make_obj_name(v.o_name1, v.o_name2) }
    end  
    local svc = { render_form(web:link(url_app), web:link("/add/"..app_id),
                { H("select") { size=list_size, style="width: 100%;", name="item", opt_svc }, br(),

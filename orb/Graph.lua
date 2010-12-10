@@ -2,6 +2,7 @@ module("Graph", package.seeall)
 
 require "config"
 require "state"
+require "util"
 
 -- VER: http://code.google.com/apis/chart/docs/gallery/graphviz.html
 -- e:    http://code.google.com/apis/charttools/docs/choosing.html
@@ -53,27 +54,29 @@ function make_content(obj, rel)
    local use_relat_label = true
    local show_ip = false
 
+
    if obj[1] then
    for _,v in ipairs(obj) do
+text_file_writer("/tmp/"..v.o_object_id, v.o_object_id)
          local name, shape  = "", ""
          if v.ao_type == 'hst' then
-            name = v.name1
+            name = v.o_name1
             if not show_ip then name = string.gsub(name,"-(.+)", "") end
-            label = v.name1  
+            label = v.o_name1  
 -- DEBUG ..":"..v.curr_state
-            url   = "/orb/obj_info/"..v.ao_type.."/"..v.obj_id
+            url   = "/orb/obj_info/"..v.ao_type.."/"..v.object_id
             shape = "box"
          elseif v.ao_type == 'svc' then
-            name = v.name1.."-"..v.name2
-            label = v.name2  
+            name = v.o_name1.."-"..v.o_name2
+            label = v.o_name2  
 -- DEBUG ..":"..v.curr_state
-            url   = "/orb/obj_info/"..v.ao_type.."/"..v.obj_id
+            url   = "/orb/obj_info/"..v.ao_type.."/"..v.object_id
             shape = "ellipse"
          elseif v.ao_type == 'app' then
             name = v.name2
             label = v.name2  
 --DEBUG ..":"..v.curr_state
-            url   = "/orb/obj_info/"..v.ao_type.."/"..v.obj_id
+            url   = "/orb/obj_info/"..v.ao_type.."/"..v.object_id
             shape = "hexagon"
             shape = "invhouse"
             shape = "octagon"
@@ -93,7 +96,7 @@ m.networkports_id = n.id and
 c.id = n.items_id and
 
 ]]
-         color = set_color(v.curr_state, v.ao_type)
+         color = set_color(v.ss_current_state, v.ao_type)
 
          name = string.gsub(name, "%p", "")
 

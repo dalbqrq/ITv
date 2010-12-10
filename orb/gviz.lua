@@ -15,9 +15,9 @@ local apps = Model.itvision:model "apps"
 -- models ------------------------------------------------------------
 
 function apps:select_apps(id)
-   local clause = nil
+   local clause = " is_active = 1 "
    if id then
-      clause = "id = "..id
+      clause = " id = "..id
    end
    --return self:find_all(clause)
    return Model.query("itvision_apps", clause, "order by id")

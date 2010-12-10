@@ -44,5 +44,5 @@ and    m.service_object_id = s.service_object_id
 and    m.service_object_id = ss.service_object_id           
 and p.itemtype = 'NetworkEquipment'         
 and m.softwareversions_id is null
-and n.name = 'MAP012';
+and n.name = 'MAP008';
 

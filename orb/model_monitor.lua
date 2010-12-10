@@ -1,5 +1,8 @@
 require "Model"
 
+local DEBUG = true
+local DEBUG = false
+
 --[[
         +------------+    +-------------------------+    +-----------------+      +----------+
         |  glpi_     |----| glpi_                   |----|  glpi_          |------|  glpi_   |
@@ -35,7 +38,8 @@ local tables = {
    Ou seja, é a chave estrangeira.
 ]]
    a =   { name="itvision_apps",                   ao="id", } ,
-   ao =  { name="itvision_app_objects",            a="app_id", o="serivce_object_id", s="serivce_object_id", ss="serivce_object_id" } ,
+   --ao =  { name="itvision_app_objects",            a="app_id", o="service_object_id", s="service_object_id", ss="service_object_id" } ,
+   ao =  { name="itvision_app_objects",            a="app_id", o="service_object_id" } ,
    m =   { name="itvision_monitors",               o="service_object_id", s="service_object_id", ss="service_object_id", 
                                                       n="networkequipments_id", p="networkports_id", sv="softwareversions_id" },
    o =   { name="nagios_objects",                  ao="object_id", m="object_id", s="object_id", ss="object_id" }, 
@@ -229,7 +233,6 @@ function make_query_1(c_id, p_id, clause)
       cond_ = cond_ .. [[ 
          and p.itemtype = ]]..it..[[
          and not exists (select 1 from itvision_monitors m2 where m2.networkports_id = p.id)
-         and c_
       ]]
 
       columns_ = columns_..",\n"..nulls_
@@ -241,11 +244,11 @@ function make_query_1(c_id, p_id, clause)
       r = Model.query(tables_, cond_, nil, columns_)
       for _,v in ipairs(r) do table.insert(v, 1, 1) end
       for _,v in ipairs(r) do table.insert(q, v) end
-      --print ("\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n")
+
+      if DEBUG then print ("\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
    end
 
    return q
-   --return "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n"
 end
 
 
@@ -276,21 +279,27 @@ function make_query_2(c_id, p_id, sv_id, clause)
 
    q = Model.query(tables_, cond_, nil, columns_)
    for _,v in ipairs(q) do table.insert(v, 1, 2) end
+
+   if DEBUG then print( "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
+
    return q
-   --return "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n"
 end
 
 
 ----------------------------------------------------------------------
 --  QUERY 3 - computador com porta sem software e com monitor - monitoracao de host onde o service eh ping
 ----------------------------------------------------------------------
-function make_query_3(c_id, p_id, clause)
-   local q = {}
+function make_query_3(c_id, p_id, a_id, clause)
+   local q, t = {}, {}
    local ictype, it = { "c", "n" }, ""
 
    for _,ic in ipairs(ictype) do
       local r = {}
-      local t = { ic, "p", "o", "s", "m", "ss" }
+      if a_id then
+          t = { ic, "p", "o", "s", "m", "ss", "a", "ao" }
+      else
+          t = { ic, "p", "o", "s", "m", "ss" }
+      end
       local n = { "csv", "sv", "sw" }
 
       local columns_ = make_columns(t)
@@ -315,25 +324,30 @@ function make_query_3(c_id, p_id, clause)
 
       if c_id  then cond_ = cond_ .. " and "..ic..".id = "  .. c_id  end
       if p_id  then cond_ = cond_ .. " and p.id = "  .. p_id  end
+      if a_id then cond_ = cond_ .. " and a.id = " .. a_id end
       if clause  then cond_ = cond_ .. " and " .. clause end
 
       r = Model.query(tables_, cond_, nil, columns_)
       for _,v in ipairs(r) do table.insert(v, 1, 3) end
       for _,v in ipairs(r) do table.insert(q, v) end
-      --print ("\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n")
+
+      if DEBUG then print ("\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
    end
 
    return q
-   --return "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n"
 end
 
 
 ----------------------------------------------------------------------
 --  QUERY 4 - computador com porta com software e com monitor - monitoracao de service 
 ----------------------------------------------------------------------
-function make_query_4(c_id, p_id, sv_id, clause)
-   local q = {}
-   t = { "c", "p", "csv", "sv", "sw", "o", "s", "m", "ss" }
+function make_query_4(c_id, p_id, sv_id, a_id, clause)
+   local q, t = {}, {}
+   if a_id then
+       t = { "c", "p", "csv", "sv", "sw", "o", "s", "m", "ss", "a", "ao" }
+   else
+       t = { "c", "p", "csv", "sv", "sw", "o", "s", "m", "ss" }
+   end
    n = { }
 
    local columns_ = make_columns(t)
@@ -347,12 +361,15 @@ function make_query_4(c_id, p_id, sv_id, clause)
    if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
    if p_id  then cond_ = cond_ .. " and p.id = "  .. p_id  end
    if sv_id then cond_ = cond_ .. " and sv.id = " .. sv_id end
+   if a_id then cond_ = cond_ .. " and a.id = " .. a_id end
    if clause  then cond_ = cond_ .. " and " .. clause end
 
    q = Model.query(tables_, cond_, nil, columns_)
    for _,v in ipairs(q) do table.insert(v, 1, 4) end
+
+   if DEBUG then print( "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
+
    return q
-   --return "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n"
 end
 
 
@@ -368,8 +385,8 @@ function select_monitors(clause)
    local q = {}
    local q1 = make_query_1(nil, nil, clause)
    local q2 = make_query_2(nil, nil, nil, clause)
-   local q3 = make_query_3(nil, nil, clause)
-   local q4 = make_query_4(nil, nil, nil, clause)
+   local q3 = make_query_3(nil, nil, nil, clause)
+   local q4 = make_query_4(nil, nil, nil, nil, clause)
 
    for _,v in ipairs(q1) do table.insert(q, v) end
    for _,v in ipairs(q2) do table.insert(q, v) end
@@ -393,18 +410,26 @@ end
 
 function select_monitors_app_objs(app_id)
    local q = {}
+--[[
    local objs = Model.select_app_object("app_id = "..app_id)
 
    if objs == nil then return nil end
 
    for _,o in ipairs(objs) do
       local clause = "m.service_object_id = "..o.service_object_id
-      local q3 = make_query_3(nil, nil, clause)
-      local q4 = make_query_4(nil, nil, nil, clause)
+      local q3 = make_query_3(nil, nil, nil, clause)
+      local q4 = make_query_4(nil, nil, nil, nil, clause)
 
       for _,v in ipairs(q3) do table.insert(q, v) end
       for _,v in ipairs(q4) do table.insert(q, v) end
    end
+]]
+
+   local q3 = make_query_3(nil, nil, app_id, clause)
+   local q4 = make_query_4(nil, nil, nil, app_id, clause)
+
+   for _,v in ipairs(q3) do table.insert(q, v) end
+   for _,v in ipairs(q4) do table.insert(q, v) end
 
    table.sort(q, function (a, b) 
       a.c_name  = a.c_name  or ""
@@ -441,32 +466,32 @@ function how_to_use()
    a = make_query_general({"a", "ao", "o", "m", })
    a = make_query_1()
    a = make_query_2()
-   a = make_query_3()
    a = make_query_4()
    a = make_query_2(1,1,2)
-   a = make_query_3(nil, nil, "m.service_object_id = 181")
-]]
+   a = make_query_3(nil, nil, nil, "m.service_object_id = 181")
    a = make_query_4()
+   a = make_query_3()
    if type(a) == "string" then print(a) end
    print("count: ", table.getn(a))
    for i,v in ipairs(a) do 
       print("A: ",table.getn(a), v.c_name, v.s_name, v.sv_name, v.p_itemtype) 
    end
 
---[[
    for i,v in ipairs(a) do
       print("Q: ",table.getn(a), v.c_name, v.p_itemtype) 
    end
+]]
 
    print("========================")
-   a = select_monitors_app_objs(5)
+   a = select_monitors_app_objs(18)
 
    for i,v in ipairs(a) do
-      print("A: ",table.getn(a), v.c_name, v.s_name, v.sv_name, v.p_itemtype) 
+      print("A: ",table.getn(a), v.c_name, v.s_name, v.sv_name, v.p_itemtype, v.ao_type) 
    end
+--[[
 ]]
 
 end
 
---how_to_use()
+if DEBUG then how_to_use() end
 
