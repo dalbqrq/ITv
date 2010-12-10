@@ -236,10 +236,13 @@ function insert(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, ip)
    os.reset_monitor() -- isto estah aqui pois as vezes o probe nao aparece na lista mesmo que itvivion_monitor
                       -- e nagios_objects tenham sido criados
 
-   return web:redirect(web:link("/list/"..msg..""))
+   if web then
+      return web:redirect(web:link("/list/"..msg..""))
+   else
+      return msg --para criacao de probes em massa
+   end
 end
 ITvision:dispatch_post(insert, "/insert/(%d+):(%d+):(%d+):(%d+):(.+):(.+):(.+):(.+)")
-
 
 --[[
 function remove(web, id)

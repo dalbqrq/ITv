@@ -229,6 +229,7 @@ function make_query_1(c_id, p_id, clause)
       cond_ = cond_ .. [[ 
          and p.itemtype = ]]..it..[[
          and not exists (select 1 from itvision_monitors m2 where m2.networkports_id = p.id)
+         and c_
       ]]
 
       columns_ = columns_..",\n"..nulls_
@@ -394,7 +395,7 @@ function select_monitors_app_objs(app_id)
    local q = {}
    local objs = Model.select_app_object("app_id = "..app_id)
 
-   if obj == nil then return nil end
+   if objs == nil then return nil end
 
    for _,o in ipairs(objs) do
       local clause = "m.service_object_id = "..o.service_object_id

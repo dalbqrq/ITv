@@ -41,7 +41,16 @@ end
 
 -- Retorna comandos e parametros 
 function get_checkhost_params(id)
+print ("---> ", id)
    local c = select_checkcmds(id, false)
+   local count = 0
+   while c[1] == nil do
+      count = count +1
+      os.sleep(1)
+      c = select_checkcmds(id, false)
+      print(".")
+   end
+
    local p = select_checkcmd_params(c[1].id, true)
    return c, p
 end
