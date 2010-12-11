@@ -578,3 +578,9 @@ function render_content_header(name, add, list, edit, geotag, back)
 end
 
 
+function button_link(label, link, class)
+   class = class or "none"
+   return [[<div class="buttons"> <a href="]]..link..
+          [[" class="]]..class..[[">]]..label..[[ </a> </div>]]
+end
+
