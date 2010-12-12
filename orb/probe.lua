@@ -308,6 +308,16 @@ function render_list(web, cmp, chk, msg)
       end
 
          -- DEBUG v[1] é o numero da query_?: v[1],
+--[[
+web.prefix = "/"
+if itemtype == "Computer" then
+/servdesk/front/computer.form.php?id=
+elseif itemtype == "NetworkEquipment" then
+/servdesk/front/computer.form.php?id=
+else
+end
+]]
+ 
       row[#row + 1] = { 
          a{ href= web:link("/add/"..id), name}, 
          ip, 

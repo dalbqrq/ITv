@@ -176,8 +176,15 @@ end
 ITvision:dispatch_get(delete, "/delete/(%d+)")
 
 
+-- TODO: deve ser modificado. Todos os nomes devem ser compostos por ids das tabelas.
+function app_to_id(str)
+   -- esta e a mesma substituicao que tem em function activate_app mo modulo inc/monitor_util.lua
+   return string.gsub(string.gsub(str,"(%p+)","_")," ","_")
+end
+
+
 function activate(web, id, flag)
-   if flag == "0" then flag = 1 else flag = 0 end
+   if tonumber(flag) == 0 then flag = 1 else flag = 0 end
    local cols = {}
    local msg, counter
 
@@ -185,6 +192,7 @@ function activate(web, id, flag)
       local clause = "id = "..id
       local tables = "itvision_apps"
       cols.is_active = flag
+--text_file_writer("/tmp/1", id.." : "..flag)
 
       local A = apps:select(id)
       local O = Model.select_app_app_objects(id)
@@ -196,17 +204,23 @@ function activate(web, id, flag)
          local APPS = apps:select()
          activate_all_apps(APPS)
 
-         local s = objects:select_app(string.toid(A[1].name))
-         -- caso host ainda nao tenha sido incluido aguarde e tente novamente
-         counter = 0
-         while s[1] == nil do
-            counter = counter + 1
-            os.sleep(1)
-            s = objects:select_app(string.toid(A[1].name))
+         -- se for uma operacao de ativacao entao atualiza o service_object_id da aplicacao criada
+         if flag == 1 then
+            local s = objects:select_app(app_to_id(A[1].name))
+            -- caso host ainda nao tenha sido incluido aguarde e tente novamente
+            counter = 0
+            while s[1] == nil do
+               counter = counter + 1
+               os.reset_monitor()
+               os.sleep(1)
+               s = objects:select_app(app_to_id(A[1].name))
+text_file_writer("/tmp/act_"..app_to_id(A[1].name, counter))
+            end
+            local svc = { id = A[1].id, service_object_id = s[1].object_id }
+            apps:update(svc)
+         else
+            os.reset_monitor()
          end
-         local svc = { id = A[1].id, service_object_id = s[1].object_id }
-         apps:update(svc)
-         text_file_writer("/tmp/contour_activate", tostring(counter))
 
          msg = "/"..error_message(9).." "..A[1].name
       else

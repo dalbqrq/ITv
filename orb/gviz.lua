@@ -36,15 +36,19 @@ ITvision:dispatch_get(list, "/", "/list")
    id -> é uma id de aplicacao
 ]]
 function show(web, id)
-   local app_name, obj_id
-   local app = apps:select_apps()
+   local app, app_name, obj_id
+   local all_apps = apps:select_apps()
+
    if id == "/show" then
-      if app[1] then 
-         id = app[1].id 
+      if all_apps[1] then 
+         id = all_apps[1].id 
       else
          return render_blank(web)
       end
    end
+
+   app = apps:select_apps(id)
+
    -- para presentacao Verto
    --if id == "/show" and app[1] then id = 31 end
    --local app = apps:select_apps(id)
@@ -54,7 +58,7 @@ function show(web, id)
    app_name = app[1].name
    obj_id = app[1].service_object_id
 
-   return render_show(web, app, app_name, id, obj, rel, obj_id)
+   return render_show(web, all_apps, app_name, id, obj, rel, obj_id)
 end
 ITvision:dispatch_get(show,"/show", "/show/(%d+)")
 
@@ -87,6 +91,7 @@ function render_show(web, app, app_name, app_id, obj, rel, obj_id)
 ]]
 
    local content = Graph.make_content(obj, rel)
+text_file_writer("/tmp/gr", app_name)
    Graph.render(app_name, file_type, engene, content)
    local imgmap = text_file_reader(mapfile)
 

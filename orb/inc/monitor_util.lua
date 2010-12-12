@@ -157,23 +157,15 @@ function activate_app(app, objs, flag)
 
    ref = string.gsub(string.gsub(app.name,"(%p+)","_")," ","_")
 
---[[
-   s = "\n"..app.name.." = "..s.."\n"
-   s = s.."display "..flag..";"..ref..";"..app.name.."\n\n"
-]]
    s = "\n"..ref.." = "..s.."\n"
    s = s.."display "..flag..";"..ref..";"..ref.."\n\n"
 
-   --text_file_writer(config.monitor.bp_dir.."/etc/apps/"..file_name..".conf", s)
-   --insert_bp_cfg_file(file_name)
-   --os.reset_monitor()
    return s
 end
 
 
 --[[
   Cria aquivo de conf para todas a aplicacoes
-
 ]]
 function activate_all_apps(apps)
    local s = ""

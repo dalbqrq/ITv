@@ -57,13 +57,15 @@ function make_content(obj, rel)
 
    if obj[1] then
    for _,v in ipairs(obj) do
-text_file_writer("/tmp/"..v.o_object_id, v.o_object_id)
+text_file_writer("/tmp/"..v.o_object_id, v.o_object_id.." :: "..v.o_name1.." :: "..v.o_name2.." :: "..v.ss_current_state)
          local name, shape  = "", ""
          if v.ao_type == 'hst' then
             name = v.o_name1
             if not show_ip then name = string.gsub(name,"-(.+)", "") end
-            label = v.o_name1  
--- DEBUG ..":"..v.curr_state
+            label = v.o_name1  ..":"..v.ss_current_state
+-- DEBUG 
+
+
             url   = "/orb/obj_info/"..v.ao_type.."/"..v.o_object_id
             shape = "box"
          elseif v.ao_type == 'svc' then

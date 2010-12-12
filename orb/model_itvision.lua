@@ -162,14 +162,14 @@ end
 
 
 function select_app_app_objects (id)
-   local cond_ = "no.object_id = al.service_object_id and al.app_id = ap.id"
+   local cond_ = "no.object_id = ao.service_object_id and ao.app_id = a.id"
    if id then
-      cond_ = cond_ .. " and ap.id = "..id
+      cond_ = cond_ .. " and a.id = "..id
    end
-   local tables_ = "nagios_objects no, itvision_app_objects al, itvision_apps ap"
-   local columns_ = [[ no.object_id, no.objecttype_id, no.name1, no.name2, al.type as obj_type, ap.id as 
-	app_id, ap.name as app_name, ap.type as app_type, ap.is_active, ap.service_object_id as service_id ]]
-   --local extra_ = "order by ap.app_id, no.name1, no.name2"
+   local tables_ = "nagios_objects no, itvision_app_objects ao, itvision_apps a"
+   local columns_ = [[ no.object_id, no.objecttype_id, no.name1, no.name2, ao.type as obj_type, a.id as 
+	app_id, a.name as a_name, a.type as a_type, a.is_active, a.service_object_id as service_id ]]
+   --local extra_ = "order by a.app_id, no.name1, no.name2"
    local content = query (tables_, cond_, extra_, columns_)
    return content
 end
