@@ -315,7 +315,6 @@ function render_add(web, HST, SVC, APP, APPOBJ, APPS, AR, RT, app_id, msg)
    local list_size = 2
    local header = ""
 
-text_file_writer("/tmp/q3", table.getn(SVC))
 
    res[#res+1] = render_content_header(strings.application, web:link("/add/"..app_id), web:link("/list"))
    res[#res+1] = render_bar( render_selector_bar(web, APPS, app_id, "/add") )

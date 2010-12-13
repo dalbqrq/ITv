@@ -66,7 +66,8 @@ end
 
 function objects:select_app(name2)
    if name2 then
-      clause = "name2 = '"..name2.."' and name1 = '"..config.monitor.check_app.."' and is_active = 1"
+      --clause = "name2 = '"..name2.."' and name1 = '"..config.monitor.check_app.."' and is_active = 1"
+      clause = "name2 = '"..name2.."' and name1 = '"..config.monitor.check_app.."' "
    else
       clause = nil
    end
@@ -214,7 +215,7 @@ function activate(web, id, flag)
                os.reset_monitor()
                os.sleep(1)
                s = objects:select_app(app_to_id(A[1].name))
-text_file_writer("/tmp/act_"..app_to_id(A[1].name, counter))
+text_file_writer("/tmp/act_"..app_to_id(A[1].name), app_to_id(A[1].name).." : "..counter.."\n")
             end
             local svc = { id = A[1].id, service_object_id = s[1].object_id }
             apps:update(svc)

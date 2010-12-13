@@ -54,30 +54,27 @@ function make_content(obj, rel)
    local use_relat_label = true
    local show_ip = false
 
-
    if obj[1] then
-   for _,v in ipairs(obj) do
-text_file_writer("/tmp/"..v.o_object_id, v.o_object_id.." :: "..v.o_name1.." :: "..v.o_name2.." :: "..v.ss_current_state)
+      text_file_writer("/tmp/c"..obj[1].a_name, table.getn(obj))
+      for _,v in ipairs(obj) do
+         -- DEBUG 
+         text_file_writer("/tmp/"..v.ao_type.."-"..v.o_object_id, v.o_object_id.." :: "..v.o_name1.." :: "..v.o_name2.." :: "..v.ss_current_state)
+   
          local name, shape  = "", ""
          if v.ao_type == 'hst' then
             name = v.o_name1
             if not show_ip then name = string.gsub(name,"-(.+)", "") end
-            label = v.o_name1  ..":"..v.ss_current_state
--- DEBUG 
-
-
+            label = v.o_name1 -- DEBUG  ..":"..v.ss_current_state
             url   = "/orb/obj_info/"..v.ao_type.."/"..v.o_object_id
             shape = "box"
          elseif v.ao_type == 'svc' then
             name = v.o_name1.."-"..v.o_name2
-            label = v.o_name2  
--- DEBUG ..":"..v.curr_state
+            label = v.o_name2  -- DEBUG ..":"..v.curr_state
             url   = "/orb/obj_info/"..v.ao_type.."/"..v.o_object_id
             shape = "ellipse"
          elseif v.ao_type == 'app' then
             name = v.o_name2
-            label = v.o_name2  
---DEBUG ..":"..v.curr_state
+            label = string.gsub(v.o_name2,"_+"," ") --DEBUG ..":"..v.curr_state
             url   = "/orb/obj_info/"..v.ao_type.."/"..v.o_object_id
             shape = "hexagon"
             shape = "invhouse"
@@ -98,11 +95,10 @@ m.networkports_id = n.id and
 c.id = n.items_id and
 
 ]]
-         color = set_color(v.ss_current_state, v.ao_type)
 
-         name = string.gsub(name, "%p", "")
-
-         table.insert(content, node{name, shape=shape, height=0.8, width=1, fontsize=12.,
+      color = set_color(v.ss_current_state, v.ao_type)
+      name = string.gsub(name, "%p", "")
+      table.insert(content, node{name, shape=shape, height=0.8, width=1, fontsize=12.,
                       fontname="Helvetica", label=label, color="black", fillcolor=color ,URL=url ,target="_self",
                       nodesep=0.05, style="bold,filled,solid", penwidth=2})
       end

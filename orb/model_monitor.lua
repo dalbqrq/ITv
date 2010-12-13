@@ -226,8 +226,10 @@ function make_query_1(c_id, p_id, clause)
       if ic == "n" then 
          columns_ = string.gsub(columns_, "as n_", "as c_") 
          it = "'NetworkEquipment'"
+         cond_ = cond_ .. [[ and n.states_id = 1 ]] -- estado deve ser ativo!
       else 
          it = "'Computer'"
+         cond_ = cond_ .. [[ and c.states_id = 1 ]] -- estado deve ser ativo!
       end 
 
       cond_ = cond_ .. [[ 
@@ -268,7 +270,8 @@ function make_query_2(c_id, p_id, sv_id, clause)
    cond_ = cond_ .. [[ 
       and p.itemtype = "Computer" 
       and not exists (select 1 from itvision_monitors m2 where m2.networkports_id = p.id and m2.softwareversions_id = sv.id)
-   ]]
+      and c.states_id = 1 
+   ]]-- estado deve ser ativo!
 
    columns_ = columns_..",\n"..nulls_
 
@@ -311,8 +314,10 @@ function make_query_3(c_id, p_id, a_id, clause)
       if ic == "n" then 
          columns_ = string.gsub(columns_, "as n_", "as c_") 
          it = "'NetworkEquipment'"
+         cond_ = cond_ .. [[ and n.states_id = 1 ]] -- estado deve ser ativo!
       else 
          it = "'Computer'"
+         cond_ = cond_ .. [[ and c.states_id = 1 ]] -- estado deve ser ativo!
       end 
 
       cond_ = cond_ .. [[ 
@@ -356,7 +361,8 @@ function make_query_4(c_id, p_id, sv_id, a_id, clause)
 
    cond_ = cond_ .. [[ 
       and p.itemtype = "Computer" 
-   ]]
+      and c.states_id = 1 
+   ]]-- estado deve ser ativo!
 
    if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
    if p_id  then cond_ = cond_ .. " and p.id = "  .. p_id  end
@@ -366,6 +372,38 @@ function make_query_4(c_id, p_id, sv_id, a_id, clause)
 
    q = Model.query(tables_, cond_, nil, columns_)
    for _,v in ipairs(q) do table.insert(v, 1, 4) end
+
+   if DEBUG then print( "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
+
+   return q
+end
+
+
+
+
+----------------------------------------------------------------------
+--  QUERY 5 - aplicacao com monitor - monitoracao de service 
+----------------------------------------------------------------------
+function make_query_5(a_id, clause)
+   local q, t = {}, {}
+   t = { "o", "s", "ss", "a", "ao" }
+   n = { "c", "p", "m", "csv", "sv", "sw" }
+
+   local columns_ = make_columns(t)
+   local _,nulls_ = make_columns(n)
+   local tables_  = make_tables(t)
+   local cond_    = make_where(t)
+
+   cond_ = cond_ .. [[ 
+      and a.is_active = 1
+      and o.name1 = ']]..config.monitor.check_app..[[' 
+   ]]
+
+   if a_id then cond_ = cond_ .. " and a.id = " .. a_id end
+   if clause then cond_ = cond_ .. " and " .. clause end
+
+   q = Model.query(tables_, cond_, nil, columns_)
+   for _,v in ipairs(q) do table.insert(v, 1, 5) end
 
    if DEBUG then print( "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
 
@@ -427,9 +465,11 @@ function select_monitors_app_objs(app_id)
 
    local q3 = make_query_3(nil, nil, app_id, clause)
    local q4 = make_query_4(nil, nil, nil, app_id, clause)
+   local q5 = make_query_5(app_id, clause)
 
    for _,v in ipairs(q3) do table.insert(q, v) end
    for _,v in ipairs(q4) do table.insert(q, v) end
+   for _,v in ipairs(q5) do table.insert(q, v) end
 
    table.sort(q, function (a, b) 
       a.c_name  = a.c_name  or ""
@@ -483,12 +523,19 @@ function how_to_use()
 ]]
 
    print("========================")
-   a = select_monitors_app_objs(18)
+   a = select_monitors_app_objs(44)
 
    for i,v in ipairs(a) do
       print("A: ",table.getn(a), v.c_name, v.s_name, v.sv_name, v.p_itemtype, v.ao_type) 
    end
 --[[
+   a = make_query_5()
+   a = make_query_5(44)
+   if type(a) == "string" then print(a) end
+   print("count: ", table.getn(a))
+   for i,v in ipairs(a) do 
+      print("A: ",v.a_id, v.a_name, v.o_name1, v.o_name2, v.ss_current_state) 
+   end
 ]]
 
 end

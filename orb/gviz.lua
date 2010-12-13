@@ -91,7 +91,6 @@ function render_show(web, app, app_name, app_id, obj, rel, obj_id)
 ]]
 
    local content = Graph.make_content(obj, rel)
-text_file_writer("/tmp/gr", app_name)
    Graph.render(app_name, file_type, engene, content)
    local imgmap = text_file_reader(mapfile)
 
