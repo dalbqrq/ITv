@@ -237,38 +237,16 @@ cp $itvhome/ks/files/plugin.d/* $dir
 install_msg NAGIOSGRAPHER
 
 sed -i.orig2 -e "s/process_performance_data=0/process_performance_data=1/" \
-    -e "s/^#service_perfdata_file=\/tmp\/service-perfdata/service_perfdata_file=\/var\/log\/nagiosgrapher\/service-perfdata/" \
-    -e "s/^#service_perfdata_file_template=/service_perfdata_file_template=/" \
-    -e "s/^#service_perfdata_file_mode=a/service_perfdata_file_mode=a/" \
-    -e "s/^#service_perfdata_command=process-service-perfdata/service_perfdata_command=process-service-perfdata/" \
-    -e "s/^#service_perfdata_file_processing_interval=0/service_perfdata_file_processing_interval=10/" \
-    -e "s/^#service_perfdata_file_processing_command=process-service-perfdata-file/service_perfdata_file_processing_command=ngraph-process-service-perfdata-pipe/" /etc/nagios3/nagios.cfg
-
-sed -i -e '/# OBJECT CONFIGURATION FILE/ i\
-cfg_dir=/etc/nagiosgrapher' /etc/nagios3/nagios.cfg
-mkdir -p /etc/nagios3/services/serviceext
+    -e "s/^#service_perfdata_command=process-service-perfdata/service_perfdata_command=ngraph-process-service-perfdata-pipe/" /etc/nagios3/nagios.cfg
 
 
 sed -i.orig -e "s/user                    nagios/user                    $user/" \
         -e "s/group                   nagios/group                   $user/" \
 	-e "s/serviceextinfo          \/etc\/nagios3\/serviceextinfo.cfg/serviceextinfo          \/etc\/nagios3\/conf.d\/serviceextinfo.cfg/" \
-	-e "s/serviceext_path         \/etc\/nagiosgrapher\/nagios3\/serviceext/serviceext_path         \/etc\/nagios3\/services\/serviceext/" \
-        -e "s/nagiosadmin/itv/" /etc/nagiosgrapher/ngraph.ncfg
+	-e "s/serviceext_path         \/etc\/nagiosgrapher\/nagios3\/serviceext/serviceext_path         \/etc\/nagios3\/services/" \
+        -e "s/nagiosadmin/$user/" /etc/nagiosgrapher/ngraph.ncfg
 
-cat << EOF > /etc/nagios3/conf.d/serviceextinfo.cfg
-define hostextinfo {
-        host_name               dummy
-        }
 
-define serviceextinfo {
-        host_name               dummy
-        service_description     PING
-        }
-EOF
-
-ln -s /etc/nagios3/services/serviceext /etc/nagiosgrapher/nagios3/serviceext
-touch /var/log/nagiosgrapher/service-perfdata
-touch /var/lib/nagiosgrapher/ngraph.pipe
 chown -R $user.$user /var/lib/nagiosgrapher /etc/nagiosgrapher /var/run/nagiosgrapher /var/log/nagiosgrapher /var/cache/nagiosgrapher /usr/share/perl5/NagiosGrapher /usr/lib/nagiosgrapher /usr/sbin/nagiosgrapher
 cat /etc/nagiosgrapher/nagios3/commands.cfg >> /etc/nagios3/commands.cfg 
 rm -f /etc/nagiosgrapher/nagios3/commands.cfg
@@ -421,7 +399,7 @@ sed -i.orig -e "s/DB_SERVER_USER=\"ocs\"/DB_SERVER_USER=\"$user\"/" \
 
 #perl -MCPAN -e 'install XML::Entities'
 cpan -i XML::Entities
-cpan -i YAML
+cpan -i YAML 
 \rm -f /tmp/ans; for i in `seq 16`; do echo >> /tmp/ans; done
 /usr/local/OCSNG_UNIX_SERVER-1.3.2/setup.sh < /tmp/ans
 
