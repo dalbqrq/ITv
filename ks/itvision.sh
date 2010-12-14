@@ -198,6 +198,7 @@ sed -i.orig -e "s/www-data/$user/g" /etc/apache2/envvars
 sed -i.orig -e "s/nagiosadmin/$user/g" /etc/nagios3/cgi.cfg
 sed -i.orig -e "s/nagios_user=nagios/nagios_user=$user/" \
 	-e "s/nagios_group=nagios/nagios_group=$user/" \
+	-e "s/check_external_commands=0/check_external_commands=1/" \
 	-e "s/admin_email=root@localhost/admin_email=webmaster@itvision.com.br/" \
 	-e "s/admin_pager=pageroot@localhost/#admin_pager=pageroot@localhost/" \
 	-e "/conf.d/a \\
