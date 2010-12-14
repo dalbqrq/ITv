@@ -1,0 +1,7 @@
+#!/usr/bin/env wsapi.cgi
+
+require "cookie"
+
+return ITvision
+
+
