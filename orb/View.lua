@@ -199,7 +199,7 @@ end
 
 function render_map(marker_maker, center, google_key, refresh_time)
    marker_maker = marker_maker or [[ function marker_maker() {} ]]
-   refresh_time = refresh_time or 60
+   refresh_time = refresh_time or 180
    --center = center or "-22.966849,-43.243217" -- IMPA
    --center = center or "-22.865104,-43.430157" -- Av Bradil
    center = center or "-22.88604,-43.229721" -- Av Brasil - Celula 01
