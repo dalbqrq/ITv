@@ -192,10 +192,12 @@ function render_geotag(web, obj_id, objtype, A)
          lat, lon = tonumber(lat), tonumber(lon)
 
          position = position .. "<!-- "..v.c_geotag.." -->\n"
-         if lat < minlat then minlat = lat end
-         if lon < minlon then minlon = lon end
-         if lat > maxlat then maxlat = lat end
-         if lon > maxlon then maxlon = lon end
+         if type(lat) == "number" and type(lon) == "number" then
+            if lat < minlat then minlat = lat end
+            if lon < minlon then minlon = lon end
+            if lat > maxlat then maxlat = lat end
+            if lon > maxlon then maxlon = lon end
+         end
       end
    end
 
@@ -217,7 +219,7 @@ function render_geotag(web, obj_id, objtype, A)
          marker_maker = marker_maker .. "var marker"..i.." = new google.maps.Marker({ position: location"..i..", map: map, icon: "..icon.." });\n"
          marker_maker = marker_maker .. "//marker"..i..".setTitle(\"VERTO\");\n"
          marker_maker = marker_maker .. "var infowindow"..i.." = new google.maps.InfoWindow( \n"
-         marker_maker = marker_maker .. "{ content: \""..v.c_name.."<br>"..v.p_ip.."<br>Funcionmaneto: "..service_alert[tonumber(v.ss_current_state)].name.."<br><a href='/servdesk/front/computer.form.php?id="..v.c_id.."'>CMDB</a>\", size: new google.maps.Size(50,50) });\n" 
+         marker_maker = marker_maker .. "{ content: \""..v.c_name.."<br>"..v.p_ip.."<br>Funcionmaneto: "..service_alert[tonumber(v.ss_current_state)].name.."<br><a href='/servdesk/front/"..string.lower(v.p_itemtype)..".form.php?id="..v.c_id.."'>CMDB</a>\", size: new google.maps.Size(50,50) });\n" 
          marker_maker = marker_maker .. "google.maps.event.addListener(marker"..i..", 'click', function() { infowindow"..i..".open(map,marker"..i.."); });\n"
       end
    end

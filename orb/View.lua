@@ -159,7 +159,12 @@ function render_menu_frame(inner_html)
       },
 
       body{
-         div{ id="header", img{ src="/pics/logopurple.png" }, " ITvision",
+         --div{ id="header", img{ src="/pics/logopurple.png" }, " ITvision",
+         div{ id="header", img{ src="/pics/logo_itvision.png" },
+            img{ src="/pics/transparent.png", width='430px', height='20px' },
+            img{ src="/pics/logo_verto.jpg", height='40px' },
+            img{ src="/pics/transparent.png", width='40px', height='20px' },
+            img{ src="/pics/logo_gov.png", height='44px' },
             ul{ id="nav", class="dropdown dropdown-linear", inner_html }
          }
       }
@@ -192,8 +197,9 @@ function render_layout(inner_html, refresh_time)
 end
 
 
-function render_map(marker_maker, center, google_key)
+function render_map(marker_maker, center, google_key, refresh_time)
    marker_maker = marker_maker or [[ function marker_maker() {} ]]
+   refresh_time = refresh_time or 60
    --center = center or "-22.966849,-43.243217" -- IMPA
    --center = center or "-22.865104,-43.430157" -- Av Bradil
    center = center or "-22.88604,-43.229721" -- Av Brasil - Celula 01
@@ -207,6 +213,7 @@ var blue   = '/pics/blue.png';
 var green  = '/pics/green.png';
 var gray   = '/pics/gray.png';
 var orange = '/pics/orange.png';
+var yellow = '/pics/yellow.png';
 
 var map;
 function initialize() {
@@ -223,11 +230,14 @@ function initialize() {
 }
    ]]
 
+   local refresh = meta{ ["http-equiv"]="Refresh", content=refresh_time, target="main" }
+
    return { "<!DOCTYPE html>", html{
       head{
          title("ITvision"),
          meta{ name = "viewport", content = "initial-scale=1.0, user-scalable=no" },
          meta{ ["http-equiv"] = "Content-Type", content = "text/html; charset=utf-8" },
+         refresh,
          link{ href="http://code.google.com/apis/maps/documentation/javascript/examples/default.css", rel="stylesheet", type="text/css" },
 
          script{ type="text/javascript", src="http://maps.google.com/maps?file=api&amp;v=2&amp;sensor=false&amp;key="..google_key },
@@ -335,7 +345,6 @@ function render_selector_bar(web, A, id, path)
       res[#res+1] = option{ selected=selected, value=url, v.name }
    end
 
-   --return { form{ H("select"){ ONCHANGE="location = this.options[this.selectedIndex].value;", res } } }
    return form{ H("select"){ ONCHANGE="location = this.options[this.selectedIndex].value;", res } }
    
 end
@@ -567,7 +576,7 @@ function render_content_header(name, add, list, edit, geotag, back)
    end
 
    if geotag then
-      myul[#myul+1] = li{ a{ href=geotag,img{ src='/pics/icon32.png', title='GeoVision', alt='Geotag'} } }
+      myul[#myul+1] = li{ a{ href=geotag,img{ src='/pics/icon32.png', title='GeoVision', alt='Geotag', "Visão Georeferenciada "} } }
    end
 
    if back then
