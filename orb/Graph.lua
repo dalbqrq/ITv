@@ -51,7 +51,7 @@ end
 
 function make_content(obj, rel)
    local content = {}
-   local use_relat_label = true
+   local use_relat_label = false
    local show_ip = false
 
    if obj[1] then
@@ -76,11 +76,11 @@ function make_content(obj, rel)
             name = v.o_name2
             label = string.gsub(v.o_name2,"_+"," ") --DEBUG ..":"..v.curr_state
             url   = "/orb/obj_info/"..v.ao_type.."/"..v.o_object_id
-            shape = "hexagon"
             shape = "invhouse"
             shape = "octagon"
             shape = "triangle"
             shape = "diamond"
+            shape = "hexagon"
          end
 
 --[[ TODO: 5
@@ -98,7 +98,7 @@ c.id = n.items_id and
 
       color = set_color(v.ss_current_state, v.ao_type)
       name = string.gsub(name, "%p", "")
-      table.insert(content, node{name, shape=shape, height=0.8, width=1, fontsize=12.,
+      table.insert(content, node{name, shape=shape, height=1.2, width=1, fontsize=12., fixedsize=true,
                       fontname="Helvetica", label=label, color="black", fillcolor=color ,URL=url ,target="_self",
                       nodesep=0.05, style="bold,filled,solid", penwidth=2})
       end
@@ -157,13 +157,13 @@ function render(app_name, file_type, engene, content)
    local imgfile, imglink, lnkfile, maplink, dotfile = make_gv_filename(app_name, file_type)
 
    local g = digraph{"G",
-      size="7.0,7.0",
+      size="10.0,10.0",
       node = { nodesep=.5, style="rounded" },
       unpack(content)
    }
 
    g:layout(engene) -- if engene == nil, then use the default 'dot'
-   g:render(file_type, imgfile) -- Render the graph into postscript format
+   g:render(file_type, imgfile) -- Render the graph into image format
    g:render("cmapx", lnkfile) -- Render the graph into image map format
    g:write(dotfile) -- Write the graph in dot 'text' format
    g:close() -- Close the graph

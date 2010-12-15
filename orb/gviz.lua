@@ -681,6 +681,9 @@ function render_show(web, app, app_name, app_id, obj, rel, obj_id)
 ]]
    if tonumber(app_id) == 48 then
       engene = "dot"
+      engene = "neato"
+      engene = "twopi"
+      engene = "fdp"
       engene = "circo"
    else
       engene = "circo"
