@@ -43,7 +43,7 @@ install_pack unzip
 install_pack wget
 install_pack vim
 install_pack ntp
-install_pack ksh # caldate
+install_pack ksh # script caldate
 install_pack libreadline6-dev
 install_pack lua5.1
 install_pack liblua5.1-0
@@ -104,7 +104,11 @@ echo "CREATE DATABASE $dbname DEFAULT CHARACTER SET utf8  DEFAULT COLLATE utf8_g
 echo "CREATE USER '$dbuser'@'localhost' IDENTIFIED BY '$dbpass';" | mysql -u root --password=$dbpass
 echo "GRANT ALL PRIVILEGES ON *.* TO '$dbuser'@'localhost' WITH GRANT OPTION;" | mysql -u root --password=$dbpass
 mysql -u root --password=$dbpass $dbname < $itvhome/ks/db/itvision.sql
-
+mkdir -p /var/log/itvision/apache2
+mkdir -p /var/log/itvision/nagios3
+mkdir -p /var/log/itvision/nagiosgrapher
+chow -R $user.$user /var/log/itvision
+chmod -R 755 /var/log/itvision
 cat << EOF > /etc/apache2/conf.d/itvision.conf
 <VirtualHost *:80>
         ServerAdmin webmaster@itvision.com.br
@@ -129,8 +133,8 @@ cat << EOF > /etc/apache2/conf.d/itvision.conf
         # alert, emerg.
         LogLevel warn
 
-        ErrorLog /var/log/apache2/itvision_error.log
-        CustomLog /var/log/apache2/tivision_access.log combined
+        ErrorLog /var/log/itvision/apache2/itvision_error.log
+        CustomLog /var/log/itvision/apache2/itivision_access.log combined
 
 </VirtualHost>
 EOF
@@ -184,7 +188,8 @@ mkdir $itvhome/html/gv
 chown -R $user.$user $itvhome/html/gv
 printf "html/gv\norb/config.lua\nbin/dbconf\n" >> $itvhome/.git/info/exclude
 
-
+sed -i -e 's/ErrorLog \/var\/log\/apache2\/error.log/ErrorLog \/var\/log\/itvision\/apache2\/error.log/g' \
+	-e 's/CustomLog \/var\/log\/apache2\/other_vhosts_access.log/CustomLog \/var\/log\/itvision\/apache2\/other_vhosts_access.log/g' /etc/apache2/apache2.conf
 
 # --------------------------------------------------
 # NAGIOS
@@ -201,6 +206,8 @@ sed -i.orig -e "s/nagios_user=nagios/nagios_user=$user/" \
 	-e "s/nagios_group=nagios/nagios_group=$user/" \
 	-e "s/check_external_commands=0/check_external_commands=1/" \
 	-e "s/admin_email=root@localhost/admin_email=webmaster@itvision.com.br/" \
+	-e "s/log_file=\/var\/log\/nagios3\/nagios.log/log_file=\/var\/log\/itvision\/nagios3\/nagios.log/" \
+	-e "s/log_archive_path=\/var\/log\/nagios3\/archives/log_archive_path=\/var\/log\/itvision\/nagios3\/archives" \
 	-e "s/admin_pager=pageroot@localhost/#admin_pager=pageroot@localhost/" \
 	-e "/conf.d/a \\
 cfg_dir=/etc/nagios3/hosts \\
@@ -246,10 +253,11 @@ sed -i.orig -e "s/user                    nagios/user                    $user/"
         -e "s/group                   nagios/group                   $user/" \
 	-e "s/serviceextinfo          \/etc\/nagios3\/serviceextinfo.cfg/serviceextinfo          \/etc\/nagios3\/conf.d\/serviceextinfo.cfg/" \
 	-e "s/serviceext_path         \/etc\/nagiosgrapher\/nagios3\/serviceext/serviceext_path         \/etc\/nagios3\/services/" \
+	-e "s/\/var\/log\/nagiosgrapher\/ngraph.log/\/var\/log\/itvision\/nagiosgrapher\/ngraph.log/" \
         -e "s/nagiosadmin/$user/" /etc/nagiosgrapher/ngraph.ncfg
 
 
-chown -R $user.$user /var/lib/nagiosgrapher /etc/nagiosgrapher /var/run/nagiosgrapher /var/log/nagiosgrapher /var/cache/nagiosgrapher /usr/share/perl5/NagiosGrapher /usr/lib/nagiosgrapher /usr/sbin/nagiosgrapher
+chown -R $user.$user /var/lib/nagiosgrapher /etc/nagiosgrapher /var/run/nagiosgrapher /var/log/itvision/nagiosgrapher /var/cache/nagiosgrapher /usr/share/perl5/NagiosGrapher /usr/lib/nagiosgrapher /usr/sbin/nagiosgrapher
 cat /etc/nagiosgrapher/nagios3/commands.cfg >> /etc/nagios3/commands.cfg 
 rm -f /etc/nagiosgrapher/nagios3/commands.cfg
 echo '<HTML><HEAD><META http-equiv="REFRESH" content="0;url=/nagios3/cgi-bin/graphs.cgi"></HEAD></HTML>'  > /usr/share/nagios3/htdocs/graphs.html
@@ -278,7 +286,7 @@ mysqldump -u root --password=$dbpass -v ndoutils > /tmp/ndoutils.sql
 mysql -u root --password=$dbpass $dbname < /tmp/ndoutils.sql
 echo "DROP DATABASE ndoutils;" | mysql -u root --password=$dbpass
 
-chown -R $user.$user /var/log/nagios3 /etc/init.d/nagios-nrpe-server /etc/init.d/nagios3 /etc/nagios3 /etc/nagios /etc/nagios-plugins /var/run/nagios /var/run/nagios3 /usr/lib/nagios /usr/sbin/log2ndo /usr/lib/nagios3 /etc/apache2 /var/cache/nagios3 /var/lib/nagios /var/lib/nagios3 /usr/share/nagios3/ /usr/lib/cgi-bin/nagios3
+chown -R $user.$user /var/log/itvision/nagios3 /etc/init.d/nagios-nrpe-server /etc/init.d/nagios3 /etc/nagios3 /etc/nagios /etc/nagios-plugins /var/run/nagios /var/run/nagios3 /usr/lib/nagios /usr/sbin/log2ndo /usr/lib/nagios3 /etc/apache2 /var/cache/nagios3 /var/lib/nagios /var/lib/nagios3 /usr/share/nagios3/ /usr/lib/cgi-bin/nagios3
 
 
 
@@ -442,6 +450,26 @@ postmap /etc/postfix/sasl_passwd
 postmap /etc/postfix/transport
 rm -f ~/SERVER* && rm -rf ~/demoCA* 
 
+
+
+
+# --------------------------------------------------
+# LOGROTATE
+# --------------------------------------------------
+mkdir -p /var/log/itvision/mysql
+chown -R mysql.adm /var/log/itvision/mysql
+sed -i -e 's/\/var\/log\/mysql\/error.log/\/var\/log\/itvision\/mysql\/error.log/g' /etc/mysql/my.cnf 
+sed -i -e 's/notifempty/ifempty/g' \
+	-e 's/weekly/daily/g' /etc/logrotate.d/apache2
+
+sed -i -e 's/notifempty/ifempty/g' \
+        -e 's/weekly/daily/g' /etc/logrotate.d/nagiosgrapher
+
+sed -i -e '/compress/ i\
+ifempty' /etc/logrotate.d/mysql-server
+
+sed -i -e '/compress/ i\
+ifempty' /etc/logrotate.d/ocsinventory-server
 
 
 # --------------------------------------------------
