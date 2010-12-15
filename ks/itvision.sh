@@ -43,6 +43,7 @@ install_pack unzip
 install_pack wget
 install_pack vim
 install_pack ntp
+install_pack ksh # caldate
 install_pack libreadline6-dev
 install_pack lua5.1
 install_pack liblua5.1-0
