@@ -22,21 +22,20 @@ if [ "$OS" == "Linux" ]; then
 fi
 
 if [ "$RELEASE" == "Ubuntu" ]; then
-        INSTALL="/usr/bin/apt-get -y"
-        ${INSTALL} install ocsinventory-agent
-	/bin/cat << EOF > /etc/ocsinventory/ocsinventory-agent.cfg
+INSTALL="/usr/bin/apt-get -y"
+${INSTALL} install ocsinventory-agent
+/bin/cat << EOF >> /etc/ocsinventory/ocsinventory-agent.cfg
 basevardir=/var/lib/ocsinventory-agent
 server=${ADDRESS}
 EOF
-		else if [ "$RELEASE" == "CentOS" ]; then
-                INSTALL="/usr/bin/yum -y"
-		rpm  -ivh  http://download.fedora.redhat.com/pub/epel/5/i386/epel-release-5-3.noarch.rpm
-		/usr/bin/yum update
-		/usr/bin/yum repolist
-		${INSTALL} ocsinventory-agent
-		/bin/sed -i.orig -e 's/OCSMODE\[0\]\=none/OCSMODE\[0\]\=cron/' /etc/sysconfig/ocsinventory-agent
-
-                        else
-                        echo "Ditribuição não reconhecida"
-                fi
+	else if [ "$RELEASE" == "CentOS" ]; then
+	INSTALL="/usr/bin/yum -y"
+	rpm  -ivh http://download.fedora.redhat.com/pub/epel/5/x86_64/epel-release-5-4.noarch.rpm
+	/usr/bin/yum update
+	/usr/bin/yum repolist
+	${INSTALL} ocsinventory-agent
+	/bin/sed -i.orig -e 's/OCSMODE\[0\]\=none/OCSMODE\[0\]\=cron/' /etc/sysconfig/ocsinventory-agent
+		else
+                echo "Ditribuição não reconhecida"
+	fi
 fi
