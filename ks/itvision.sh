@@ -129,8 +129,8 @@ cat << EOF > /etc/apache2/conf.d/itvision.conf
                 Allow from all
         </Directory>
 
-        ScriptAlias /adm /usr/local/itvision/adm
-        <Directory "/usr/local/itvision/adm">
+        ScriptAlias /adm $itvhome/adm
+        <Directory "$itvhome/adm">
                 AllowOverride None
                 Options +ExecCGI +MultiViews +SymLinksIfOwnerMatch FollowSymLinks
 
@@ -140,7 +140,7 @@ cat << EOF > /etc/apache2/conf.d/itvision.conf
 
 		AuthName "ITvision Access"
 		AuthType Basic
-		AuthUserFile /usr/local/itvision/bin/htpasswd.users
+		AuthUserFile $itvhome/bin/htpasswd
 		require valid-user
         </Directory>
 
@@ -148,8 +148,8 @@ cat << EOF > /etc/apache2/conf.d/itvision.conf
         # alert, emerg.
         LogLevel warn
 
-        ErrorLog /var/log/itvision/apache2/itvision_error.log
-        CustomLog /var/log/itvision/apache2/itivision_access.log combined
+        ErrorLog /var/log/apache2/itvision_error.log
+        CustomLog /var/log/apache2/itvision_access.log combined
 
 </VirtualHost>
 EOF
@@ -206,13 +206,14 @@ dbname=$dbname
 EOF
 
 mkdir $itvhome/html/gv
-chown -R $user.$user $itvhome/html/gv
 printf "html/gv\norb/config.lua\nbin/dbconf\nbin/htpasswd.users\n" >> $itvhome/.git/info/exclude
 
 sed -i -e 's/ErrorLog \/var\/log\/apache2\/error.log/ErrorLog \/var\/log\/itvision\/apache2\/error.log/g' \
 	-e 's/CustomLog \/var\/log\/apache2\/other_vhosts_access.log/CustomLog \/var\/log\/itvision\/apache2\/other_vhosts_access.log/g' /etc/apache2/apache2.conf
 
-htpasswd -bc /usr/local/itvision/bin/htpasswd.users $user $dbpass
+htpasswd -bc $itvhome/bin/htpasswd $user $dbpass
+chown -R $user.$user $itvhome/html/gv $itvhome/bin/htpasswd $itvhome/bin/dbconf
+
 
 # --------------------------------------------------
 # NAGIOS

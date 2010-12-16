@@ -10,9 +10,6 @@ module(Model.name, package.seeall,orbit.new)
 -- controllers ------------------------------------------------------------
 
 function list(web)
-   local expiration_date = os.time() + 3600 * 48
-   web:set_cookie("itvision", { value="foo", expires = expiration_date })
-   web:set_cookie("SID", {value = "blah", path = "/"})
    return render_list(web)
 end
 ITvision:dispatch_get(list, "/")
@@ -25,18 +22,28 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 function render_list(web)
    local res = {}
 
-   local expiration_date = os.time() + 3600 * 48
-   web:set_cookie("itvision", { value="foo", expires = expiration_date })
-   --web:delete_cookie("itvision")
+   -- Nao está funcionando com expiracao!
+   --local expiration_date = os.time() + 3600 * 48
+   --web:set_cookie("itvision", { value="foo", expires = expiration_date })
 
-   res[#res+1] = "Olah<br>"
-   res[#res+1] = table.getn(web.cookies)
+   web:set_cookie("itvision", {value="fool", path = "/"})
+   --web:delete_cookie("itvision", "/")
+
+   res[#res+1] = "========================================="
+   res[#res+1] = br()
+
+   cookie_value = web.cookies["itvision"]
 
    if web.cookies then 
       for i, v in pairs(web.cookies) do
-         res[#res+1] = { i, v, br() }
+         res[#res+1] = { "COOKIE: ", i, " - ", v, br() }
       end
    end
+
+   res[#res+1] = br(), "|"
+   res[#res+1] = "alksjhdfalks "
+   res[#res+1] = cookie_value
+   res[#res+1] = br()
 
    return render_layout(res)
 end
