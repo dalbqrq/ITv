@@ -1,0 +1,40 @@
+!/bin/bash
+################################################
+# Arquivo; logdate.sh
+# Objetivo; Organizar arquivos de log por data
+# Autor: Ricardo Gomes da Silva
+# Email: rgomes@impa.br
+################################################
+
+DATE1=`date +%Y%m%d`;
+DATE2=$(caldate $DATE1 - 1dy 'yyyymmdd')
+if [ -e /var/log/itvision/apache2/apache2.log.1.gz ]; then
+        /bin/mv /var/log/itvision/apache2/error.log.1.gz /var/log/itvision/apache2/error.log.$DATE2.gz
+else
+        echo "Não existe log do APACHE2  para serem renomeados"
+fi
+
+if [ -e /var/log/itvision/apache2/itvision_access.log.1.gz ]; then
+        /bin/mv /var/log/itvision/apache2/itvision_access.log.1.gz /var/log/itvision/apache2/itvision_access.log.$DATE2.gz
+else
+        echo "Não existe log de access do ITvision  para serem renomeados"
+fi
+
+if [ -e /var/log/itvision/apache2/itvision_error.log.1.gz ]; then
+        /bin/mv /var/log/itvision/apache2/itvision_error.log.1.gz /var/log/itvision/apache2/itvision_error.log.$DATE2.gz
+else
+        echo "Não existe log de error_apache do ITvision  para serem renomeados"
+fi
+
+if [ -e /var/log/itvision/nagiosgrapher/ngraph.log.1.gz ]; then
+	/bin/mv /var/log/itvision/nagiosgrapher/ngraph.log.1.gz /var/log/itvision/nagiosgrapher/ngraph.log.$DATE2.gz
+else
+	echo "Não existe logs do NagiosGrapher para serem renomeados"
+fi
+
+if [ -e /var/log/itvision/mysql/mysql.log.1.gz ]; then
+        /bin/mv /var/log/itvision/mysql/mysql.log.1.gz /var/log/itvision/mysql/mysql.log.$DATE2.gz
+else
+        echo "Não existe logs do Mysql para serem renomeados"
+fi
+

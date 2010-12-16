@@ -474,18 +474,20 @@ rm -f ~/SERVER* && rm -rf ~/demoCA*
 # --------------------------------------------------
 mkdir -p /var/log/itvision/mysql
 chown -R mysql.adm /var/log/itvision/mysql
-sed -i -e 's/\/var\/log\/mysql\/error.log/\/var\/log\/itvision\/mysql\/error.log/g' /etc/mysql/my.cnf 
-sed -i -e 's/notifempty/ifempty/g' \
+sed -i -e 's/\/var\/log\/mysql\/error.log/\/var\/log\/itvision\/mysql\/error.log/' /etc/mysql/my.cnf 
 	-e 's/weekly/daily/g' /etc/logrotate.d/apache2
 
-sed -i -e 's/notifempty/ifempty/g' \
-        -e 's/weekly/daily/g' /etc/logrotate.d/nagiosgrapher
+sed -i -e 's/weekly/daily/g' /etc/logrotate.d/nagiosgrapher
 
 sed -i -e '/compress/ i\
-ifempty' /etc/logrotate.d/mysql-server
+notifempty' /etc/logrotate.d/mysql-server
 
 sed -i -e '/compress/ i\
-ifempty' /etc/logrotate.d/ocsinventory-server
+notifempty' /etc/logrotate.d/ocsinventory-server
+
+cat << EOF > /etc/cron.d/logdate 
+00 03 * * * $user /usr/sbin/logdate 2>&1
+EOF
 
 
 # --------------------------------------------------
