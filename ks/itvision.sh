@@ -486,9 +486,11 @@ sed -i -e '/compress/ i\
 notifempty' /etc/logrotate.d/ocsinventory-server
 
 cat << EOF > /etc/cron.d/logdate 
-00 03 * * * $user /usr/sbin/logdate 2>&1
+00 03 * * * root /usr/sbin/logdate
 EOF
 
+# Gera perfil para apparmor ("SElinux do Ubuntu") habilitar o mysqld escrever em outro arquivo
+aa-complain /usr/sbin/mysqld
 
 # --------------------------------------------------
 # GRAPHVIZ
@@ -582,6 +584,8 @@ install_msg CLEAN UP
 /usr/sbin/invoke-rc.d apache2 stop
 /usr/sbin/invoke-rc.d nagiosgrapher stop
 /usr/sbin/invoke-rc.d postfix stop
+/usr/sbin/invoke-rc.d mysql stop
+/usr/sbin/invoke-rc.d mysql start
 /usr/sbin/invoke-rc.d postfix start
 /usr/sbin/invoke-rc.d apache2 start
 /usr/sbin/invoke-rc.d nagios-nrpe-server start
