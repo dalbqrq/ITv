@@ -117,6 +117,19 @@ string.extract_latlon = function(str)
    return lat, lon
 end
 
+----------------------------- ECT ----------------------------------
+
+find_hostname = function( a, h, k ) 
+   local host_name
+
+   if a ~= "" and a ~= nil then host_name = a end
+   if host_name == nil and h ~= "" and h ~= nil then host_name = h end
+   if host_name == nil and k ~= "" and k ~= nil then host_name = k end
+
+   return host_name
+end
+
+
 ----------------------------- CSV ----------------------------------
 
 -- Transform an array of strings into CSV 

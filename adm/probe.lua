@@ -55,7 +55,7 @@ function objects:select_checks(cmd)
 end
 
 
-function monitors:insert_monitor(networkport, softwareversion, service_object, is_active, type_)
+function monitors:insert_monitor(networkport, softwareversion, service_object, state, type_)
    if tonumber(networkport)      == 0 then networkport      = nil end         
    if tonumber(softwareversion)  == 0 then softwareversion  = nil end         
 
@@ -65,8 +65,8 @@ function monitors:insert_monitor(networkport, softwareversion, service_object, i
       service_object_id    = service_object,
       networkports_id      = networkport,
       softwareversions_id  = softwareversion,
-      is_active = is_active,
-      type = type_,
+      state = state,
+      type  = type_,
    }
    Model.insert("itvision_monitors", mon)
 end
@@ -178,18 +178,11 @@ function insert(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, ip)
       -- cria monitor sem a referencia do servico check_alive associado.
       monitors:insert_monitor(p_id, nil, -1, 0, "hst")
 
-      msg = msg.."Check do HOST: "..c_name.." para o IP "..ip.." criado. "
+      msg = msg.."Check do HOST: "..c_name.." para o IP "..ip.." criado. "..error_message(11)
    else
       msg = msg.."Check do HOST: "..c_name.." já existe! "
    end   
 
---[[
-   if h[1] == nil then 
-      msg = msg..error_message(11)
-   else
-      hst = h[1].object_id
-   end
-]]
 
 
    -- DEBUG: text_file_writer ("/tmp/4", "4\n")
@@ -242,17 +235,19 @@ function insert(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, ip)
 --[[
    local uurrll = "/list/"..msg..""
    text_file_writer ("/tmp/6", uurrll.." 6\n")
+]]
    if web then
       return web:redirect(web:link("/list/"..msg..""))
    else
       return msg --para criacao de probes em massa
    end
-]]
 
+--[[
    local cmp = Monitor.select_monitors(clause)
    local chk = Checkcmds.select_checkcmds()
 
    return render_list(web, cmp, chk, "")
+]]
 end
 ITvision:dispatch_post(insert, "/insert/(%d+):(%d+):(%d+):(%d+):(.+):(.+):(.+):(.+)")
 
@@ -291,11 +286,10 @@ function render_list(web, cmp, chk, msg)
    local res = {}
    local link = {}
    
-   -- DEBUG: local header =  { "query", strings.name, "IP", "Software / Versão", strings.type, strings.command, "." }
-   local header =  { strings.name, "IP", "Software / Versão", strings.type, strings.command, "." }
+   local header =  { strings.alias.."/"..strings.name, "IP", "Software / Versão", strings.type, strings.command, "." }
 
    for i, v in ipairs(cmp) do
-      local serv, ip, itemtype, name, id = "", "", "", "", ""
+      local serv, ip, itemtype, id, hst_name = "", "", "", "", nil
 
       if v.sw_name ~= "" then serv = v.sw_name.." / "..v.sv_name end
 
@@ -304,9 +298,9 @@ function render_list(web, cmp, chk, msg)
       v.n_id = v.n_id or 0
       v.p_id = v.p_id or 0
       v.sv_id = v.sv_id or 0
+      hst_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
       if v.p_itemtype then itemtype = v.p_itemtype else itemtype = "NetworkEquipment" end
       if v.p_ip then ip = v.p_ip else ip = v.n_ip end
-      if v.c_name then name = v.c_name else name = v.n_name end
 
       if v.c_id ~= 0 then id = v.c_id else id = v.n_id end
 
@@ -323,19 +317,19 @@ function render_list(web, cmp, chk, msg)
          link = "-"
       end
 
-         -- DEBUG v[1] é o numero da query_?: v[1],
---[[
-web.prefix = "/"
-if itemtype == "Computer" then
-/servdesk/front/computer.form.php?id=
-elseif itemtype == "NetworkEquipment" then
-/servdesk/front/computer.form.php?id=
-else
-end
-]]
- 
+      local url
+      web.prefix = "/servdesk"
+      if itemtype == "Computer" then
+         url = web:link("/front/computer.form.php?id="..id)
+      elseif itemtype == "NetworkEquipment" then
+         url = web:link("/front/networkequipment.form.php?id="..id)
+         else
+      end
+
+      web.prefix = "/adm/probe"
+
       row[#row + 1] = { 
-         a{ href= web:link("/add/"..id), name}, 
+         a{ href=url, hst_name}, 
          ip, 
          serv,
          itemtype,
@@ -344,7 +338,7 @@ end
    end
 
    res[#res+1] = render_content_header("Checagem", nil, web:link("/list"))
-   if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ msg } end
+   if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ font{ color="red", msg } } end
    res[#res+1] = render_form_bar( render_filter(web), strings.search, web:link("/list"), web:link("/list") )
    res[#res+1] = render_table(row, header)
 
@@ -370,8 +364,8 @@ function render_checkcmd_test(web, cur_cmd, name, ip)
    url = web:link("")
 
    hidden = { 
-      "<INPUT TYPE=HIDDEN NAME=\"cmd\" value=\""..c[1].command.."\">",
-      "<INPUT TYPE=HIDDEN NAME=\"count\" value=\""..#p.."\">" 
+      --"<INPUT TYPE=HIDDEN NAME=\"cmd\" value=\""..c[1].command.."\">",
+      --"<INPUT TYPE=HIDDEN NAME=\"count\" value=\""..#p.."\">" 
    }
 
    for i, v in ipairs(p) do
@@ -404,14 +398,12 @@ function render_add(web, cmp, chk, params)
    local v = cmp[1]
    local row = {}
    local res = {}
-   local serv, ip, itemtype, name, id = "", "", "", "", ""
+   local serv, ip, itemtype, id, hst_name = "", "", "", "", nil
    local s, r, url, url2
    local display = ""
 
    params.default = params.default or chk[1].object_id
-
-   --local header = { "query", strings.name, "IP", "SW / Versão", strings.type, strings.command }
-   local header = { strings.name, "IP", "SW / Versão", strings.type, strings.command }
+   local header = { strings.alias.."/"..strings.name, "IP", "SW / Versão", strings.type, strings.command }
 
    if v then
       if v.sw_name ~= nil then 
@@ -424,11 +416,11 @@ function render_add(web, cmp, chk, params)
       v.n_id = v.n_id or 0
       v.p_id = v.p_id or 0
       v.sv_id = v.sv_id or 0
+      hst_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
       if v.p_itemtype then itemtype = v.p_itemtype else itemtype = "NetworkEquipment" end
       if v.p_ip then ip = v.p_ip else ip = v.n_ip end
-      if v.c_name then name = v.c_name else name = v.n_name end
 
-      url = "/insert/"..v.p_id..":"..v.sv_id..":"..v.c_id..":"..v.n_id..":"..name..":"..v.sw_name..":"..v.sv_name..":"..ip
+      url = "/insert/"..v.p_id..":"..v.sv_id..":"..v.c_id..":"..v.n_id..":"..hst_name..":"..v.sw_name..":"..v.sv_name..":"..ip
 
       -- se sv_id == 0 entao eh um host ou um network
       if v.sv_id == 0 then 
@@ -450,7 +442,7 @@ function render_add(web, cmp, chk, params)
          --a{ href= web:link("/show/"..v.c_id), v.c_name}, 
          --v[1],
       row[#row + 1] = { 
-         name,
+         hst_name,
          ip, 
          serv,
          itemtype,
@@ -458,19 +450,13 @@ function render_add(web, cmp, chk, params)
       }
    end
 
---[[
-   if v.sv_id ~= 0 then 
-      row[#row + 1] = { colspan=6, text=render_checkcmd_test(web, params.default, name, ip) } 
-   end
-]]
-
 -- VER: http://stackoverflow.com/questions/942772/html-form-with-two-submit-buttons-and-two-target-attributes
 
    res[#res+1] = render_content_header("Checagem", nil, web:link("/list"))
    res[#res+1] = render_table(row, header)
 
    if v.sv_id ~= 0 then 
-      res[#res+1] = render_checkcmd_test(web, params.default, name, ip)
+      res[#res+1] = render_checkcmd_test(web, params.default, hst_name, ip)
       res[#res+1] = iframe{name="check", src=web:link("/blank"), width="100%",  height="300", frameborder=0}
    end
 

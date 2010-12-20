@@ -484,15 +484,20 @@ function select_monitors(clause)
    for _,v in ipairs(q4) do table.insert(q, v) end
 
    table.sort(q, function (a, b) 
-      a.c_name  = a.c_name  or ""
-      a.p_ip    = a.p_ip    or ""
-      a.sw_name = a.sw_name or ""
-      a.sv_name = a.sv_name or ""
-      b.c_name  = b.c_name  or ""
-      b.p_ip    = b.p_ip    or ""
-      b.sw_name = b.sw_name or ""
-      b.sv_name = b.sv_name or ""
-      return a.c_name..a.p_ip..a.sw_name..a.sv_name < b.c_name..b.p_ip..b.sw_name..b.sv_name  end )
+      a.c_alias   = a.c_alias   or ""
+      a.c_name    = a.c_name    or ""
+      a.c_itv_key = a.c_itv_key or ""
+      a.p_ip      = a.p_ip      or ""
+      a.sw_name   = a.sw_name   or ""
+      a.sv_name   = a.sv_name   or ""
+      b.c_alias   = b.c_alias   or ""
+      b.c_name    = b.c_name    or ""
+      b.c_itv_key = b.c_itv_key or ""
+      b.p_ip      = b.p_ip      or ""
+      b.sw_name   = b.sw_name   or ""
+      b.sv_name   = b.sv_name   or ""
+      return a.c_alias..a.c_name..a.c_itv_key..a.p_ip..a.sw_name..a.sv_name < 
+             b.c_alias..b.c_name..b.c_itv_key..b.p_ip..b.sw_name..b.sv_name  end )
 
    return q
 end

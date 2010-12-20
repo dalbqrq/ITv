@@ -627,7 +627,7 @@ install_msg POS-CONFIGURACAO
 
 # Só agora executa a inicializacao das tabelas de checkcmd
 source /home/$user/.bashrc
-/usr/bin/lua /usr/local/itvision/orb/inc/update_checkcmds.lua
+/usr/bin/lua /usr/local/itvision/scr/update_checkcmds.lua
 
 
 echo ""
