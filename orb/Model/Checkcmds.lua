@@ -1,5 +1,6 @@
 module("Checkcmds", package.seeall)
 
+require "Model"
 require "util"
 
 function select_checkcmds(id, hide_check_host)
@@ -7,7 +8,7 @@ function select_checkcmds(id, hide_check_host)
    local cond_ = [[ objecttype_id = 12 and is_active = 1 and 
       o.object_id = c.cmd_object_id ]]
 
-   if id then
+   if id ~= nil then
       cond_ = cond_ .. [[ and o.object_id = ]]..id
    end
 
@@ -17,8 +18,9 @@ function select_checkcmds(id, hide_check_host)
 
    local extra_ = [[ order by name1 ]]
 
-   --DEBUG: id = id or ""; text_file_writer ("/tmp/chk"..id, "select * from ".. table_ .." where ".. cond_ .. " ".. extra_..";\n\n" )
-   --text_file_writer ("/tmp/chk", "select * from ".. table_ .." where ".. cond_ .. " ".. extra_..";\n\n" )
+   -- DEBUG: id = id or ""; text_file_writer ("/tmp/chk"..id, "select * from ".. table_ .." where ".. cond_ .. " ".. extra_..";\n\n" )
+   -- DEBUG: 
+text_file_writer ("/tmp/dbg_5", "select * from ".. table_ .." where ".. cond_ .. " ".. extra_..";" )
    return Model.query(table_, cond_, extra_)
 end
 
@@ -36,21 +38,20 @@ function select_checkcmd_params(id, exclude_fixed_params)
 
    local extra_ = [[ order by p.sequence ]]
 
-   --DEBUG: id = id or ""; text_file_writer ("/tmp/8"..id, "select * from ".. table_ .." where ".. cond_ .. " ".. extra_..";\n\n" )
+   -- DEBUG: id = id or ""; 
+text_file_writer ("/tmp/dbg_3", "select * from ".. table_ .." where ".. cond_ .. " ".. extra_..";" )
    return Model.query(table_, cond_, extra_)
 end
 
 
 -- Retorna comandos e parametros 
 function get_checkhost_params(id)
-   --print ("---> ", id)
    local c = select_checkcmds(id, false)
    local count = 0
    while c[1] == nil do
       count = count +1
       os.sleep(1)
       c = select_checkcmds(id, false)
-      --print(".")
    end
 
    local p = select_checkcmd_params(c[1].id, true)
@@ -77,7 +78,7 @@ function get_check_params(id)
       os.sleep(1)
       c = select_checkcmds(id, true)
    end
-   text_file_writer("/tmp/contour_chkcmd", tostring(counter))
+   -- DEBUG: text_file_writer("/tmp/contour_chkcmd", tostring(counter))
 
    local p = select_checkcmd_params(c[1].id, true)
    return c, p
@@ -96,13 +97,11 @@ function how_to_use(object_id)
 
    chk = c[1].name1
 
-   for i,v in ipairs(p) do
-      chk = chk.."!"..v.default_value
+   for j,w in ipairs(p) do
+       print(chk, c[1].command, w.default_value)
    end
 
-   print(chk) 
 end
 
---how_to_use(30)
-
+--how_to_use(87)
 

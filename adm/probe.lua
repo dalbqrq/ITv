@@ -3,7 +3,6 @@
 -- includes & defs ------------------------------------------------------
 require "Model"
 require "Monitor"
-require "Checkcmds"
 require "View"
 require "util"
 require "monitor_util"
@@ -184,12 +183,10 @@ function insert(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, ip)
    end   
 
 
-
-   -- DEBUG: text_file_writer ("/tmp/4", "4\n")
    ------------------------------------------------------
    -- cria o service check caso tenha sido requisitado
    ------------------------------------------------------
---[[
+   --alter table itvision.itvision_monitors add columns display_name VARCHAR(40) NULL DEFAULT NULL  AFTER softwareversions_id;
    if tonumber(sv_id) ~= 0 then
       local clause
 
@@ -213,10 +210,6 @@ function insert(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, ip)
       cmd = insert_service_cfg_file (hostname, dpl, chk_name, chk_id, true)
       s = objects:select(hostname, dpl)
 
-      -- caso service ainda nao tenha sido incluido aguarde e tente novamente
-      counter = 0
-      -- DEBUG: text_file_writer ("/tmp/6", "Counter: "..counter.."\n")
-
       if s[1] == nil then 
          msg = msg..error_message(12)
       else
@@ -227,14 +220,13 @@ function insert(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, ip)
          -- DEBUG: msg = msg.." ||| serviceobjid"..svc.." ||| " 
       end
    end
-]]
 
    --os.reset_monitor() -- isto estah aqui pois as vezes o probe nao aparece na lista mesmo que itvivion_monitor
                       -- e nagios_objects tenham sido criados
 
 --[[
    local uurrll = "/list/"..msg..""
-   text_file_writer ("/tmp/6", uurrll.." 6\n")
+   -- DEBUG: text_file_writer ("/tmp/6", uurrll.." 6\n")
 ]]
    if web then
       return web:redirect(web:link("/list/"..msg..""))
@@ -354,18 +346,15 @@ end
 
 function render_checkcmd_test(web, cur_cmd, name, ip)
    local row, cmd, url = {}, "", ""
-   local c, p
    local readonly = ""
    local hidden = {}
    local header = { strings.parameter.." #", strings.value, strings.description }
 
-   web.prefix = "/adm/checkcmd"
-   c, p = get_allcheck_params(cur_cmd)
-   url = web:link("")
+   local c, p = Checkcmds.get_allcheck_params(cur_cmd)
 
    hidden = { 
-      --"<INPUT TYPE=HIDDEN NAME=\"cmd\" value=\""..c[1].command.."\">",
-      --"<INPUT TYPE=HIDDEN NAME=\"count\" value=\""..#p.."\">" 
+      "<INPUT TYPE=HIDDEN NAME=\"cmd\" value=\""..c[1].command.."\">",
+      "<INPUT TYPE=HIDDEN NAME=\"count\" value=\""..#p.."\">" 
    }
 
    for i, v in ipairs(p) do
@@ -455,11 +444,13 @@ function render_add(web, cmp, chk, params)
    res[#res+1] = render_content_header("Checagem", nil, web:link("/list"))
    res[#res+1] = render_table(row, header)
 
+   web.prefix = "/adm/checkcmd"
+   url = web:link("")
+
    if v.sv_id ~= 0 then 
       res[#res+1] = render_checkcmd_test(web, params.default, hst_name, ip)
       res[#res+1] = iframe{name="check", src=web:link("/blank"), width="100%",  height="300", frameborder=0}
    end
-
 
    for _,c in ipairs(chk) do
       if c.object_id == default then
@@ -467,8 +458,6 @@ function render_add(web, cmp, chk, params)
          --r = os.capture(s)
       end
    end
-
-   -- DEBUG res[#res+1] = p{ "| ", default, " | ", s, " | ", r }
 
    return render_layout(res)
 end

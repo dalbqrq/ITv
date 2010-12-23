@@ -193,7 +193,7 @@ function activate(web, id, flag)
       local clause = "id = "..id
       local tables = "itvision_apps"
       cols.is_active = flag
---text_file_writer("/tmp/1", id.." : "..flag)
+      -- DEBUG: text_file_writer("/tmp/1", id.." : "..flag)
 
       local A = apps:select(id)
       local O = Itvision.select_app_app_objects(id)
@@ -215,7 +215,7 @@ function activate(web, id, flag)
                os.reset_monitor()
                os.sleep(1)
                s = objects:select_app(app_to_id(A[1].name))
-text_file_writer("/tmp/act_"..app_to_id(A[1].name), app_to_id(A[1].name).." : "..counter.."\n")
+               -- DEBUG: text_file_writer("/tmp/act_"..app_to_id(A[1].name), app_to_id(A[1].name).." : "..counter.."\n")
             end
             local svc = { id = A[1].id, service_object_id = s[1].object_id }
             apps:update(svc)
