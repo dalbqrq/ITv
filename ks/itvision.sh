@@ -3,12 +3,12 @@
 # ITvision MONITOR INSTALL for Ubuntu 10.04.1
 # --------------------------------------------------
 
-user=itv
-dbpass=itv
+user=itvision
+dbpass=itvision
 dbuser=$user
 dbname=itvision
 itvhome=/usr/local/itvision
-instance=ATMA
+instance=PRODERJ
 hostname=itvision
 
 function install_pack() {
