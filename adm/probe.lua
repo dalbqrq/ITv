@@ -37,6 +37,20 @@ function objects:select(name1, name2)
 end
 
 
+function objects:select_host(name1)
+   local clause = ""
+   if name1 ~= nil then
+      clause = " o.name1 = '"..name1.."'"
+   else
+      clause = " o.name1 like '"..config.monitor.check_app.."%' "
+   end
+
+   clause = clause .. " and m.softwareversions_id is null and o.name2 = m.id and o.is_active = 1"
+
+   return Model.query("nagios_objects o, itvision_monitors m", clause)
+end
+
+
 function objects:select_check_host()
    local clause = "name1 = '"..config.monitor.check_host.."' and name2 is NULL"
    local chk =  Model.query("nagios_objects", clause)
@@ -69,7 +83,7 @@ function monitors:insert_monitor(networkport, softwareversion, service_object, d
       state = state,
       type  = type_,
    }
-   Model.insert("itvision_monitors", mon)
+   return Model.insert_monitor("itvision_monitors", mon)
 end
 
 
@@ -162,9 +176,9 @@ function insert(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, ip)
    local cmd, hst, svc, dpl, chk, mon, chk_id, h, s
    local chk_name = config.monitor.check_host
    local msg = ""
-   local content, counter
+   local content, counter, new_id
 
-   h = objects:select(hst_name, chk_name)
+   h = objects:select_host(hst_name)
 
    ------------------------------------------------------
    -- cria check host e service ping caso nao exista
@@ -172,11 +186,10 @@ function insert(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, ip)
    if h[1] == nil then
       chk_id = objects:select_check_host()
 
-      cmd = insert_host_cfg_file (hst_name, hst_name, ip)
-      cmd = insert_service_cfg_file (hst_name, chk_name, chk_name, chk_id, false)
-
       -- cria monitor sem a referencia do servico check_alive associado.
-      monitors:insert_monitor(p_id, nil, -1, nil, 0, "hst")
+      cmd = insert_host_cfg_file (hst_name, hst_name, ip)
+      new_id = monitors:insert_monitor(p_id, nil, -1, nil, 0, "hst")
+      cmd = insert_service_cfg_file (hst_name, new_id, chk_name, chk_id, false)
 
       msg = msg.."Check do HOST: "..c_name.." para o IP "..ip.." criado. "..error_message(11)
    else
@@ -188,41 +201,36 @@ function insert(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, ip)
    -- cria o service check caso tenha sido requisitado
    ------------------------------------------------------
    --alter table itvision.itvision_monitors add column display_name VARCHAR(40) NULL DEFAULT NULL  AFTER softwareversions_id;
+   --ALTER TABLE `itvision`.`itvision_monitors` ADD COLUMN `id` INT(11) NOT NULL AUTO_INCREMENT  FIRST , ADD PRIMARY KEY (`id`) ;
+
    if tonumber(sv_id) ~= 0 then
       local clause
-
---[[
-      if web.input.check == 0 then
-         clause = "name1 = '"..config.monitor.check_host.."'"
-      else
-         clause = "object_id = "..web.input.check
-
-      end
-      chk = Model.query("nagios_objects", clause)
- Substituido pela linha abaixo ]]
-      chk = Model.query("nagios_objects", "object_id = "..web.input.check)
-
       -- DEBUG: text_file_writer ("/tmp/4", "clause: "..clause.."\n")
 
+      chk = Model.query("nagios_objects", "object_id = "..web.input.check)
       if chk[1] then chk_name = chk[1].name1; chk_id = chk[1].object_id end
 
-      --dpl = string.toid(web.input.display)
       dpl = web.input.display
       if dpl == "" or dpl == nil then 
          dpl = chk_name
       end
 
-      -- DEBUG: text_file_writer ("/tmp/5", "chk_name: "..chk_name.."\n".."chk_id: "..chk_id)
+--[[
       mon = Model.query("itvision_monitors", "networkports_id = "..p_id.." and softwareversions_id = "..sv_id..
                         " and display_name = '"..dpl.."'")
 
       if mon[1] then
          msg = msg.."Check de SERVIÇO: "..dpl.." - HOST: ".. c_name.." - COMANDO: "..chk_name.." NÃO FOI CRIADO POIS JÁ EXISTE."
       else
-         cmd = insert_service_cfg_file (hst_name, dpl, chk_name, chk_id, true)
-         monitors:insert_monitor(p_id, sv_id, -1, dpl, 0, "svc")
+]]
+      -- cria monitor sem a referencia do servico associado.
+         new_id = monitors:insert_monitor(p_id, sv_id, -1, dpl, 0, "svc")
+         cmd = insert_service_cfg_file (hst_name, new_id, chk_name, chk_id, true)
          msg = msg.."Check de SERVIÇO: "..dpl.." - HOST: ".. c_name.." - COMANDO: "..chk_name.." criado."
+
+--[[
       end
+]]
    end
 
    if web then
@@ -291,6 +299,7 @@ function render_list(web, cmp, chk, msg)
       alias = v.m_display_name
 
       if v.s_check_command_object_id == nil then 
+         chk = ""
          if tonumber(v.m_service_object_id) == -1 then
             link = font{ color="orange", "Pendente" }
          else

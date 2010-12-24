@@ -120,7 +120,8 @@ function add(web, id, msg)
                       and o.is_active = 1 ]]
    local extra   = [[ order by o.name1, o.name2 ]]
 
-   clause = [[ and o.name1 <> 'dummy' and o.name2 = ']]..config.monitor.check_host..[[' ]]
+   --clause = [[ and o.name1 <> 'dummy' and o.name2 = ']]..config.monitor.check_host..[[' ]]
+   clause = " "
    local HST = Monitor.make_query_3(nil, nil, nil, exclude .. clause .. extra)
 
    --local SVC = Itvision.select_service_object(nil, nil, nil, nil, id, nil)
@@ -251,7 +252,7 @@ function make_app_objects_table(web, A)
       end
       ic = ic[1]
 
-      local obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.name2)
+      local obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.display_name)
 
       --web.prefix = "/adm/app_objects"
 
@@ -277,7 +278,7 @@ function make_app_relat_table(web, AR)
       end
       ic = ic[1]
 
-      local from = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.from_name2)
+      local from = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.from_display_name)
 
       if v.to_itemtype == "Computer" then
          ic = Model.query("glpi_computers", "id = "..v.to_items_id)
@@ -286,7 +287,7 @@ function make_app_relat_table(web, AR)
       end
       ic = ic[1]
 
-      local to = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.to_name2)
+      local to = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.to_display_name)
 
       if v.connection_type == "physical" then contype = strings.physical else contype = strings.logical end
 
@@ -339,7 +340,6 @@ function render_add(web, HST, SVC, APP, APPOBJ, APPS, AR, RT, app_id, msg)
    local list_size = 2
    local header = ""
 
-
    res[#res+1] = render_content_header(strings.application, web:link("/add/"..app_id), web:link("/list"))
    res[#res+1] = render_bar( render_selector_bar(web, APPS, app_id, "/add") )
 
@@ -368,7 +368,7 @@ function render_add(web, HST, SVC, APP, APPOBJ, APPS, AR, RT, app_id, msg)
    local opt_svc = {}
    for i,v in ipairs(SVC) do
       local hst_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
-      opt_svc[#opt_svc+1] = option{ value=v.o_object_id, make_obj_name(hst_name, v.o_name2) }
+      opt_svc[#opt_svc+1] = option{ value=v.o_object_id, make_obj_name(hst_name, v.m_display_name) }
    end  
    local svc = { render_form(web:link(url_app), web:link("/add/"..app_id),
                { H("select") { size=list_size, style="width: 100%;", name="item", opt_svc }, br(),
@@ -410,7 +410,7 @@ function render_add(web, HST, SVC, APP, APPOBJ, APPS, AR, RT, app_id, msg)
          end
          ic = ic[1]
 
-         obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.name2)
+         obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.display_name)
          opt_from[#opt_from+1] = option{ value=v.object_id, obj }
       end
    end
@@ -435,7 +435,7 @@ function render_add(web, HST, SVC, APP, APPOBJ, APPS, AR, RT, app_id, msg)
          end
          ic = ic[1]
 
-         obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.name2)
+         obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.display_name)
          opt_to[#opt_to+1] = option{ value=v.object_id, obj }
       end
    end

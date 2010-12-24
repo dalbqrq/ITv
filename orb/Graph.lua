@@ -55,26 +55,24 @@ function make_content(obj, rel)
    local show_ip = false
 
    if obj[1] then
-      -- DEBUG: text_file_writer("/tmp/c"..obj[1].a_name, table.getn(obj))
       for _,v in ipairs(obj) do
-         -- DEBUG 
-         -- DEBUG: text_file_writer("/tmp/"..v.ao_type.."-"..v.o_object_id, v.o_object_id.." :: "..v.o_name1.." :: "..v.o_name2.." :: "..v.ss_current_state)
-   
+
          local name, shape = "", ""
          local hst_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
+
          if v.ao_type == 'hst' then
-            name  = hst_name
-            label = name
+            label = hst_name
+            name  = string.gsub(hst_name, "%s", "")
             url   = "/orb/obj_info/"..v.ao_type.."/"..v.o_object_id
             shape = "box"
          elseif v.ao_type == 'svc' then
-            name  = hst_name.."-"..v.o_name2
-            label = v.o_name2
+            label = v.m_display_name
+            name  = string.gsub(hst_name..v.m_display_name, "%s", "")
             url   = "/orb/obj_info/"..v.ao_type.."/"..v.o_object_id
             shape = "ellipse"
          elseif v.ao_type == 'app' then
-            name = v.o_name2
-            label = string.gsub(v.o_name2,"_+"," ")
+            label = v.m_display_name
+            name  = string.gsub(v.m_display_name, "%s", "")
             url   = "/orb/obj_info/"..v.ao_type.."/"..v.o_object_id
             shape = "invhouse"
             shape = "octagon"
@@ -83,33 +81,20 @@ function make_content(obj, rel)
             shape = "hexagon"
          end
 
---[[ TODO: 5
-
-select app_id, a.name as a_name, ao.type as ao_type, o.name1, o.name2, ss.current_state as curr_state
-from itvision_apps a, itvision_app_objects ao, nagios_services s, nagios_objects o, nagios_servicestatus ss,
-     itvision_monitors m, glpi_networkports n, glpi_computers c
-where a.id = ao.app_id and ao.object_id = s.service_object_id and 
-s.service_object_id = o.object_id and s.service_object_id = ss.service_object_id and
-a.id = 1 and
-m.networkports_id = n.id and
-c.id = n.items_id and
-
-]]
-
       color = set_color(v.ss_current_state, v.ao_type)
-      name = string.gsub(name, "%p", "")
       table.insert(content, node{name, shape=shape, height=1.2, width=1, fontsize=12., fixedsize=true,
                       fontname="Helvetica", label=label, color="black", fillcolor=color ,URL=url ,target="_self",
                       nodesep=0.05, style="bold,filled,solid", penwidth=2})
       end
    end
 
+
    if rel[1] then
       for _,v in ipairs(rel) do
-         --local from_name, to_name = "", ""
-         local hst_name
+         local from_name, to_name, ic = "", "", nil
+         hst_name = ""
 
-         -- FROM
+         -- FROM -------------------------------
          if v.itemtype1 == "Computer" then
             ic = Model.query("glpi_computers", "id = "..v.items_id1)
          else
@@ -118,27 +103,17 @@ c.id = n.items_id and
          ic = ic[1]
          hst_name = find_hostname(ic.alias, ic.name, ic.itv_key)
 
---[[
          if string.find(v.o1_name1, config.monitor.check_app) then
-            from_name = v.o1_name2
-         elseif v.o1_name2 == config.monitor.check_host then
-            from_name = v.o1_name1
-            if not show_ip then from_name = string.gsub(from_name,"-(.+)", "") end
+            from_name = string.gsub(v.m1_display_name, "%s", "")
+         --elseif v.o1_name2 == config.monitor.check_host then
+         elseif v.m1_display_name == nil then
+            to_name = string.gsub(hst_name, "%s", "")
          else
-            from_name = v.o1_name1.."-"..v.o1_name2
-         end
-]]
-         if string.find(v.o1_name1, config.monitor.check_app) then
-            from_name = hst_name
-         elseif v.o1_name2 == config.monitor.check_host then
-            from_name = hst_name1
-            --if not show_ip then from_name = string.gsub(from_name,"-(.+)", "") end
-         else
-            from_name = hst_name.."-"..v.o1_name2
+            from_name = string.gsub(hst_name..v.m1_display_name, "%s", "")
          end
 
 
-         -- TO
+         -- TO -------------------------------
          if v.itemtype2 == "Computer" then
             ic = Model.query("glpi_computers", "id = "..v.items_id2)
          else
@@ -147,19 +122,17 @@ c.id = n.items_id and
          ic = ic[1]
          hst_name = find_hostname(ic.alias, ic.name, ic.itv_key)
 
-
          if string.find(v.o2_name1, config.monitor.check_app) then
-            to_name = hst_name
-         elseif v.o2_name2 == config.monitor.check_host then
-            to_name = hst_name
-            --if not show_ip then to_name = string.gsub(to_name,"-(.+)", "") end
+            to_name = string.gsub(v.m2_display_name, "%s", "")
+         --elseif v.o2_name2 == config.monitor.check_host then
+         elseif v.m2_display_name == nil then
+            to_name = string.gsub(hst_name, "%s", "")
          else
-            to_name = hst_name.."-"..v.o2_name2
+            to_name = string.gsub(hst_name..v.m2_display_name, "%s", "")
          end
 
-         --from_name = string.gsub(from_name, "%p", "")
-         --to_name = string.gsub(to_name, "%p", "")
 
+         -- RELAT -------------------------------
          if use_relat_label then
             relat_label = v.art_name
          else

@@ -629,6 +629,16 @@ install_msg POS-CONFIGURACAO
 source /home/$user/.bashrc
 /usr/bin/lua /usr/local/itvision/scr/update_checkcmds.lua
 
+# Cron setup
+sudo -u $user crontab -l > /tmp/crontab
+sudo -u $user cat << EOF >> /tmp/crontab
+* * * * * /usr/bin/lua $itvhome/scr/pendings.lua
+EOF
+sudo -u $user crontab /tmp/crontab
+rm -f /tmp/crontab
+
+
+
 
 echo ""
 echo "======================================================================================="

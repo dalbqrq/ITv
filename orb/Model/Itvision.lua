@@ -88,6 +88,7 @@ function select_app_service_object (cond_, extra_, columns_, app_id)
 
 end
 
+
 ----------------------------- SERVICE APP ----------------------------------
 
 function select_service_app (cond_, extra_, columns_)
@@ -160,14 +161,15 @@ end
 
 
 function select_app_app_objects (id)
-   local cond_ = "no.object_id = ao.service_object_id and ao.app_id = a.id and no.name1 = n.id"
+   local cond_ = "no.object_id = ao.service_object_id and ao.app_id = a.id and no.name1 = n.id and no.name2 = m.id "
    if id then
       cond_ = cond_ .. " and a.id = "..id
    end
-   local tables_ = "nagios_objects no, itvision_app_objects ao, itvision_apps a, glpi_networkports n"
+   local tables_ = "nagios_objects no, itvision_app_objects ao, itvision_apps a, glpi_networkports n, itvision_monitors m"
    local columns_ = [[ no.object_id, no.objecttype_id, no.name1, no.name2, ao.type as obj_type, a.id as 
 	app_id, a.name as a_name, a.type as a_type, a.is_active, a.service_object_id as service_id, 
-        n.itemtype as itemtype, n.items_id as items_id ]]
+        n.itemtype as itemtype, n.items_id as items_id,
+        m.display_name as display_name ]]
    local content = query (tables_, cond_, extra_, columns_)
    return content
 end
@@ -206,13 +208,16 @@ end
 function select_app_relat_object (id, from, to)
    local tables_  = [[itvision_app_relats ar, nagios_objects o1, nagios_objects o2, 
                       itvision_app_relat_types rt, itvision_apps ap,
-                      glpi_networkports n1, glpi_networkports n2]]
+                      glpi_networkports n1, glpi_networkports n2, 
+                      itvision_monitors m1, itvision_monitors m2 ]]
    local cond_    = [[ar.from_object_id = o1.object_id and 
                       ar.to_object_id = o2.object_id and
                       ar.app_relat_type_id = rt.id and
                       ar.app_id = ap.id and
                       o1.name1 = n1.id and 
-                      o2.name1 = n2.id ]]
+                      o2.name1 = n2.id and
+                      o1.name2 = m1.id and 
+                      o2.name2 = m2.id ]]
    local columns_ = [[o1.name1 as from_name1, o1.name2 as from_name2, 
                       o2.name1 as to_name1, o2.name2 as to_name2,
                       ar.from_object_id, ar.to_object_id,
@@ -223,7 +228,9 @@ function select_app_relat_object (id, from, to)
                       n1.itemtype as from_itemtype,
                       n1.items_id as from_items_id,
                       n2.itemtype as to_itemtype,
-                      n2.items_id as to_items_id ]]
+                      n2.items_id as to_items_id,
+                      m1.display_name as from_display_name,
+                      m2.display_name as to_display_name ]]
 
    if id then cond_ = cond_ .. " and ar.app_id = "..id end
    if from and to then cond_ = cond_  .. " and from_object_id = "..from.." and to_object_id = "..to end
@@ -244,16 +251,20 @@ function select_app_relat_to_graph (id)
    local columns_ = "a.name as a_name, art.name as art_name, o1.name1 as o1_name1, o1.name2 as o1_name2, "..
                     "o2.name1 as o2_name1, o2.name2 as o2_name2, "..
                     "n1.itemtype as itemtype1, n1.items_id as items_id1, "..
-                    "n2.itemtype as itemtype2, n2.items_id as items_id2 "
+                    "n2.itemtype as itemtype2, n2.items_id as items_id2, "..
+                    "m1.display_name as m1_display_name, m2.display_name as m2_display_name "
    local tables_  = "itvision_apps a, itvision_app_relats ar, nagios_objects o1, nagios_objects o2, "..
                     "itvision_app_relat_types art, "..
-                    "glpi_networkports n1, glpi_networkports n2"
+                    "glpi_networkports n1, glpi_networkports n2, "..
+                    "itvision_monitors m1, itvision_monitors m2"
    local cond_    = "a.id = ar.app_id and \
                      ar.from_object_id = o1.object_id and \
                      ar.to_object_id = o2.object_id and \
                      ar.app_relat_type_id = art.id and \
                      o1.name1 = n1.id and \
                      o2.name1 = n2.id and \
+                     o1.name2 = m1.id and \
+                     o2.name2 = m2.id and \
                      a.id = "..id 
 
    local content = query (tables_, cond_, extra_, columns_)

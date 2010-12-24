@@ -1,7 +1,7 @@
 require "Model"
 
-local DEBUG = true
 local DEBUG = false
+local DEBUG = true
 
 --[[
         +------------+    +-------------------------+    +-----------------+      +----------+
@@ -658,14 +658,14 @@ function how_to_use()
 
    --a = make_query_1()
    --a = make_query_2()
-   --a = make_query_3()
+   a = make_query_3()
    --a = make_query_4()
 
    --a = make_query_5()
-   a = select_monitors()
+   --a = select_monitors()
 
    for i,v in ipairs(a) do
-      print("A: ", v[1],table.getn(a), v.c_name, v.s_name, v.sv_name, v.p_itemtype, v.ao_type, v.c_geotag, v.m_service_object_id) 
+      print("A: ", v[1], v.c_alias, v.c_name, v.s_name, v.sv_name, v.p_itemtype, v.ao_type, v.c_geotag, v.m_service_object_id) 
    end
 
 

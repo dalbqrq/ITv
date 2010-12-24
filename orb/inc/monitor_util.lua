@@ -15,7 +15,8 @@ function make_obj_name(host, service)
    if string.find(host,config.monitor.check_app) == nil then 
        name = host
    end
-   if service ~= config.monitor.check_host then
+   --if service ~= config.monitor.check_host then
+   if service then
       if name ~= "" then
          name = " @ "..name
       else

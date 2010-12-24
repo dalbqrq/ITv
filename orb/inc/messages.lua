@@ -162,7 +162,7 @@ err_msg.pt_BR = {
 	[8] = "ERRO: A conexão entre os seguintes objetos já existe:",
 	[9] = "A seguinte Aplicação foi ativada:",
 	[10] = "ERRO: A seguinte Aplicação não possui objetos associados:",
-	[11] = "Por favor a atualização da base de dados.",
+	[11] = "Por favor, aguarde a atualização da base de dados.",
 	[12] = "ERRO: Monitoração de Service não foi incluida. Por favor entre em contato com o administrador.",
 }
 
