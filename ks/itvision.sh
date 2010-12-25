@@ -579,7 +579,9 @@ aliases="\nalias mv='mv -i'\nalias cp='cp -i'\nalias rm='rm -i'\nalias psa='ps -
 printf "$path"    >> /home/$user/.bashrc
 printf "$aliases" >> /home/$user/.bashrc
 printf "$aliases" >> /root/.bashrc
-printf "export LUA_PATH='$itvhome/orb/?.lua;$itvhome/orb/inc/?.lua;$itvhome/orb/Model/?.lua;/usr/local/share/lua/5.1/?.lua'\n" >> /home/$user/.bashrc
+LUA_PATH="$itvhome/orb/?.lua;$itvhome/orb/inc/?.lua;$itvhome/orb/Model/?.lua;/usr/local/share/lua/5.1/?.lua"
+printf "export LUA_PATH='$LUA_PATH'\n" >> /home/$user/.bashrc
+
 
 
 
@@ -632,6 +634,7 @@ source /home/$user/.bashrc
 # Cron setup
 sudo -u $user crontab -l > /tmp/crontab
 sudo -u $user cat << EOF >> /tmp/crontab
+LUA_PATH="$LUA_PATH"
 * * * * * /usr/bin/lua $itvhome/scr/pendings.lua
 EOF
 sudo -u $user crontab /tmp/crontab
