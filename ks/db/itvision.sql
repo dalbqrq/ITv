@@ -117,7 +117,7 @@ CREATE TABLE `itvision_apps` (
   CONSTRAINT `fk_instance_id20` FOREIGN KEY (`instance_id`) REFERENCES `nagios_instances` (`instance_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `fk_instance_id27` FOREIGN KEY (`instance_id`) REFERENCES `nagios_instances` (`instance_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `fk_object_id26` FOREIGN KEY (`service_object_id`) REFERENCES `nagios_objects` (`object_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -162,14 +162,17 @@ DROP TABLE IF EXISTS `itvision_monitors`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `itvision_monitors` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `instance_id` smallint(6) NOT NULL,
   `entities_id` int(11) NOT NULL DEFAULT '0',
   `service_object_id` int(11) NOT NULL,
   `networkports_id` int(11) NOT NULL,
   `softwareversions_id` int(11) DEFAULT NULL,
+  `display_name` varchar(40) DEFAULT NULL,
   `state` tinyint(4) NOT NULL DEFAULT '0',
-  `type` enum('hst','svc') CHARACTER SET latin1 NOT NULL DEFAULT 'hst'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  `type` enum('hst','svc') CHARACTER SET latin1 NOT NULL DEFAULT 'hst',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -276,4 +279,4 @@ CREATE TABLE `itvision_user_prefs` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2010-12-19 19:57:16
+-- Dump completed on 2010-12-24  1:05:48
