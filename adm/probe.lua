@@ -89,6 +89,9 @@ end
 
 -- controllers ------------------------------------------------------------
 
+
+------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------
 function list(web, msg)
    local clause = nil
    if web.input.hostname ~= "" and web.input.hostname ~= nil then clause = "c.name like '%"..web.input.hostname.."%' " end
@@ -112,26 +115,9 @@ ITvision:dispatch_get(list, "/", "/list", "/list/(.+)")
 ITvision:dispatch_post(list, "/list", "/list/(.+)")
 
 
---[[
-function show(web, id)
-   return render_show(web, id)
-end 
-ITvision:dispatch_get(show, "/show/(%d+)")
 
-
-function edit(web, id)
-   return render_add(web, id)
-end
-ITvision:dispatch_get(edit, "/edit/(%d+)")
-
-
-function update(web, id)
-   return web:redirect(web:link("/list"))
-end
-ITvision:dispatch_post(update, "/update/(%d+)")
-]]
-
-
+------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------
 function add(web, query, c_id, p_id, sv_id, default)
    local chk = Checkcmds.select_checkcmds(nil, true)
    local cmp = {}
@@ -155,6 +141,9 @@ end
 ITvision:dispatch_get(add, "/add/(%d+):(%d+):(%d+):(%d+)", "/add/(%d+):(%d+):(%d+):(%d+):(%d+)")
 
 
+
+------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------
 --[[
    insert()
 
@@ -165,11 +154,7 @@ ITvision:dispatch_get(add, "/add/(%d+):(%d+):(%d+):(%d+)", "/add/(%d+):(%d+):(%d
    O nome de um host deverá ser composto somente pelo p_id.
    O nome de um service deverah ser composto pelo p_id concatenado com o sv_id ligado por um _.
 ]]
-function insert(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, ip)
-   -- hostname passa aqui a ser uma composicao do proprio hostname com o ip a ser monitorado
-   --local hostname = string.gsub(string.toid(c_name).."-"..ip,"(%s+)","_")
-   --local software = string.toid(sw_name.." "..sv_name)
-
+function insert(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, ip, display, display_name)
    local hst_name = p_id
    local svc_name = p_id.."_"..sv_id
 
@@ -200,13 +185,9 @@ function insert(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, ip)
    ------------------------------------------------------
    -- cria o service check caso tenha sido requisitado
    ------------------------------------------------------
-   --alter table itvision.itvision_monitors add column display_name VARCHAR(40) NULL DEFAULT NULL  AFTER softwareversions_id;
-   --ALTER TABLE `itvision`.`itvision_monitors` ADD COLUMN `id` INT(11) NOT NULL AUTO_INCREMENT  FIRST , ADD PRIMARY KEY (`id`) ;
-
+-- INCLUIR O DISPLAY_NAME POR AQUI.... TODO
    if tonumber(sv_id) ~= 0 then
       local clause
-      -- DEBUG: text_file_writer ("/tmp/4", "clause: "..clause.."\n")
-
       chk = Model.query("nagios_objects", "object_id = "..web.input.check)
       if chk[1] then chk_name = chk[1].name1; chk_id = chk[1].object_id end
 
@@ -215,22 +196,10 @@ function insert(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, ip)
          dpl = chk_name
       end
 
---[[
-      mon = Model.query("itvision_monitors", "networkports_id = "..p_id.." and softwareversions_id = "..sv_id..
-                        " and display_name = '"..dpl.."'")
-
-      if mon[1] then
-         msg = msg.."Check de SERVIÇO: "..dpl.." - HOST: ".. c_name.." - COMANDO: "..chk_name.." NÃO FOI CRIADO POIS JÁ EXISTE."
-      else
-]]
       -- cria monitor sem a referencia do servico associado.
-         new_id = monitors:insert_monitor(p_id, sv_id, -1, dpl, 0, "svc")
-         cmd = insert_service_cfg_file (hst_name, new_id, chk_name, chk_id, true)
-         msg = msg.."Check de SERVIÇO: "..dpl.." - HOST: ".. c_name.." - COMANDO: "..chk_name.." criado."
-
---[[
-      end
-]]
+      new_id = monitors:insert_monitor(p_id, sv_id, -1, dpl, 0, "svc")
+      cmd = insert_service_cfg_file (hst_name, new_id, chk_name, chk_id, true)
+      msg = msg.."Check de SERVIÇO: "..dpl.." - HOST: ".. c_name.." - COMANDO: "..chk_name.." criado."
    end
 
    if web then
@@ -242,18 +211,36 @@ function insert(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, ip)
 end
 ITvision:dispatch_post(insert, "/insert/(%d+):(%d+):(%d+):(%d+):(.+):(.+):(.+):(.+)")
 
---[[
-function remove(web, id)
-   return render_remove(web, id)
-end
-ITvision:dispatch_get(remove, "/remove/(%d+)")
 
 
-function delete(web, id)
-   return web:redirect(web:link("/list"))
+------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------
+function chkexec(web)
+   local flags, opts = {}, {}
+   local cmd = web.input.cmd
+   local args = web.input.args
+   local display = web.input.display
+   local display_name = web.input.display_name
+   local count = web.input["count"]
+
+   for i = 1,count do
+      flags[#flags+1] = web.input["flag"..i]
+      opts[#opts+1]   = web.input["opt"..i]
+   end
+
+   return render_chkexec(web, cmd, count, flags, opts, args, display, display_name)
 end
-ITvision:dispatch_get(delete, "/delete/(%d+)")
-]]
+ITvision:dispatch_post(chkexec, "/chkexec")
+
+
+
+------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------
+function blank(web)
+   return render_blank(web)
+end
+ITvision:dispatch_get(blank, "/blank")
+
 
 
 ITvision:dispatch_static("/css/%.css", "/script/%.js")
@@ -261,6 +248,9 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 
 -- views ------------------------------------------------------------
 
+
+------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------
 function render_filter(web)
    local res = {}
 
@@ -272,31 +262,30 @@ function render_filter(web)
 end
 
 
+
+------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------
 function render_list(web, cmp, chk, msg)
    local row = {}
    local res = {}
    local link = {}
-   local alias
    
    local header = {strings.alias.."/"..strings.name, "IP", "Software / Versão", strings.type, strings.command, strings.alias, "."}
 
    for i, v in ipairs(cmp) do
-      local serv, ip, itemtype, id, hst_name = "", "", "", "", nil
+      local serv, ip, itemtype, id, hst_name, alias = "", "", "", "", nil, nil
 
       if v.sw_name ~= "" then serv = v.sw_name.." / "..v.sv_name end
 
       -- muitos dos ifs abaixo existem em funcao da direrenca entre as queries com Computer e as com Network
-      v.c_id = v.c_id or 0
-      v.n_id = v.n_id or 0
-      v.p_id = v.p_id or 0
-      v.sv_id = v.sv_id or 0
+      v.c_id = v.c_id or 0 v.n_id = v.n_id or 0 v.p_id = v.p_id or 0 v.sv_id = v.sv_id or 0
       hst_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
+      alias = v.m_display_name
+
       if v.p_itemtype then itemtype = v.p_itemtype else itemtype = "NetworkEquipment" end
       if v.p_ip then ip = v.p_ip else ip = v.n_ip end
-
       if v.c_id ~= 0 then id = v.c_id else id = v.n_id end
 
-      alias = v.m_display_name
 
       if v.s_check_command_object_id == nil then 
          chk = ""
@@ -321,17 +310,8 @@ function render_list(web, cmp, chk, msg)
       end
 
       if v.sw_name ~= "" then itemtype = "Service" end
-
       web.prefix = "/adm/probe"
-
-      row[#row + 1] = { 
-         a{ href=url, hst_name}, 
-         ip, 
-         serv,
-         itemtype,
-         chk,
-         alias,
-         link }
+      row[#row + 1] = { a{ href=url, hst_name}, ip, serv, itemtype, chk, alias, link }
    end
 
    res[#res+1] = render_content_header("Checagem", nil, web:link("/list"))
@@ -343,22 +323,33 @@ function render_list(web, cmp, chk, msg)
 end
 
 
+
+
+------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------
 function render_confirm(web, msg)
    local res = p{ "SHOW", br(), msg }
    return render_layout(res)
 end
 
 
-function render_checkcmd_test(web, cur_cmd, name, ip)
+
+------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------
+function render_checkcmd_test(web, cur_cmd, name, ip, args_to_insert)
    local row, cmd, url = {}, "", ""
    local readonly = ""
-   local hidden = {}
    local header = { strings.parameter.." #", strings.value, strings.description }
 
-   local c, p = Checkcmds.get_all_check_params(cur_cmd)
-
-   hidden = { 
+   local c, p   = Checkcmds.get_all_check_params(cur_cmd)
+   local display = {
+      { "Label", "<INPUT TYPE=TEXT NAME=\"display\" value=\""..c[1].name1.."\">", 
+        "Nome alternativo para o comando a ser criado." }
+   }
+   local hidden = { 
       "<INPUT TYPE=HIDDEN NAME=\"cmd\" value=\""..c[1].command.."\">",
+      "<INPUT TYPE=HIDDEN NAME=\"display_name\" value=\""..c[1].name1.."\">",
+      "<INPUT TYPE=HIDDEN NAME=\"args\" value=\""..args_to_insert.."\">" ,
       "<INPUT TYPE=HIDDEN NAME=\"count\" value=\""..#p.."\">" 
    }
 
@@ -381,29 +372,58 @@ function render_checkcmd_test(web, cur_cmd, name, ip)
       }
    end
 
-   web.prefix = "/adm/checkcmd"
-   url = web:link("")
+   local params = {hidden, br(), render_table(display, nil), br(), render_table(row, header)}
 
---[[
-   res[#res+1] = "============================================"
-   res[#res+1] = { a{ href=web:link("/test/check_http:-H!www.impa.br"), target="check",  "LINK" }, "DANIEL" }
-   res[#res+1] = { a{ href=web:link("www.impa.br"),  "LINK" }, "DANIEL" }
-   res[#res+1] = "============================================"
-]]
-   res[#res+1] = center{ br(), strings.parameter.."s do comando "..c[1].name1, br() }
-   res[#res+1] = center{ render_form(web:link(url), nil, {hidden, render_table(row, header)}, "check", strings.test, "check" ) }
+   res[#res+1] = center{ br(), br(), strings.parameter.."s do comando "..c[1].name1, br() }
+   res[#res+1] = center{ render_form(web:link("/chkexec"), nil, params, "check", strings.test, "check" ) }
 
    return res
 end
 
 
+------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------
+function render_chkexec(web, cmd, count, flags, opts, args, display, display_name)
+   local path = "/usr/lib/nagios/plugins"
+   local chk = path.."/"..cmd.." "
+   local res = {}
+   local err = false
+
+   for i = 1,count do
+      if flags[i] == nil then flags[i] = "" end
+      --if opts[i] == nil then opts[i] = "opt"..i end
+      if opts[i] == "" or opts[i] == nil then opts[i] = ""; err = true end
+      chk = chk ..flags[i].." "..opts[i].." "
+   end
+
+   _, _, v.p_id, v.sv_id, v.c_id, v.n_id, hst_name, v.sw_name, v.sv_name, ip = string.find(args, "(%d+):(%d+):(%d+):(%d+):(.+):(.+):(.+):(.+)")
+
+   local url = "/insert/"..args..":"..display..":"..display_name
+   local create_probe = render_form(web:link(url), web:link("/blank"), "", "", "Criar checagem" )
+
+   if err == true then
+      res[#res+1] = { br(), br(), strings.fillall }
+   else
+      -- DEBUG: res[#res+1] = { br(), "A ", display, " B", display_name, " C ", br() }
+      res[#res+1] = { br(), br(), os.capture(chk, true) }
+      res[#res+1] = { br(), br(), br(), create_probe }
+   end
+
+   return render_layout(res)
+end
+
+
+
+
+------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------
 function render_add(web, cmp, chk, params)
    local v = cmp[1]
    local row = {}
    local res = {}
    local serv, ip, itemtype, id, hst_name = "", "", "", "", nil
-   local s, r, url, url2
-   local display = ""
+   local s, r, url
+   local args_to_insert = ""
 
    params.default = params.default or chk[1].object_id
    local header = { strings.alias.."/"..strings.name, "IP", "SW / Versão", strings.type, strings.command }
@@ -417,32 +437,20 @@ function render_add(web, cmp, chk, params)
 
       v.c_id = v.c_id or 0; v.n_id = v.n_id or 0; v.p_id = v.p_id or 0; v.sv_id = v.sv_id or 0;
       hst_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
+      args_to_insert = v.p_id..":"..v.sv_id..":"..v.c_id..":"..v.n_id..":"..hst_name..":"..v.sw_name..":"..v.sv_name..":"..ip
 
       if v.p_itemtype then itemtype = v.p_itemtype else itemtype = "NetworkEquipment" end
       if v.p_ip then ip = v.p_ip else ip = v.n_ip end
 
-      url = "/insert/"..v.p_id..":"..v.sv_id..":"..v.c_id..":"..v.n_id..":"..hst_name..":"..v.sw_name..":"..v.sv_name..":"..ip
-      to_insert = v.p_id..":"..v.sv_id..":"..v.c_id..":"..v.n_id..":"..hst_name..":"..v.sw_name..":"..v.sv_name..":"..ip
-
       if v.sv_id == 0 then  -- entao nao eh service e sim um host ou um network
---[[
-         cmd = render_form(web:link(url), nil,
-               { "<INPUT TYPE=HIDDEN NAME=\"check\" value=\"0\">", config.monitor.check_host, " " } )
-]]
          cmd = { "<INPUT TYPE=HIDDEN NAME=\"check\" value=\"0\">", config.monitor.check_host, " " }
       else
-         url2="/add/"..params.query..":"..params.c_id
-         if params.p_id    then url2 = url2 ..":"..params.p_id    end
-         if params.sv_id   then url2 = url2 ..":"..params.sv_id   end
-         url2=web:link(url2)
+         url="/add/"..params.query..":"..params.c_id
+         if params.p_id    then url = url ..":"..params.p_id    end
+         if params.sv_id   then url = url ..":"..params.sv_id   end
+         url=web:link(url)
 
---[[
-         cmd = render_form(web:link(url), nil,
-               { "Nome:", "<INPUT TYPE=TEXT NAME=\"display\" value=\""..display.."\">", 
-               select_option_onchange("check", chk, "object_id", "name1", params.default, url2), " " } )
-]]
-         cmd = { "Nome:", "<INPUT TYPE=TEXT NAME=\"display\" value=\""..display.."\">", 
-               select_option_onchange("check", chk, "object_id", "name1", params.default, url2), " " }
+         cmd = { select_option_onchange("check", chk, "object_id", "name1", params.default, url), " " }
       end
 
       row[#row + 1] = { hst_name, ip, serv, itemtype, cmd, }
@@ -454,7 +462,7 @@ function render_add(web, cmp, chk, params)
    res[#res+1] = render_table(row, header)
 
    if v.sv_id ~= 0 then 
-      res[#res+1] = render_checkcmd_test(web, params.default, hst_name, ip)
+      res[#res+1] = render_checkcmd_test(web, params.default, hst_name, ip, args_to_insert)
       res[#res+1] = iframe{name="check", src=web:link("/blank"), width="100%",  height="300", frameborder=0}
    end
 
@@ -462,8 +470,18 @@ function render_add(web, cmp, chk, params)
 end
 
 
+
+------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------
 function render_remove(web)
    -- VAZIO
+end
+
+
+------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------
+function render_blank(web)
+   return render_layout()
 end
 
 

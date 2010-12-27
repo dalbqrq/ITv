@@ -270,20 +270,19 @@ function render_table(t, h)
       hea = tr{ class="tab_bg_1", hea }
    end
 
-      local span = 1
+   local span = 1
    for r, v in ipairs(t) do
       for c, w in pairs(v) do
-
-if c == "colspan" then 
-   span = w
-else 
-         if r == 1 and h ~= nil and table.getn(h) == 0 then -- h vazio ({}) e header dentro de t
-            hea[#hea+1] = th{ align="center", w }
-         else                                               -- nao possui header, tudo eh linha
-            col[#col+1] = td{ colspan=span, w }
+         if c == "colspan" then 
+            span = w
+         else 
+            if r == 1 and h ~= nil and table.getn(h) == 0 then -- h vazio ({}) e header dentro de t
+               hea[#hea+1] = th{ align="center", w }
+            else                                               -- nao possui header, tudo eh linha
+               col[#col+1] = td{ colspan=span, w }
+            end
+            span = 1
          end
-   span = 1
-end
       end
 
       if r == 1 and h ~= nil and table.getn(h) == 0 then  -- h vazio ({}) e header dentro de t
@@ -291,7 +290,6 @@ end
       else 
          row[#row+1] = tr{ class='tab_bg_1', col }
       end
-
       col = {}
    end
 
