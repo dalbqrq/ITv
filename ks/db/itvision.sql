@@ -30,6 +30,8 @@ CREATE TABLE `itvision_app_objects` (
   KEY `fk_app_id4` (`app_id`),
   KEY `fk_object_id3` (`service_object_id`),
   KEY `fk_instance_id11` (`instance_id`),
+  KEY `fk_service_object_id1` (`service_object_id`),
+  CONSTRAINT `fk_service_object_id1` FOREIGN KEY (`service_object_id`) REFERENCES `nagios_objects` (`object_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_app_id6` FOREIGN KEY (`app_id`) REFERENCES `itvision_apps` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_object_id3` FOREIGN KEY (`service_object_id`) REFERENCES `nagios_objects` (`object_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -167,13 +169,12 @@ CREATE TABLE `itvision_monitors` (
   `service_object_id` int(11) NOT NULL,
   `networkports_id` int(11) NOT NULL,
   `softwareversions_id` int(11) DEFAULT NULL,
-  `display` varchar(40) DEFAULT NULL,
+  `name` varchar(40) DEFAULT NULL,
   `name1` varchar(40) DEFAULT NULL,
   `name2` varchar(40) DEFAULT NULL,
   `state` tinyint(4) NOT NULL DEFAULT '0',
   `type` enum('hst','svc') CHARACTER SET latin1 NOT NULL DEFAULT 'hst'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -280,4 +281,4 @@ CREATE TABLE `itvision_user_prefs` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2010-12-24  1:05:48
+-- Dump completed on 2010-12-27 18:37:29
