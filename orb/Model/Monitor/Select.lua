@@ -168,6 +168,7 @@ end
 
 
 --[[ a -> string ou tabela com os aliases de nomes de tabela ]]
+--[[
 function make_quer_generaly(a)
    local t = {}
 
@@ -183,6 +184,7 @@ function make_quer_generaly(a)
 
    return "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n"
 end
+]]
 
 
 --[[

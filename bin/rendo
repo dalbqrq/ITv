@@ -3,6 +3,7 @@
 . /etc/nagios3/ndo2db.cfg
 
 /usr/sbin/invoke-rc.d ndoutils stop
+killall ndo2db
 if [ -e $socket_name ]; then
    \rm -f $socket_name
 fi
