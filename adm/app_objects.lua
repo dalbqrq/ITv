@@ -252,7 +252,7 @@ function make_app_objects_table(web, A)
       end
       ic = ic[1]
 
-      local obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.display_name)
+      local obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.name)
 
       --web.prefix = "/adm/app_objects"
 
@@ -278,7 +278,7 @@ function make_app_relat_table(web, AR)
       end
       ic = ic[1]
 
-      local from = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.from_display_name)
+      local from = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.from_name)
 
       if v.to_itemtype == "Computer" then
          ic = Model.query("glpi_computers", "id = "..v.to_items_id)
@@ -287,7 +287,7 @@ function make_app_relat_table(web, AR)
       end
       ic = ic[1]
 
-      local to = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.to_display_name)
+      local to = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.to_name)
 
       if v.connection_type == "physical" then contype = strings.physical else contype = strings.logical end
 
@@ -368,7 +368,7 @@ function render_add(web, HST, SVC, APP, APPOBJ, APPS, AR, RT, app_id, msg)
    local opt_svc = {}
    for i,v in ipairs(SVC) do
       local hst_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
-      opt_svc[#opt_svc+1] = option{ value=v.o_object_id, make_obj_name(hst_name, v.m_display_name) }
+      opt_svc[#opt_svc+1] = option{ value=v.o_object_id, make_obj_name(hst_name, v.m_name) }
    end  
    local svc = { render_form(web:link(url_app), web:link("/add/"..app_id),
                { H("select") { size=list_size, style="width: 100%;", name="item", opt_svc }, br(),
@@ -410,7 +410,7 @@ function render_add(web, HST, SVC, APP, APPOBJ, APPS, AR, RT, app_id, msg)
          end
          ic = ic[1]
 
-         obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.display_name)
+         obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.name)
          opt_from[#opt_from+1] = option{ value=v.object_id, obj }
       end
    end
@@ -435,7 +435,7 @@ function render_add(web, HST, SVC, APP, APPOBJ, APPS, AR, RT, app_id, msg)
          end
          ic = ic[1]
 
-         obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.display_name)
+         obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.name)
          opt_to[#opt_to+1] = option{ value=v.object_id, obj }
       end
    end

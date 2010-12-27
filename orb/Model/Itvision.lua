@@ -161,15 +161,15 @@ end
 
 
 function select_app_app_objects (id)
-   local cond_ = "no.object_id = ao.service_object_id and ao.app_id = a.id and no.name1 = n.id and no.name2 = m.id "
+   local cond_ = "o.object_id = ao.service_object_id and ao.app_id = a.id and o.name1 = p.id and o.name2 = m.id "
    if id then
       cond_ = cond_ .. " and a.id = "..id
    end
-   local tables_ = "nagios_objects no, itvision_app_objects ao, itvision_apps a, glpi_networkports n, itvision_monitors m"
-   local columns_ = [[ no.object_id, no.objecttype_id, no.name1, no.name2, ao.type as obj_type, a.id as 
+   local tables_ = "nagios_objects o, itvision_app_objects ao, itvision_apps a, glpi_networkports p, itvision_monitors m"
+   local columns_ = [[ o.object_id, o.objecttype_id, o.name1, o.name2, ao.type as obj_type, a.id as 
 	app_id, a.name as a_name, a.type as a_type, a.is_active, a.service_object_id as service_id, 
-        n.itemtype as itemtype, n.items_id as items_id,
-        m.display as display ]]
+        p.itemtype as itemtype, p.items_id as items_id,
+        m.name as name ]]
    local content = query (tables_, cond_, extra_, columns_)
    return content
 end
@@ -230,8 +230,8 @@ function select_app_relat_object (id, from, to)
                       n1.items_id as from_items_id,
                       n2.itemtype as to_itemtype,
                       n2.items_id as to_items_id,
-                      m1.display as from_display,
-                      m2.display as to_display ]]
+                      m1.name as from_name,
+                      m2.name as to_name ]]
 
    if id then cond_ = cond_ .. " and ar.app_id = "..id end
    if from and to then cond_ = cond_  .. " and from_object_id = "..from.." and to_object_id = "..to end
@@ -251,7 +251,7 @@ function select_app_relat_to_graph (id)
                     "o2.name1 as o2_name1, o2.name2 as o2_name2, "..
                     "n1.itemtype as itemtype1, n1.items_id as items_id1, "..
                     "n2.itemtype as itemtype2, n2.items_id as items_id2, "..
-                    "m1.display as m1_display, m2.display as m2_display "
+                    "m1.name as m1_name, m2.name as m2_name "
    local cond_    = "a.id = ar.app_id and \
                      ar.from_object_id = o1.object_id and \
                      ar.to_object_id = o2.object_id and \

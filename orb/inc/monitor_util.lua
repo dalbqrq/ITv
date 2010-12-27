@@ -66,15 +66,14 @@ define host{
 end
 
 
-function insert_service_cfg_file (hostname, display_name, display, check_args)
+function insert_service_cfg_file (hostname, service_desc, check_cmd, check_args)
    local content, cmd, filename
-   local check_cmd = display_name
 
    if check_args == nil then
       check_args = ""
       local tables_ = [[nagios_objects o, itvision_checkcmds c, itvision_checkcmd_params p]]
-      local cond_   = [[objecttype_id = 12 and is_active = 1 and o.object_id = c.cmd_object_id and c.id = p.checkcmds_id 
-                        and p.sequence is not null and o.name2 is null and o.name1 = ']]..display_name..[[']]
+      local cond_   = [[o.objecttype_id = 12 and o.is_active = 1 and o.object_id = c.cmd_object_id and c.id = p.checkcmds_id 
+                        and p.sequence is not null and o.name2 is null and o.name1 = ']]..check_cmd..[[']]
       local extras_ = [[order by p.sequence]]
       local p = Model.query(tables_, cond_, extras_)
       
@@ -83,13 +82,13 @@ function insert_service_cfg_file (hostname, display_name, display, check_args)
       end
    end
 
-   filename = config.monitor.dir.."/services/"..hostname.."-"..display_name.."-"..display..".cfg"
+   filename = config.monitor.dir.."/services/"..hostname.."-"..service_desc..".cfg"
 
    local text = [[
 define service{
         use]].."\t\t\t"..[[generic-service
         host_name]].."\t\t"..hostname..[[ 
-        service_description]].."\t"..display_name..[[ 
+        service_description]].."\t"..service_desc..[[ 
         check_command]].."\t\t"..check_cmd..check_args..[[ 
         } 
 ]]

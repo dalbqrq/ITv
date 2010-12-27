@@ -64,7 +64,7 @@ s_check_command_object_id	87
 s_check_interval	5
 s_check_timeperiod_object_id	158
 s_config_type	1
-s_display_name	MySql_Ver_14_14
+s_naem  	MySql_Ver_14_14
 s_event_handler_enabled	1
 s_eventhandler_command_args	
 s_eventhandler_command_object_id	0

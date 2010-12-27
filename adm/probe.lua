@@ -37,6 +37,28 @@ function objects:select(name1, name2)
 end
 
 
+-- conta quantas entradas existe parecidas com a que possui os parametros name1 e name2.
+-- serve para numerar sequencialmente as entradas incluidas para servicos no nagios_objects
+-- caso mais de um servico com o mesmo check_command seja criado.
+function objects:count_alike(name1, name2)
+   local res, q = 1, {}
+   local clause = ""
+   if name1 ~= nil then
+      clause = " name1 = '"..name1.."'"
+   end
+
+   if name2 ~= nil then
+      clause = clause.." and name2 like '"..name2.."%'"
+   end
+
+   q = Model.query("nagios_objects", clause)
+   if q then res = #q + 1 end
+   
+   return res
+end
+
+
+
 function objects:select_host(name1)
    local clause = ""
    if name1 ~= nil then
@@ -69,7 +91,7 @@ function objects:select_checks(cmd)
 end
 
 
-function monitors:insert_monitor(networkport, softwareversion, service_object, display, name1, name2, state, type_)
+function monitors:insert_monitor(networkport, softwareversion, service_object, name, name1, name2, state, type_)
    if tonumber(networkport)      == 0 then networkport      = nil end         
    if tonumber(softwareversion)  == 0 then softwareversion  = nil end         
 
@@ -79,9 +101,9 @@ function monitors:insert_monitor(networkport, softwareversion, service_object, d
       service_object_id    = service_object,
       networkports_id      = networkport,
       softwareversions_id  = softwareversion,
-      display              = display,
-      name1                = name1,
-      name2                = name2,
+      name  = name,
+      name1 = name1,
+      name2 = name2,
       state = state,
       type  = type_,
    }
@@ -120,10 +142,10 @@ ITvision:dispatch_post(list, "/list", "/list/(.+)")
 ------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------
 function add(web, query, c_id, p_id, sv_id, default)
-   local chk_id = web.input.chk_id
    local count = web.input.count
-   local display = web.input.display
-   local display_name = web.input.display_name
+   local chk_id = web.input.chk_id
+   local chk_name = web.input.chk_name
+   local monitor_name = web.input.monitor_name
    local chk_params = nil
 
    local chk = Checkcmds.select_checkcmds(nil, true)
@@ -151,7 +173,7 @@ function add(web, query, c_id, p_id, sv_id, default)
       end
    end
 
-   return render_add(web, cmp, chk, params, chk_params, display)
+   return render_add(web, cmp, chk, params, chk_params, monitor_name)
 end
 ITvision:dispatch_get(add, "/add/(%d+):(%d+):(%d+):(%d+)", "/add/(%d+):(%d+):(%d+):(%d+):(%d+)")
 ITvision:dispatch_post(add, "/add/(%d+):(%d+):(%d+):(%d+)", "/add/(%d+):(%d+):(%d+):(%d+):(%d+)")
@@ -222,9 +244,13 @@ function insert_service(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, 
    local cmd = web.input.cmd
    local args = web.input.args
    local count = web.input.count
-   local display = web.input.display
-   local display_name = web.input.display_name
+   local monitor_name = web.input.monitor_name
+   local chk_name = web.input.chk_name
    local check_args = ""
+
+   -- o nome do monitoramento/sevice_description deve conter o nome do comando para o nagiosgrapher
+   -- e ainda, o service_description (name2) deve possuir um numero sequencial ao final
+   local service_desc = chk_name.."_"..objects:count_alike(hst_name, chk_name)
 
    for i = 1,count do
       check_args = check_args.."!"..web.input["opt"..i]
@@ -237,12 +263,12 @@ function insert_service(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, 
 
    ------------------------------------------------------
    -- cria o service check caso tenha sido requisitado
+   -- e cria monitor sem a referencia do servico associado.
    ------------------------------------------------------
+   monitors:insert_monitor(p_id, sv_id, -1, monitor_name, hst_name, service_desc, 0, "svc")
+   insert_service_cfg_file (hst_name, service_desc, chk_name, check_args)
 
-   -- cria monitor sem a referencia do servico associado.
-   monitors:insert_monitor(p_id, sv_id, -1, display, hst_name, display_name, 0, "svc")
-   insert_service_cfg_file (hst_name, display_name, display, check_args)
-   msg = "Check de SERVIÇO: "..display.." - HOST: ".. c_name.." - COMANDO: "..display_name.." criado."
+   msg = "Check de SERVIÇO: "..monitor_name.." - HOST: ".. c_name.." - COMANDO: "..chk_name.." criado."
 
    if web then
       return web:redirect(web:link("/list/"..msg..""))
@@ -301,7 +327,7 @@ function render_list(web, cmp, chk, msg)
       -- muitos dos ifs abaixo existem em funcao da direrenca entre as queries com Computer e as com Network
       v.c_id = v.c_id or 0 v.n_id = v.n_id or 0 v.p_id = v.p_id or 0 v.sv_id = v.sv_id or 0
       hst_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
-      alias = v.m_display
+      alias = v.m_name
 
 
       if v.p_itemtype then itemtype = v.p_itemtype else itemtype = "NetworkEquipment" end
@@ -360,7 +386,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------
-function render_checkcmd(web, chk_id, name, ip, url_test, url_insert, chk_params, display)
+function render_checkcmd(web, chk_id, hst_name, ip, url_test, url_insert, chk_params, monitor_name)
    local row, row_hidden, cmd = {}, {}, ""
    local readonly, text = "", ""
    local header = { strings.parameter.." #", strings.value, strings.description }
@@ -371,24 +397,24 @@ function render_checkcmd(web, chk_id, name, ip, url_test, url_insert, chk_params
    if chk_params then p = chk_params end
    local chk = path.."/"..c[1].command
 
-   display = display or c[1].name1
+   monitor_name = monitor_name or c[1].name1
    
    local hidden = { 
       "<INPUT TYPE=HIDDEN NAME=\"cmd\" value=\""..c[1].command.."\">",
       "<INPUT TYPE=HIDDEN NAME=\"chk_id\" value=\""..chk_id.."\">" ,
-      "<INPUT TYPE=HIDDEN NAME=\"display_name\" value=\""..c[1].name1.."\">",
+      "<INPUT TYPE=HIDDEN NAME=\"chk_name\" value=\""..c[1].name1.."\">",
       "<INPUT TYPE=HIDDEN NAME=\"count\" value=\""..#p.."\">" 
    }
    local display_show = {
-      { "Label", "<INPUT TYPE=TEXT NAME=\"display\" value=\""..display.."\">", 
+      { "Label", "<INPUT TYPE=TEXT NAME=\"monitor_name\" value=\""..monitor_name.."\">", 
         "Nome alternativo para o comando a ser criado." }
    }
-   local display_hidden = { "<INPUT TYPE=HIDDEN NAME=\"display\" value=\""..display.."\">" }
+   local display_hidden = { "<INPUT TYPE=HIDDEN NAME=\"monitor_name\" value=\""..monitor_name.."\">" }
 
    for i, v in ipairs(p) do
       if v.sequence == nil then readonly="readonly=\"readonly\"" else readonly="" end
       if v.variable == "$HOSTNAME$" then
-         value = name
+         value = hst_name
       elseif v.variable == "$HOSTADDRESS$" then
          value = ip
       else
@@ -422,7 +448,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------
-function render_add(web, cmp, chk, params, chk_params, display)
+function render_add(web, cmp, chk, params, chk_params, monitor_name)
    local v = cmp[1]
    local row = {}
    local res = {}
@@ -455,7 +481,7 @@ function render_add(web, cmp, chk, params, chk_params, display)
 
    res[#res+1] = render_content_header("Checagem", nil, web:link("/list"))
    res[#res+1] = render_table(row, header)
-   res[#res+1] = render_checkcmd(web, chk_id, hst_name, v.p_ip, url_test, url_insert, chk_params, display)
+   res[#res+1] = render_checkcmd(web, chk_id, hst_name, v.p_ip, url_test, url_insert, chk_params, monitor_name)
 
 
    return render_layout(res)

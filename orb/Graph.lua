@@ -66,13 +66,13 @@ function make_content(obj, rel)
             url   = "/orb/obj_info/"..v.ao_type.."/"..v.o_object_id
             shape = "box"
          elseif v.ao_type == 'svc' then
-            label = v.m_display_name
-            name  = string.gsub(hst_name..v.m_display_name, "%s", "")
+            label = v.m_name
+            name  = string.gsub(hst_name..v.m_name, "%s", "")
             url   = "/orb/obj_info/"..v.ao_type.."/"..v.o_object_id
             shape = "ellipse"
          elseif v.ao_type == 'app' then
-            label = v.m_display_name
-            name  = string.gsub(v.m_display_name, "%s", "")
+            label = v.m_name
+            name  = string.gsub(v.m_name, "%s", "")
             url   = "/orb/obj_info/"..v.ao_type.."/"..v.o_object_id
             shape = "invhouse"
             shape = "octagon"
@@ -104,12 +104,12 @@ function make_content(obj, rel)
          hst_name = find_hostname(ic.alias, ic.name, ic.itv_key)
 
          if string.find(v.o1_name1, config.monitor.check_app) then
-            from_name = string.gsub(v.m1_display_name, "%s", "")
+            from_name = string.gsub(v.m1_name, "%s", "")
          --elseif v.o1_name2 == config.monitor.check_host then
-         elseif v.m1_display_name == nil then
+         elseif v.m1_name == nil then
             to_name = string.gsub(hst_name, "%s", "")
          else
-            from_name = string.gsub(hst_name..v.m1_display_name, "%s", "")
+            from_name = string.gsub(hst_name..v.m1_name, "%s", "")
          end
 
 
@@ -123,12 +123,12 @@ function make_content(obj, rel)
          hst_name = find_hostname(ic.alias, ic.name, ic.itv_key)
 
          if string.find(v.o2_name1, config.monitor.check_app) then
-            to_name = string.gsub(v.m2_display_name, "%s", "")
+            to_name = string.gsub(v.m2_name, "%s", "")
          --elseif v.o2_name2 == config.monitor.check_host then
-         elseif v.m2_display_name == nil then
+         elseif v.m2_name == nil then
             to_name = string.gsub(hst_name, "%s", "")
          else
-            to_name = string.gsub(hst_name..v.m2_display_name, "%s", "")
+            to_name = string.gsub(hst_name..v.m2_name, "%s", "")
          end
 
 
