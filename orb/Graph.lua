@@ -65,17 +65,17 @@ function make_content(obj, rel)
             name = v.o_name1
             if not show_ip then name = string.gsub(name,"-(.+)", "") end
             label = v.o_name1 -- DEBUG  ..":"..v.ss_current_state
-            url   = "/orb/obj_info/"..v.ao_type.."/"..v.o_object_id
+            url   = "/adm/obj_info/"..v.ao_type.."/"..v.o_object_id
             shape = "box"
          elseif v.ao_type == 'svc' then
             name = v.o_name1.."-"..v.o_name2
             label = v.o_name2  -- DEBUG ..":"..v.curr_state
-            url   = "/orb/obj_info/"..v.ao_type.."/"..v.o_object_id
+            url   = "/adm/obj_info/"..v.ao_type.."/"..v.o_object_id
             shape = "ellipse"
          elseif v.ao_type == 'app' then
             name = v.o_name2
             label = string.gsub(v.o_name2,"_+"," ") --DEBUG ..":"..v.curr_state
-            url   = "/orb/obj_info/"..v.ao_type.."/"..v.o_object_id
+            url   = "/adm/obj_info/"..v.ao_type.."/"..v.o_object_id
             shape = "invhouse"
             shape = "octagon"
             shape = "triangle"

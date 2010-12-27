@@ -349,7 +349,7 @@ function render_checkcmd_test(web, cur_cmd, name, ip)
    local hidden = {}
    local header = { strings.parameter.." #", strings.value, strings.description }
 
-   web.prefix = "/orb/checkcmd"
+   web.prefix = "/adm/checkcmd"
    c, p = get_allcheck_params(cur_cmd)
    url = web:link("")
 

@@ -80,13 +80,13 @@ menu_itens = {
 	{ 2, "Lógico", "/orb/gviz/show" },
 	{ 2, "Físico", "/orb/gviz/show" },
 	--{ 2, "Árvore", "/orb/app_tree" },
-	{ 2, "Aplicações", "/orb/app" },
-	{ 2, "Objetos & Relacionamentos", "/orb/app_objects" },
-	--{ 2, "Objetos", "/orb/app_object" },
-	--{ 2, "Relacionamento", "/orb/app_relat" },
-	{ 2, "Checagem", "/orb/probe" },
-	{ 2, "Tipo de Relacionamento", "/orb/app_relat_types" },
-	--{ 2, "Teste de Atividade", "/orb/probe" },
+	{ 2, "Aplicações", "/adm/app" },
+	{ 2, "Objetos & Relacionamentos", "/adm/app_objects" },
+	--{ 2, "Objetos", "/adm/app_object" },
+	--{ 2, "Relacionamento", "/adm/app_relat" },
+	{ 2, "Checagem", "/adm/probe" },
+	{ 2, "Tipo de Relacionamento", "/adm/app_relat_types" },
+	--{ 2, "Teste de Atividade", "/adm/probe" },
 	--{ 2, "Relatórios", "/blank.html" },
 	{ 1, "ServiceDesk", "/servdesk/front/central.php" },
 	{ 2, "Central", "/servdesk/front/central.php" },
@@ -109,7 +109,7 @@ menu_itens = {
 	{ 2, "Grupos", "/servdesk/front/group.php" },
 	{ 2, "Regras", "/servdesk/front/rule.php" },
 	{ 2, "Logs", "/servdesk/front/event.php" },
-	{ 2, "Comandos de Teste", "/orb/checkcmd" },
+	{ 2, "Comandos de Teste", "/adm/checkcmd" },
 	{ 2, "Manutenção", "/orb/system" },
 	{ 0, "Ajuda", "/blank.html" },
 }
@@ -696,7 +696,7 @@ function render_show(web, app, app_name, app_id, obj, rel, obj_id)
 
    local lnkgeo = nil
    if obj_id then 
-      web.prefix = "/orb/obj_info"
+      web.prefix = "/adm/obj_info"
       lnkgeo = web:link("/geotag/app:"..obj_id) 
       web.prefix = "/orb/gviz"
    end

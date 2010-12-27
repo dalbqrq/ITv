@@ -256,9 +256,9 @@ function render_list(web, A, msg)
          stract = strings.deactivate
       end
 
-      web.prefix = "/orb/app_objects"
+      web.prefix = "/adm/app_objects"
       local lnk = web:link("/list/"..v.id)
-      web.prefix = "/orb/app"
+      web.prefix = "/adm/app"
 
       row[#row+1] = {
          a{ href=lnk, v.name },
