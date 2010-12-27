@@ -165,6 +165,7 @@ monitor = {
 }
 
 view = {
+	-- GERAR NOVA CHAVE EM: http://code.google.com/apis/maps/signup.html
         google_maps_key = "ABQIAAAAsqOIUfpoX_G_Pw0Ar48BRhRtyMmS1TXEK_DXFnd23B1n8zvUnRT_9hDq4-PHCmE33vrSdHVrdUyjgw" --itv.impa.br
 }
 
@@ -401,10 +402,10 @@ cd $itvhome/ks/servdesk
 tar cf - * | ( cd /usr/local/servdesk; tar xfp -)
 
 
+echo "ALTER TABLE itvision.glpi_computers ADD COLUMN geotag VARCHAR(40) NULL DEFAULT NULL  AFTER ticket_tco ;" | mysql -u root --password=$dbpass
 echo "ALTER TABLE itvision.glpi_computers ADD COLUMN alias VARCHAR(30) NULL DEFAULT NULL  AFTER ticket_tco ;" | mysql -u root --password=$dbpass
 echo "ALTER TABLE itvision.glpi_computers ADD COLUMN itv_key VARCHAR(30) NULL DEFAULT NULL  AFTER ticket_tco ;" | mysql -u root --password=$dbpass
-echo "ALTER TABLE itvision.glpi_computers ADD COLUMN geotag VARCHAR(20) NULL DEFAULT NULL  AFTER ticket_tco ;" | mysql -u root --password=$dbpass
-echo "ALTER TABLE itvision.glpi_networkequipments ADD COLUMN geotag VARCHAR(20) NULL DEFAULT NULL  AFTER ticket_tco ;" | mysql -u root --password=$dbpass
+echo "ALTER TABLE itvision.glpi_networkequipments ADD COLUMN geotag VARCHAR(40) NULL DEFAULT NULL  AFTER ticket_tco ;" | mysql -u root --password=$dbpass
 echo "ALTER TABLE itvision.glpi_networkequipments ADD COLUMN alias VARCHAR(30) NULL DEFAULT NULL  AFTER ticket_tco ;" | mysql -u root --password=$dbpass
 echo "ALTER TABLE itvision.glpi_networkequipments ADD COLUMN itv_key VARCHAR(30) NULL DEFAULT NULL  AFTER ticket_tco ;" | mysql -u root --password=$dbpass
  
