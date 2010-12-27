@@ -1,0 +1,15 @@
+#!/bin/bash
+
+if [ $# -lt 2 ]; then
+   echo "Usage: limpa <hostname> <ip>" 
+   exit 0
+fi
+
+\rm /etc/nagios3/hosts/$1"-"$2".cfg"
+\rm /etc/nagios3/services/$1"-"$2"-HOST_ALIVE-HOST_ALIVE.cfg"
+
+echo "delete from itvision_monitor where service_object_id = (select id from nagios_objects where name1 = '"$1"-"$2"' and name2 = 'HOST_ALIVE'"  | dbcon
+
+#echo "select * from itvision_monitors where service_object_id = (select object_id from nagios_objects where name1 = '"$1"-"$2"' and name2 = 'HOST_ALIVE')"  | dbcon > /tmp/limpa.log
+
+/usr/local/itvision/bin/renagios
