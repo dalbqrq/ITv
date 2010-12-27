@@ -129,6 +129,21 @@ cat << EOF > /etc/apache2/conf.d/itvision.conf
                 Allow from all
         </Directory>
 
+        ScriptAlias /adm /usr/local/itvision/adm
+        <Directory "/usr/local/itvision/adm">
+                AllowOverride None
+                Options +ExecCGI +MultiViews +SymLinksIfOwnerMatch FollowSymLinks
+
+		AllowOverride AuthConfig
+                Order allow,deny
+                Allow from all
+
+		AuthName "ITvision Access"
+		AuthType Basic
+		AuthUserFile /usr/local/itvision/bin/htpasswd.users
+		require valid-user
+        </Directory>
+
         # Possible values: debug, info, notice, warn, error, crit,
         # alert, emerg.
         LogLevel warn
