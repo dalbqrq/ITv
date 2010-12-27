@@ -492,19 +492,23 @@ rm -f ~/SERVER* && rm -rf ~/demoCA*
 # --------------------------------------------------
 mkdir -p /var/log/itvision/mysql
 chown -R mysql.adm /var/log/itvision/mysql
-sed -i -e 's/\/var\/log\/mysql\/error.log/\/var\/log\/itvision\/mysql\/error.log/g' /etc/mysql/my.cnf 
-sed -i -e 's/notifempty/ifempty/g' \
+sed -i -e 's/\/var\/log\/mysql\/error.log/\/var\/log\/itvision\/mysql\/error.log/' /etc/mysql/my.cnf 
 	-e 's/weekly/daily/g' /etc/logrotate.d/apache2
 
-sed -i -e 's/notifempty/ifempty/g' \
-        -e 's/weekly/daily/g' /etc/logrotate.d/nagiosgrapher
+sed -i -e 's/weekly/daily/g' /etc/logrotate.d/nagiosgrapher
 
 sed -i -e '/compress/ i\
-ifempty' /etc/logrotate.d/mysql-server
+notifempty' /etc/logrotate.d/mysql-server
 
 sed -i -e '/compress/ i\
-ifempty' /etc/logrotate.d/ocsinventory-server
+notifempty' /etc/logrotate.d/ocsinventory-server
 
+cat << EOF > /etc/cron.d/logdate 
+00 03 * * * root /usr/sbin/logdate
+EOF
+
+# Gera perfil para apparmor ("SElinux do Ubuntu") habilitar o mysqld escrever em outro arquivo
+aa-complain /usr/sbin/mysqld
 
 # --------------------------------------------------
 # GRAPHVIZ
@@ -598,6 +602,8 @@ install_msg CLEAN UP
 /usr/sbin/invoke-rc.d apache2 stop
 /usr/sbin/invoke-rc.d nagiosgrapher stop
 /usr/sbin/invoke-rc.d postfix stop
+/usr/sbin/invoke-rc.d mysql stop
+/usr/sbin/invoke-rc.d mysql start
 /usr/sbin/invoke-rc.d postfix start
 /usr/sbin/invoke-rc.d apache2 start
 /usr/sbin/invoke-rc.d nagios-nrpe-server start
