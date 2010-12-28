@@ -171,6 +171,20 @@ function select_app_app_objects (id)
         p.itemtype as itemtype, p.items_id as items_id,
         m.name as name ]]
    local content = query (tables_, cond_, extra_, columns_)
+
+   local cond_ = "o.object_id = ao.service_object_id and ao.app_id = a.id and ao.type = 'app' "
+   if id then
+      cond_ = cond_ .. " and a.id = "..id
+   end
+   local tables_ = "nagios_objects o, itvision_app_objects ao, itvision_apps a "
+   local columns_ = [[ o.object_id, o.objecttype_id, o.name1, o.name2, ao.type as obj_type, a.id as 
+	app_id, a.name as a_name, a.type as a_type, a.is_active, a.service_object_id as service_id, 
+        NULL as itemtype, NULL as items_id,
+        o.name2 as name ]]
+   local content2 = query (tables_, cond_, extra_, columns_)
+   for _,v in ipairs(content2) do
+      table.insert(content,v)
+   end
    return content
 end
 
@@ -207,6 +221,8 @@ end
 
 
 function select_app_relat_object (id, from, to)
+
+   -- PRIMEIRO SELECIONA RELACIONAMENTOS ENTRE HOSTS e SERVICES
    local tables_  = [[itvision_app_relats ar, nagios_objects o1, nagios_objects o2, 
                       itvision_app_relat_types art, itvision_apps ap,
                       glpi_networkports n1, glpi_networkports n2, 
@@ -216,7 +232,9 @@ function select_app_relat_object (id, from, to)
                       ar.app_relat_type_id = art.id and
                       ar.app_id = ap.id and
                       o1.object_id = m1.service_object_id and 
-                      o2.object_id = m2.service_object_id ]]
+                      o2.object_id = m2.service_object_id and
+                      m1.networkports_id = n1.id and
+                      m2.networkports_id = n2.id ]]
    local columns_ = [[o1.name1 as from_name1, o1.name2 as from_name2, 
                       o2.name1 as to_name1, o2.name2 as to_name2,
                       ar.from_object_id, ar.to_object_id,
@@ -229,11 +247,131 @@ function select_app_relat_object (id, from, to)
                       n2.itemtype as to_itemtype,
                       n2.items_id as to_items_id,
                       m1.name as from_name,
-                      m2.name as to_name ]]
+                      m2.name as to_name,
+                      m1.type as from_type,
+                      m2.type as to_type ]]
 
    if id then cond_ = cond_ .. " and ar.app_id = "..id end
    if from and to then cond_ = cond_  .. " and from_object_id = "..from.." and to_object_id = "..to end
    local content = query (tables_, cond_, extra_, columns_)
+
+   -- AGORA SELECIONA RELACIONAMENTOS ENTRE HOSTS e SERVICES NA ORIGEM E APLICACOES NO DESTINO
+   local tables_  = [[itvision_app_relats ar, nagios_objects o1, nagios_objects o2, 
+                      itvision_app_relat_types art, itvision_apps ap,
+                      glpi_networkports n1,
+                      itvision_monitors m1 ]]
+   local cond_    = [[ar.from_object_id = o1.object_id and 
+                      ar.to_object_id = o2.object_id and
+                      ar.app_relat_type_id = art.id and
+                      ar.app_id = ap.id and
+                      o1.object_id = m1.service_object_id and 
+                      m1.networkports_id = n1.id and
+                      o2.name1 = ']]..config.monitor.check_app..[[']]
+   local columns_ = [[o1.name1 as from_name1, o1.name2 as from_name2, 
+                      o2.name1 as to_name1, o2.name2 as to_name2,
+
+                      ar.from_object_id, ar.to_object_id,
+                      ar.app_id as app_id, ap.name as app_name, 
+                      ar.app_relat_type_id, 
+                      ar.from_object_id, ar.to_object_id,
+                      art.name as art_name, art.type as art_type,
+
+                      n1.itemtype as from_itemtype,
+                      n1.items_id as from_items_id,
+                      NULL as to_itemtype,
+                      NULL as to_items_id,
+
+                      m1.name as from_name,
+                      m1.type as from_type,
+                      o2.name2 as to_name,
+                      'app' as to_type 
+                    ]]
+
+   if id then cond_ = cond_ .. " and ar.app_id = "..id end
+   if from and to then cond_ = cond_  .. " and from_object_id = "..from.." and to_object_id = "..to end
+   local content2 = query (tables_, cond_, extra_, columns_)
+
+   -- AINDA, SELECIONA RELACIONAMENTOS ENTRE APLICACOES NA ORIGEM e HOSTS e SERVICES NO DESTINO
+   local tables_  = [[itvision_app_relats ar, nagios_objects o1, nagios_objects o2, 
+                      itvision_app_relat_types art, itvision_apps ap,
+                      glpi_networkports n2,
+                      itvision_monitors m2 ]]
+   local cond_    = [[ar.from_object_id = o1.object_id and 
+                      ar.to_object_id = o2.object_id and
+                      ar.app_relat_type_id = art.id and
+                      ar.app_id = ap.id and
+                      o2.object_id = m2.service_object_id and 
+                      m2.networkports_id = n2.id and
+                      o1.name1 = ']]..config.monitor.check_app..[[']]
+   local columns_ = [[o1.name1 as from_name1, o1.name2 as from_name2, 
+                      o2.name1 as to_name1, o2.name2 as to_name2,
+
+                      ar.from_object_id, ar.to_object_id,
+                      ar.app_id as app_id, ap.name as app_name, 
+                      ar.app_relat_type_id, 
+                      ar.from_object_id, ar.to_object_id,
+                      art.name as art_name, art.type as art_type,
+
+                      n2.itemtype as from_itemtype,
+                      n2.items_id as from_items_id,
+                      NULL as to_itemtype,
+                      NULL as to_items_id,
+
+                      o1.name2 as from_name,
+                      'app' as from_type,
+                      m2.name as to_name,
+                      m2.type as to_type
+                    ]]
+
+   if id then cond_ = cond_ .. " and ar.app_id = "..id end
+   if from and to then cond_ = cond_  .. " and from_object_id = "..from.." and to_object_id = "..to end
+   local content3 = query (tables_, cond_, extra_, columns_)
+
+   -- POR FIM, SELECIONA RELACIONAMENTOS ENTRE APLICACOES NA ORIGEM e HOSTS e SERVICES NO DESTINO
+   local tables_  = [[itvision_app_relats ar, nagios_objects o1, nagios_objects o2, 
+                      itvision_app_relat_types art, itvision_apps ap ]]
+   local cond_    = [[ar.from_object_id = o1.object_id and 
+                      ar.to_object_id = o2.object_id and
+                      ar.app_relat_type_id = art.id and
+                      ar.app_id = ap.id and
+                      o1.name1 = ']]..config.monitor.check_app..[[' and 
+                      o2.name1 = ']]..config.monitor.check_app..[[']]
+   local columns_ = [[o1.name1 as from_name1, o1.name2 as from_name2, 
+                      o2.name1 as to_name1,   o2.name2 as to_name2,
+
+                      ar.from_object_id, ar.to_object_id,
+                      ar.app_id as app_id, ap.name as app_name, 
+                      ar.app_relat_type_id, 
+                      ar.from_object_id, ar.to_object_id,
+                      art.name as art_name, art.type as art_type,
+
+                      NULL as from_itemtype,
+                      NULL as from_items_id,
+                      NULL as to_itemtype,
+                      NULL as to_items_id,
+
+                      o1.name2 as from_name,
+                      'app' as from_type,
+                      o2.name2 as to_name,
+                      'app' as to_type
+                    ]]
+
+   if id then cond_ = cond_ .. " and ar.app_id = "..id end
+   if from and to then cond_ = cond_  .. " and from_object_id = "..from.." and to_object_id = "..to end
+   local content4 = query (tables_, cond_, extra_, columns_)
+
+   -- JUNTA TODOS OS RESULTADOS
+   for _,v in ipairs(content2) do
+      table.insert(content,v)
+   end
+
+   for _,v in ipairs(content3) do
+      table.insert(content,v)
+   end
+
+   for _,v in ipairs(content4) do
+      table.insert(content,v)
+   end
 
    return content
 end
@@ -241,6 +379,7 @@ end
 
 
 function select_app_relat_to_graph (id)
+   -- PRIMEIRO SELECIONA RELACIONAMENTOS ENTRE HOSTS e SERVICES
    local tables_  = "itvision_apps a, itvision_app_relats ar, itvision_app_relat_types art, "..
                     "nagios_objects o1, nagios_objects o2, "..
                     "glpi_networkports n1, glpi_networkports n2, "..
@@ -261,6 +400,89 @@ function select_app_relat_to_graph (id)
                      a.id = "..id 
 
    local content = query (tables_, cond_, extra_, columns_)
+
+   -- AGORA SELECIONA RELACIONAMENTOS ENTRE HOSTS e SERVICES NA ORIGEM E APLICACOES NO DESTINO
+   local tables_  = "itvision_apps a, itvision_app_relats ar, itvision_app_relat_types art, "..
+                    "nagios_objects o1, nagios_objects o2, "..
+                    "glpi_networkports n1, "..
+                    "itvision_monitors m1 "
+   local columns_ = "a.name as a_name, art.name as art_name, "..
+                    "o1.name1 as o1_name1, o1.name2 as o1_name2, "..
+                    "o2.name1 as o2_name1, o2.name2 as o2_name2, "..
+                    "n1.itemtype as itemtype1, n1.items_id as items_id1, "..
+                    "'app' as itemtype2, NULL as items_id2, "..
+                    "m1.name as m1_name, "..
+                    "o2.name2 as m2_name "
+   local cond_    = "a.id = ar.app_id and \
+                     ar.from_object_id = o1.object_id and \
+                     ar.to_object_id = o2.object_id and \
+                     ar.app_relat_type_id = art.id and \
+                     o1.object_id = m1.service_object_id and \
+                     m1.networkports_id = n1.id and \
+                     a.id = "..id.." and \
+                     o2.name1 = '"..config.monitor.check_app.."'"
+
+   local content2 = query (tables_, cond_, extra_, columns_)
+
+   -- AINDA, SELECIONA RELACIONAMENTOS ENTRE APLICACOES NA ORIGEM e HOSTS e SERVICES NO DESTINO
+   local tables_  = "itvision_apps a, itvision_app_relats ar, itvision_app_relat_types art, "..
+                    "nagios_objects o1, nagios_objects o2, "..
+                    "glpi_networkports n2, "..
+                    "itvision_monitors m2 "
+   local columns_ = "a.name as a_name, art.name as art_name, "..
+                    "o1.name1 as o1_name1, o1.name2 as o1_name2, "..
+                    "o2.name1 as o2_name1, o2.name2 as o2_name2, "..
+                    "'app' as itemtype1, NULL as items_id1, "..
+                    "n2.itemtype as itemtype2, n2.items_id as items_id2, "..
+                    "m2.name as m2_name, "..
+                    "o1.name2 as m1_name "
+   local cond_    = "a.id = ar.app_id and \
+                     ar.from_object_id = o1.object_id and \
+                     ar.to_object_id = o2.object_id and \
+                     ar.app_relat_type_id = art.id and \
+                     o2.object_id = m2.service_object_id and \
+                     m2.networkports_id = n2.id and \
+                     a.id = "..id.." and \
+                     o1.name1 = '"..config.monitor.check_app.."'"
+
+
+   local content3 = query (tables_, cond_, extra_, columns_)
+
+   -- POR FIM, SELECIONA RELACIONAMENTOS ENTRE APLICACOES NA ORIGEM e HOSTS e SERVICES NO DESTINO
+   local tables_  = "itvision_apps a, itvision_app_relats ar, itvision_app_relat_types art, "..
+                    "nagios_objects o1, nagios_objects o2 "
+   local columns_ = "a.name as a_name, art.name as art_name, "..
+                    "o1.name1 as o1_name1, o1.name2 as o1_name2, "..
+                    "o2.name1 as o2_name1, o2.name2 as o2_name2, "..
+                    "'app' as itemtype1, NULL as items_id1, "..
+                    "'app' as itemtype2, NULL as items_id2, "..
+                    "o2.name2 as m2_name, "..
+                    "o1.name2 as m1_name "
+   local cond_    = "a.id = ar.app_id and \
+                     ar.from_object_id = o1.object_id and \
+                     ar.to_object_id = o2.object_id and \
+                     ar.app_relat_type_id = art.id and \
+                     a.id = "..id.." and \
+                     o1.name1 = '"..config.monitor.check_app.."' and  \
+                     o2.name1 = '"..config.monitor.check_app.."'"
+
+
+   local content4 = query (tables_, cond_, extra_, columns_)
+
+
+   -- JUNTA TODOS OS RESULTADOS
+   for _,v in ipairs(content2) do
+      table.insert(content,v)
+   end
+
+   for _,v in ipairs(content3) do
+      table.insert(content,v)
+   end
+
+   for _,v in ipairs(content4) do
+      table.insert(content,v)
+   end
+
    return content
 end
 

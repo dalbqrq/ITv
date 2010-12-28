@@ -212,6 +212,14 @@ function render_geotag(web, obj_id, objtype, A)
       if v.ss_current_state then
          if v.c_geotag == nil then geotag = v.n_geotag else geotag = v.c_geotag end
          geotag = geotag or ""
+
+         -- tratar corretamente (converter) geotab no formato:  22°51'33.20"S,43°23'17.42"O
+         -- agora simplesmente eliminaremos estas entradas.
+         -- procurar expressao como esta em util.lua:string.extract_latlon()
+         if string.find(geotag, "°") then geotag = "" end
+         if string.find(geotag, "'") then geotag = "" end
+
+
          res[#res+1] = " | "..geotag.." | "
          local icon = service_alert[tonumber(v.ss_current_state)].color_name
 

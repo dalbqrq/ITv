@@ -54,9 +54,12 @@ function app_relats:delete_app_relat(id, from, to)
    local clause = ""
    if id and from and to then
       clause = " app_id = "..id.." and from_object_id = "..from.." and to_object_id = "..to
+   elseif id and from and to == nil then
+      clause = " app_id = "..id.." and from_object_id = "..from
+   elseif id and from == nil and to then
+      clause = " app_id = "..id.." and to_object_id = "..to
    end
-   --self:find_all(clause)
-   --self:delete()
+
    Model.delete("itvision_app_relats", clause)
 end
 
@@ -212,6 +215,10 @@ function delete_obj(web, app_id, obj_id)
       local clause = "app_id = "..app_id.." and service_object_id = "..obj_id
       local tables = "itvision_app_objects"
       Model.delete (tables, clause) 
+ 
+     -- apaga tambem todos os relacionamentos 
+     app_relats:delete_app_relat(app_id, obj_id, nil)
+     app_relats:delete_app_relat(app_id, nil, obj_id)
    end
 
    web.prefix = "/adm/app_objects"
@@ -248,18 +255,19 @@ function make_app_objects_table(web, A)
    for i, v in ipairs(A) do
       if v.itemtype == "Computer" then
          ic = Model.query("glpi_computers", "id = "..v.items_id)
-      else
+         ic = ic[1]
+      elseif v.itemtype == "NetworkEquipment" then
          ic = Model.query("glpi_networkequipment", "id = "..v.items_id)
+         ic = ic[1]
       end
-      ic = ic[1]
 
       if v.obj_type == "hst" then
          obj = find_hostname(ic.alias, ic.name, ic.itv_key)
-      else
+      elseif v.obj_type == "svc" then
          obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.name)
+      else
+         obj = v.name
       end
-
-      --web.prefix = "/adm/app_objects"
 
       row[#row + 1] = { 
          obj,
@@ -278,27 +286,44 @@ function make_app_relat_table(web, AR)
    for i, v in ipairs(AR) do
       if v.from_itemtype == "Computer" then
          ic = Model.query("glpi_computers", "id = "..v.from_items_id)
-      else
+         ic = ic[1]
+      elseif v.itemtype == "NetworkEquipment" then
          ic = Model.query("glpi_networkequipments", "id = "..v.from_items_id)
+         ic = ic[1]
       end
-      ic = ic[1]
 
-      local from = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.from_name)
+      local from
+      if v.from_type == "hst" then
+         from = find_hostname(ic.alias, ic.name, ic.itv_key)
+      elseif v.from_type == "svc" then
+         from = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.from_name)
+      else
+         from = v.from_name.." #"
+      end
 
       if v.to_itemtype == "Computer" then
          ic = Model.query("glpi_computers", "id = "..v.to_items_id)
-      else
+         ic = ic[1]
+      elseif v.itemtype == "NetworkEquipment" then
          ic = Model.query("glpi_networkequipments", "id = "..v.to_items_id)
+         ic = ic[1]
       end
-      ic = ic[1]
 
-      local to = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.to_name)
+      local to
+      if v.to_type == "hst" then
+         to = find_hostname(ic.alias, ic.name, ic.itv_key)
+      elseif v.to_type == "svc" then
+         to = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.to_name)
+      else
+         to = v.to_name.." #"
+      end
+
 
       if v.connection_type == "physical" then contype = strings.physical else contype = strings.logical end
 
       row[#row+1] = {
          from,
-         v.rtype_name,
+         v.art_name,
          to,
          button_link(strings.remove, web:link("/remove_relat/"..v.app_id..":"..v.from_object_id
              ..":"..v.to_object_id), "negative"),
@@ -319,15 +344,17 @@ function render_list(web, APPOBJ, APPS, AR, app_id)
    res[#res+1] = render_content_header(strings.application, web:link("/add/"..app_id), web:link("/list"))
    res[#res+1] = render_bar( render_selector_bar(web, APPS, app_id, "/list") )
    res[#res+1] = render_content_header(strings.app_object)
-   header = { strings.object.." ("..strings.service.."@"..strings.host..")", strings.type, "." }
+--   header = { strings.object.." ("..strings.service.."@"..strings.host..")", strings.type, "." }
+   header = { strings.object, strings.type, "." }
    res[#res+1] = render_table(make_app_objects_table(web, APPOBJ), header)
 
    -----------------------------------------------------------------------
    -- Relacionamentos da aplicacao
    -----------------------------------------------------------------------
    res[#res+1] = render_content_header(strings.app_relat)
-   header =  { strings.origin.." ("..strings.service.."@"..strings.host..")", strings.type, 
-                     strings.destiny.." ("..strings.service.."@"..strings.host..")", "." }
+--   header =  { strings.origin.." ("..strings.service.."@"..strings.host..")", strings.type, 
+--                     strings.destiny.." ("..strings.service.."@"..strings.host..")", "." }
+   header =  { strings.origin, strings.type, strings.destiny, "." }
    res[#res+1] = render_table(make_app_relat_table(web, AR), header)
 
    return render_layout(res)
@@ -410,15 +437,18 @@ function render_add(web, HST, SVC, APP, APPOBJ, APPS, AR, RT, app_id, msg)
       for i,v in ipairs(APPOBJ) do
          if v.itemtype == "Computer" then
             ic = Model.query("glpi_computers", "id = "..v.items_id)
-         else
+            ic = ic[1]
+         elseif v.itemtype == "NetworkEquipment" then
             ic = Model.query("glpi_networkequipment", "id = "..v.items_id)
+            ic = ic[1]
          end
-         ic = ic[1]
 
          if v.obj_type == "hst" then
             obj = find_hostname(ic.alias, ic.name, ic.itv_key)
-         else
+         elseif v.obj_type == "svc" then
             obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.name)
+         else
+            obj = v.name
          end
          opt_from[#opt_from+1] = option{ value=v.object_id, obj }
       end
@@ -439,15 +469,18 @@ function render_add(web, HST, SVC, APP, APPOBJ, APPS, AR, RT, app_id, msg)
       for i,v in ipairs(APPOBJ) do
          if v.itemtype == "Computer" then
             ic = Model.query("glpi_computers", "id = "..v.items_id)
-         else
+            ic = ic[1]
+         elseif v.itemtype == "NetworkEquipment" then
             ic = Model.query("glpi_networkequipment", "id = "..v.items_id)
+            ic = ic[1]
          end
-         ic = ic[1]
 
          if v.obj_type == "hst" then
             obj = find_hostname(ic.alias, ic.name, ic.itv_key)
-         else
+         elseif v.obj_type == "svc" then
             obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.name)
+         else
+            obj = v.name
          end
          opt_to[#opt_to+1] = option{ value=v.object_id, obj }
       end

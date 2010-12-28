@@ -71,8 +71,8 @@ function make_content(obj, rel)
             url   = "/orb/obj_info/"..v.ao_type.."/"..v.o_object_id
             shape = "ellipse"
          elseif v.ao_type == 'app' then
-            label = v.m_name
-            name  = string.gsub(v.m_name, "%s", "")
+            label = v.o_name2
+            name  = string.gsub(v.o_name2, "%s", "")
             url   = "/orb/obj_info/"..v.ao_type.."/"..v.o_object_id
             shape = "invhouse"
             shape = "octagon"
@@ -97,38 +97,36 @@ function make_content(obj, rel)
          -- FROM -------------------------------
          if v.itemtype1 == "Computer" then
             ic = Model.query("glpi_computers", "id = "..v.items_id1)
-         else
+            ic = ic[1]
+         elseif v.itemtype == "NetworkEquipment" then
             ic = Model.query("glpi_networkequipment", "id = "..v.items_id1)
+            ic = ic[1]
          end
-         ic = ic[1]
-         hst_name = find_hostname(ic.alias, ic.name, ic.itv_key)
 
          if string.find(v.o1_name1, config.monitor.check_app) then
             from_name = string.gsub(v.m1_name, "%s", "")
-         --elseif v.o1_name2 == config.monitor.check_host then
-         elseif v.m1_name == nil then
-            to_name = string.gsub(hst_name, "%s", "")
+         elseif v.o1_name2 == config.monitor.check_host then
+            from_name = string.gsub(find_hostname(ic.alias, ic.name, ic.itv_key), "%s", "")
          else
-            from_name = string.gsub(hst_name..v.m1_name, "%s", "")
+            from_name = string.gsub(find_hostname(ic.alias, ic.name, ic.itv_key)..v.m1_name, "%s", "")
          end
 
 
          -- TO -------------------------------
          if v.itemtype2 == "Computer" then
             ic = Model.query("glpi_computers", "id = "..v.items_id2)
-         else
+            ic = ic[1]
+         elseif v.itemtype == "NetworkEquipment" then
             ic = Model.query("glpi_networkequipment", "id = "..v.items_id2)
+            ic = ic[1]
          end
-         ic = ic[1]
-         hst_name = find_hostname(ic.alias, ic.name, ic.itv_key)
 
          if string.find(v.o2_name1, config.monitor.check_app) then
             to_name = string.gsub(v.m2_name, "%s", "")
-         --elseif v.o2_name2 == config.monitor.check_host then
-         elseif v.m2_name == nil then
-            to_name = string.gsub(hst_name, "%s", "")
+         elseif v.o2_name2 == config.monitor.check_host then
+            to_name = string.gsub(find_hostname(ic.alias, ic.name, ic.itv_key), "%s", "")
          else
-            to_name = string.gsub(hst_name..v.m2_name, "%s", "")
+            to_name = string.gsub(find_hostname(ic.alias, ic.name, ic.itv_key)..v.m2_name, "%s", "")
          end
 
 
