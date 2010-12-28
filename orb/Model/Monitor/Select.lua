@@ -1,7 +1,7 @@
 require "Model"
 
-local DEBUG = false
 local DEBUG = true
+local DEBUG = false
 
 --[[
         +------------+    +-------------------------+    +-----------------+      +----------+
@@ -257,6 +257,56 @@ end
 
 
 ----------------------------------------------------------------------
+--  QUERY 1+1/2 - computador com porta sem software e sem monitor
+----------------------------------------------------------------------
+function make_query_112(c_id, p_id, clause)
+   local q = {}
+   local ictype, it = { "c", "n" }, ""
+
+   for _,ic in ipairs(ictype) do
+      local r = {}
+      local t = { ic, "p", "m" }
+      local n = { "csv", "sv", "sw", "o", "s", "ss" }
+
+      local columns_ = make_columns(t)
+      local _,nulls_ = make_columns(n)
+      local tables_  = make_tables(t)
+      local cond_    = make_where(t)
+
+      -- os nomes dos campos tanto de computers como os de networkequipment comecam com c_
+      if ic == "n" then 
+         columns_ = string.gsub(columns_, "as n_", "as c_") 
+         excludes = string.gsub(g_excludes, "c%.", "n.")
+         if clause then clause = string.gsub(clause, "c%.", "n.") end
+         it = "'NetworkEquipment'"
+      else 
+         excludes = g_excludes
+         it = "'Computer'"
+      end 
+
+      cond_ = cond_ .. [[ 
+         and p.itemtype = ]]..it..[[
+         and m.service_object_id = -1
+      ]] .. excludes
+
+      columns_ = columns_..",\n"..nulls_
+
+      if c_id  then cond_ = cond_ .. " and "..ic..".id = "  .. c_id  end
+      if p_id  then cond_ = cond_ .. " and p.id = "  .. p_id  end
+      if clause then cond_ = cond_ .. " and " .. clause end
+
+      r = Model.query(tables_, cond_, nil, columns_)
+      for _,v in ipairs(r) do table.insert(v, 1, 1) end
+      for _,v in ipairs(r) do table.insert(q, v) end
+
+      --if DEBUG then print ("\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
+   end
+
+   return q
+end
+
+
+----------------------------------------------------------------------
 --  QUERY 2 - computador com porta com software e sem monitor
 ----------------------------------------------------------------------
 function make_query_2(c_id, p_id, sv_id, clause)
@@ -422,11 +472,13 @@ end
 function select_monitors(clause)
    local q = {}
    local q1 = make_query_1(nil, nil, clause)
+   local q112 = make_query_112(nil, nil, clause)
    local q2 = make_query_2(nil, nil, nil, clause)
    local q3 = make_query_3(nil, nil, nil, clause)
    local q4 = make_query_4(nil, nil, nil, nil, clause)
 
    for _,v in ipairs(q1) do table.insert(q, v) end
+   for _,v in ipairs(q112) do table.insert(q, v) end
    for _,v in ipairs(q2) do table.insert(q, v) end
    for _,v in ipairs(q3) do table.insert(q, v) end
    for _,v in ipairs(q4) do table.insert(q, v) end
@@ -549,10 +601,18 @@ function how_to_use()
    end
 ]]
 
-   a = tree(8)
+   --a = tree(8)
+
+   --a = make_query_1()
+   --a = make_query_2()
+   --a = make_query_3()
+   --a = make_query_4()
+
+   a = make_query_112()
+   a = select_monitors()
 
    for i,v in ipairs(a) do
-      print("A: ",table.getn(a), v.c_name, v.s_name, v.sv_name, v.p_itemtype, v.ao_type, v.c_geotag) 
+      print("A: ",table.getn(a), v.c_name, v.s_name, v.sv_name, v.p_itemtype, v.ao_type, v.c_geotag, v.m_service_object_id) 
    end
 
 

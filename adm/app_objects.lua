@@ -333,7 +333,11 @@ function render_add(web, HST, SVC, APP, APPOBJ, APPS, AR, RT, app_id, msg)
    -- LISTA DE HOSTS PARA SEREM INCLUIDOS ---------------------------------
    local opt_hst = {}
    for i,v in ipairs(HST) do
-     opt_hst[#opt_hst+1] = option{ value=v.o_object_id, v.o_name1 }
+      local hst_name = nil
+      if v.c_alias ~= "" and v.c_alias ~= nil then hst_name = v.c_alias end
+      if hst_name == nil and v.c_name ~= "" and v.c_name ~= nil then hst_name = v.c_name end
+      if hst_name == nil and v.c_itv_key ~= "" and v.c_itv_key ~= nil then hst_name = v.c_itv_key end
+      opt_hst[#opt_hst+1] = option{ value=v.o_object_id, hst_name }
    end
    local hst = { render_form(web:link(url_app), web:link("/add/"..app_id),
                { H("select") { size=list_size, style="width: 100%;", name="item", opt_hst }, br(),
@@ -344,7 +348,12 @@ function render_add(web, HST, SVC, APP, APPOBJ, APPS, AR, RT, app_id, msg)
    -- LISTA DE SERVICES PARA SEREM INCLUIDOS ---------------------------------
    local opt_svc = {}
    for i,v in ipairs(SVC) do
-      opt_svc[#opt_svc+1] = option{ value=v.o_object_id, make_obj_name(v.o_name1, v.o_name2) }
+      local hst_name = nil
+      if v.c_alias ~= "" and v.c_alias ~= nil then hst_name = v.c_alias end
+      if hst_name == nil and v.c_name ~= "" and v.c_name ~= nil then hst_name = v.c_name end
+      if hst_name == nil and v.c_itv_key ~= "" and v.c_itv_key ~= nil then hst_name = v.c_itv_key end
+      --opt_svc[#opt_svc+1] = option{ value=v.o_object_id, make_obj_name(v.o_name1, v.o_name2) }
+      opt_svc[#opt_svc+1] = option{ value=v.o_object_id, make_obj_name(hst_name, v.o_name2) }
    end  
    local svc = { render_form(web:link(url_app), web:link("/add/"..app_id),
                { H("select") { size=list_size, style="width: 100%;", name="item", opt_svc }, br(),

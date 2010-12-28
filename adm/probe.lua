@@ -37,6 +37,14 @@ function objects:select(name1, name2)
 end
 
 
+function objects:select_check_host()
+   local clause = "name1 = '"..config.monitor.check_host.."' and name2 is NULL"
+   local chk =  Model.query("nagios_objects", clause)
+
+   return chk[1].object_id
+end
+
+
 function objects:select_checks(cmd)
    local clause = ""
    if cmd then
@@ -47,10 +55,9 @@ function objects:select_checks(cmd)
 end
 
 
-function monitors:insert_monitor(networkport, softwareversion, networkequipment, service_object, is_active, type_)
+function monitors:insert_monitor(networkport, softwareversion, service_object, is_active, type_)
    if tonumber(networkport)      == 0 then networkport      = nil end         
    if tonumber(softwareversion)  == 0 then softwareversion  = nil end         
-   if tonumber(networkequipment) == 0 then networkequipment = nil end         
 
    local mon = { 
       instance_id = Model.db.instance_id,
@@ -58,7 +65,6 @@ function monitors:insert_monitor(networkport, softwareversion, networkequipment,
       service_object_id    = service_object,
       networkports_id      = networkport,
       softwareversions_id  = softwareversion,
-      networkequipments_id = networkequipment,
       is_active = is_active,
       type = type_,
    }
@@ -88,7 +94,7 @@ function list(web, msg)
    return render_list(web, cmp, chk, msg)
 end
 ITvision:dispatch_get(list, "/", "/list", "/list/(.+)")
-ITvision:dispatch_post(list, "/list")
+ITvision:dispatch_post(list, "/list", "/list/(.+)")
 
 
 --[[
@@ -140,66 +146,57 @@ ITvision:dispatch_get(add, "/add/(%d+):(%d+):(%d+):(%d+)", "/add/(%d+):(%d+):(%d
 
    sv_id == 0 significa que entrada nao possui software associado e eh somente uma maquina
    sw_name e sv_name == no_software_code entao os nomes sao nulos e isto é um host e nao um service
+
+
+   O nome de um host deverá ser composto somente pelo p_id.
+   O nome de um service deverah ser composto pelo p_id concatenado com o sv_id ligado por um _.
 ]]
 function insert(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, ip)
    -- hostname passa aqui a ser uma composicao do proprio hostname com o ip a ser monitorado
-   local hostname = string.gsub(string.toid(c_name).."-"..ip,"(%s+)","_")
-   local software = string.toid(sw_name.." "..sv_name)
-   local cmd, hst, svc, dpl, chk, chk_name, chk_id, h, s
+   --local hostname = string.gsub(string.toid(c_name).."-"..ip,"(%s+)","_")
+   --local software = string.toid(sw_name.." "..sv_name)
+
+   local hst_name = p_id
+   local svc_name = p_id.."_"..sv_id
+
+   local cmd, hst, svc, dpl, chk, chk_id, h, s
+   local chk_name = config.monitor.check_host
    local msg = ""
    local content, counter
 
-   h = objects:select(hostname)
+   h = objects:select(hst_name, chk_name)
 
    ------------------------------------------------------
    -- cria check host e service ping caso nao exista
    ------------------------------------------------------
    if h[1] == nil then
-      chk = Model.query("nagios_objects", "name1 = '"..config.monitor.check_host.."'")
-      if chk[1] then chk_name = chk[1].name1; chk_id = chk[1].object_id end
+      chk_id = objects:select_check_host()
 
-      cmd = insert_host_cfg_file (hostname, c_name, ip)
-      cmd = insert_service_cfg_file (hostname, config.monitor.check_host, config.monitor.check_host, chk_id, false)
-      h = objects:select(hostname)
-      -- caso host ainda nao tenha sido incluido aguarde e tente novamente
-      counter = 0
-      while h[1] == nil do
-         counter = counter + 1
-         os.sleep(1)
-         h = objects:select(hostname)
-      end
-      --text_file_writer("/tmp/contour_insert_h", tostring(counter))
-      -- DEBUG: text_file_writer ("/tmp/1", "Counter: "..counter.."\n")
-      s = objects:select(hostname, config.monitor.check_host)
-      -- caso service ainda nao tenha sido incluido aguarde e tente novamente
-      counter = 0
-      while s[1] == nil do
-         counter = counter + 1
-         os.sleep(1)
-         s = objects:select(hostname, config.monitor.check_host)
-      end
-      --text_file_writer("/tmp/contour_insert_ha", tostring(counter))
-      -- DEBUG: text_file_writer ("/tmp/2", "Counter: "..counter.."\n")
-      svc = s[1].object_id
-      monitors:insert_monitor(p_id, nil, n_id, svc, 1, "hst")
+      cmd = insert_host_cfg_file (hst_name, hst_name, ip)
+      cmd = insert_service_cfg_file (hst_name, chk_name, chk_name, chk_id, false)
+
+      -- cria monitor sem a referencia do servico check_alive associado.
+      monitors:insert_monitor(p_id, nil, -1, 0, "hst")
+
       msg = msg.."Check do HOST: "..c_name.." para o IP "..ip.." criado. "
-      -- DEBUG:         .." (hst,svc) = ("..hst..","..svc..") "
    else
       msg = msg.."Check do HOST: "..c_name.." já existe! "
    end   
 
-   -- DEBUG: text_file_writer ("/tmp/3", "Counter: "..counter.."\n")
+--[[
    if h[1] == nil then 
       msg = msg..error_message(11)
    else
-      -- DEBUG: msg = msg.." ||| hostobjid"..hst.." ||| "
       hst = h[1].object_id
    end
+]]
 
 
+   -- DEBUG: text_file_writer ("/tmp/4", "4\n")
    ------------------------------------------------------
    -- cria o service check caso tenha sido requisitado
    ------------------------------------------------------
+--[[
    if tonumber(sv_id) ~= 0 then
       local clause
 
@@ -209,46 +206,53 @@ function insert(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, ip)
          clause = "object_id = "..web.input.check
       end
       chk = Model.query("nagios_objects", clause)
+
       -- DEBUG: text_file_writer ("/tmp/4", "clause: "..clause.."\n")
+
       if chk[1] then chk_name = chk[1].name1; chk_id = chk[1].object_id end
 
       dpl = string.toid(web.input.display)
       if dpl == "" then 
          dpl = software
       end
+
       -- DEBUG: text_file_writer ("/tmp/5", "chk_name: "..chk_name.."\n".."chk_id: "..chk_id)
       cmd = insert_service_cfg_file (hostname, dpl, chk_name, chk_id, true)
       s = objects:select(hostname, dpl)
 
       -- caso service ainda nao tenha sido incluido aguarde e tente novamente
       counter = 0
-      while s[1] == nil do
-         counter = counter + 1
-         os.sleep(1)
-         s = objects:select(hostname, dpl)
-      end
-      text_file_writer("/tmp/contour_insert_s", tostring(counter))
       -- DEBUG: text_file_writer ("/tmp/6", "Counter: "..counter.."\n")
 
       if s[1] == nil then 
          msg = msg..error_message(12)
       else
-         svc = s[1].object_id
-         monitors:insert_monitor(p_id, sv_id, n_id, svc, 1, "svc")
+         --svc = s[1].object_id
+         monitors:insert_monitor(p_id, sv_id, -1, 0, "svc")
          msg = msg.."Check do SERVIÇO: "..dpl.." HOST: ".. c_name.." COMANDO: "..chk_name.." criado. "
          -- DEBUG:       .." (hst,svc) = ("..hst..","..svc..") "
          -- DEBUG: msg = msg.." ||| serviceobjid"..svc.." ||| " 
       end
    end
+]]
 
-   os.reset_monitor() -- isto estah aqui pois as vezes o probe nao aparece na lista mesmo que itvivion_monitor
+   --os.reset_monitor() -- isto estah aqui pois as vezes o probe nao aparece na lista mesmo que itvivion_monitor
                       -- e nagios_objects tenham sido criados
 
+--[[
+   local uurrll = "/list/"..msg..""
+   text_file_writer ("/tmp/6", uurrll.." 6\n")
    if web then
       return web:redirect(web:link("/list/"..msg..""))
    else
       return msg --para criacao de probes em massa
    end
+]]
+
+   local cmp = Monitor.select_monitors(clause)
+   local chk = Checkcmds.select_checkcmds()
+
+   return render_list(web, cmp, chk, "")
 end
 ITvision:dispatch_post(insert, "/insert/(%d+):(%d+):(%d+):(%d+):(.+):(.+):(.+):(.+)")
 
@@ -308,7 +312,11 @@ function render_list(web, cmp, chk, msg)
 
       if v.s_check_command_object_id == nil then 
          chk = ""
-         link = a{ href= web:link("/add/"..v[1]..":"..id..":"..v.p_id..":"..v.sv_id), strings.add }
+         if tonumber(v.m_service_object_id) == -1 then
+            link = "Pendente"
+         else
+            link = a{ href= web:link("/add/"..v[1]..":"..id..":"..v.p_id..":"..v.sv_id), strings.add }
+         end
       else
          content = objects:select_checks(v.s_check_command_object_id)
          chk = content[1].name1
