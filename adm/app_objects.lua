@@ -494,7 +494,10 @@ function render_add(web, HST, SVC, APP, APPOBJ, APPS, AR, RT, app_id, msg)
 
    res[#res+1] = br()
    if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ msg } end
-   res[#res+1] = render_form_bar( render_table(t, header) , strings.add, web:link(url_relat), web:link("/add/"..app_id))
+
+   header =  { strings.origin, strings.type, strings.destiny }
+   --res[#res+1] = render_form_bar( render_table(t, header) , strings.add, web:link(url_relat), web:link("/add/"..app_id))
+   res[#res+1] = render_form( web:link(url_relat), web:link("/add/"..app_id), render_table(t, header), true, strings.add )
 
    return render_layout(res)
 end
