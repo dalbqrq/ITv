@@ -384,6 +384,10 @@ function render_checkcmd_test(web, cur_cmd, name, ip)
    web.prefix = "/adm/checkcmd"
    url = web:link("")
 
+   res[#res+1] = "============================================"
+   res[#res+1] = { a{ href=web:link("/test/check_http:-H!www.impa.br"), target="check",  "LINK" }, "DANIEL" }
+   res[#res+1] = { a{ href=web:link("www.impa.br"),  "LINK" }, "DANIEL" }
+   res[#res+1] = "============================================"
    res[#res+1] = center{ br(), br(), strings.parameter.."s do comando "..c[1].name1, br() }
    res[#res+1] = center{ render_form(web:link(url), nil, {hidden, render_table(row, header)}, "check", strings.test, "check" ) }
 
