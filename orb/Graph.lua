@@ -55,10 +55,10 @@ function make_content(obj, rel)
    local show_ip = false
 
    if obj[1] then
-      text_file_writer("/tmp/c"..obj[1].a_name, table.getn(obj))
+      -- DEBUG: text_file_writer("/tmp/c"..obj[1].a_name, table.getn(obj))
       for _,v in ipairs(obj) do
          -- DEBUG 
-         text_file_writer("/tmp/"..v.ao_type.."-"..v.o_object_id, v.o_object_id.." :: "..v.o_name1.." :: "..v.o_name2.." :: "..v.ss_current_state)
+         -- DEBUG: text_file_writer("/tmp/"..v.ao_type.."-"..v.o_object_id, v.o_object_id.." :: "..v.o_name1.." :: "..v.o_name2.." :: "..v.ss_current_state)
    
          local name, shape  = "", ""
          if v.ao_type == 'hst' then
