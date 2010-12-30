@@ -360,13 +360,17 @@ function render_checkcmd_test(web, cur_cmd, name, ip)
    local header = { strings.parameter.." #", strings.value, strings.description }
 
    web.prefix = "/adm/checkcmd"
-   c, p = get_allcheck_params(cur_cmd)
+   c, p = get_all_check_params(cur_cmd)
    url = web:link("")
 
+   -- DEBUG: 
+   text_file_writer ("/tmp/chk_test", "-> "..cur_cmd.."\n")
+
    hidden = { 
-      --"<INPUT TYPE=HIDDEN NAME=\"cmd\" value=\""..c[1].command.."\">",
-      --"<INPUT TYPE=HIDDEN NAME=\"count\" value=\""..#p.."\">" 
+      "<INPUT TYPE=HIDDEN NAME=\"cmd\" value=\""..c[1].command.."\">",
+      "<INPUT TYPE=HIDDEN NAME=\"count\" value=\""..#p.."\">" 
    }
+
 
    for i, v in ipairs(p) do
       if v.sequence == nil then readonly="readonly=\"readonly\"" else readonly="" end

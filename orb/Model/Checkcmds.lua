@@ -84,7 +84,7 @@ function get_check_params(id)
 end
 
 
-function get_allcheck_params(id)
+function get_all_check_params(id)
    local c = select_checkcmds(id, true)
    local p = select_checkcmd_params(c[1].id, false)
    return c, p
