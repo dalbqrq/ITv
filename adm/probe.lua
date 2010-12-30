@@ -384,11 +384,13 @@ function render_checkcmd_test(web, cur_cmd, name, ip)
    web.prefix = "/adm/checkcmd"
    url = web:link("")
 
+--[[
    res[#res+1] = "============================================"
    res[#res+1] = { a{ href=web:link("/test/check_http:-H!www.impa.br"), target="check",  "LINK" }, "DANIEL" }
    res[#res+1] = { a{ href=web:link("www.impa.br"),  "LINK" }, "DANIEL" }
    res[#res+1] = "============================================"
-   res[#res+1] = center{ br(), br(), strings.parameter.."s do comando "..c[1].name1, br() }
+]]
+   res[#res+1] = center{ br(), strings.parameter.."s do comando "..c[1].name1, br() }
    res[#res+1] = center{ render_form(web:link(url), nil, {hidden, render_table(row, header)}, "check", strings.test, "check" ) }
 
    return res
@@ -413,42 +415,37 @@ function render_add(web, cmp, chk, params)
          v.sw_name, v.sv_name = no_software_code, no_software_code
       end
 
-      v.c_id = v.c_id or 0
-      v.n_id = v.n_id or 0
-      v.p_id = v.p_id or 0
-      v.sv_id = v.sv_id or 0
+      v.c_id = v.c_id or 0; v.n_id = v.n_id or 0; v.p_id = v.p_id or 0; v.sv_id = v.sv_id or 0;
       hst_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
+
       if v.p_itemtype then itemtype = v.p_itemtype else itemtype = "NetworkEquipment" end
       if v.p_ip then ip = v.p_ip else ip = v.n_ip end
 
       url = "/insert/"..v.p_id..":"..v.sv_id..":"..v.c_id..":"..v.n_id..":"..hst_name..":"..v.sw_name..":"..v.sv_name..":"..ip
+      to_insert = v.p_id..":"..v.sv_id..":"..v.c_id..":"..v.n_id..":"..hst_name..":"..v.sw_name..":"..v.sv_name..":"..ip
 
-      -- se sv_id == 0 entao eh um host ou um network
-      if v.sv_id == 0 then 
+      if v.sv_id == 0 then  -- entao nao eh service e sim um host ou um network
+--[[
          cmd = render_form(web:link(url), nil,
                { "<INPUT TYPE=HIDDEN NAME=\"check\" value=\"0\">", config.monitor.check_host, " " } )
+]]
+         cmd = { "<INPUT TYPE=HIDDEN NAME=\"check\" value=\"0\">", config.monitor.check_host, " " }
       else
          url2="/add/"..params.query..":"..params.c_id
          if params.p_id    then url2 = url2 ..":"..params.p_id    end
          if params.sv_id   then url2 = url2 ..":"..params.sv_id   end
-         --if params.default then url2 = url2 ..":"..params.default end
          url2=web:link(url2)
 
+--[[
          cmd = render_form(web:link(url), nil,
                { "Nome:", "<INPUT TYPE=TEXT NAME=\"display\" value=\""..display.."\">", 
-               --select_option("check", chk, "object_id", "name1", params.default), " " } )
                select_option_onchange("check", chk, "object_id", "name1", params.default, url2), " " } )
+]]
+         cmd = { "Nome:", "<INPUT TYPE=TEXT NAME=\"display\" value=\""..display.."\">", 
+               select_option_onchange("check", chk, "object_id", "name1", params.default, url2), " " }
       end
 
-         --a{ href= web:link("/show/"..v.c_id), v.c_name}, 
-         --v[1],
-      row[#row + 1] = { 
-         hst_name,
-         ip, 
-         serv,
-         itemtype,
-         cmd,
-      }
+      row[#row + 1] = { hst_name, ip, serv, itemtype, cmd, }
    end
 
 -- VER: http://stackoverflow.com/questions/942772/html-form-with-two-submit-buttons-and-two-target-attributes
@@ -456,19 +453,9 @@ function render_add(web, cmp, chk, params)
    res[#res+1] = render_content_header("Checagem", nil, web:link("/list"))
    res[#res+1] = render_table(row, header)
 
-   web.prefix = "/adm/checkcmd"
-   url = web:link("")
-
    if v.sv_id ~= 0 then 
       res[#res+1] = render_checkcmd_test(web, params.default, hst_name, ip)
       res[#res+1] = iframe{name="check", src=web:link("/blank"), width="100%",  height="300", frameborder=0}
-   end
-
-   for _,c in ipairs(chk) do
-      if c.object_id == default then
-         --s = config.monitor.dir.."/libexec/"..c.name1.." -H "..v.p_ip.." "
-         --r = os.capture(s)
-      end
    end
 
    return render_layout(res)
