@@ -640,6 +640,7 @@ function show(web, id)
       end
    end
 
+   text_file_writer("/tmp/app", id )
    app = apps:select_apps(id)
 
    -- para presentacao Verto
@@ -675,9 +676,8 @@ function render_show(web, app, app_name, app_id, obj, rel, obj_id)
    local refresh_time = 15
    local imgfile, imglink, mapfile, maplink, dotfile = Graph.make_gv_filename(app_name, file_type)
 
---[[
-   if string.find(app_name, "Av Brasil") then
-]]
+--[[ if string.find(app_name, "Av Brasil") then ]]
+
    if tonumber(app_id) == 48 then
       engene = "dot"
       engene = "neato"

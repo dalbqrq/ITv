@@ -8,7 +8,7 @@ dbpass=itv
 dbuser=$user
 dbname=itvision
 itvhome=/usr/local/itvision
-instance=VERTO
+instance=ATMA
 hostname=itvision
 
 function install_pack() {

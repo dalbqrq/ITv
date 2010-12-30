@@ -241,10 +241,17 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 
 function make_app_objects_table(web, A)
 -- TODO: 2 (acho este TODO deve ficar aqui!)
-   local row = {}
+   local row, ic = {}, {}
 
    for i, v in ipairs(A) do
-      local obj = make_obj_name(v.name1, v.name2)
+      if v.itemtype == "Computer" then
+         ic = Model.query("glpi_computers", "id = "..v.items_id)
+      else
+         ic = Model.query("glpi_networkequipment", "id = "..v.items_id)
+      end
+      ic = ic[1]
+
+      local obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.name2)
 
       --web.prefix = "/adm/app_objects"
 
@@ -260,11 +267,26 @@ end
 
 
 function make_app_relat_table(web, AR)
-   local row = {}
+   local row, ic = {}, {}
 
    for i, v in ipairs(AR) do
-      local from = make_obj_name(v.from_name1, v.from_name2)
-      local to   = make_obj_name(v.to_name1, v.to_name2)
+      if v.from_itemtype == "Computer" then
+         ic = Model.query("glpi_computers", "id = "..v.from_items_id)
+      else
+         ic = Model.query("glpi_networkequipment", "id = "..v.from_items_id)
+      end
+      ic = ic[1]
+
+      local from = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.from_name2)
+
+      if v.to_itemtype == "Computer" then
+         ic = Model.query("glpi_computers", "id = "..v.to_items_id)
+      else
+         ic = Model.query("glpi_networkequipment", "id = "..v.to_items_id)
+      end
+      ic = ic[1]
+
+      local to = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.to_name2)
 
       if v.connection_type == "physical" then contype = strings.physical else contype = strings.logical end
 
@@ -333,10 +355,7 @@ function render_add(web, HST, SVC, APP, APPOBJ, APPS, AR, RT, app_id, msg)
    -- LISTA DE HOSTS PARA SEREM INCLUIDOS ---------------------------------
    local opt_hst = {}
    for i,v in ipairs(HST) do
-      local hst_name = nil
-      if v.c_alias ~= "" and v.c_alias ~= nil then hst_name = v.c_alias end
-      if hst_name == nil and v.c_name ~= "" and v.c_name ~= nil then hst_name = v.c_name end
-      if hst_name == nil and v.c_itv_key ~= "" and v.c_itv_key ~= nil then hst_name = v.c_itv_key end
+      local hst_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
       opt_hst[#opt_hst+1] = option{ value=v.o_object_id, hst_name }
    end
    local hst = { render_form(web:link(url_app), web:link("/add/"..app_id),
@@ -348,11 +367,7 @@ function render_add(web, HST, SVC, APP, APPOBJ, APPS, AR, RT, app_id, msg)
    -- LISTA DE SERVICES PARA SEREM INCLUIDOS ---------------------------------
    local opt_svc = {}
    for i,v in ipairs(SVC) do
-      local hst_name = nil
-      if v.c_alias ~= "" and v.c_alias ~= nil then hst_name = v.c_alias end
-      if hst_name == nil and v.c_name ~= "" and v.c_name ~= nil then hst_name = v.c_name end
-      if hst_name == nil and v.c_itv_key ~= "" and v.c_itv_key ~= nil then hst_name = v.c_itv_key end
-      --opt_svc[#opt_svc+1] = option{ value=v.o_object_id, make_obj_name(v.o_name1, v.o_name2) }
+      local hst_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
       opt_svc[#opt_svc+1] = option{ value=v.o_object_id, make_obj_name(hst_name, v.o_name2) }
    end  
    local svc = { render_form(web:link(url_app), web:link("/add/"..app_id),
@@ -385,10 +400,18 @@ function render_add(web, HST, SVC, APP, APPOBJ, APPS, AR, RT, app_id, msg)
 
    -- LISTA APP ORIGEM DOS RELACIONAMENTO ---------------------------------
    local opt_from = {}
+   local obj
    if APPOBJ[1] then
       for i,v in ipairs(APPOBJ) do
-         ic = make_obj_name(v.name1, v.name2)
-         opt_from[#opt_from+1] = option{ value=v.object_id, ic }
+         if v.itemtype == "Computer" then
+            ic = Model.query("glpi_computers", "id = "..v.items_id)
+         else
+            ic = Model.query("glpi_networkequipment", "id = "..v.items_id)
+         end
+         ic = ic[1]
+
+         obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.name2)
+         opt_from[#opt_from+1] = option{ value=v.object_id, obj }
       end
    end
    --local from = H("select") { multiple="multiple", size=list_size, name="from", opt_from, }
@@ -405,8 +428,15 @@ function render_add(web, HST, SVC, APP, APPOBJ, APPS, AR, RT, app_id, msg)
    local opt_to = {}
    if APPOBJ[1] then
       for i,v in ipairs(APPOBJ) do
-         ic = make_obj_name(v.name1, v.name2)
-         opt_to[#opt_to+1] = option{ value=v.object_id, ic }
+         if v.itemtype == "Computer" then
+            ic = Model.query("glpi_computers", "id = "..v.items_id)
+         else
+            ic = Model.query("glpi_networkequipment", "id = "..v.items_id)
+         end
+         ic = ic[1]
+
+         obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.name2)
+         opt_to[#opt_to+1] = option{ value=v.object_id, obj }
       end
    end
    local to = H("select") { size=list_size, name="to", opt_to }

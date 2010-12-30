@@ -28,6 +28,9 @@ local DEBUG = false
         QUERY 2 - computador              com porta com software e sem monitor
         QUERY 3 - computador/networkequip com porta sem software e com monitor - monitoracao de host onde o service eh ping
         QUERY 4 - computador              com porta com software e com monitor - monitoracao de service 
+	QUERY 5 - aplicacao com monitor - monitoracao de service 
+	QUERY 6 - computador com porta sem software e com monitor pendente
+	QUERY 7 - computador com porta com software e com monitor pendente
 
 ]]
 
@@ -201,7 +204,9 @@ end
         QUERY 2 - computador              com porta com software e sem monitor
         QUERY 3 - computador/networkequip com porta sem software e com monitor - monitoracao de host onde o service eh ping
         QUERY 4 - computador              com porta com software e com monitor - monitoracao de service 
-
+	QUERY 5 - aplicacao com monitor - monitoracao de service 
+	QUERY 6 - computador com porta sem software e com monitor pendente
+	QUERY 7 - computador com porta com software e com monitor pendente
 ]]
 
 local g_excludes = [[ and c.is_deleted = 0 and c.is_template = 0 and c.states_id = 1 ]]
@@ -257,56 +262,6 @@ end
 
 
 ----------------------------------------------------------------------
---  QUERY 1+1/2 - computador com porta sem software e sem monitor
-----------------------------------------------------------------------
-function make_query_112(c_id, p_id, clause)
-   local q = {}
-   local ictype, it = { "c", "n" }, ""
-
-   for _,ic in ipairs(ictype) do
-      local r = {}
-      local t = { ic, "p", "m" }
-      local n = { "csv", "sv", "sw", "o", "s", "ss" }
-
-      local columns_ = make_columns(t)
-      local _,nulls_ = make_columns(n)
-      local tables_  = make_tables(t)
-      local cond_    = make_where(t)
-
-      -- os nomes dos campos tanto de computers como os de networkequipment comecam com c_
-      if ic == "n" then 
-         columns_ = string.gsub(columns_, "as n_", "as c_") 
-         excludes = string.gsub(g_excludes, "c%.", "n.")
-         if clause then clause = string.gsub(clause, "c%.", "n.") end
-         it = "'NetworkEquipment'"
-      else 
-         excludes = g_excludes
-         it = "'Computer'"
-      end 
-
-      cond_ = cond_ .. [[ 
-         and p.itemtype = ]]..it..[[
-         and m.service_object_id = -1
-      ]] .. excludes
-
-      columns_ = columns_..",\n"..nulls_
-
-      if c_id  then cond_ = cond_ .. " and "..ic..".id = "  .. c_id  end
-      if p_id  then cond_ = cond_ .. " and p.id = "  .. p_id  end
-      if clause then cond_ = cond_ .. " and " .. clause end
-
-      r = Model.query(tables_, cond_, nil, columns_)
-      for _,v in ipairs(r) do table.insert(v, 1, 1) end
-      for _,v in ipairs(r) do table.insert(q, v) end
-
-      --if DEBUG then print ("\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
-   end
-
-   return q
-end
-
-
-----------------------------------------------------------------------
 --  QUERY 2 - computador com porta com software e sem monitor
 ----------------------------------------------------------------------
 function make_query_2(c_id, p_id, sv_id, clause)
@@ -321,8 +276,10 @@ function make_query_2(c_id, p_id, sv_id, clause)
 
    cond_ = cond_ .. [[ 
       and p.itemtype = "Computer" 
-      and not exists (select 1 from itvision_monitors m2 where m2.networkports_id = p.id and m2.softwareversions_id = sv.id)
    ]] .. g_excludes
+   -- Esta linha abaixo foi retirada do query para que continue aparecendo a possibilidade de se incluir um
+   -- novo probe mesmo que existe um para determonado servico.
+   --and not exists (select 1 from itvision_monitors m2 where m2.networkports_id = p.id and m2.softwareversions_id = sv.id)
 
    columns_ = columns_..",\n"..nulls_
 
@@ -461,6 +418,93 @@ function make_query_5(a_id, clause)
 end
 
 
+----------------------------------------------------------------------
+--  QUERY 6 - computador com porta sem software e com monitor pendente
+----------------------------------------------------------------------
+function make_query_6(c_id, p_id, clause)
+   local q = {}
+   local ictype, it = { "c", "n" }, ""
+
+   for _,ic in ipairs(ictype) do
+      local r = {}
+      local t = { ic, "p", "m" }
+      local n = { "csv", "sv", "sw", "o", "s", "ss" }
+
+      local columns_ = make_columns(t)
+      local _,nulls_ = make_columns(n)
+      local tables_  = make_tables(t)
+      local cond_    = make_where(t)
+
+      -- os nomes dos campos tanto de computers como os de networkequipment comecam com c_
+      if ic == "n" then 
+         columns_ = string.gsub(columns_, "as n_", "as c_") 
+         excludes = string.gsub(g_excludes, "c%.", "n.")
+         if clause then clause = string.gsub(clause, "c%.", "n.") end
+         it = "'NetworkEquipment'"
+      else 
+         excludes = g_excludes
+         it = "'Computer'"
+      end 
+
+      cond_ = cond_ .. [[ 
+         and p.itemtype = ]]..it..[[
+         and m.display_name is null
+         and m.service_object_id = -1
+      ]] .. excludes
+
+      columns_ = columns_..",\n"..nulls_
+
+      if c_id  then cond_ = cond_ .. " and "..ic..".id = "  .. c_id  end
+      if p_id  then cond_ = cond_ .. " and p.id = "  .. p_id  end
+      if clause then cond_ = cond_ .. " and " .. clause end
+
+      r = Model.query(tables_, cond_, nil, columns_)
+      for _,v in ipairs(r) do table.insert(v, 1, 6) end
+      for _,v in ipairs(r) do table.insert(q, v) end
+
+      --if DEBUG then print ("\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
+   end
+
+   return q
+end
+
+
+
+----------------------------------------------------------------------
+--  QUERY 7 - computador com porta com software e sem monitor
+----------------------------------------------------------------------
+function make_query_7(c_id, p_id, sv_id, clause)
+   local q = {}
+   t = { "c", "p", "csv", "sv", "sw", "m" }
+   n = { "o", "s", "ss" }
+
+   local columns_ = make_columns(t)
+   local _,nulls_ = make_columns(n)
+   local tables_  = make_tables(t)
+   local cond_    = make_where(t)
+
+   cond_ = cond_ .. [[ 
+      and p.itemtype = "Computer" 
+      and m.display_name is not null
+      and m.service_object_id = -1
+   ]] .. g_excludes
+      --and not exists (select 1 from itvision_monitors m2 where m2.networkports_id = p.id and m2.softwareversions_id = sv.id)
+
+   columns_ = columns_..",\n"..nulls_
+
+   if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
+   if p_id  then cond_ = cond_ .. " and p.id = "  .. p_id  end
+   if sv_id then cond_ = cond_ .. " and sv.id = " .. sv_id end
+   if clause  then cond_ = cond_ .. " and " .. clause end
+
+   q = Model.query(tables_, cond_, nil, columns_)
+   for _,v in ipairs(q) do table.insert(v, 1, 7) end
+
+   --if DEBUG then print( "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
+
+   return q
+end
+
 
 
 ----------------------------------------------------------------------
@@ -472,16 +516,18 @@ end
 function select_monitors(clause)
    local q = {}
    local q1 = make_query_1(nil, nil, clause)
-   local q112 = make_query_112(nil, nil, clause)
    local q2 = make_query_2(nil, nil, nil, clause)
    local q3 = make_query_3(nil, nil, nil, clause)
    local q4 = make_query_4(nil, nil, nil, nil, clause)
+   local q6 = make_query_6(nil, nil, clause)
+   local q7 = make_query_7(nil, nil, clause)
 
    for _,v in ipairs(q1) do table.insert(q, v) end
-   for _,v in ipairs(q112) do table.insert(q, v) end
    for _,v in ipairs(q2) do table.insert(q, v) end
    for _,v in ipairs(q3) do table.insert(q, v) end
    for _,v in ipairs(q4) do table.insert(q, v) end
+   for _,v in ipairs(q6) do table.insert(q, v) end
+   for _,v in ipairs(q7) do table.insert(q, v) end
 
    table.sort(q, function (a, b) 
       a.c_alias   = a.c_alias   or ""
@@ -490,14 +536,16 @@ function select_monitors(clause)
       a.p_ip      = a.p_ip      or ""
       a.sw_name   = a.sw_name   or ""
       a.sv_name   = a.sv_name   or ""
+      a.m_display_name = a.m_display_name or ""
       b.c_alias   = b.c_alias   or ""
       b.c_name    = b.c_name    or ""
       b.c_itv_key = b.c_itv_key or ""
       b.p_ip      = b.p_ip      or ""
       b.sw_name   = b.sw_name   or ""
       b.sv_name   = b.sv_name   or ""
-      return a.c_alias..a.c_name..a.c_itv_key..a.p_ip..a.sw_name..a.sv_name < 
-             b.c_alias..b.c_name..b.c_itv_key..b.p_ip..b.sw_name..b.sv_name  end )
+      b.m_display_name = b.m_display_name or ""
+      return a.c_alias..a.c_name..a.c_itv_key..a.p_ip..a.sw_name..a.sv_name..a.m_display_name < 
+             b.c_alias..b.c_name..b.c_itv_key..b.p_ip..b.sw_name..b.sv_name..b.m_display_name  end )
 
    return q
 end
@@ -613,11 +661,11 @@ function how_to_use()
    --a = make_query_3()
    --a = make_query_4()
 
-   a = make_query_112()
+   --a = make_query_5()
    a = select_monitors()
 
    for i,v in ipairs(a) do
-      print("A: ",table.getn(a), v.c_name, v.s_name, v.sv_name, v.p_itemtype, v.ao_type, v.c_geotag, v.m_service_object_id) 
+      print("A: ", v[1],table.getn(a), v.c_name, v.s_name, v.sv_name, v.p_itemtype, v.ao_type, v.c_geotag, v.m_service_object_id) 
    end
 
 

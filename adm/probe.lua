@@ -3,6 +3,7 @@
 -- includes & defs ------------------------------------------------------
 require "Model"
 require "Monitor"
+require "Checkcmds"
 require "View"
 require "util"
 require "monitor_util"
@@ -54,7 +55,7 @@ function objects:select_checks(cmd)
 end
 
 
-function monitors:insert_monitor(networkport, softwareversion, service_object, state, type_)
+function monitors:insert_monitor(networkport, softwareversion, service_object, display_name, state, type_)
    if tonumber(networkport)      == 0 then networkport      = nil end         
    if tonumber(softwareversion)  == 0 then softwareversion  = nil end         
 
@@ -64,6 +65,7 @@ function monitors:insert_monitor(networkport, softwareversion, service_object, s
       service_object_id    = service_object,
       networkports_id      = networkport,
       softwareversions_id  = softwareversion,
+      display_name         = display_name,
       state = state,
       type  = type_,
    }
@@ -75,15 +77,15 @@ end
 
 function list(web, msg)
    local clause = nil
-   if web.input.hostname  then clause = "c.name like '%"..web.input.hostname.."%' " end
-   if web.input.inventory then 
+   if web.input.hostname ~= "" and web.input.hostname ~= nil then clause = "c.name like '%"..web.input.hostname.."%' " end
+   if web.input.inventory ~= "" and web.input.inventory ~= nil then 
       local a = ""
-      if clause then a = " and " end
+      if clause then a = " and " else clause = "" end
       clause = clause..a.."c.otherserial like '%"..web.input.inventory.."%' "
    end
-   if web.input.sn then 
+   if web.input.sn ~= "" and web.input.sn ~= nil then 
       local a = ""
-      if clause then a = " and " end
+      if clause then a = " and " else clause = ""  end
       clause = clause..a.."c.serial like '%"..web.input.sn.."%' "
    end
 
@@ -118,7 +120,6 @@ ITvision:dispatch_post(update, "/update/(%d+)")
 
 function add(web, query, c_id, p_id, sv_id, default)
    local chk = Checkcmds.select_checkcmds(nil, true)
--- get_allcheck_params()
    local cmp = {}
 
    query = tonumber(query)
@@ -158,7 +159,7 @@ function insert(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, ip)
    local hst_name = p_id
    local svc_name = p_id.."_"..sv_id
 
-   local cmd, hst, svc, dpl, chk, chk_id, h, s
+   local cmd, hst, svc, dpl, chk, mon, chk_id, h, s
    local chk_name = config.monitor.check_host
    local msg = ""
    local content, counter
@@ -175,7 +176,7 @@ function insert(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, ip)
       cmd = insert_service_cfg_file (hst_name, chk_name, chk_name, chk_id, false)
 
       -- cria monitor sem a referencia do servico check_alive associado.
-      monitors:insert_monitor(p_id, nil, -1, 0, "hst")
+      monitors:insert_monitor(p_id, nil, -1, nil, 0, "hst")
 
       msg = msg.."Check do HOST: "..c_name.." para o IP "..ip.." criado. "..error_message(11)
    else
@@ -186,60 +187,50 @@ function insert(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, ip)
    ------------------------------------------------------
    -- cria o service check caso tenha sido requisitado
    ------------------------------------------------------
-   --alter table itvision.itvision_monitors add columns display_name VARCHAR(40) NULL DEFAULT NULL  AFTER softwareversions_id;
+   --alter table itvision.itvision_monitors add column display_name VARCHAR(40) NULL DEFAULT NULL  AFTER softwareversions_id;
    if tonumber(sv_id) ~= 0 then
       local clause
 
+--[[
       if web.input.check == 0 then
          clause = "name1 = '"..config.monitor.check_host.."'"
       else
          clause = "object_id = "..web.input.check
+
       end
       chk = Model.query("nagios_objects", clause)
+ Substituido pela linha abaixo ]]
+      chk = Model.query("nagios_objects", "object_id = "..web.input.check)
 
       -- DEBUG: text_file_writer ("/tmp/4", "clause: "..clause.."\n")
 
       if chk[1] then chk_name = chk[1].name1; chk_id = chk[1].object_id end
 
-      dpl = string.toid(web.input.display)
-      if dpl == "" then 
-         dpl = software
+      --dpl = string.toid(web.input.display)
+      dpl = web.input.display
+      if dpl == "" or dpl == nil then 
+         dpl = chk_name
       end
 
       -- DEBUG: text_file_writer ("/tmp/5", "chk_name: "..chk_name.."\n".."chk_id: "..chk_id)
-      cmd = insert_service_cfg_file (hostname, dpl, chk_name, chk_id, true)
-      s = objects:select(hostname, dpl)
+      mon = Model.query("itvision_monitors", "networkports_id = "..p_id.." and softwareversions_id = "..sv_id..
+                        " and display_name = '"..dpl.."'")
 
-      if s[1] == nil then 
-         msg = msg..error_message(12)
+      if mon[1] then
+         msg = msg.."Check de SERVIÇO: "..dpl.." - HOST: ".. c_name.." - COMANDO: "..chk_name.." NÃO FOI CRIADO POIS JÁ EXISTE."
       else
-         --svc = s[1].object_id
-         monitors:insert_monitor(p_id, sv_id, -1, 0, "svc")
-         msg = msg.."Check do SERVIÇO: "..dpl.." HOST: ".. c_name.." COMANDO: "..chk_name.." criado. "
-         -- DEBUG:       .." (hst,svc) = ("..hst..","..svc..") "
-         -- DEBUG: msg = msg.." ||| serviceobjid"..svc.." ||| " 
+         cmd = insert_service_cfg_file (hst_name, dpl, chk_name, chk_id, true)
+         monitors:insert_monitor(p_id, sv_id, -1, dpl, 0, "svc")
+         msg = msg.."Check de SERVIÇO: "..dpl.." - HOST: ".. c_name.." - COMANDO: "..chk_name.." criado."
       end
    end
 
-   --os.reset_monitor() -- isto estah aqui pois as vezes o probe nao aparece na lista mesmo que itvivion_monitor
-                      -- e nagios_objects tenham sido criados
-
---[[
-   local uurrll = "/list/"..msg..""
-   -- DEBUG: text_file_writer ("/tmp/6", uurrll.." 6\n")
-]]
    if web then
       return web:redirect(web:link("/list/"..msg..""))
    else
       return msg --para criacao de probes em massa
    end
 
---[[
-   local cmp = Monitor.select_monitors(clause)
-   local chk = Checkcmds.select_checkcmds()
-
-   return render_list(web, cmp, chk, "")
-]]
 end
 ITvision:dispatch_post(insert, "/insert/(%d+):(%d+):(%d+):(%d+):(.+):(.+):(.+):(.+)")
 
@@ -277,8 +268,9 @@ function render_list(web, cmp, chk, msg)
    local row = {}
    local res = {}
    local link = {}
+   local alias
    
-   local header =  { strings.alias.."/"..strings.name, "IP", "Software / Versão", strings.type, strings.command, "." }
+   local header = {strings.alias.."/"..strings.name, "IP", "Software / Versão", strings.type, strings.command, strings.alias, "."}
 
    for i, v in ipairs(cmp) do
       local serv, ip, itemtype, id, hst_name = "", "", "", "", nil
@@ -296,10 +288,11 @@ function render_list(web, cmp, chk, msg)
 
       if v.c_id ~= 0 then id = v.c_id else id = v.n_id end
 
+      alias = v.m_display_name
+
       if v.s_check_command_object_id == nil then 
-         chk = ""
          if tonumber(v.m_service_object_id) == -1 then
-            link = "Pendente"
+            link = font{ color="orange", "Pendente" }
          else
             link = a{ href= web:link("/add/"..v[1]..":"..id..":"..v.p_id..":"..v.sv_id), strings.add }
          end
@@ -318,6 +311,8 @@ function render_list(web, cmp, chk, msg)
          else
       end
 
+      if v.sw_name ~= "" then itemtype = "Service" end
+
       web.prefix = "/adm/probe"
 
       row[#row + 1] = { 
@@ -326,6 +321,7 @@ function render_list(web, cmp, chk, msg)
          serv,
          itemtype,
          chk,
+         alias,
          link }
    end
 
@@ -350,13 +346,12 @@ function render_checkcmd_test(web, cur_cmd, name, ip)
    local hidden = {}
    local header = { strings.parameter.." #", strings.value, strings.description }
 
-   local c, p = Checkcmds.get_allcheck_params(cur_cmd)
+   local c, p = Checkcmds.get_all_check_params(cur_cmd)
 
    hidden = { 
       "<INPUT TYPE=HIDDEN NAME=\"cmd\" value=\""..c[1].command.."\">",
       "<INPUT TYPE=HIDDEN NAME=\"count\" value=\""..#p.."\">" 
    }
-
 
    for i, v in ipairs(p) do
       if v.sequence == nil then readonly="readonly=\"readonly\"" else readonly="" end
