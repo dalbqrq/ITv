@@ -65,7 +65,7 @@ if (!file_exists(GLPI_CONFIG_DIR . "/config_db.php")) {
    echo '<head><title>GLPI - '.$LANG['login'][10].'</title>'."\n";
    echo '<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>'."\n";
    echo '<meta http-equiv="Content-Script-Type" content="text/javascript"/>'."\n";
-   echo '<meta http-equiv="REFRESH" content="0;url=/orb/gviz/show"></HEAD>'."\n"; // daniel@itvision.com.br
+   echo '<meta http-equiv="REFRESH" content="0;url=/orb/login"></HEAD>'."\n"; // daniel@itvision.com.br
    echo '<link rel="shortcut icon" type="images/x-icon" href="'.$CFG_GLPI["root_doc"].
           '/pics/favicon.ico" />';
 
