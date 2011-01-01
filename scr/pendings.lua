@@ -36,7 +36,7 @@ function update_pending()
       local cond = [[ id = ]]..m_id
 
       print(v.object_id, v.name1, v.name2, v.networkports_id, v.softwareversions_id, cond____)
-      Model.update("itvision_monitors", udt, cond)
+      --Model.update("itvision_monitors", udt, cond)
    end
 
 end

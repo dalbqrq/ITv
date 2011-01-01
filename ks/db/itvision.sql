@@ -162,17 +162,18 @@ DROP TABLE IF EXISTS `itvision_monitors`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `itvision_monitors` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
   `instance_id` smallint(6) NOT NULL,
   `entities_id` int(11) NOT NULL DEFAULT '0',
   `service_object_id` int(11) NOT NULL,
   `networkports_id` int(11) NOT NULL,
   `softwareversions_id` int(11) DEFAULT NULL,
-  `display_name` varchar(40) DEFAULT NULL,
+  `display` varchar(40) DEFAULT NULL,
+  `name1` varchar(40) DEFAULT NULL,
+  `name2` varchar(40) DEFAULT NULL,
   `state` tinyint(4) NOT NULL DEFAULT '0',
-  `type` enum('hst','svc') CHARACTER SET latin1 NOT NULL DEFAULT 'hst',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8;
+  `type` enum('hst','svc') CHARACTER SET latin1 NOT NULL DEFAULT 'hst'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --

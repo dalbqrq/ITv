@@ -30,6 +30,19 @@ end
 
 
 ----------------------------- CONFIG FILES ----------------------------------
+--[[
+          command_name        = PING
+          command_line        = chck_ping
+name1   = host_name           = Euler
+name2   = service_description = My_PING
+c_alias = alias               = euler
+          check_command       = PING!400.0,20%!999.0,70%
+p_id    = address             = 147.65.1.3
+
+
+]]
+
+
 
 function insert_host_cfg_file (hostname, alias, ip)
    if not  ( hostname and alias and ip ) then return false end
@@ -53,31 +66,31 @@ define host{
 end
 
 
-function insert_service_cfg_file (hostname, display_name, chk_name, chk_id, hide_check_host)
-   if not  ( display_name and hostname and chk_name and chk_id ) then return false end
+function insert_service_cfg_file (hostname, display_name, display, check_args)
    local content, cmd, filename
-   local c, p
+   local check_cmd = display_name
 
-   if hide_check_host then
-      c, p = Checkcmds.get_check_params(chk_id)
-   else
-      c, p = Checkcmds.get_checkhost_params(chk_id)
-   end
-
-   local chk = chk_name
+   if check_args == nil then
+      check_args = ""
+      local tables_ = [[nagios_objects o, itvision_checkcmds c, itvision_checkcmd_params p]]
+      local cond_   = [[objecttype_id = 12 and is_active = 1 and o.object_id = c.cmd_object_id and c.id = p.checkcmds_id 
+                        and p.sequence is not null and o.name2 is null and o.name1 = ']]..display_name..[[']]
+      local extras_ = [[order by p.sequence]]
+      local p = Model.query(tables_, cond_, extras_)
       
-   for i,v in ipairs(p) do
-      chk = chk.."!"..v.default_value 
+      for i,v in ipairs(p) do
+         check_args = check_args.."!"..v.default_value 
+      end
    end
 
-   filename = config.monitor.dir.."/services/"..hostname.."-"..display_name.."-"..chk_name..".cfg"
+   filename = config.monitor.dir.."/services/"..hostname.."-"..display_name.."-"..display..".cfg"
 
    local text = [[
 define service{
         use]].."\t\t\t"..[[generic-service
         host_name]].."\t\t"..hostname..[[ 
         service_description]].."\t"..display_name..[[ 
-        check_command]].."\t\t"..chk..[[ 
+        check_command]].."\t\t"..check_cmd..check_args..[[ 
         } 
 ]]
 

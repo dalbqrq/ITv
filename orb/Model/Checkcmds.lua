@@ -18,9 +18,6 @@ function select_checkcmds(id, hide_check_host)
 
    local extra_ = [[ order by name1 ]]
 
-   -- DEBUG: id = id or ""; text_file_writer ("/tmp/chk"..id, "select * from ".. table_ .." where ".. cond_ .. " ".. extra_..";\n\n" )
-   -- DEBUG: 
-text_file_writer ("/tmp/dbg_5", "select * from ".. table_ .." where ".. cond_ .. " ".. extra_..";" )
    return Model.query(table_, cond_, extra_)
 end
 
@@ -38,62 +35,28 @@ function select_checkcmd_params(id, exclude_fixed_params)
 
    local extra_ = [[ order by p.sequence ]]
 
-   -- DEBUG: id = id or ""; 
-text_file_writer ("/tmp/dbg_3", "select * from ".. table_ .." where ".. cond_ .. " ".. extra_..";" )
    return Model.query(table_, cond_, extra_)
 end
 
 
--- Retorna comandos e parametros 
-function get_checkhost_params(id)
-   local c = select_checkcmds(id, false)
-   local count = 0
+function get_check_params(id, exclude_fixed_params, hide_check_host)
+   local c = select_checkcmds(id, hide_check_host)
+   local counter = 0
+--[[ isto era necessário!!!
    while c[1] == nil do
-      count = count +1
+      counter = counter +1
       os.sleep(1)
-      c = select_checkcmds(id, false)
+      c = select_checkcmds(id, hide_check_host)
    end
+]]
 
-   local p = select_checkcmd_params(c[1].id, true)
-   return c, p
-end
-
-
-function get_check_params(id)
-   local c = select_checkcmds(id, true)
-
-   --[[ DEBUG
-   if c[1] == nil then
-      text_file_writer ("/tmp/9",id )
-   end
-   ]]
-
-   -- Este temporizador foi colocado aqui em funcao de comportamenteo estranho
-   -- identificado com o DEBUG acima. Curiosamente a query nao retornava o 
-   -- valor apesar de existir a entrada. O loop abaixo insite na tentativa e
-   -- acaba conseguindo.
-   local counter, ui, x = 0, 0, 0
-   while c[1] == nil do
-      counter = counter + 1
-      os.sleep(1)
-      c = select_checkcmds(id, true)
-   end
-   -- DEBUG: text_file_writer("/tmp/contour_chkcmd", tostring(counter))
-
-   local p = select_checkcmd_params(c[1].id, true)
-   return c, p
-end
-
-
-function get_all_check_params(id)
-   local c = select_checkcmds(id, true)
-   local p = select_checkcmd_params(c[1].id, false)
+   local p = select_checkcmd_params(c[1].id, exclude_fixed_params)
    return c, p
 end
 
 
 function how_to_use(object_id)
-   local c, p = get_allcheck_params(object_id)
+   local c, p = get_check_params(object_id)
 
    chk = c[1].name1
 

@@ -448,7 +448,7 @@ function make_query_6(c_id, p_id, clause)
 
       cond_ = cond_ .. [[ 
          and p.itemtype = ]]..it..[[
-         and m.display_name is null
+         and m.display = ']]..config.monitor.check_host..[['
          and m.service_object_id = -1
       ]] .. excludes
 
@@ -485,7 +485,7 @@ function make_query_7(c_id, p_id, sv_id, clause)
 
    cond_ = cond_ .. [[ 
       and p.itemtype = "Computer" 
-      and m.display_name is not null
+      and m.display is not null
       and m.service_object_id = -1
    ]] .. g_excludes
       --and not exists (select 1 from itvision_monitors m2 where m2.networkports_id = p.id and m2.softwareversions_id = sv.id)
@@ -536,16 +536,16 @@ function select_monitors(clause)
       a.p_ip      = a.p_ip      or ""
       a.sw_name   = a.sw_name   or ""
       a.sv_name   = a.sv_name   or ""
-      a.m_display_name = a.m_display_name or ""
+      a.m_display = a.m_display or ""
       b.c_alias   = b.c_alias   or ""
       b.c_name    = b.c_name    or ""
       b.c_itv_key = b.c_itv_key or ""
       b.p_ip      = b.p_ip      or ""
       b.sw_name   = b.sw_name   or ""
       b.sv_name   = b.sv_name   or ""
-      b.m_display_name = b.m_display_name or ""
-      return a.c_alias..a.c_name..a.c_itv_key..a.p_ip..a.sw_name..a.sv_name..a.m_display_name < 
-             b.c_alias..b.c_name..b.c_itv_key..b.p_ip..b.sw_name..b.sv_name..b.m_display_name  end )
+      b.m_display = b.m_display or ""
+      return a.c_alias..a.c_name..a.c_itv_key..a.p_ip..a.sw_name..a.sv_name < 
+             b.c_alias..b.c_name..b.c_itv_key..b.p_ip..b.sw_name..b.sv_name end )
 
    return q
 end
