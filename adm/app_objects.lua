@@ -243,6 +243,7 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 function make_app_objects_table(web, A)
 -- TODO: 2 (acho este TODO deve ficar aqui!)
    local row, ic = {}, {}
+   local obj = ""
 
    for i, v in ipairs(A) do
       if v.itemtype == "Computer" then
@@ -252,7 +253,11 @@ function make_app_objects_table(web, A)
       end
       ic = ic[1]
 
-      local obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.name)
+      if v.obj_type == "hst" then
+         obj = find_hostname(ic.alias, ic.name, ic.itv_key)
+      else
+         obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.name)
+      end
 
       --web.prefix = "/adm/app_objects"
 
@@ -274,7 +279,7 @@ function make_app_relat_table(web, AR)
       if v.from_itemtype == "Computer" then
          ic = Model.query("glpi_computers", "id = "..v.from_items_id)
       else
-         ic = Model.query("glpi_networkequipment", "id = "..v.from_items_id)
+         ic = Model.query("glpi_networkequipments", "id = "..v.from_items_id)
       end
       ic = ic[1]
 
@@ -283,7 +288,7 @@ function make_app_relat_table(web, AR)
       if v.to_itemtype == "Computer" then
          ic = Model.query("glpi_computers", "id = "..v.to_items_id)
       else
-         ic = Model.query("glpi_networkequipment", "id = "..v.to_items_id)
+         ic = Model.query("glpi_networkequipments", "id = "..v.to_items_id)
       end
       ic = ic[1]
 
@@ -410,7 +415,11 @@ function render_add(web, HST, SVC, APP, APPOBJ, APPS, AR, RT, app_id, msg)
          end
          ic = ic[1]
 
-         obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.name)
+         if v.obj_type == "hst" then
+            obj = find_hostname(ic.alias, ic.name, ic.itv_key)
+         else
+            obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.name)
+         end
          opt_from[#opt_from+1] = option{ value=v.object_id, obj }
       end
    end
@@ -435,7 +444,11 @@ function render_add(web, HST, SVC, APP, APPOBJ, APPS, AR, RT, app_id, msg)
          end
          ic = ic[1]
 
-         obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.name)
+         if v.obj_type == "hst" then
+            obj = find_hostname(ic.alias, ic.name, ic.itv_key)
+         else
+            obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.name)
+         end
          opt_to[#opt_to+1] = option{ value=v.object_id, obj }
       end
    end

@@ -161,7 +161,7 @@ end
 
 
 function select_app_app_objects (id)
-   local cond_ = "o.object_id = ao.service_object_id and ao.app_id = a.id and o.name1 = p.id and o.name2 = m.id "
+   local cond_ = "o.object_id = ao.service_object_id and ao.app_id = a.id and o.object_id = m.service_object_id and m.networkports_id = p.id "
    if id then
       cond_ = cond_ .. " and a.id = "..id
    end
@@ -208,23 +208,21 @@ end
 
 function select_app_relat_object (id, from, to)
    local tables_  = [[itvision_app_relats ar, nagios_objects o1, nagios_objects o2, 
-                      itvision_app_relat_types rt, itvision_apps ap,
+                      itvision_app_relat_types art, itvision_apps ap,
                       glpi_networkports n1, glpi_networkports n2, 
                       itvision_monitors m1, itvision_monitors m2 ]]
    local cond_    = [[ar.from_object_id = o1.object_id and 
                       ar.to_object_id = o2.object_id and
-                      ar.app_relat_type_id = rt.id and
+                      ar.app_relat_type_id = art.id and
                       ar.app_id = ap.id and
-                      o1.name1 = n1.id and 
-                      o2.name1 = n2.id and
-                      o1.name2 = m1.id and 
-                      o2.name2 = m2.id ]]
+                      o1.object_id = m1.service_object_id and 
+                      o2.object_id = m2.service_object_id ]]
    local columns_ = [[o1.name1 as from_name1, o1.name2 as from_name2, 
                       o2.name1 as to_name1, o2.name2 as to_name2,
                       ar.from_object_id, ar.to_object_id,
                       ar.app_id as app_id, ap.name as app_name, 
                       ar.app_relat_type_id, 
-                      rt.name as rtype_name, rt.type as rtype_type,
+                      art.name as art_name, art.type as art_type,
                       ar.from_object_id, ar.to_object_id,
                       n1.itemtype as from_itemtype,
                       n1.items_id as from_items_id,

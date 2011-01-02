@@ -392,6 +392,7 @@ function render_checkcmd(web, chk_id, hst_name, ip, url_test, url_insert, chk_pa
    local header = { strings.parameter.." #", strings.value, strings.description }
    local params, params_hidden, args = {}, {} , ""
    local path = "/usr/lib/nagios/plugins"
+   local count = 0
 
    local c, p = Checkcmds.get_check_params(chk_id, false, false)
    if chk_params then p = chk_params end
@@ -399,19 +400,8 @@ function render_checkcmd(web, chk_id, hst_name, ip, url_test, url_insert, chk_pa
 
    monitor_name = monitor_name or c[1].name1
    
-   local hidden = { 
-      "<INPUT TYPE=HIDDEN NAME=\"cmd\" value=\""..c[1].command.."\">",
-      "<INPUT TYPE=HIDDEN NAME=\"chk_id\" value=\""..chk_id.."\">" ,
-      "<INPUT TYPE=HIDDEN NAME=\"chk_name\" value=\""..c[1].name1.."\">",
-      "<INPUT TYPE=HIDDEN NAME=\"count\" value=\""..#p.."\">" 
-   }
-   local display_show = {
-      { "Label", "<INPUT TYPE=TEXT NAME=\"monitor_name\" value=\""..monitor_name.."\">", 
-        "Nome alternativo para o comando a ser criado." }
-   }
-   local display_hidden = { "<INPUT TYPE=HIDDEN NAME=\"monitor_name\" value=\""..monitor_name.."\">" }
-
    for i, v in ipairs(p) do
+      v.flag = v.flag or ""
       if v.sequence == nil then readonly="readonly=\"readonly\"" else readonly="" end
       if v.variable == "$HOSTNAME$" then
          value = hst_name
@@ -420,23 +410,44 @@ function render_checkcmd(web, chk_id, hst_name, ip, url_test, url_insert, chk_pa
       else
          v.default_value = v.default_value or ""
          value = v.default_value
+
       end
-      v.flag = v.flag or ""
+
+      -- soh os parametros variaveis eh que serao usado na criacao do comando
+      if string.sub(v.variable,1,4) == "$ARG" then
+         count = count + 1
+         row_hidden[#row_hidden + 1] = { 
+--[[
+            { "<INPUT TYPE=HIDDEN NAME=\"flag"..i.."\" value=\""..v.flag.."\">" ,
+              "<INPUT TYPE=HIDDEN NAME=\"opt"..i.."\" value=\""..value.."\" "..readonly..">" } }
+]]
+            { "<INPUT TYPE=HIDDEN NAME=\"flag"..count.."\" value=\""..v.flag.."\">" ,
+              "<INPUT TYPE=HIDDEN NAME=\"opt"..count.."\" value=\""..value.."\" "..readonly..">" } }
+      end
+
       row[#row + 1] = { i,
          { "<INPUT TYPE=HIDDEN NAME=\"flag"..i.."\" value=\""..v.flag.."\">" ,
            "<INPUT TYPE=TEXT NAME=\"opt"..i.."\" value=\""..value.."\" "..readonly..">" }, v.description }
-      row_hidden[#row_hidden + 1] = { 
-         { "<INPUT TYPE=HIDDEN NAME=\"flag"..i.."\" value=\""..v.flag.."\">" ,
-           "<INPUT TYPE=HIDDEN NAME=\"opt"..i.."\" value=\""..value.."\" "..readonly..">" } }
 
       args = args.." "..v.flag.." "..value
    end
 
-   params = {hidden, br(), render_table(display_show, nil), br(), render_table(row, header)}
-   params_hidden = {hidden, display_hidden, row_hidden}
+   local hidden = { 
+      "<INPUT TYPE=HIDDEN NAME=\"cmd\" value=\""..c[1].command.."\">",
+      "<INPUT TYPE=HIDDEN NAME=\"chk_id\" value=\""..chk_id.."\">" ,
+      "<INPUT TYPE=HIDDEN NAME=\"chk_name\" value=\""..c[1].name1.."\">",
+      "<INPUT TYPE=HIDDEN NAME=\"count\" value=\""..count.."\">" 
+   }
+   local display_show = {
+      { strings.alias, "<INPUT TYPE=TEXT NAME=\"monitor_name\" value=\""..monitor_name.."\">", 
+        "Nome alternativo para o comando a ser criado." }
+   }
+   local display_hidden = { "<INPUT TYPE=HIDDEN NAME=\"monitor_name\" value=\""..monitor_name.."\">" }
+
+   params = {hidden, br(), render_table(row, header)}
+   params_hidden = {hidden, br(), br(), render_table(display_show, nil), row_hidden}
    text = strings.parameter.."s do comando "..c[1].name1
 
-   res[#res+1] = center{ br(), text, br() }
    res[#res+1] = center{ render_form(web:link(url_test), nil, params, true, strings.test ) }
    res[#res+1] = { br(), os.capture(chk.." "..args, true) }
    res[#res+1] = center{ render_form(web:link(url_insert), nil, params_hidden, true, "Criar checagem" ) }
