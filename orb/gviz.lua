@@ -696,7 +696,7 @@ function render_show(web, app, app_name, app_id, obj, rel, obj_id)
 
    local lnkgeo = nil
    if obj_id then 
-      web.prefix = "/adm/obj_info"
+      web.prefix = "/orb/obj_info"
       lnkgeo = web:link("/geotag/app:"..obj_id) 
       web.prefix = "/orb/gviz"
    end
