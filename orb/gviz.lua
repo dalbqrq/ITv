@@ -8,6 +8,7 @@
 ]]
 require "Model"
 require "Monitor"
+require "Auth"
 require "Itvision"
 require "config"
 require "messages"
@@ -626,6 +627,7 @@ ITvision:dispatch_get(list, "/", "/list")
    id -> é uma id de aplicacao
 ]]
 function show(web, id)
+   Auth.check(web)
    local app, app_name, obj_id
    local all_apps = apps:select_apps()
 

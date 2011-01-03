@@ -3,6 +3,7 @@
 -- includes & defs ------------------------------------------------------
 require "Model"
 require "View"
+--require "Auth"
 
 module(Model.name, package.seeall,orbit.new)
 
@@ -69,12 +70,20 @@ menu_itens = {
 
 
 
-function render_menu(item, subitem)
+function render_menu(web, item, subitem)
    item    = tonumber(item)
    subitem = tonumber(subitem)
    local itens, subitens = {}, {}
    local js = "javascript:void(0);"
 
+   local islog, user_name, id = Auth.is_logged_at_glpi(web)
+   --local user_name = "admin"
+   if islog == nil then
+      user_name = "OK"
+   else
+      user_name = "NOT"
+   end
+   table.insert(menu_itens, { name="Logout: "..user_name, link="orb/login/logout", submenu = { } })
 
    for i,v in ipairs(menu_itens) do
       local active = ""
@@ -88,6 +97,7 @@ function render_menu(item, subitem)
       if i == subitem then active = "current" end
       subitens[#subitens+1] = li{ a{ class=active, href=js, onClick="changePage('/orb/menu/"..item..":"..i.."','"..v.link.."')", v.name } }
    end
+   subitens[#subitens+1] = li{ a{ class="", href=js, onClick="changePage('#', '/orb/login/logout')", "Logout" } }
 
 
    return { ul{ id="tablist", itens }, ul{ id="subtablist", subitens } }
@@ -95,7 +105,7 @@ end
 
 
 function render_list(web, item, subitem)
-   return render_menu_frame(render_menu(item, subitem))
+   return render_menu_frame(render_menu(web, item, subitem))
 end
 
 

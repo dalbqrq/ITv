@@ -3,6 +3,7 @@
 -- includes & defs ------------------------------------------------------
 require "Model"
 require "View"
+require "Auth"
 require "util"
 
 module(Model.name, package.seeall,orbit.new)
@@ -13,21 +14,17 @@ module(Model.name, package.seeall,orbit.new)
 
 -- controllers ------------------------------------------------------------
 
-function list(web)
+function login(web)
    return render_login(web)
 end
-ITvision:dispatch_get(list, "/")
+ITvision:dispatch_get(login, "/")
 
 
-function login(web)
-   users.login = web.input.login
-   if web.input.password ~= "?-^&" then
-      user.password = web.input.password
-   end
+function logout(web)
    web.prefix = "/servdesk"
-   return web:redirect(web:link("/login.php"))
+   return web:redirect(web:link("/logout.php"))
 end
-ITvision:dispatch_post(login, "/login")
+ITvision:dispatch_get(logout, "/logout")
 
 
 function cookie(web, user_name)
@@ -45,10 +42,13 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 function render_login(web, login_error)
    local res = {}
 
+   if Auth.is_logged_at_glpi(web) then
+      web.prefix = "/orb"
+      return web:redirect(web:link("/gviz/show"))
+   end
+
    web.prefix = "/servdesk"
    local url = web:link("/login.php")
-
-   -- LISTA DE OPERACOES 
 
    res[#res + 1] = form{
       name = "input",
@@ -62,68 +62,24 @@ function render_login(web, login_error)
       p{ button_form(strings.reset, "reset", "negative") },
    }
 
-   if login_error then res[#res + 1] = p{ font{ color="red", msg }, br()  } end
+   if login_error then res[#res + 1] = p{ font{ color="red", error_message[13] }, br()  } end
 
    return render_layout(res)
 end
 
 
+-- user_name vem do glpi::login.php e nao estah sendo usado!
 function render_cookie(web, user_name)
-   -- Nao está funcionando com expiracao!
-   --local expiration_date = os.time() + 3600 * 48
-   --web:set_cookie("itvision", { value="foo", expires = expiration_date })
-
-   --web:delete_cookie("itvision", "/")
-
---[[
    local res = {}
-   web:set_cookie("itvision", {value=user_name, path = "/"})
-   cookie_value = web.cookies["itvision"]
+   local is_logged, name, id = Auth.is_logged_at_glpi(web)
 
-   if web.cookies then
-      for i, v in pairs(web.cookies) do
-         res[#res+1] = { "COOKIE: ", i, " - ", v, br() }
-      end
-   end
-
-]]
-   local cookie = web.cookies["PHPSESSID"]
-   res[#res+1] = br(), "|"
-   res[#res+1] = "++++++++++ "
-   res[#res+1] = cookie_value
-   res[#res+1] = br()
-   cookie_value = web.cookies["PHPSESSID"]
-   res[#res+1] = cookie_value
-   res[#res+1] = br()
-   cookie_value = web.cookies["itvision"]
-   res[#res+1] = br()
-   res[#res+1] = br()
-   res[#res+1] = 
-
-   return render_layout(res)
-
---[[ 
-   local file_name = "/usr/local/servdesk/files/_session/sess_"..cookie.value
-
-    buscar em 'file_name'  as strings 
-
-	glpiID|s:1:"2";
-	glpiname|s:5:"admin";
-
-    e comparar o valor do glpiname  com o user_name.
-
-
-   if cookie then
-      web:set_cookie("itvision", {value=user_name, path = "/"})
+   if is_logged then
       web.prefix = "/orb"
       return web:redirect(web:link("/gviz/show"))
    else
       return render_login(web, true)
    end
-]]
-
 end
-
 
 
 
