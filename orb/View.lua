@@ -40,109 +40,18 @@ function button_form(label, btype, class, div)
 end
 
 
---[[ 
-  Cada entrada da tabela menu_item é uma tabela com os seguintes campos:
-  { level, name, link }
-
-  O campo level pode ter os seguinte valores:
-     0 - item principal sem submenu
-     1 - item principal que eh entrada para um submenu
-     2 - item de submenu
-
-  Ex:
-    Um menu com a seguite disposicao:
-   
-       menu1   |   menu2   |   menu3   |   menu4
-                   item2.1     item3.1     item4.1
-                   item2.2                 item4.2
-                   item2.3
-
-    Ficaria assim:
-       menu_itens = {
-	   { 0, "menu1",   "href.html" },
-	   { 1, "menu2",   "href.html" },
-	   { 2, "item2.1", "href.html" },
-	   { 2, "item2.2", "href.html" },
-	   { 2, "item2.3", "href.html" },
-	   { 1, "menu3",   "href.html" },
-	   { 2, "item3.1", "href.html" },
-	   { 1, "menu4",   "href.html" },
-	   { 2, "item4.1", "href.html" },
-	   { 2, "item4.2", "href.html" },
-    }
-]]
-menu_itens = {
-	{ 1, "Monitor", "/orb/gviz/show" },
-	{ 2, "Lógico", "/orb/gviz/show" },
-	{ 2, "Físico", "/orb/gviz/show" },
-	--{ 2, "Árvore", "/adm/app_tree" },
-	{ 2, "Aplicações", "/adm/app" },
-	{ 2, "Objetos & Relacionamentos", "/adm/app_objects" },
-	--{ 2, "Objetos", "/adm/app_object" },
-	--{ 2, "Relacionamento", "/adm/app_relat" },
-	{ 2, "Checagem", "/adm/probe" },
-	{ 2, "Tipo de Relacionamento", "/adm/app_relat_types" },
-	--{ 2, "Teste de Atividade", "/adm/probe" },
-	--{ 2, "Relatórios", "/blank.html" },
-	{ 1, "ServiceDesk", "/servdesk/front/central.php" },
-	{ 2, "Central", "/servdesk/front/central.php" },
-	{ 2, "ticket", "/servdesk/front/ticket.php" },
-	{ 2, "Estatística", "/servdesk/front/stat.php" },
-	{ 1, "CMDB", "#" },
-	{ 2, "Computadores", "/servdesk/front/computer.php" },
-	{ 2, "Software", "/servdesk/front/software.php" },
-	{ 2, "Equip. de Redes", "/servdesk/front/networkequipment.php" },
-	{ 2, "Telefones", "/servdesk/front/phone.php"  },
-	{ 2, "Periféricos", "/servdesk/front/peripheral.php" },
-	{ 2, "Status", "/servdesk/front/states.php" },
-	{ 2, "Base de Conhecimento", "/servdesk/front/knowbaseitem.php" },
-	{ 2, "Fornecedores", "/servdesk/front/supplier.php" },
-	{ 2, "Contratos", "/servdesk/front/contract.php" },
-	{ 2, "Contatos", "/servdesk/front/contact.php" },
-	{ 1, "Administrar", "#" },
-	{ 2, "Login", "/orb/login" },
-	{ 2, "Cookie", "/orb/cookie" },
-	{ 2, "Usuários", "/servdesk/front/user.php" },
-	{ 2, "Grupos", "/servdesk/front/group.php" },
-	{ 2, "Regras", "/servdesk/front/rule.php" },
-	{ 2, "Logs", "/servdesk/front/event.php" },
-	{ 2, "Comandos de Teste", "/adm/checkcmd" },
-	{ 2, "Manutenção", "/orb/system" },
-	{ 0, "Ajuda", "/blank.html" },
-}
-
--- o parametro 'link_at_level_1' diz se o menu cujo nivel eh 1 serah tratado como um link
-function render_menu(link_at_level_1) 
-   local o_level = 0
-   local s = ""
-
-   for i, v in ipairs(menu_itens) do
-      local level = v[1]
-      local name  = v[2]
-      local link  = v[3]
-
-      if ( ( level == 0 or level == 1 ) and o_level == 2 ) then
-         s = s .. "\t</ul>\n</li>\n"
-      end
-
-      if level == 0 or level == 2 then
-         s = s .. "\t\t<li><a href=\""..link.."\" target=\"content\">"..name.."</a></li>\n"
-      elseif level == 1 then
-         if link_at_level_1 then
-            s = s .. "<li><a href=\""..link.."\" class=\"dir\">"..name.."</a>\n\t<ul>\n"
-         else
-            s = s .. "<li><span class=\"dir\">"..name.."</span>\n\t<ul>\n"
-         end
-      end
-
-      o_level = level
-   end
-
-   return { s }
-end
-
 
 function render_menu_frame(inner_html)
+   local change_script = [[
+         function changeHead(headPage) {
+            parent.headFrame.location.href = headPage;
+         }
+         function changePage(headPage, bodyPage) {
+            parent.headFrame.location.href = headPage;
+            parent.bodyFrame.location.href = bodyPage;
+         }
+   ]]
+
    return html{
       head{
          title("ITvision"),
@@ -150,10 +59,9 @@ function render_menu_frame(inner_html)
          meta{ name="author", content="ATMA (http://www.itvision.com.br)" },
          meta{ name="description", content="IT monitoring" },
          link{ href="/pics/favicon.ico", rel="shortcut icon" },
-         link{ href="/css/menu/helper.css", media="screen", rel="stylesheet", type="text/css" },
-         link{ href="/css/menu/dropdown.linear.css", media="screen", rel="stylesheet", type="text/css" },
-         link{ href="/css/menu/default.ultimate.linear.css", media="screen", rel="stylesheet", type="text/css" },
          link{ href="/css/style.css", media="screen", rel="stylesheet", type="text/css" },
+         link{ href="/css/style_menu.css", media="screen", rel="stylesheet", type="text/css" },
+         script{ type="text/javascript", change_script },
       },
 
       body{
@@ -162,7 +70,8 @@ function render_menu_frame(inner_html)
             img{ src="/pics/logo_verto.jpg", height='35px' },
             img{ src="/pics/transparent.png", width='40px', height='44px' },
             img{ src="/pics/logo_proderj.jpg", height='35px' },
-            ul{ id="nav", class="dropdown dropdown-linear", inner_html }
+            --ul{ id="nav", class="dropdown dropdown-linear", inner_html }
+            inner_html
          }
       }
    }
