@@ -100,10 +100,19 @@ end
 
 string.extract_latlon = function(str)
    str = string.gsub(str, "%s+", "")
+   local lat, lon = nil, nil
    local b, c = string.find(str, ",")
 
-   local lat = string.sub(str,1,b-1)
-   local lon = string.sub(str,b+1,-1)
+   if b and c then
+      lat = string.sub(str,1,b-1)
+      lon = string.sub(str,b+1,-1)
+   end
+
+   if lat and lon then
+   if tonumber(lat) < -180 or tonumber(lat) > 180 or tonumber(lon) < -90 or tonumber(lon) > 90 then
+      lat, lon = nil, nil
+   end
+   end
 
    return lat, lon
 end

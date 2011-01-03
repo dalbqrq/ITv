@@ -129,6 +129,21 @@ cat << EOF > /etc/apache2/conf.d/itvision.conf
                 Allow from all
         </Directory>
 
+        ScriptAlias /adm /usr/local/itvision/adm
+        <Directory "/usr/local/itvision/adm">
+                AllowOverride None
+                Options +ExecCGI +MultiViews +SymLinksIfOwnerMatch FollowSymLinks
+
+		AllowOverride AuthConfig
+                Order allow,deny
+                Allow from all
+
+		AuthName "ITvision Access"
+		AuthType Basic
+		AuthUserFile /usr/local/itvision/bin/htpasswd.users
+		require valid-user
+        </Directory>
+
         # Possible values: debug, info, notice, warn, error, crit,
         # alert, emerg.
         LogLevel warn
@@ -165,6 +180,7 @@ monitor = {
 }
 
 view = {
+	-- GERAR NOVA CHAVE EM: http://code.google.com/apis/maps/signup.html
         google_maps_key = "ABQIAAAAsqOIUfpoX_G_Pw0Ar48BRhRtyMmS1TXEK_DXFnd23B1n8zvUnRT_9hDq4-PHCmE33vrSdHVrdUyjgw" --itv.impa.br
 }
 
@@ -191,10 +207,12 @@ EOF
 
 mkdir $itvhome/html/gv
 chown -R $user.$user $itvhome/html/gv
-printf "html/gv\norb/config.lua\nbin/dbconf\n" >> $itvhome/.git/info/exclude
+printf "html/gv\norb/config.lua\nbin/dbconf\nbin/htpasswd.users\n" >> $itvhome/.git/info/exclude
 
 sed -i -e 's/ErrorLog \/var\/log\/apache2\/error.log/ErrorLog \/var\/log\/itvision\/apache2\/error.log/g' \
 	-e 's/CustomLog \/var\/log\/apache2\/other_vhosts_access.log/CustomLog \/var\/log\/itvision\/apache2\/other_vhosts_access.log/g' /etc/apache2/apache2.conf
+
+htpasswd -bc /usr/local/itvision/bin/htpasswd.users $user $dbpass
 
 # --------------------------------------------------
 # NAGIOS
@@ -401,10 +419,10 @@ cd $itvhome/ks/servdesk
 tar cf - * | ( cd /usr/local/servdesk; tar xfp -)
 
 
+echo "ALTER TABLE itvision.glpi_computers ADD COLUMN geotag VARCHAR(40) NULL DEFAULT NULL  AFTER ticket_tco ;" | mysql -u root --password=$dbpass
 echo "ALTER TABLE itvision.glpi_computers ADD COLUMN alias VARCHAR(30) NULL DEFAULT NULL  AFTER ticket_tco ;" | mysql -u root --password=$dbpass
 echo "ALTER TABLE itvision.glpi_computers ADD COLUMN itv_key VARCHAR(30) NULL DEFAULT NULL  AFTER ticket_tco ;" | mysql -u root --password=$dbpass
-echo "ALTER TABLE itvision.glpi_computers ADD COLUMN geotag VARCHAR(20) NULL DEFAULT NULL  AFTER ticket_tco ;" | mysql -u root --password=$dbpass
-echo "ALTER TABLE itvision.glpi_networkequipments ADD COLUMN geotag VARCHAR(20) NULL DEFAULT NULL  AFTER ticket_tco ;" | mysql -u root --password=$dbpass
+echo "ALTER TABLE itvision.glpi_networkequipments ADD COLUMN geotag VARCHAR(40) NULL DEFAULT NULL  AFTER ticket_tco ;" | mysql -u root --password=$dbpass
 echo "ALTER TABLE itvision.glpi_networkequipments ADD COLUMN alias VARCHAR(30) NULL DEFAULT NULL  AFTER ticket_tco ;" | mysql -u root --password=$dbpass
 echo "ALTER TABLE itvision.glpi_networkequipments ADD COLUMN itv_key VARCHAR(30) NULL DEFAULT NULL  AFTER ticket_tco ;" | mysql -u root --password=$dbpass
  
@@ -474,19 +492,23 @@ rm -f ~/SERVER* && rm -rf ~/demoCA*
 # --------------------------------------------------
 mkdir -p /var/log/itvision/mysql
 chown -R mysql.adm /var/log/itvision/mysql
-sed -i -e 's/\/var\/log\/mysql\/error.log/\/var\/log\/itvision\/mysql\/error.log/g' /etc/mysql/my.cnf 
-sed -i -e 's/notifempty/ifempty/g' \
+sed -i -e 's/\/var\/log\/mysql\/error.log/\/var\/log\/itvision\/mysql\/error.log/' /etc/mysql/my.cnf 
 	-e 's/weekly/daily/g' /etc/logrotate.d/apache2
 
-sed -i -e 's/notifempty/ifempty/g' \
-        -e 's/weekly/daily/g' /etc/logrotate.d/nagiosgrapher
+sed -i -e 's/weekly/daily/g' /etc/logrotate.d/nagiosgrapher
 
 sed -i -e '/compress/ i\
-ifempty' /etc/logrotate.d/mysql-server
+notifempty' /etc/logrotate.d/mysql-server
 
 sed -i -e '/compress/ i\
-ifempty' /etc/logrotate.d/ocsinventory-server
+notifempty' /etc/logrotate.d/ocsinventory-server
 
+cat << EOF > /etc/cron.d/logdate 
+00 03 * * * root /usr/sbin/logdate
+EOF
+
+# Gera perfil para apparmor ("SElinux do Ubuntu") habilitar o mysqld escrever em outro arquivo
+aa-complain /usr/sbin/mysqld
 
 # --------------------------------------------------
 # GRAPHVIZ
@@ -580,6 +602,8 @@ install_msg CLEAN UP
 /usr/sbin/invoke-rc.d apache2 stop
 /usr/sbin/invoke-rc.d nagiosgrapher stop
 /usr/sbin/invoke-rc.d postfix stop
+/usr/sbin/invoke-rc.d mysql stop
+/usr/sbin/invoke-rc.d mysql start
 /usr/sbin/invoke-rc.d postfix start
 /usr/sbin/invoke-rc.d apache2 start
 /usr/sbin/invoke-rc.d nagios-nrpe-server start

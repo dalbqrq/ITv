@@ -213,7 +213,7 @@ function delete_obj(web, app_id, obj_id)
       Model.delete (tables, clause) 
    end
 
-   web.prefix = "/orb/app_objects"
+   web.prefix = "/adm/app_objects"
    return web:redirect(web:link("/list/"..app_id))
 end
 ITvision:dispatch_get(delete_obj, "/delete_obj/(%d+):(%d+)")
@@ -246,7 +246,7 @@ function make_app_objects_table(web, A)
    for i, v in ipairs(A) do
       local obj = make_obj_name(v.name1, v.name2)
 
-      --web.prefix = "/orb/app_objects"
+      --web.prefix = "/adm/app_objects"
 
       row[#row + 1] = { 
          obj,
