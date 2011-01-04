@@ -250,12 +250,17 @@ function render_selector_bar(web, A, id, path)
    end
 
    return form{ H("select"){ ONCHANGE="location = this.options[this.selectedIndex].value;", res } }
-   
 end
 
 
 function render_bar(t)
-   return { H("table") { class='tab_cadre_fixe', tr{ class='tab_bg_1', td{ t } } }, br() }
+   local r = {}
+   if type(t) == "table" then
+      for _,v in ipairs(t) do r[#r+1] = td {v} end
+      return H("table") { class='tab_cadre_fixe', tr{ class='tab_bg_1', r } }
+   else
+      return H("table") { class='tab_cadre_fixe', tr{ class='tab_bg_1', td{ t } } }
+   end
 end
 
 

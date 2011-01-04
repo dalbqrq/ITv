@@ -3,7 +3,7 @@
 -- includes & defs ------------------------------------------------------
 require "Model"
 require "View"
---require "Auth"
+require "Auth"
 
 module(Model.name, package.seeall,orbit.new)
 
@@ -25,10 +25,10 @@ menu_itens = {
       submenu = {
       { name="Lógico", link="/orb/gviz/show" },
       { name="Físico", link="/orb/gviz/show" },
-      { name="Aplicações", link="/adm/app" },
-      { name="Objetos & Relacionamentos", link="/adm/app_objects" },
-      { name="Checagem", link="/adm/probe" },
-      { name="Tipo de Relacionamento", link="/adm/app_relat_types" },
+      { name="Aplicações", link="/orb/app" },
+      { name="Objetos & Relacionamentos", link="/orb/app_objects" },
+      { name="Checagem", link="/orb/probe" },
+      { name="Tipo de Relacionamento", link="/orb/app_relat_types" },
       },
    },
    { name="ServiceDesk", link="/servdesk/front/central.php",
@@ -77,28 +77,25 @@ function render_menu(web, item, subitem)
    local js = "javascript:void(0);"
 
    local islog, user_name, id = Auth.is_logged_at_glpi(web)
-   --local user_name = "admin"
-   if islog == nil then
-      user_name = "OK"
-   else
-      user_name = "NOT"
+
+   if islog == false or ( item == 0 and subitem == 0 ) then
+      return ""
    end
-   table.insert(menu_itens, { name="Logout: "..user_name, link="orb/login/logout", submenu = { } })
 
    for i,v in ipairs(menu_itens) do
       local active = ""
       if i == item then active = "current" end
       itens[#itens+1] = li{ a{ class=active, href=js, onClick="changeHead('/orb/menu/"..i..":1')", v.name } }
    end
-
+   itens[#itens+1] = li{ a{ class="logout", href=js, onClick="changePage('/orb/menu/0:0', '/orb/login/logout')", 
+                            "Logout: "..user_name } }
 
    for i,v in ipairs(menu_itens[item].submenu) do
       local active = ""
       if i == subitem then active = "current" end
-      subitens[#subitens+1] = li{ a{ class=active, href=js, onClick="changePage('/orb/menu/"..item..":"..i.."','"..v.link.."')", v.name } }
+      subitens[#subitens+1] = li{ a{ class=active, href=js, onClick="changePage('/orb/menu/"..item..":"..i.."','"..v.link.."')", 
+                                     v.name } }
    end
-   subitens[#subitens+1] = li{ a{ class="", href=js, onClick="changePage('#', '/orb/login/logout')", "Logout" } }
-
 
    return { ul{ id="tablist", itens }, ul{ id="subtablist", subitens } }
 end

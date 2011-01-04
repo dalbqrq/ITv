@@ -42,6 +42,10 @@
   background: #F0F0F0;
 }
 
+#tablist li a.logout{
+  text-align: right;
+}
+
 /**********************
        SUBTABLIST
 **********************/

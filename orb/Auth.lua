@@ -49,11 +49,11 @@ function is_logged_at_glpi(web)
            glpiname|s:5:"admin";
    ]]
    local sess_ = text_file_reader(file_name)
-   local _, _, _, id = string.find(sess_, 'glpiID|s:(%d+):"(%d+)"')
-   local _, _, _, name = string.find(sess_, 'glpiname|s:(%d+):"(%a+)"')
+   local a, b, c, id = string.find(sess_, 'glpiID|s:(%d+):"(%d+)"')
+   local d, e, f, name = string.find(sess_, 'glpiname|s:(%d+):"(%a+)"')
 
    if name ~= nil then
-      return true, name, id
+      return true, name, id, sess_, glpi_cookie
    else
       return false
    end

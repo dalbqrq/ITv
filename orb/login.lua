@@ -27,10 +27,19 @@ end
 ITvision:dispatch_get(logout, "/logout")
 
 
+function login_err(web)
+   return render_login(web, true)
+end
+ITvision:dispatch_get(login_err, "/err")
+
+
+
+--[[
 function cookie(web, user_name)
    return render_cookie(web, user_name)
 end
 ITvision:dispatch_get(cookie, "/cookie/(.+)")
+]]
 
 
 ITvision:dispatch_static("/css/%.css", "/script/%.js")
@@ -43,8 +52,8 @@ function render_login(web, login_error)
    local res = {}
 
    if Auth.is_logged_at_glpi(web) then
-      web.prefix = "/orb"
-      return web:redirect(web:link("/gviz/show"))
+      web.prefix = "/"
+      return web:redirect(web:link("index.html"))
    end
 
    web.prefix = "/servdesk"
@@ -62,25 +71,26 @@ function render_login(web, login_error)
       p{ button_form(strings.reset, "reset", "negative") },
    }
 
-   if login_error then res[#res + 1] = p{ font{ color="red", error_message[13] }, br()  } end
+   if login_error then res[#res + 1] = p{ font{ color="red", error_message(13) }, br()  } end
 
    return render_layout(res)
 end
 
 
 -- user_name vem do glpi::login.php e nao estah sendo usado!
+--[[
 function render_cookie(web, user_name)
    local res = {}
    local is_logged, name, id = Auth.is_logged_at_glpi(web)
 
    if is_logged then
       web.prefix = "/orb"
-      return web:redirect(web:link("/gviz/show"))
+      return web:redirect(web:link("/index.html"))
    else
       return render_login(web, true)
    end
 end
-
+]]
 
 
 orbit.htmlify(ITvision, "render_.+")

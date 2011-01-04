@@ -360,7 +360,7 @@ function render_list(web, cmp, chk, msg)
       end
 
       if v.sw_name ~= "" then itemtype = "Service" end
-      web.prefix = "/adm/probe"
+      web.prefix = "/orb/probe"
       row[#row + 1] = { a{ href=url, hst_name}, ip, serv, itemtype, chk, alias, link }
    end
 

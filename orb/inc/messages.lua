@@ -164,7 +164,7 @@ err_msg.pt_BR = {
 	[10] = "ERRO: A seguinte Aplicação não possui objetos associados:",
 	[11] = "Por favor, aguarde a atualização da base de dados.",
 	[12] = "ERRO: Monitoração de Service não foi incluida. Por favor entre em contato com o administrador.",
-	[13] = "Erro ao tentar logar-se no sistema.", 
+	[13] = "Usuário ou senha inválido. Logue novamente.", 
 }
 
 err_msg.us = {
@@ -180,7 +180,7 @@ err_msg.us = {
 	[10] = "ERROR: There is no objects associated with the following Application:",
 	[11] = "Please, wait for the database update.",
 	[12] = "ERROR: Service monitoring was not included. Please, contact the administrator.",
-	[13] = "Error trying to log in to the system.", 
+	[13] = "Invalid user or password. Login again.", 
 }
 
 

@@ -221,7 +221,7 @@ function delete_obj(web, app_id, obj_id)
      app_relats:delete_app_relat(app_id, nil, obj_id)
    end
 
-   web.prefix = "/adm/app_objects"
+   web.prefix = "/orb/app_objects"
    return web:redirect(web:link("/list/"..app_id))
 end
 ITvision:dispatch_get(delete_obj, "/delete_obj/(%d+):(%d+)")

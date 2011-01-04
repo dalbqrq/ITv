@@ -83,18 +83,19 @@ if ($auth->Login($_POST['login_name'],
       glpi_header($CFG_GLPI['root_doc'] . "/front/helpdesk.public.php$REDIRECT");
    } else {
       //glpi_header($CFG_GLPI['root_doc'] . "/front/central.php$REDIRECT");
-      glpi_header("/orb/gviz/show$REDIRECT");
+      glpi_header("/login.html$REDIRECT");
    }
 
 } else {
 
+   glpi_header("/orb/login/err$REDIRECT");
    // we have done at least a good login? No, we exit.
-   nullHeader("Login", $CFG_GLPI["root_doc"] . '/index.php');
-   echo '<div class="center b">' . $auth->getErr() . '<br><br>';
+//   nullHeader("Login", $CFG_GLPI["root_doc"] . '/index.php');
+//   echo '<div class="center b">' . $auth->getErr() . '<br><br>';
    // Logout whit noAUto to manage auto_login with errors
-   echo '<a href="' . $CFG_GLPI["root_doc"] . '/logout.php?noAUTO=1'.str_replace("?","&",$REDIRECT).'">' .
-          $LANG['login'][1] . '</a></div>';
-   nullFooter();
+//   echo '<a href="' . $CFG_GLPI["root_doc"] . '/logout.php?noAUTO=1'.str_replace("?","&",$REDIRECT).'">' .
+//          $LANG['login'][1] . '</a></div>';
+   //nullFooter();
    exit();
 }
 
