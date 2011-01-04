@@ -24,6 +24,7 @@ local scrt = [[
    } 
    ]]
 
+
 function do_button(web, label, url, question)
    -- TODO: do_button() NAO ESTAh FUNCIONANDO !!!!
    return { form = { action = web:link(url),  input = { value = label, type = "submit" } } }
@@ -88,13 +89,18 @@ function render_layout(inner_html, refresh_time)
       head{ 
          title("ITvision"),
          meta{ ["http-equiv"] = "Content-Type", content = "text/html; charset=utf-8" },
-         refresh,
          meta{ ["http-equiv"] = "Cache-Control", content = "No-Cache" },
          meta{ ["http-equiv"] = "Pragma",        content = "No-Cache" },
-         link{ href="/pics/favicon.ico", rel="shortcut icon" },
-         link{ href="/css/style.css", media="screen", rel="stylesheet", type="text/css" },
-         link{ href="/css/glpi_styles.css", media="screen", rel="stylesheet", type="text/css" },
-         --script{ type="text/javascript", src="http://itv/js/scripts.js" },
+         refresh,
+
+         link{ rel="shortcut icon", href="/pics/favicon.ico" },
+         link{ rel='stylesheet', type='text/css', media='screen', href="/css/style.css" },
+         link{ rel='stylesheet', type='text/css', media='screen', href="/css/glpi_styles.css" },
+         link{ rel='stylesheet', type='text/css', media='screen', href='/servdesk/lib/extjs/resources/css/ext-all.css' } ,
+         link{ rel='stylesheet', type='text/css', media='screen', href='/servdesk/css/ext-all-glpi.css' },
+
+         script{ type="text/javascript", src='/servdesk/lib/extjs/adapter/ext/ext-base.js' },
+         script{ type="text/javascript", src='/servdesk/lib/extjs/ext-all.js' },
          script{ type="text/javascript", scrt },
       },
       body{ div{ id='page', inner_html } }
@@ -494,6 +500,51 @@ function render_content_header(name, add, list, edit, geotag, back)
 
    return div{ id='menu_navigate', div { id='c_ssmenu2', ul{ myul } } }
 end
+
+
+
+--[[
+<div class='sep'></div><div id="tabspanel" class='center-h'></div>
+<script type='text/javascript'> var tabpanel = new Ext.TabPanel({
+            applyTo: 'tabspanel', activeTab: 0, deferredRender: false, autoTabs : true,
+            width:950, enableTabScroll: true, resizeTabs: false, plain: true,
+            renderTo: 'tabspanel', border: false,
+
+            items: [{
+                  title: 'Tab 1',
+                  html: 'www.uol.com.br',
+                  autoLoad: 'blank.html'
+            },{
+                  title: 'Tab 2',
+                  html: 'www.google.com',
+                  autoLoad: 'orb/login'
+            }]
+
+      });
+</script>
+]]
+function render_tabs(t)
+   res = {}
+   obj = {}
+
+   tab_config = [[ applyTo: 'tabspanel', activeTab: 0, deferredRender: false, autoTabs : true, width:950, 
+      enableTabScroll: true, resizeTabs: false, plain: true, renderTo: 'tabscontent', border: false, ]]
+
+   obj[#obj+1] = "var tabpanel = new Ext.TabPanel({ "..tab_config.." items: ["
+   for _,v in ipairs(t) do
+      obj[#obj+1] = "{ title: '"..v.title.."', html: '"..v.html.."', autoLoad: '"..v.href.."' },"
+   end
+   obj[#obj+1] = "] });"
+
+   res[#res+1] = div{ class='sep' }
+   res[#res+1] = div{ id="tabspanel", class='center-h' }
+   res[#res+1] = script{ type='text/javascript', obj }
+   res[#res+1] = div { id='tabcontent' }
+   res[#res+1] = script{ type='text/javascript', "loadDefaultTab();" }
+
+   return res
+end
+
 
 
 function button_link(label, link, class)
