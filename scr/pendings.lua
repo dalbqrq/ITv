@@ -4,7 +4,7 @@ require "Model"
 function update_pending()
 
    local res = Model.query("itvision_monitors m, nagios_objects o", 
-      "m.service_object_id = 0 and o.name1 = m.name1 and o.name2 = m.name2 and o.is_active = 1",
+      "m.service_object_id = -1 and o.name1 = m.name1 and o.name2 = m.name2 and o.is_active = 1",
        nil, 
       "m.name1 as name1, m.name2 as name2")
 
