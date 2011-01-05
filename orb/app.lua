@@ -256,8 +256,10 @@ function render_list(web, A, msg)
          stract = strings.deactivate
       end
 
-      web.prefix = "/orb/app_objects"
-      local lnk = web:link("/list/"..v.id)
+      --web.prefix = "/orb/app_objects"
+      --local lnk = web:link("/list/"..v.id)
+      web.prefix = "/orb/app_tabs"
+      local lnk = web:link("/list/"..v.id..":1")
       web.prefix = "/orb/app"
 
       row[#row+1] = {

@@ -523,11 +523,11 @@ end
       });
 </script>
 ]]
-function render_tabs(t)
+function render_tabs(t, active_tab)
    res = {}
    obj = {}
 
-   tab_config = [[ applyTo: 'tabspanel', activeTab: 0, deferredRender: false, autoTabs : true, width:950, 
+   tab_config = [[ applyTo: 'tabspanel', activeTab: ]]..active_tab..[[, deferredRender: false, autoTabs: true, width:950, 
       enableTabScroll: true, resizeTabs: false, plain: true, renderTo: 'tabscontent', border: false, ]]
 
    obj[#obj+1] = "var tabpanel = new Ext.TabPanel({ "..tab_config.." items: ["
