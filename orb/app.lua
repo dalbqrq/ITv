@@ -30,7 +30,9 @@ function apps:select(id, clause_)
       clause = clause_
    end
 
-   extra  = " order by id "
+  if clause == nil then clause = "name <> '_ROOT'" end
+
+   extra  = " order by name "
    return Model.query("itvision_apps", clause, extra)
 end
 

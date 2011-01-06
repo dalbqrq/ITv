@@ -62,17 +62,17 @@ function make_content(obj, rel)
 
          if v.ao_type == 'hst' then
             label = hst_name
-            name  = string.gsub(hst_name, "%s", "")
+            name  = string.gsub(hst_name, "[%s,%p]", "")
             url   = "/orb/obj_info/"..v.ao_type.."/"..v.o_object_id
             shape = "box"
          elseif v.ao_type == 'svc' then
             label = v.m_name
-            name  = string.gsub(hst_name..v.m_name, "%s", "")
+            name  = string.gsub(hst_name..v.m_name, "[%s,%p]", "")
             url   = "/orb/obj_info/"..v.ao_type.."/"..v.o_object_id
             shape = "ellipse"
          elseif v.ao_type == 'app' then
             label = v.o_name2
-            name  = string.gsub(v.o_name2, "%s", "")
+            name  = string.gsub(v.o_name2, "[%s,%p]", "")
             url   = "/orb/obj_info/"..v.ao_type.."/"..v.o_object_id
             shape = "invhouse"
             shape = "octagon"
@@ -95,38 +95,38 @@ function make_content(obj, rel)
          hst_name = ""
 
          -- FROM -------------------------------
-         if v.itemtype1 == "Computer" then
-            ic = Model.query("glpi_computers", "id = "..v.items_id1)
+         if v.from_itemtype == "Computer" then
+            ic = Model.query("glpi_computers", "id = "..v.from_items_id)
             ic = ic[1]
-         elseif v.itemtype == "NetworkEquipment" then
-            ic = Model.query("glpi_networkequipment", "id = "..v.items_id1)
+         elseif v.from_itemtype == "NetworkEquipment" then
+            ic = Model.query("glpi_networkequipments", "id = "..v.from_items_id)
             ic = ic[1]
          end
 
          if string.find(v.o1_name1, config.monitor.check_app) then
-            from_name = string.gsub(v.m1_name, "%s", "")
+            from_name = string.gsub(v.m1_name, "[%s,%p]", "")
          elseif v.o1_name2 == config.monitor.check_host then
-            from_name = string.gsub(find_hostname(ic.alias, ic.name, ic.itv_key), "%s", "")
+            from_name = string.gsub(find_hostname(ic.alias, ic.name, ic.itv_key), "[%s,%p]", "")
          else
-            from_name = string.gsub(find_hostname(ic.alias, ic.name, ic.itv_key)..v.m1_name, "%s", "")
+            from_name = string.gsub(find_hostname(ic.alias, ic.name, ic.itv_key)..v.m1_name, "[%s,%p]", "")
          end
 
 
          -- TO -------------------------------
-         if v.itemtype2 == "Computer" then
-            ic = Model.query("glpi_computers", "id = "..v.items_id2)
+         if v.to_itemtype == "Computer" then
+            ic = Model.query("glpi_computers", "id = "..v.to_items_id)
             ic = ic[1]
-         elseif v.itemtype == "NetworkEquipment" then
-            ic = Model.query("glpi_networkequipment", "id = "..v.items_id2)
+         elseif v.to_itemtype == "NetworkEquipment" then
+            ic = Model.query("glpi_networkequipments", "id = "..v.to_items_id)
             ic = ic[1]
          end
 
          if string.find(v.o2_name1, config.monitor.check_app) then
-            to_name = string.gsub(v.m2_name, "%s", "")
+            to_name = string.gsub(v.m2_name, "[%s,%p]", "")
          elseif v.o2_name2 == config.monitor.check_host then
-            to_name = string.gsub(find_hostname(ic.alias, ic.name, ic.itv_key), "%s", "")
+            to_name = string.gsub(find_hostname(ic.alias, ic.name, ic.itv_key), "[%s,%p]", "")
          else
-            to_name = string.gsub(find_hostname(ic.alias, ic.name, ic.itv_key)..v.m2_name, "%s", "")
+            to_name = string.gsub(find_hostname(ic.alias, ic.name, ic.itv_key)..v.m2_name, "[%s,%p]", "")
          end
 
 
@@ -161,8 +161,8 @@ function render(app_name, file_type, engene, content)
 
    local g = digraph{"G",
       size="10.0,10.0",
-      label = "\\n"..app_name,
       node = { label=app_name, nodesep=.5, style="rounded" },
+      --label = "\\n"..app_name,
       unpack(content),
    }
 

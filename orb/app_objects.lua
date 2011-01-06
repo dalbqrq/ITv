@@ -11,6 +11,7 @@ require "app"
 
 module(Model.name, package.seeall,orbit.new)
 
+local apps = Model.itvision:model "apps"
 local app_objects = Model.itvision:model "app_objects"
 local app_relats = Model.itvision:model "app_relats"
 
@@ -34,8 +35,28 @@ function app_relats:delete_app_relat(id, from, to)
 end
 
 
+function apps:select(id, clause_)
+   local clause = nil
+
+   if id and clause_ then
+      clause = "id = "..id.." and "..clause_
+   elseif id then
+      clause = "id = "..id
+   elseif clause_ then
+      clause = clause_
+   end
+
+   extra  = " order by id "
+   return Model.query("itvision_apps", clause, extra)
+end
+
 
 -- controllers ------------------------------------------------------------
+
+function update_apps()
+   local APPS = apps:select()
+   activate_all_apps(APPS)
+end
 
 
 function add(web, id, msg)
@@ -60,6 +81,8 @@ ITvision:dispatch_get(add, "/add/", "/add/(%d+)", "/add/(%d+):(.+)")
 
 -- TODO: problema na inclusão de multiplos itens
 function insert_obj(web)
+   update_apps()
+
    app_objects:new()
 --local r = ""
    if type(web.input.item) == "table" then
@@ -79,6 +102,13 @@ function insert_obj(web)
       app_objects:save()
    end
 
+   if web.input.type == 'app' then 
+--daniel
+      local app_child = apps:select(nil,"service_object_id = "..web.input.item)
+text_file_writer("/tmp/tree", app_child[1].id .." : ".. web.input.app_id .. " : "..web.input.item)
+      Itvision.insert_node_app_tree(app_child[1].id, web.input.app_id, 1)
+   end
+
    --return web:redirect(web:link("/add/"..app_objects.app_id))
    web.prefix = "/orb/app_tabs"
    return web:redirect(web:link("/list/"..app_objects.app_id..":"..tab_id))
@@ -88,6 +118,8 @@ ITvision:dispatch_post(insert_obj, "/insert_obj")
 
 
 function delete_obj(web, app_id, obj_id)
+   update_apps()
+
    if app_id and obj_id then
       local clause = "app_id = "..app_id.." and service_object_id = "..obj_id
       local tables = "itvision_app_objects"
@@ -123,7 +155,7 @@ function make_app_objects_table(web, A)
          ic = Model.query("glpi_computers", "id = "..v.items_id)
          ic = ic[1]
       elseif v.itemtype == "NetworkEquipment" then
-         ic = Model.query("glpi_networkequipment", "id = "..v.items_id)
+         ic = Model.query("glpi_networkequipments", "id = "..v.items_id)
          ic = ic[1]
       end
 

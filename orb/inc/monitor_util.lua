@@ -102,6 +102,13 @@ end
 
 
 
+function remove_contact_cfg_file (name)
+   local filename = config.monitor.dir.."/contacts/"..name..".cfg"
+   remove_file(filename)
+end
+
+
+
 function insert_contact_cfg_file (name, full_name, email, apps)
    --if not  ( name and full_name and email ) then return false end
    local app_list = ""
@@ -125,6 +132,8 @@ define contact{
         alias]].."\t\t"..full_name..[[ 
         email]].."\t\t"..email..[[ 
         contactgroup]].."\t"..app_list..[[
+
+        # Count: ]]..#apps..[[
 
         }
 ]]

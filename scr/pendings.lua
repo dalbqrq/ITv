@@ -13,7 +13,7 @@ function update_pending()
          (select object_id from nagios_objects where name1 = ']]..v.name1..[[' and name2 = ']]..v.name2..[[')
          where name1 = ']]..v.name1..[[' and name2 = ']]..v.name2..[[' ;]]
 
-      --print( "Updating: ",v.name1, v.name2)
+      print( "Updating: ",v.name1, v.name2)
       --print(udt)
          
       Model.execute(udt)

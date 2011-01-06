@@ -14,6 +14,7 @@ module(Model.name, package.seeall,orbit.new)
 
 local apps = Model.itvision:model "apps"
 local app_contacts = Model.itvision:model "app_contacts"
+local users = Model.glpi:model "users"
 
 local tab_id = 4
 
@@ -30,6 +31,15 @@ function app_contacts:delete_app_contact(id, user_id)
    Model.delete("itvision_app_contacts", clause)
 end
 
+
+function users:select_user(user_id)
+   local clause = ""
+   if user_id then
+      clause = "id = "..user_id
+   end
+
+   return self:find_all(clause)
+end
 
 
 -- controllers ------------------------------------------------------------
@@ -52,7 +62,13 @@ ITvision:dispatch_get(add, "/add", "/add/(%d+)", "/add/(%d+):(.+)")
 function update_contact(user_id)
    local apps = Glpi.select_app_by_contact(user_id)
    local a = apps[1]
-   insert_contact_cfg_file (a.name, a.firstname.." "..a.realname, a.email, apps)
+
+   if a == nil then
+      local user = users:select_user(user_id)
+      remove_contact_cfg_file(user[1].name)
+   else
+      insert_contact_cfg_file (a.name, a.firstname.." "..a.realname, a.email, apps)
+   end
 end
 
 
@@ -71,13 +87,14 @@ end
 ITvision:dispatch_get(insert, "/insert/(%d+):(%d+)")
 
 
-
 function delete(web, app_id, user_id)
    if app_id and user_id then
       local clause = "app_id = "..app_id.." and user_id = "..user_id
       local tables = "itvision_app_contacts"
       Model.delete (tables, clause) 
    end
+
+   update_contact(user_id)
 
    web.prefix = "/orb/app_tabs"
    return web:redirect(web:link("/list/"..app_id..":"..tab_id))

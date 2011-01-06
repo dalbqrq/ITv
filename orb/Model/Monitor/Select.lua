@@ -31,6 +31,8 @@ local DEBUG = false
 	QUERY 5 - aplicacao com monitor - monitoracao de service 
 	QUERY 6 - computador com porta sem software e com monitor pendente
 	QUERY 7 - computador com porta com software e com monitor pendente
+        QUERY 8 - computador com porta sem software e com monitor e service state pendente
+        QUERY 9 - computador com porta com software e com monitor e service state pendente
 
 ]]
 
@@ -209,6 +211,8 @@ end
 	QUERY 5 - aplicacao com monitor - monitoracao de service 
 	QUERY 6 - computador com porta sem software e com monitor pendente
 	QUERY 7 - computador com porta com software e com monitor pendente
+        QUERY 8 - computador com porta sem software e com monitor e service state pendente
+        QUERY 9 - computador com porta com software e com monitor e service state pendente
 ]]
 
 local g_excludes = [[ and c.is_deleted = 0 and c.is_template = 0 and c.states_id = 1 ]]
@@ -473,7 +477,7 @@ end
 
 
 ----------------------------------------------------------------------
---  QUERY 7 - computador com porta com software e sem monitor
+--  QUERY 7 - computador com porta com software e com monitor pendente
 ----------------------------------------------------------------------
 function make_query_7(c_id, p_id, sv_id, clause)
    local q = {}
@@ -509,6 +513,97 @@ end
 
 
 
+-------------------------------------------------------------------------------------
+--  QUERY 8 - computador com porta sem software e com monitor e service state pendente
+-------------------------------------------------------------------------------------
+function make_query_8(c_id, p_id, clause)
+   local q = {}
+   local ictype, it = { "c", "n" }, ""
+
+   for _,ic in ipairs(ictype) do
+      local r = {}
+      local t = { ic, "p", "m", "o", "s" }
+      local n = { "csv", "sv", "sw", "ss" }
+
+      local columns_ = make_columns(t)
+      local _,nulls_ = make_columns(n)
+      local tables_  = make_tables(t)
+      local cond_    = make_where(t)
+
+      -- os nomes dos campos tanto de computers como os de networkequipment comecam com c_
+      if ic == "n" then 
+         columns_ = string.gsub(columns_, "as n_", "as c_") 
+         excludes = string.gsub(g_excludes, "c%.", "n.")
+         if clause then clause = string.gsub(clause, "c%.", "n.") end
+         it = "'NetworkEquipment'"
+      else 
+         excludes = g_excludes
+         it = "'Computer'"
+      end 
+
+      cond_ = cond_ .. [[ 
+         and p.itemtype = ]]..it..[[
+         and m.name = ']]..config.monitor.check_host..[['
+         and m.service_object_id <> -1
+         and not exists (select * from nagios_servicestatus where service_object_id = m.service_object_id )
+      ]] .. excludes
+
+      columns_ = columns_..",\n"..nulls_
+
+      if c_id  then cond_ = cond_ .. " and "..ic..".id = "  .. c_id  end
+      if p_id  then cond_ = cond_ .. " and p.id = "  .. p_id  end
+      if clause then cond_ = cond_ .. " and " .. clause end
+
+      r = Model.query(tables_, cond_, nil, columns_)
+      for _,v in ipairs(r) do table.insert(v, 1, 8) end
+      for _,v in ipairs(r) do table.insert(q, v) end
+
+      --if DEBUG then print ("\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
+   end
+
+   return q
+end
+
+
+
+-------------------------------------------------------------------------------------
+--  QUERY 9 - computador com porta com software e com monitor e service state pendente
+-------------------------------------------------------------------------------------
+function make_query_9(c_id, p_id, sv_id, clause)
+   local q = {}
+   t = { "c", "p", "csv", "sv", "sw", "m","o", "s" }
+   n = { "ss" }
+
+   local columns_ = make_columns(t)
+   local _,nulls_ = make_columns(n)
+   local tables_  = make_tables(t)
+   local cond_    = make_where(t)
+
+   cond_ = cond_ .. [[ 
+      and p.itemtype = "Computer" 
+      and m.name is not null
+      and m.service_object_id <> -1
+      and not exists (select * from nagios_servicestatus where service_object_id = m.service_object_id )
+   ]] .. g_excludes
+      --and not exists (select 1 from itvision_monitors m2 where m2.networkports_id = p.id and m2.softwareversions_id = sv.id)
+
+   columns_ = columns_..",\n"..nulls_
+
+   if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
+   if p_id  then cond_ = cond_ .. " and p.id = "  .. p_id  end
+   if sv_id then cond_ = cond_ .. " and sv.id = " .. sv_id end
+   if clause  then cond_ = cond_ .. " and " .. clause end
+
+   q = Model.query(tables_, cond_, nil, columns_)
+   for _,v in ipairs(q) do table.insert(v, 1, 9) end
+
+   --if DEBUG then print( "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
+
+   return q
+end
+
+
+
 ----------------------------------------------------------------------
 --  END of the QUERIES
 ----------------------------------------------------------------------
@@ -523,6 +618,8 @@ function select_monitors(clause)
    local q4 = make_query_4(nil, nil, nil, nil, clause)
    local q6 = make_query_6(nil, nil, clause)
    local q7 = make_query_7(nil, nil, clause)
+   local q8 = make_query_8(nil, nil, clause)
+   local q9 = make_query_9(nil, nil, clause)
 
    for _,v in ipairs(q1) do table.insert(q, v) end
    for _,v in ipairs(q2) do table.insert(q, v) end
@@ -530,6 +627,8 @@ function select_monitors(clause)
    for _,v in ipairs(q4) do table.insert(q, v) end
    for _,v in ipairs(q6) do table.insert(q, v) end
    for _,v in ipairs(q7) do table.insert(q, v) end
+   for _,v in ipairs(q8) do table.insert(q, v) end
+   for _,v in ipairs(q9) do table.insert(q, v) end
 
    table.sort(q, function (a, b) 
       a.c_alias   = a.c_alias   or ""
@@ -660,7 +759,7 @@ function how_to_use()
 
    --a = make_query_1()
    --a = make_query_2()
-   a = make_query_3()
+   a = make_query_8()
    --a = make_query_4()
 
    --a = make_query_5()

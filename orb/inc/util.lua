@@ -260,6 +260,10 @@ function text_file_writer(filename, text)
 end
 
 
+function remove_file(filename)
+   return os.capture("/bin/rm -f "..filename)
+end
+
 ----------------------------- OS ----------------------------------
 
 function os.splittime(time_)
