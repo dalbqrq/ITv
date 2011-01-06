@@ -105,12 +105,19 @@ ITvision:dispatch_post(list, "/list")
 
 
 function show(web, id)
+--[[
    local A = apps:select(id)
    local O = app_objects:select(id)
    local R = app_relats:select(id)
    return render_show(web, A, O, R)
+]]
+   local clause = "id = "..id
+
+   local A = apps:select(nil, clause)
+   local no_header = true
+   return render_list(web, A, nil, no_header)
 end 
-ITvision:dispatch_get(show, "/show", "/show/(%d+)")
+ITvision:dispatch_get(show, "/show/(%d+)")
 
 
 function edit(web, id, nm, tp)
@@ -244,7 +251,7 @@ function render_filter(web)
 end
 
 
-function render_list(web, A, msg)
+function render_list(web, A, msg, no_header)
    local res = {}
    local row = {}
    local svc, stract
@@ -272,9 +279,11 @@ function render_list(web, A, msg)
    end
 
    local header =  { strings.name, strings.type, strings.is_active, ".", ".", "." }
-   res[#res+1] = render_content_header(strings.application, web:link("/add"), web:link("/list"))
-   res[#res+1] = render_form_bar( render_filter(web), strings.search, web:link("/list"), web:link("/list") )
-   if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ msg } end
+   if no_header == nil then
+      res[#res+1] = render_content_header(strings.application, web:link("/add"), web:link("/list"))
+      res[#res+1] = render_form_bar( render_filter(web), strings.search, web:link("/list"), web:link("/list") )
+      if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ msg } end
+   end
    res[#res+1] = render_table(row, header)
 
    return render_layout(res)

@@ -27,7 +27,7 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 
 function render_list(web, app_id, active_tab)
    local t = { 
-      { title="<", html="", href="" },
+      { title=".", html="", href="http://itv/orb/app/show/"..app_id },
       { title="Objetos", html="", href="/orb/app_objects/add/"..app_id }, 
       { title="Relacionamentos", html="", href="/orb/app_relats/add/"..app_id }, 
    }

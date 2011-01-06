@@ -7,6 +7,7 @@ require "Monitor"
 require "View"
 require "util"
 require "monitor_util"
+require "app"
 
 module(Model.name, package.seeall,orbit.new)
 
@@ -167,6 +168,7 @@ function render_add(web, APPOBJ, AR, RT, app_id, msg)
    -----------------------------------------------------------------------
    -- Relacionamentos da aplicacao
    -----------------------------------------------------------------------
+   res[#res+1] = show(web, app_id)
    res[#res+1] = br()
    --res[#res+1] = render_content_header(strings.relation)
    header =  { strings.origin, strings.type, strings.destiny, "." }

@@ -208,7 +208,8 @@ function render_table(t, h)
       col = {}
    end
 
-   return H("table") { border="0", class="tab_cadrehov", thead{ hea }, tbody{ row } }
+   --return H("table") { border="0", class="tab_cadrehov", thead{ hea }, tbody{ row } }
+   return H("table") { border="0", class="tab_cadre_fixe", thead{ hea }, tbody{ row } }
 end
 
 
@@ -527,12 +528,24 @@ function render_tabs(t, active_tab)
    res = {}
    obj = {}
 
-   tab_config = [[ applyTo: 'tabspanel', activeTab: ]]..active_tab..[[, deferredRender: false, autoTabs: true, width:950, 
-      enableTabScroll: true, resizeTabs: false, plain: true, renderTo: 'tabscontent', border: false, ]]
+--[[
+      autoTabs: true, 
+      deferredRender: false, 
+      renderTo: 'tabscontent', 
+]]
+   tab_config = [[ 
+      applyTo: 'tabspanel', 
+      activeTab: ]]..active_tab..[[, 
+      width: 950, 
+      enableTabScroll: true, 
+      resizeTabs: false, 
+      plain: true, 
+      border: false, 
+   ]]
 
    obj[#obj+1] = "var tabpanel = new Ext.TabPanel({ "..tab_config.." items: ["
-   for _,v in ipairs(t) do
-      obj[#obj+1] = "{ title: '"..v.title.."', html: '"..v.html.."', autoLoad: '"..v.href.."' },"
+   for i,v in ipairs(t) do
+      obj[#obj+1] = "{ id: '"..i.."', title: '"..v.title.."', html: '"..v.html.."', autoLoad: '"..v.href.."' },"
    end
    obj[#obj+1] = "] });"
 
