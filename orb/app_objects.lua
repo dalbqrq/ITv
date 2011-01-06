@@ -14,6 +14,7 @@ module(Model.name, package.seeall,orbit.new)
 local app_objects = Model.itvision:model "app_objects"
 local app_relats = Model.itvision:model "app_relats"
 
+local tab_id = 2
 
 -- models ------------------------------------------------------------
 
@@ -78,7 +79,9 @@ function insert_obj(web)
       app_objects:save()
    end
 
-   return web:redirect(web:link("/add/"..app_objects.app_id))
+   --return web:redirect(web:link("/add/"..app_objects.app_id))
+   web.prefix = "/orb/app_tabs"
+   return web:redirect(web:link("/list/"..app_objects.app_id..":"..tab_id))
 end
 ITvision:dispatch_post(insert_obj, "/insert_obj")
 
@@ -95,8 +98,10 @@ function delete_obj(web, app_id, obj_id)
      app_relats:delete_app_relat(app_id, nil, obj_id)
    end
 
-   web.prefix = "/orb/app_objects"
-   return web:redirect(web:link("/add/"..app_id))
+   --web.prefix = "/orb/app_objects"
+   --return web:redirect(web:link("/add/"..app_id))
+   web.prefix = "/orb/app_tabs"
+   return web:redirect(web:link("/list/"..app_id..":"..tab_id))
 end
 ITvision:dispatch_get(delete_obj, "/delete_obj/(%d+):(%d+)")
 
@@ -110,6 +115,8 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 function make_app_objects_table(web, A)
    local row, ic = {}, {}
    local obj = ""
+
+   web.prefix = "/orb/app_objects"
 
    for i, v in ipairs(A) do
       if v.itemtype == "Computer" then

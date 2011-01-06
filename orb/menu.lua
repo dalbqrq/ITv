@@ -24,9 +24,7 @@ menu_itens = {
    { name="Monitor", link="/orb/gviz/show",
       submenu = {
       { name="Lógico", link="/orb/gviz/show" },
-      { name="Físico", link="/orb/gviz/show" },
       { name="Aplicações", link="/orb/app" },
-      { name="Objetos & Relacionamentos", link="/orb/app_objects" },
       { name="Checagem", link="/orb/probe" },
       { name="Tipo de Relacionamento", link="/orb/app_relat_types" },
       },

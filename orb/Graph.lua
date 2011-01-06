@@ -161,8 +161,9 @@ function render(app_name, file_type, engene, content)
 
    local g = digraph{"G",
       size="10.0,10.0",
-      node = { nodesep=.5, style="rounded" },
-      unpack(content)
+      label = "\\n"..app_name,
+      node = { label=app_name, nodesep=.5, style="rounded" },
+      unpack(content),
    }
 
    g:layout(engene) -- if engene == nil, then use the default 'dot'

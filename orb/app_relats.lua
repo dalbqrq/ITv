@@ -14,6 +14,7 @@ module(Model.name, package.seeall,orbit.new)
 local app_relats = Model.itvision:model "app_relats"
 local app_relat_types = Model.itvision:model "app_relat_types"
 
+local tab_id = 3
 
 -- models ------------------------------------------------------------
 
@@ -83,7 +84,9 @@ function insert_relat(web)
       app_relats:save()
    end
 
-   return web:redirect(web:link("/add/"..app_relats.app_id)..msg)
+   --return web:redirect(web:link("/add/"..app_relats.app_id)..msg)
+   web.prefix = "/orb/app_tabs"
+   return web:redirect(web:link("/list/"..app_relats.app_id..":"..tab_id))
 end
 ITvision:dispatch_post(insert_relat, "/insert_relat")
 
@@ -91,7 +94,9 @@ ITvision:dispatch_post(insert_relat, "/insert_relat")
 
 function delete_relat(web, app_id, from, to)
    app_relats:delete_app_relat(app_id, from, to)
-   return web:redirect(web:link("/add/"..app_id))
+   --return web:redirect(web:link("/add/"..app_id))
+   web.prefix = "/orb/app_tabs"
+   return web:redirect(web:link("/list/"..app_id..":"..tab_id))
 end
 ITvision:dispatch_get(delete_relat, "/delete_relat/(%d+):(%d+):(%d+)")
 
@@ -104,6 +109,8 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 
 function make_app_relat_table(web, AR)
    local row, ic = {}, {}
+
+   web.prefix = "/orb/app_relats"
 
    for i, v in ipairs(AR) do
       if v.from_itemtype == "Computer" then

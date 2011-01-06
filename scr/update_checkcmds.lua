@@ -33,6 +33,15 @@ cmds = {
             { sequence=3, flag="-u", variable="$ARG3$", default_value="/", description="Caminho (path)"},
          },
       },
+   SQUID = {
+         command="check_http",
+         args={
+            { sequence=nil, flag="-H", variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP)"},
+            { sequence=1, flag="-p", variable="$ARG1$", default_value=80, description="Porta"},
+            { sequence=2, flag="-u", variable="$ARG2$", default_value="/", description="Caminho (path)"},
+            { sequence=nil, flag="-e", variable="HTTP/1.0 200 OK", default_value="HTTP/1.0 200 OK", description="String de retorno"},
+         },
+      },
    PING = {
          command="check_ping",
          args={

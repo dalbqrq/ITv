@@ -81,7 +81,7 @@ end
 
 function render_layout(inner_html, refresh_time)
    local refresh = {}
-   if refresh_time then
+   if type(tonumber(refresh_time)) == number then
       refresh = meta{ ["http-equiv"]="Refresh", content=refresh_time, target="main" }
    end
 

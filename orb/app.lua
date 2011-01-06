@@ -15,6 +15,8 @@ local app_relats  = Model.itvision:model "app_relats"
 local objects     = Model.nagios:model "objects"
 local services    = Model.nagios:model "services"
 
+local tab_id = 1
+
 -- models ------------------------------------------------------------
 
 function apps:select(id, clause_)
@@ -140,7 +142,9 @@ function update(web, id)
       Model.update (tables, A, clause) 
    end
 
-   return web:redirect(web:link("/list"))
+   --return web:redirect(web:link("/list"))
+   web.prefix = "/orb/app_tabs"
+   return web:redirect(web:link("/list/"..id..":"..tab_id))
 end
 ITvision:dispatch_post(update, "/update/(%d+)")
 
@@ -160,6 +164,7 @@ function insert(web)
    apps.instance_id = Model.db.instance_id
    apps.entities_id = 0
    apps:save()
+
    return web:redirect(web:link("/list"))
 end
 ITvision:dispatch_post(insert, "/insert")
@@ -174,11 +179,13 @@ ITvision:dispatch_get(remove, "/remove/(%d+)")
 
 function delete(web, id)
    if id then
-      local clause = "id = "..id
-      local tables = "itvision_apps"
-      Model.delete (tables, clause) 
+      Model.delete ("itvision_app_relats", "app_id = "..id) 
+      Model.delete ("itvision_app_objects", "app_id = "..id) 
+      Model.delete ("itvision_apps", "id = "..id) 
    end
 
+   --return web:redirect(web:link("/list"))
+   web.prefix = "/orb/app"
    return web:redirect(web:link("/list"))
 end
 ITvision:dispatch_get(delete, "/delete/(%d+)")
@@ -339,15 +346,17 @@ function render_remove(web, A)
 
    if A then
       A = A[1]
+      web.prefix = "/orb/app"
       url_ok = web:link("/delete/"..A.id)
-      url_cancel = web:link("/list")
-   end
+      web.prefix = "/orb/app_tabs"
+      url_cancel = web:link("/list/"..A.id..":"..tab_id)
 
-   res[#res+1] = p{
-      strings.exclude_quest.." "..strings.application.." "..A.name.."?",
-      p{ button_link(strings.yes, web:link(url_ok)) },
-      p{ button_link(strings.cancel, web:link(url_cancel)) },
-   }
+      res[#res+1] = p{
+         strings.exclude_quest.." "..strings.application.." "..A.name.."?",
+         p{ button_link(strings.yes, url_ok) },
+         p{ button_link(strings.cancel, url_cancel) },
+      }
+   end
 
    return render_layout(res)
 end

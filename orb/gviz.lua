@@ -33,10 +33,8 @@ function list(web)
 end
 ITvision:dispatch_get(list, "/", "/list")
 
---[[
-   id -> é uma id de aplicacao
-]]
-function show(web, id)
+
+function show(web, id, no_header)
    Auth.check(web)
    local app, app_name, obj_id
    local all_apps = apps:select_apps()
@@ -64,9 +62,9 @@ function show(web, id)
    app_name = app[1].name
    obj_id = app[1].service_object_id
 
-   return render_show(web, all_apps, app_name, id, obj, rel, obj_id)
+   return render_show(web, all_apps, app_name, id, obj, rel, obj_id, no_header)
 end
-ITvision:dispatch_get(show,"/show", "/show/(%d+)")
+ITvision:dispatch_get(show,"/show", "/show/(%d+)", "/show/(%d+):(%d+)")
 
 
 ITvision:dispatch_static("/css/%.css", "/script/%.js")
@@ -81,7 +79,7 @@ function render_list(web, A)
 end
 
 
-function render_show(web, app, app_name, app_id, obj, rel, obj_id)
+function render_show(web, app, app_name, app_id, obj, rel, obj_id, no_header)
    local res = {}
    local engene = "dot"
    local file_type = "png"
@@ -111,9 +109,12 @@ function render_show(web, app, app_name, app_id, obj, rel, obj_id)
       lnkgeo = web:link("/geotag/app:"..obj_id) 
       web.prefix = "/orb/gviz"
    end
-   res[#res+1] = render_bar( { render_selector_bar(web, app, app_id, "/show"), 
-      a{ href=lnkgeo,  "Visão Georeferenciada" } ,
-   } )
+   if no_header == nil then
+      res[#res+1] = render_bar( { render_selector_bar(web, app, app_id, "/show"), 
+         a{ href=lnkgeo,  "Visão Georeferenciada" } ,
+      } )
+      refresh_time = nil
+   end
    --res[#res+1] = render_content_header("", nil, nil, nil, lnkgeo)
    res[#res+1] = br()
    res[#res+1] = { imgmap }
