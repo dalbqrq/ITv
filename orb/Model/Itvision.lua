@@ -514,21 +514,21 @@ function new_app_tree() -- Create table structure
       instance_id = 0,
       lft = 0,
       rgt = 0,
-      app_id = ""
+      app_id = 0
    }
 
    return content
 end
 
 
-function insert_node_app_tree(content_, origin_, position_) -- Inclui novo noh
+function insert_node_app_tree(app_id, origin_, position_) -- Inclui novo noh
    --[[   content_ deve conter o app_id a ser inserido na inclusao.
       Se origin_ for nulo, entao deve ser a primeira entrada na arvore.
       position pode ter os valores: 0 -> antes; 1 -> abaixo; 2 -> depois.
    ]]
    position_ = position_ or 1 
    local lft, rgt, newLft, newRgt, condLft, confRgt, root_id
-   local content = {}
+   local content = new_app_tree()
 
    if origin_ then
       -- usuario deu a origem, entao verifica se ela existe
@@ -570,16 +570,21 @@ function insert_node_app_tree(content_, origin_, position_) -- Inclui novo noh
       end
    end
 
-   content_.lft    = newLft
-   content_.rgt    = newRgt
+   content.app_id = app_id
+   content.lft    = newLft
+   content.rgt    = newRgt
+   content.instance_id = config.database.instance_id
+
+   text_file_writer
+      ("/tmp/instree", type(content)..":"..content.app_id.." "..content.lft.." "..content.rgt.." "..content.instance_id)
 
    execute ( "LOCK TABLE itvision_app_trees WRITE" )
-   if origin_ then
+   if not origin_ and not root_id then
       -- devido a set do tipo "lft = lft + 2" tive que usar execute() e nao update()
       execute("update itvision_app_trees set lft = lft + 2 where "..condLft)
       execute("update itvision_app_trees set rgt = rgt + 2 where "..condRgt)
    end
-   insert  ( "itvision_app_trees", content_)
+   insert  ( "itvision_app_trees", content)
    execute ( "UNLOCK TABLES" )
 
    return true, error_message(2) 
@@ -587,7 +592,6 @@ end
 
 
 function select_root_app_tree () -- Seleciona o noh raiz da arvore
-   --local root = select ("itvision_app_trees", "lft = 1")
    local root = query ("itvision_app_trees", "lft = 1")
    if root[1] then
       return root[1].id, root

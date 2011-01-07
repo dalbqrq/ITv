@@ -98,12 +98,17 @@ function select_func (table_, cond_, extra_, columns_) -- this function return a
    return content
 end
 
+
 function insert (table_, content_)
    local db = connect ()
+   local content = {}
    if content_.instance_id then 
-      content_.instance_id = Model.db.instance_id -- nao insere outras instancias
+      --content_.instance_id = Model.db.instance_id -- nao insere outras instancias
    end
-   assert ( db:insert (table_, content_))
+   for i,v in pairs(content_) do
+      content = content.." "..i.."="..v
+   end
+   assert ( db:insert (table_, content))
    db:close ()
 end
 

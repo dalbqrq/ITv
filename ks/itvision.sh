@@ -216,7 +216,7 @@ chown -R $user.$user $itvhome/html/gv $itvhome/bin/htpasswd $itvhome/bin/dbconf
 
 
 echo "INSERT INTO itvision.itvision_apps set instance_id = 1, entities_id = 0, name = '_ROOT';" | mysql -u root --password=$dbpass
-echo "insert into itvision_app_trees set instance_id = 1, app_id = (select id from itvision_apps where name = '_ROOT' and is_active = 0), lft = 1, rgt = 2;"  | mysql -u root --password=$dbpass
+echo "INSERT INTO itvision_app_trees set instance_id = 1, app_id = (select id from itvision_apps where name = '_ROOT' and is_active = 0), lft = 1, rgt = 2;"  | mysql -u root --password=$dbpass
 
 
 

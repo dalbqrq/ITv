@@ -167,6 +167,9 @@ function insert(web)
    apps.entities_id = 0
    apps:save()
 
+   local app = apps:select(nil, "name = '"..web.input.name.."'")
+   Itvision.insert_node_app_tree(app[1].id, nil, 1)
+
    return web:redirect(web:link("/list"))
 end
 ITvision:dispatch_post(insert, "/insert")
@@ -183,6 +186,8 @@ function delete(web, id)
    if id then
       Model.delete ("itvision_app_relats", "app_id = "..id) 
       Model.delete ("itvision_app_objects", "app_id = "..id) 
+      Model.delete ("itvision_app_contacts", "app_id = "..id) 
+      Model.delete ("itvision_app_viewers", "app_id = "..id) 
       Model.delete ("itvision_apps", "id = "..id) 
    end
 
