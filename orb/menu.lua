@@ -23,7 +23,7 @@ ITvision:dispatch_get(list, "/(%d+):(%d+)")
 menu_itens = {
    { name="Monitor", link="/orb/gviz/show",
       submenu = {
-      { name="Lógico", link="/orb/gviz/show" },
+      { name="Visão", link="/orb/gviz/show" },
       { name="Aplicações", link="/orb/app" },
       { name="Checagem", link="/orb/probe" },
       { name="Tipo de Relacionamento", link="/orb/app_relat_types" },
@@ -52,12 +52,10 @@ menu_itens = {
    },
    { name="Administrar", link="#",
       submenu = {
-      { name="Login", link="/orb/login" },
       { name="Usuários", link="/servdesk/front/user.php" },
       { name="Grupos", link="/servdesk/front/group.php" },
       { name="Regras", link="/servdesk/front/rule.php" },
       { name="Logs", link="/servdesk/front/event.php" },
-      { name="Comandos de Teste", link="/orb/checkcmd" },
       { name="Manutenção", link="/orb/system" },
       },
    },

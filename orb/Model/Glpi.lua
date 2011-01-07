@@ -155,4 +155,50 @@ end
 
 
 
+function select_contacts_in_app (id)
+   local cond_ = " u.id = c.user_id and a.id = c.app_id "
+   if id then cond_ = cond_.." and a.id = "..id end
+   local tables_ = "glpi_users u, itvision_app_contacts c, itvision_apps a"
+   local columns_ = "u.name as name, u.firstname as firstname, u.realname as realname, u.email as email, a.id as app_id, u.id as user_id"
+
+   local content = query ( tables_, cond_, extra_, columns_)
+   return content
+end
+
+
+
+function select_contacts_not_in_app (id)
+   local cond_ = " "
+   if id then cond_ = cond_.." id not in (select user_id from itvision_app_contacts where app_id = "..id..")" end
+   local tables_ = "glpi_users u"
+   local columns_ = "*"
+
+   local content = query ( tables_, cond_, extra_, columns_)
+   return content
+end
+
+
+
+function select_viewers_in_app (id)
+   local cond_ = " u.id = v.user_id and a.id = v.app_id "
+   if id then cond_ = cond_.." and a.id = "..id end
+   local tables_ = "glpi_users u, itvision_app_viewers v, itvision_apps a"
+   local columns_ = "u.name as name, u.firstname as firstname, u.realname as realname, u.email as email, a.id as app_id, u.id as user_id"
+
+   local content = query ( tables_, cond_, extra_, columns_)
+   return content
+end
+
+
+
+function select_viewers_not_in_app (id)
+   local cond_ = " "
+   if id then cond_ = cond_.." id not in (select user_id from itvision_app_viewers where app_id = "..id..")" end
+   local tables_ = "glpi_users u"
+   local columns_ = "*"
+
+   local content = query ( tables_, cond_, extra_, columns_)
+   return content
+end
+
 

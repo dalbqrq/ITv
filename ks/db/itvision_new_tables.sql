@@ -1,0 +1,64 @@
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL';
+
+CREATE  TABLE IF NOT EXISTS `itvision`.`itvision_app_contacts` (
+  `instance_id` SMALLINT(6) NOT NULL ,
+  `app_id` INT(11) NOT NULL ,
+  `user_id` INT(11) NOT NULL ,
+  INDEX `fk_id6` (`app_id` ASC) ,
+  INDEX `fk_id7` (`user_id` ASC) ,
+  CONSTRAINT `fk_id6`
+    FOREIGN KEY (`app_id` )
+    REFERENCES `itvision`.`itvision_apps` (`id` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_id7`
+    FOREIGN KEY (`user_id` )
+    REFERENCES `itvision`.`glpi_users` (`id` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8
+COLLATE = utf8_unicode_ci;
+
+CREATE  TABLE IF NOT EXISTS `itvision`.`itvision_app_viewers` (
+  `instance_id` SMALLINT(6) NOT NULL ,
+  `app_id` INT(11) NOT NULL ,
+  `user_id` INT(11) NOT NULL ,
+  INDEX `fk_id4` (`app_id` ASC) ,
+  INDEX `fk_id5` (`user_id` ASC) ,
+  CONSTRAINT `fk_id4`
+    FOREIGN KEY (`app_id` )
+    REFERENCES `itvision`.`itvision_apps` (`id` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_id5`
+    FOREIGN KEY (`user_id` )
+    REFERENCES `itvision`.`glpi_users` (`id` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8
+COLLATE = utf8_unicode_ci;
+
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL';
+
+ALTER TABLE `itvision`.`itvision_app_contacts` 
+DROP INDEX `fk_id7` ;
+
+ALTER TABLE `itvision`.`itvision_app_viewers` 
+DROP INDEX `fk_id5` ;
+
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+

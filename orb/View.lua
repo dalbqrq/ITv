@@ -67,10 +67,11 @@ function render_menu_frame(inner_html)
 
       body{
          div{ id="header", img{ src="/pics/logo_itv.png" },
-            img{ src="/pics/transparent.png", width='500px', height='54px' },
-            img{ src="/pics/logo_verto.jpg", height='35px' },
-            img{ src="/pics/transparent.png", width='40px', height='44px' },
-            img{ src="/pics/logo_proderj.jpg", height='35px' },
+            img{ src="/pics/transparent.png", width='700px', height='54px' },
+            img{ src="/pics/logo_impa.png", height='45px'  },
+            --img{ src="/pics/logo_verto.jpg", height='35px' },
+            --img{ src="/pics/transparent.png", width='40px', height='44px' },
+            --img{ src="/pics/logo_proderj.jpg", height='35px' },
             --ul{ id="nav", class="dropdown dropdown-linear", inner_html }
             inner_html
          }

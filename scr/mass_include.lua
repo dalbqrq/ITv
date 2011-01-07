@@ -3,7 +3,7 @@ require "Model"
 
 function update_pending()
    local qry = [[ select object_id from nagios_objects where name1 = 
-         (select networkports_id from itvision_monitors  where service_object_id = -1 and softwareversions_id is null) 
+         (select networkports_id from itvision_monitors  where service_object_id = 0 and softwareversions_id is null) 
          and name2 = ']]..config.monitor.check_host..[[' and objecttype_id = 2 ]]
    local res = Model.query(cmd)
 
