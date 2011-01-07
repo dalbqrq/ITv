@@ -9,7 +9,7 @@ function update_pending()
       "m.name1 as name1, m.name2 as name2")
 
    for i, v in ipairs(res) do
-      local udt = [[ update itvision_monitors set service_object_id = 
+      local udt = [[ update itvision_monitors set state = 1, service_object_id = 
          (select object_id from nagios_objects where name1 = ']]..v.name1..[[' and name2 = ']]..v.name2..[[')
          where name1 = ']]..v.name1..[[' and name2 = ']]..v.name2..[[' ;]]
 
