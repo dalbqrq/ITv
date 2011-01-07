@@ -30,27 +30,13 @@ function apps:select(id, clause_)
       clause = clause_
    end
 
-  if clause == nil then clause = "name <> '_ROOT'" end
+   --if clause == nil then clause = "name <> '_ROOT'" end
 
    extra  = " order by name "
-   return Model.query("itvision_apps", clause, extra)
-end
+   local content = Model.query("itvision_apps", clause, extra)
+   local root = Itvision.select_root_app()
 
-
-function apps:select_apps_to_activate()
-   local stmt = [[
-      select id, is_active from itvision_apps where id in (
-      select distinct(node.app_id)
-      from itvision_app_trees AS node, itvision_app_trees AS parent 
-      where node.lft BETWEEN parent.lft AND parent.rgt 
-            AND parent.id = (select t.id from itvision_app_trees t, itvision_apps a 
-                             where t.app_id = a.id and a.name = '_ROOT')
-      ORDER BY node.lft desc
-      );
-   ]]
-
-   local content = Model.execute(stmt)
-   return content
+   return content, root
 end
 
 
@@ -118,8 +104,8 @@ function list(web, msg)
    local clause = nil
    if web.input.app_name then clause = " name like '%"..web.input.app_name.."%' " end
 
-   local A = apps:select(nil, clause)
-   return render_list(web, A, msg)
+   local A, root = apps:select(nil, clause)
+   return render_list(web, A, root, msg)
 end
 ITvision:dispatch_get(list, "/", "/list", "/list/(.+)")
 ITvision:dispatch_post(list, "/list")
@@ -134,9 +120,9 @@ function show(web, id)
 ]]
    local clause = "id = "..id
 
-   local A = apps:select(nil, clause)
+   local A, root = apps:select(nil, clause)
    local no_header = true
-   return render_list(web, A, nil, no_header)
+   return render_list(web, A, root, nil, no_header)
 end 
 ITvision:dispatch_get(show, "/show/(%d+)")
 
@@ -288,12 +274,14 @@ function render_filter(web)
 end
 
 
-function render_list(web, A, msg, no_header)
+function render_list(web, A, root, msg, no_header)
    local res = {}
    local row = {}
    local svc, stract
 
    for i, v in ipairs(A) do
+      local button_remove, button_edit, button_active = "-", "-", "-"
+
       if v.is_active == "0" then
          stract = strings.activate
       else
@@ -306,13 +294,20 @@ function render_list(web, A, msg, no_header)
       local lnk = web:link("/list/"..v.id..":1")
       web.prefix = "/orb/app"
 
+      if v.id ~= root then 
+         button_remove = button_link(strings.remove, web:link("/remove/"..v.id), "negative")
+      end
+      button_edit   = button_link(strings.edit, web:link("/edit/"..v.id..":"..v.name..":"..v.type))
+      button_active = button_link(stract, web:link("/activate/"..v.id..":"..v.is_active)) 
+
       row[#row+1] = {
          a{ href=lnk, v.name },
          strings["logical_"..v.type],
          NoOrYes[tonumber(v.is_active)+1].name,
-         button_link(strings.remove, web:link("/remove/"..v.id), "negative"),
-         button_link(strings.edit, web:link("/edit/"..v.id..":"..v.name..":"..v.type)),
-         button_link(stract, web:link("/activate/"..v.id..":"..v.is_active)) }
+         button_remove,
+         button_edit,
+         button_active,
+      }
    end
 
    local header =  { strings.name, strings.type, strings.is_active, ".", ".", "." }

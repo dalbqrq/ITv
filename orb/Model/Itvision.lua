@@ -103,6 +103,11 @@ function select_service_app_object (cond_, extra_, columns_)
 end
 
 
+function select_root_app()
+   local root = Model.query("itvision_apps a, itvision_app_trees at", "a.id = at.app_id and at.lft = 1", nil, "a.id as app_id")
+   return root[1].app_id
+end
+
 ----------------------------- NAGIOS X ITVISION X GLPI ----------------------------------
 
 function select_ci_monitor (w_wo, itemtype)
@@ -608,18 +613,15 @@ function insert_node_app_tree(app_id, origin_, position_) -- Inclui novo noh
    node.instance_id = config.database.instance_id
 
 --[[ DEBUG
-   text_file_writer ("/tmp/instree", type(node)..":"..node.app_id.." "..node.lft.." "..node.rgt.." "..node.instance_id)
    local s = ""
    for i,v in pairs(node) do
       s = s .. " "..i..":"..type(v)
    end
-   text_file_writer ("/tmp/instree2", s)
 ]]
 
    execute ( "LOCK TABLE itvision_app_trees WRITE" )
    if origin_ or root_id then
       -- devido a set do tipo "lft = lft + 2" tive que usar execute() e nao update()
-   --text_file_writer ("/tmp/instree3", condLft.." : "..condRgt)
       execute("update itvision_app_trees set lft = lft + 2 where "..condLft)
       execute("update itvision_app_trees set rgt = rgt + 2 where "..condRgt)
    end
@@ -642,7 +644,6 @@ function delete_node_app_tree(orgin_)
    local lft, rgt, width, root_id
    local content = {}
 
-text_file_writer("/tmp/rmapp"..origin_)
    if origin_ then
       -- usuario deu a origem, entao verifica se ela existe
       content = query ("itvision_app_trees", "id = ".. origin_, nil, "lft, rgt, rgt - lft + 1 as width")
@@ -829,8 +830,6 @@ end
 function insert_subnode_app_tree(app_child, app_parent) -- Adiciona nós filhos abaixo de todos os nos que possuiem app_id = app_parent
                                     -- isso é feito tipicamente na inclusão de uma app como objeto de outra (subapp)
       local nodes = query ("itvision_app_trees", "app_id = "..app_parent)
-
-text_file_writer("/tmp/nodes", app_child.. " x "..app_parent)
 
       for i,v in ipairs(nodes) do
          insert_node_app_tree(app_child, v.id, 1)

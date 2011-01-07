@@ -24,6 +24,7 @@ menu_itens = {
    { name="Monitor", link="/orb/gviz/show",
       submenu = {
       { name="Visão", link="/orb/gviz/show" },
+      { name="Árvore", link="/orb/treeviz/show" },
       { name="Aplicações", link="/orb/app" },
       { name="Checagem", link="/orb/probe" },
       { name="Tipo de Relacionamento", link="/orb/app_relat_types" },

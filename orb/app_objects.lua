@@ -72,6 +72,8 @@ function add(web, id, msg)
    local APP = Itvision.select_app_service_object(nil, nil, nil, id)
    local APPOBJ = Itvision.select_app_app_objects(id)
 
+--text_file_writer("/tmp/app", #HST, #SVC.." : "..#APP.." : "..#APPOBJ)
+
    return render_add(web, HST, SVC, APP, APPOBJ, id, msg)
 
 end
@@ -107,7 +109,7 @@ function insert_obj(web)
       Itvision.insert_subnode_app_tree(app_child[1].id, web.input.app_id)
    end
 
-   --return web:redirect(web:link("/add/"..app_objects.app_id))
+   os.sleep(1) -- CLUDGE Espera um pouco pois as queries das caixas de insercao estao retornando vazias!
    web.prefix = "/orb/app_tabs"
    return web:redirect(web:link("/list/"..app_objects.app_id..":"..tab_id))
 end
@@ -120,7 +122,6 @@ function delete_obj(web, app_id, obj_id)
 
    local app = apps:select(nil, "service_object_id = "..obj_id)
    local tree_id = Itvision.find_node_id(app[1].id)
-text_file_writer("/tmp/rmapp", #tree_id.." : "..tree_id[1].id)
 
    for _,v in ipairs(tree_id) do
       Itvision.delete_node_app_tree(v.id)

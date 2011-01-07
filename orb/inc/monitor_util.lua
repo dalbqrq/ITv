@@ -238,7 +238,6 @@ function insert_bp_cfg_file()
    cmd = cmd .. " -o "..config.monitor.dir.."/apps/apps.cfg"
 
    os.capture(cmd)
-   -- DEBUG: text_file_writer("/tmp/cmd.out", cmd)
 end
 
 

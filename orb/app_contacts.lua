@@ -67,6 +67,8 @@ function update_contact(user_id)
       local user = users:select_user(user_id)
       remove_contact_cfg_file(user[1].name)
    else
+      a.firstname = a.firstname or ""
+      a.realname  = a.realname or ""
       insert_contact_cfg_file (a.name, a.firstname.." "..a.realname, a.email, apps)
    end
 end
