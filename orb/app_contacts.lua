@@ -49,6 +49,12 @@ end
 ITvision:dispatch_get(add, "/add", "/add/(%d+)", "/add/(%d+):(.+)")
 
 
+function update_contact(user_id)
+   local apps = Glpi.select_app_by_contact(user_id)
+   local a = apps[1]
+   insert_contact_cfg_file (a.name, a.firstname.." "..a.realname, a.email, apps)
+end
+
 
 function insert(web, app_id, user_id)
    app_contacts:new()
@@ -56,6 +62,8 @@ function insert(web, app_id, user_id)
    app_contacts.app_id = app_id
    app_contacts.user_id = user_id
    app_contacts:save()
+
+   update_contact(user_id)
 
    web.prefix = "/orb/app_tabs"
    return web:redirect(web:link("/list/"..app_id..":"..tab_id))
