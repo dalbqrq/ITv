@@ -118,6 +118,14 @@ ITvision:dispatch_post(insert_obj, "/insert_obj")
 function delete_obj(web, app_id, obj_id)
    update_apps()
 
+   local app = apps:select(nil, "service_object_id = "..obj_id)
+   local tree_id = Itvision.find_node_id(app[1].id)
+text_file_writer("/tmp/rmapp", #tree_id.." : "..tree_id[1].id)
+
+   for _,v in ipairs(tree_id) do
+      Itvision.delete_node_app_tree(v.id)
+   end
+
    if app_id and obj_id then
       local clause = "app_id = "..app_id.." and service_object_id = "..obj_id
       local tables = "itvision_app_objects"

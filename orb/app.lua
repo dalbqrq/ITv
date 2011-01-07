@@ -37,6 +37,23 @@ function apps:select(id, clause_)
 end
 
 
+function apps:select_apps_to_activate()
+   local stmt = [[
+      select id, is_active from itvision_apps where id in (
+      select distinct(node.app_id)
+      from itvision_app_trees AS node, itvision_app_trees AS parent 
+      where node.lft BETWEEN parent.lft AND parent.rgt 
+            AND parent.id = (select t.id from itvision_app_trees t, itvision_apps a 
+                             where t.app_id = a.id and a.name = '_ROOT')
+      ORDER BY node.lft desc
+      );
+   ]]
+
+   local content = Model.execute(stmt)
+   return content
+end
+
+
 function apps:update(app)
    local A = {}
    if app.id then
@@ -169,6 +186,8 @@ function insert(web)
 
    local app = apps:select(nil, "name = '"..web.input.name.."'")
    Itvision.insert_node_app_tree(app[1].id, nil, 1)
+   activate(web, app[1].id, 0)
+   activate(web, app[1].id, 1)
 
    return web:redirect(web:link("/list"))
 end
@@ -191,6 +210,10 @@ function delete(web, id)
       Model.delete ("itvision_apps", "id = "..id) 
    end
 
+   local tree_id = Itvision.find_node_id(id)
+   for _,v in ipairs(tree_id) do
+      Itvision.delete_node_app_tree(v.id)
+   end
    --return web:redirect(web:link("/list"))
    web.prefix = "/orb/app"
    return web:redirect(web:link("/list"))

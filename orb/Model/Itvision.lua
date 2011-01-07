@@ -75,7 +75,6 @@ end
 -- seleciona applicacoes para serem incluidas como uma subaplicacao de outra aplicacao em app_obj.lua
 -- na lista retornada nao pode haver aplicacoes que já possuam como pai uma app_id em nem ela propria
 function select_app_service_object (cond_, extra_, columns_, app_id)
-
    if cond_ ~= nil then cond_ = " and "..cond_ else cond_ = "" end
 
    cond_ = cond_.." and o.object_id not in ( select service_object_id from itvision_app_objects where app_id = "..app_id..") "
@@ -643,6 +642,7 @@ function delete_node_app_tree(orgin_)
    local lft, rgt, width, root_id
    local content = {}
 
+text_file_writer("/tmp/rmapp"..origin_)
    if origin_ then
       -- usuario deu a origem, entao verifica se ela existe
       content = query ("itvision_app_trees", "id = ".. origin_, nil, "lft, rgt, rgt - lft + 1 as width")
@@ -653,6 +653,7 @@ function delete_node_app_tree(orgin_)
    lft   = tonumber(content[1].lft)
    rgt   = tonumber(content[1].rgt)
    width = tonumber(content[1].width)
+
 
    execute ( "LOCK TABLE itvision_app_trees WRITE" )
    execute ( "delete from itvision_app_trees where lft between "..lft.." and "..rgt )
