@@ -257,7 +257,7 @@ function make_app_objects_table(web, A)
          ic = Model.query("glpi_computers", "id = "..v.items_id)
          ic = ic[1]
       elseif v.itemtype == "NetworkEquipment" then
-         ic = Model.query("glpi_networkequipment", "id = "..v.items_id)
+         ic = Model.query("glpi_networkequipments", "id = "..v.items_id)
          ic = ic[1]
       end
 
@@ -439,7 +439,7 @@ function render_add(web, HST, SVC, APP, APPOBJ, APPS, AR, RT, app_id, msg)
             ic = Model.query("glpi_computers", "id = "..v.items_id)
             ic = ic[1]
          elseif v.itemtype == "NetworkEquipment" then
-            ic = Model.query("glpi_networkequipment", "id = "..v.items_id)
+            ic = Model.query("glpi_networkequipments", "id = "..v.items_id)
             ic = ic[1]
          end
 
@@ -471,7 +471,7 @@ function render_add(web, HST, SVC, APP, APPOBJ, APPS, AR, RT, app_id, msg)
             ic = Model.query("glpi_computers", "id = "..v.items_id)
             ic = ic[1]
          elseif v.itemtype == "NetworkEquipment" then
-            ic = Model.query("glpi_networkequipment", "id = "..v.items_id)
+            ic = Model.query("glpi_networkequipments", "id = "..v.items_id)
             ic = ic[1]
          end
 

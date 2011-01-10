@@ -116,7 +116,7 @@ function make_app_relat_table(web, AR)
       if v.from_itemtype == "Computer" then
          ic = Model.query("glpi_computers", "id = "..v.from_items_id)
          ic = ic[1]
-      elseif v.itemtype == "NetworkEquipment" then
+      elseif v.from_itemtype == "NetworkEquipment" then
          ic = Model.query("glpi_networkequipments", "id = "..v.from_items_id)
          ic = ic[1]
       end
@@ -133,7 +133,7 @@ function make_app_relat_table(web, AR)
       if v.to_itemtype == "Computer" then
          ic = Model.query("glpi_computers", "id = "..v.to_items_id)
          ic = ic[1]
-      elseif v.itemtype == "NetworkEquipment" then
+      elseif v.to_itemtype == "NetworkEquipment" then
          ic = Model.query("glpi_networkequipments", "id = "..v.to_items_id)
          ic = ic[1]
       end
@@ -191,7 +191,7 @@ function render_add(web, APPOBJ, AR, RT, app_id, msg)
             ic = Model.query("glpi_computers", "id = "..v.items_id)
             ic = ic[1]
          elseif v.itemtype == "NetworkEquipment" then
-            ic = Model.query("glpi_networkequipment", "id = "..v.items_id)
+            ic = Model.query("glpi_networkequipments", "id = "..v.items_id)
             ic = ic[1]
          end
 
@@ -223,7 +223,7 @@ function render_add(web, APPOBJ, AR, RT, app_id, msg)
             ic = Model.query("glpi_computers", "id = "..v.items_id)
             ic = ic[1]
          elseif v.itemtype == "NetworkEquipment" then
-            ic = Model.query("glpi_networkequipment", "id = "..v.items_id)
+            ic = Model.query("glpi_networkequipments", "id = "..v.items_id)
             ic = ic[1]
          end
 

@@ -386,8 +386,8 @@ function select_app_relat_to_graph (id)
                     "itvision_monitors m1, itvision_monitors m2"
    local columns_ = "a.name as a_name, art.name as art_name, o1.name1 as o1_name1, o1.name2 as o1_name2, "..
                     "o2.name1 as o2_name1, o2.name2 as o2_name2, "..
-                    "n1.itemtype as itemtype1, n1.items_id as items_id1, "..
-                    "n2.itemtype as itemtype2, n2.items_id as items_id2, "..
+                    "n1.itemtype as from_itemtype, n1.items_id as from_items_id, "..
+                    "n2.itemtype as to_itemtype, n2.items_id as to_items_id, "..
                     "m1.name as m1_name, m2.name as m2_name "
    local cond_    = "a.id = ar.app_id and \
                      ar.from_object_id = o1.object_id and \
@@ -409,8 +409,8 @@ function select_app_relat_to_graph (id)
    local columns_ = "a.name as a_name, art.name as art_name, "..
                     "o1.name1 as o1_name1, o1.name2 as o1_name2, "..
                     "o2.name1 as o2_name1, o2.name2 as o2_name2, "..
-                    "n1.itemtype as itemtype1, n1.items_id as items_id1, "..
-                    "'app' as itemtype2, NULL as items_id2, "..
+                    "n1.itemtype as from_itemtype, n1.items_id as from_items_id, "..
+                    "'app' as to_itemtype, NULL as to_items_id, "..
                     "m1.name as m1_name, "..
                     "o2.name2 as m2_name "
    local cond_    = "a.id = ar.app_id and \
@@ -432,8 +432,8 @@ function select_app_relat_to_graph (id)
    local columns_ = "a.name as a_name, art.name as art_name, "..
                     "o1.name1 as o1_name1, o1.name2 as o1_name2, "..
                     "o2.name1 as o2_name1, o2.name2 as o2_name2, "..
-                    "'app' as itemtype1, NULL as items_id1, "..
-                    "n2.itemtype as itemtype2, n2.items_id as items_id2, "..
+                    "'app' as from_itemtype, NULL as from_items_id, "..
+                    "n2.itemtype as to_itemtype, n2.items_id as to_items_id, "..
                     "m2.name as m2_name, "..
                     "o1.name2 as m1_name "
    local cond_    = "a.id = ar.app_id and \
@@ -454,8 +454,8 @@ function select_app_relat_to_graph (id)
    local columns_ = "a.name as a_name, art.name as art_name, "..
                     "o1.name1 as o1_name1, o1.name2 as o1_name2, "..
                     "o2.name1 as o2_name1, o2.name2 as o2_name2, "..
-                    "'app' as itemtype1, NULL as items_id1, "..
-                    "'app' as itemtype2, NULL as items_id2, "..
+                    "'app' as from_itemtype, NULL as from_items_id, "..
+                    "'app' as to_itemtype, NULL as to_items_id, "..
                     "o2.name2 as m2_name, "..
                     "o1.name2 as m1_name "
    local cond_    = "a.id = ar.app_id and \
@@ -597,6 +597,50 @@ function select_root_app_tree () -- Seleciona o noh raiz da arvore
 end
 
 
+function delete_node_app_tree(orgin_)
+   local lft, rgt, width, root_id
+   local content = {}
+
+   if origin_ then
+      -- usuario deu a origem, entao verifica se ela existe
+      content = query ("itvision_app_trees", "id = ".. origin_, nil, "lft, rgt, rgt - lft + 1 as width")
+   else
+      return false
+   end
+
+   lft   = tonumber(content[1].lft)
+   rgt   = tonumber(content[1].rgt)
+   width = tonumber(content[1].width)
+
+   execute ( "LOCK TABLE itvision_app_trees WRITE" )
+   execute ( "delete from itvision_app_trees where lft between "..lft.." and "..rgt )
+   execute ( "update itvision_app_trees set lft = lft - "..width.." where lft > "..rgt )
+   execute ( "update itvision_app_trees set rgt = rgt - "..width.." where rgt > "..rgt )
+   execute ( "UNLOCK TABLES" )
+
+   return true
+end
+
+
+function show_app_tree()
+   local stmt_ = [[
+      SELECT CONCAT( REPEAT( ' ', (COUNT(parent.app_id) - 1) ), node.app_id) AS app_id
+      FROM itvision_app_trees AS node,
+           itvision_app_trees AS parent
+      WHERE node.lft BETWEEN parent.lft AND parent.rgt
+      GROUP BY node.app_id
+      ORDER BY node.lft;
+   ]]
+
+   content = execute( stmt_ )
+
+   for i, v in ipairs(content) do
+      print(v.app_id)
+   end 
+end
+   
+
+
 function select_full_path_app_tree (origin) -- Seleciona toda sub-arvore a patir de um noh de origem
    local root_id, root = {}
    root_id, root = select_root_app_tree()
@@ -736,249 +780,5 @@ function move_app_tree(origin, destiny) -- move um ramo de arvore para outro noh
    return false
 end
 
-
-
-
------------------------------ LOCATION TREE ----------------------------------
---[[
-   Nested Set Model
-   see: http://dev.mysql.com/tech-resources/articles/hierarchical-data.html
-]]
-
-
-function new_location_tree() -- Create table structure
-   local content = {
-      location_tree_id = 0,
-      lft = 0,
-      rgt = 0,
-      instance_id = 0,
-      name = "",
-      obs = "",
-      geotag = "",
-   }
-
-   return content
-end
-
-
-function insert_node_location_tree(content_, origin_, position_) -- Inclui novo noh
-   --[[   content_ deve conter o app_id a ser inserido na inclusao.
-      Se origin_ for nulo, entao deve ser a primeira entrada na arvore.
-      position pode ter os valores: 0 -> antes; 1 -> abaixo; 2 -> depois.
-   ]]
-   position_ = position_ or 1 
-   local lft, rgt, newLft, newRgt, condLft, confRgt, root_id
-   local content = {}
-
---print("position = "..position_)
-   if origin_ then
-      -- usuario deu a origem, entao verifica se ela existe
-      content = query ("itvision_location_tree", "location_tree_id = ".. origin_)
---print("origin = "..origin_)
-   else
-      -- usuario disse que é a primeira entrada. Isto eh verdade ou a arvore jah existe?
-      root_id, content = select_root_location_tree()
---print("auto set root_id = "..root_id)
-   end
-
-   if not origin_ and root_id == nil then
-      newLft = 1
-      newRgt = 2
---print("1 - lft, rgt = ", newLft, newRgt)
-
-   elseif content[1] == nil then
-      return false, error_message(1)
-
-   else
-      lft = tonumber(content[1].lft)
-      rgt = tonumber(content[1].rgt)
-
---print("2 - lft, rgt, newLft, newRgt = ", lft, rgt, newLft, newRgt)
-      if position_ == 0 then
-         newLft = lft
-         newRgt = lft + 1
-         condLft = "lft >= " .. lft
-         condRgt = "rgt >= " .. lft
-
-      elseif position_ == 1 then
-         newLft = rgt
-         newRgt = rgt + 1
-         condLft = "lft >  " .. rgt
-         condRgt = "rgt >= " .. rgt
-
-      elseif position_ == 2 then
-         newLft = rgt + 1
-         newRgt = rgt + 2
-         condLft = "lft > " .. lft
-         condRgt = "rgt > " .. rgt
-
-      end
---print("position = 2")
---print("newLft, newRgt, condLft, conRgt = ", newLft, newRgt, condLft, condRgt)
-   end
---print("3 - lft, rgt = ", newLft, newRgt)
-
-   content_.lft    = newLft
-   content_.rgt    = newRgt
-
-   execute ( "LOCK TABLE itvision_location_tree WRITE" )
-   if origin_ then
-      -- devido a set do tipo "lft = lft + 2" tive que usar execute() e nao update()
-      execute("update itvision_location_tree set lft = lft + 2 where "..condLft)
-      execute("update itvision_location_tree set rgt = rgt + 2 where "..condRgt)
---print("update itvision_location_tree set lft = lft + 2 where "..condLft)
---print("update itvision_location_tree set rgt = rgt + 2 where "..condRgt)
-   end
-   insert  ( "itvision_location_tree", content_)
-   execute ( "UNLOCK TABLES" )
-
-   return true, error_message(5) 
-end
-
-
-function select_root_location_tree () -- Seleciona o noh raiz da arvore
-   local root = query ("itvision_location_tree", "lft = 1")
-   if root[1] then
-      return root[1].location_tree_id, root
-   else
-      return nil, nil
-   end
-end
-
-
-function select_full_path_location_tree (origin) -- Seleciona toda sub-arvore a patir de um noh de origem
-   local root_id, root = {}
-   root_id, root = select_root_location_tree()
-   origin = origin or root_id
-   local content = {}
-
-   columns   = "node.location_tree_id, node.instance_id, node.lft, node.rgt, node.name, node.geotag, node.obs"
-   tablename = "itvision_location_tree AS node, itvision_location_tree AS parent"
-   cond      = "node.lft BETWEEN parent.lft AND parent.rgt AND parent.location_tree_id = " .. origin
-   extra     = "ORDER BY node.lft"
-
-   content = query (tablename, cond, extra, columns)
-
-   return content
-end
-
-
-function select_leaf_nodes_location_tree () -- Seleciona todas as folhas da arvore
-   local content = {}
-
-   columns   = "*"
-   tablename = "itvision_location_tree"
-   cond      = "rgt = lft + 1"
-   extra     = "ORDER BY lft"
-
-   content = query (tablename, cond, extra, columns)
-
-   return content
-end
-
-
-function select_simple_path_location_tree (origin) -- Seleciona um unico caminho partindo de um noh 
-                     -- ateh o topo da arvore
-   local root_id, root = {}
-   root_id, root = select_root_location_trelocation_tree
-   origin = origin or root_id
-   local content = {}
-
-   columns   = "parent.location_tree_id, parent.instance_id, parent.lft, parent.rgt, parent.app_id"
-   tablename = "itvision_location_tree AS node, itvision_location_tree AS parent"
-   cond      = "node.lft BETWEEN parent.lft AND parent.rgt AND node.location_tree_id = " .. origin
-   extra     = "ORDER BY parent.lft"
-
-   content = query (tablename, cond, extra, columns)
-
-   return content
-end
-
-
-function select_depth_location_tree (origin) -- Seleciona a profundidade de cada noh
-   local root_id, root = {}
-   root_id, root = select_root_location_tree()
-   origin = origin or root_id
-   local content = {}
-
-   columns   = [[ node.location_tree_id, node.instance_id, node.lft, node.rgt, node.app_id, 
-            (COUNT(parent.location_tree_id) - 1) AS depth ]]
-   tablename = "itvision_location_tree AS node, itvision_location_tree AS parent"
-   cond      = "node.lft BETWEEN parent.lft AND parent.rgt AND node.location_tree_id = " .. origin
-   extra     = "GROUP BY node.location_tree_id ORDER BY parent.lft"
-
-   content = query (tablename, cond, extra, columns)
-
-   return content
-end
-
-
-function select_depth_subtree_location_tree (origin) -- Seleciona a profundidade de cada noh a partir de 
-                  -- um noh especifico
-   local root_id, root = {}
-   root_id, root = select_root_location_tree()
-   origin = origin or root_id
-   local content = {}
-
-   columns   = [[ node.location_tree_id, node.instance_id, node.lft, node.rgt, node.app_id,
-            (COUNT(parent.location_tree_id) - (sub_tree.depth + 1)) AS depth ]]
-   tablename = [[ itvision_location_tree AS node, itvision_location_tree AS parent, itvision_location_tree AS sub_parent
-            (   SELECT node.location_tree_id, (COUNT(parent.location_tree_id) - 1) AS depth
-            FROM itvision_location_tree AS node, itvision_location_tree AS parent
-            WHERE node.lft BETWEEN parent.lft AND parent.rgt
-            AND node.location_tree_id = ]] .. origin .. [[
-            GROUP BY node.location_tree_id
-            ORDER BY node.lft
-            ) AS sub_tree ]]
-   cond      = [[ node.lft BETWEEN parent.lft AND parent.rgt
-            AND node.lft BETWEEN sub_parent.lft AND sub_parent.rgt
-            AND sub_parent.location_tree_id = sub_tree.location_tree_id ]]
-   extra     = "GROUP BY node.location_tree_id ORDER BY node.lft"
-
-   content = query (tablename, cond, extra, columns)
-
-   return content
-end
-
-
-function select_subrdinates_location_tree (origin) -- Encontra o noh subordinado imediato
-   local root_id, root = {}
-   root_id, root = select_root_location_tree()
-   origin = origin or root_id
-   local content = {}
-
-   columns   = [[ node.location_tree_id, node.instance_id, node.lft, node.rgt, node.app_id,
-            (COUNT(parent.location_tree_id) - (sub_tree.depth + 1)) AS depth ]]
-   tablename = [[ itvision_location_tree AS node, itvision_location_tree AS parent, itvision_location_tree AS sub_parent
-            (   SELECT node.location_tree_id, (COUNT(parent.location_tree_id) - 1) AS depth
-            FROM itvision_location_tree AS node,
-            itvision_location_tree AS parent
-            WHERE node.lft BETWEEN parent.lft AND parent.rgt
-            AND node.location_tree_id = ]] .. origin .. [[
-            GROUP BY node.location_tree_id
-            ORDER BY node.lft
-            ) AS sub_tree ]]
-   cond      = [[ node.lft BETWEEN parent.lft AND parent.rgt
-            AND node.lft BETWEEN sub_parent.lft AND sub_parent.rgt
-            AND sub_parent.location_tree_id = sub_tree.location_tree_id ]]
-   extra     = [[ GROUP BY node.location_tree_id HAVING depth <= 1 ORDER BY node.lft ]]
-
-
-   content = query (tablename, cond, extra, columns)
-
-   return content
-end
-
-
-function delete_location_tree (origin) -- remove um noh dado por 'origin'
-   -- TODO: !
-   return false
-end
-
-
-function move_location_tree(origin, destiny) -- move um ramo de arvore para outro noh
-   -- TODO: !
-   return false
-end
 
 

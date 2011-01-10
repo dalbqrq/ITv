@@ -271,6 +271,7 @@ function insert_service(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, 
    msg = "Check de SERVIÇO: "..monitor_name.." - HOST: ".. c_name.." - COMANDO: "..chk_name.." criado."
 
    if web then
+      os.sleep(1)
       return web:redirect(web:link("/list/"..msg..""))
    else
       return msg --para criacao de probes em massa

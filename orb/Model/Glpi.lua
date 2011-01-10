@@ -206,8 +206,7 @@ end
 
 
 function select_app_by_contact (user_id)
-   local cond_ = " u.id = c.user_id and a.id = c.app_id "
-   if id then cond_ = cond_.." and u.id = "..user_id end
+   local cond_ = " u.id = c.user_id and a.id = c.app_id and u.id = "..user_id
    local tables_ = "glpi_users u, itvision_app_contacts c, itvision_apps a"
    local extra_ = "order by u.name"
    local columns_ = "u.name as name, u.firstname as firstname, u.realname as realname, u.email as email, a.name as app_name, a.id as app_id, u.id as user_id"
