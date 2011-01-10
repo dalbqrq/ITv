@@ -26,7 +26,7 @@ HOST_NAME=(`cat $ARQ |awk -F ";" '{print $2}'`) # glpi_computers > name
 IP=(`cat $ARQ |awk -F ";" '{print $3}'`) # glpi_networkports > ip
 #PATRIMONIO=(`cat $ARQ |awk -F ";" '{print $7}'`)
 #FABRICANTE=(`cat $ARQ |awk -F ";" '{print $8}'`) # glpi_computers "id" dell=4
-#COD_FABRICANTE=(`cat $ARQ |awk -F ";" '{print $9}'`)
+#COD_FABRICANTE=(`cat $ARQ |awk -F ";" '{print $9}'`) modelo
 #MOD_FABRINCATE=(`cat $ARQ |awk -F ";" '{print $10}'`) #glpi_computermodels "id" 2950=1
 #VERSAO=(`cat $ARQ |awk -F ";" '{print $11}'`)
 #FAMILIA=(`cat $ARQ |awk -F ";" '{print $12}'`)
