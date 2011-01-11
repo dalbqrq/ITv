@@ -74,15 +74,18 @@ end
 
 -- seleciona applicacoes para serem incluidas como uma subaplicacao de outra aplicacao em app_obj.lua
 -- na lista retornada nao pode haver aplicacoes que já possuam como pai uma app_id em nem ela propria
--- TODO: 1 
 function select_app_service_object (cond_, extra_, columns_, app_id)
-   local bp_id = get_bp_id()
 
    if cond_ ~= nil then cond_ = " and "..cond_ else cond_ = "" end
 
-   cond_ = cond_ .. " and  service_object_id not in (select service_object_id from itvision_apps)"
+   cond_ = cond_.." and o.object_id not in ( select service_object_id from itvision_app_objects where app_id = "..app_id..") "
+   cond_ = cond_.." and o.object_id not in ( select service_object_id from itvision_apps where id = "..app_id..") "
+   cond_ = cond_.." and o.object_id not in ( select distinct(a.service_object_id) from itvision_app_trees AS node, itvision_app_trees AS parent, itvision_apps a where node.lft BETWEEN parent.lft AND parent.rgt AND node.id in (select id from itvision_app_trees where app_id = "..app_id..") and parent.app_id <> "..app_id.." and a.id = parent.app_id and a.is_active = 1)"
+   cond_ = cond_.." and o.is_active = 1 "
 
-   local content = query ("nagios_services", "check_command_object_id = "..bp_id..cond_,
+   local bp_id = get_bp_id()
+   local content = query ("nagios_services s, nagios_objects o ", 
+      "s.service_object_id = o.object_id and s.check_command_object_id = "..bp_id..cond_, 
       extra_, columns_)
    return content
 
@@ -505,6 +508,25 @@ end
 --[[
    Nested Set Model
    see: http://dev.mysql.com/tech-resources/articles/hierarchical-data.html
+
+
+function new_app_tree() -- Create table structure
+function insert_node_app_tree(app_id, origin_, position_) -- Inclui novo noh
+function select_root_app_tree () -- Seleciona o noh raiz da arvore
+function find_node_id(app_id, conected_to_root)
+function delete_node_app_tree(orgin_)
+function show_app_tree()
+function select_full_path_app_tree (origin) -- Seleciona toda sub-arvore a patir de um noh de origem
+function select_leaf_nodes_app_tree () -- Seleciona todas as folhas da arvore
+function select_simple_path_app_tree (origin) -- Seleciona um unico caminho partindo de um noh 
+function select_depth_app_tree (origin) -- Seleciona a profundidade de cada noh
+function select_depth_subtree_app_tree (origin) -- Seleciona a profundidade de cada noh a partir de 
+function select_subrdinates_app_tree (origin) -- Encontra o noh subordinado imediato
+function delete_app_tree (origin) -- remove um noh dado por 'origin'
+function move_app_tree(origin, destiny) -- move um ramo de arvore para outro noh
+
+
+
 ]]
 
 
@@ -528,7 +550,8 @@ function insert_node_app_tree(app_id, origin_, position_) -- Inclui novo noh
    ]]
    position_ = position_ or 1 
    local lft, rgt, newLft, newRgt, condLft, confRgt, root_id
-   local content = new_app_tree()
+   local content = nil
+   local node = new_app_tree()
 
    if origin_ then
       -- usuario deu a origem, entao verifica se ela existe
@@ -538,7 +561,7 @@ function insert_node_app_tree(app_id, origin_, position_) -- Inclui novo noh
       root_id, content = select_root_app_tree()
    end
 
-   if not origin_ and root_id == nil then
+   if not origin_ and not root_id then
       newLft = 1
       newRgt = 2
 
@@ -570,21 +593,28 @@ function insert_node_app_tree(app_id, origin_, position_) -- Inclui novo noh
       end
    end
 
-   content.app_id = app_id
-   content.lft    = newLft
-   content.rgt    = newRgt
-   content.instance_id = config.database.instance_id
+   node.app_id = app_id
+   node.lft    = newLft
+   node.rgt    = newRgt
+   node.instance_id = config.database.instance_id
 
-   text_file_writer
-      ("/tmp/instree", type(content)..":"..content.app_id.." "..content.lft.." "..content.rgt.." "..content.instance_id)
+--[[ DEBUG
+   text_file_writer ("/tmp/instree", type(node)..":"..node.app_id.." "..node.lft.." "..node.rgt.." "..node.instance_id)
+   local s = ""
+   for i,v in pairs(node) do
+      s = s .. " "..i..":"..type(v)
+   end
+   text_file_writer ("/tmp/instree2", s)
+]]
 
    execute ( "LOCK TABLE itvision_app_trees WRITE" )
-   if not origin_ and not root_id then
+   if origin_ or root_id then
       -- devido a set do tipo "lft = lft + 2" tive que usar execute() e nao update()
+   --text_file_writer ("/tmp/instree3", condLft.." : "..condRgt)
       execute("update itvision_app_trees set lft = lft + 2 where "..condLft)
       execute("update itvision_app_trees set rgt = rgt + 2 where "..condRgt)
    end
-   insert  ( "itvision_app_trees", content)
+   insert  ( "itvision_app_trees", node)
    execute ( "UNLOCK TABLES" )
 
    return true, error_message(2) 
@@ -598,6 +628,14 @@ function select_root_app_tree () -- Seleciona o noh raiz da arvore
    else
       return nil, nil
    end
+end
+
+
+function find_node_id(app_id, conected_to_root)
+   local cond = ""
+   if conected_to_root then cond = " and " end
+   local content = query ("itvision_app_trees", cond.." app_id = "..app_id)
+   return content
 end
 
 
@@ -705,7 +743,7 @@ function select_depth_app_tree (origin) -- Seleciona a profundidade de cada noh
    local content = {}
 
    columns   = [[ node.id, node.instance_id, node.lft, node.rgt, node.app_id, 
-            (COUNT(parent.id) - 1) AS depth ]]
+            (COUNT(parent.id) - 1) AS depth, parent.id as parent ]]
    tablename = "itvision_app_trees AS node, itvision_app_trees AS parent"
    cond      = "node.lft BETWEEN parent.lft AND parent.rgt AND node.id = " .. origin
    extra     = "GROUP BY node.id ORDER BY parent.lft"
@@ -724,8 +762,8 @@ function select_depth_subtree_app_tree (origin) -- Seleciona a profundidade de c
    local content = {}
 
    columns   = [[ node.id, node.instance_id, node.lft, node.rgt, node.app_id,
-            (COUNT(parent.id) - (sub_tree.depth + 1)) AS depth ]]
-   tablename = [[ itvision_app_trees AS node, itvision_app_trees AS parent, itvision_app_trees AS sub_parent
+            (COUNT(parent.id) - (sub_tree.depth + 1)) AS depth, parent.id as parent ]]
+   tablename = [[ itvision_app_trees AS node, itvision_app_trees AS parent, itvision_app_trees AS sub_parent,
             (   SELECT node.id, (COUNT(parent.id) - 1) AS depth
             FROM itvision_app_trees AS node, itvision_app_trees AS parent
             WHERE node.lft BETWEEN parent.lft AND parent.rgt
@@ -752,7 +790,7 @@ function select_subrdinates_app_tree (origin) -- Encontra o noh subordinado imed
 
    columns   = [[ node.id, node.instance_id, node.lft, node.rgt, node.app_id,
             (COUNT(parent.id) - (sub_tree.depth + 1)) AS depth ]]
-   tablename = [[ itvision_app_trees AS node, itvision_app_trees AS parent, itvision_app_trees AS sub_parent
+   tablename = [[ itvision_app_trees AS node, itvision_app_trees AS parent, itvision_app_trees AS sub_parent, 
             (   SELECT node.id, (COUNT(parent.id) - 1) AS depth
             FROM itvision_app_trees AS node,
             itvision_app_trees AS parent
@@ -764,13 +802,27 @@ function select_subrdinates_app_tree (origin) -- Encontra o noh subordinado imed
    cond      = [[ node.lft BETWEEN parent.lft AND parent.rgt
             AND node.lft BETWEEN sub_parent.lft AND sub_parent.rgt
             AND sub_parent.id = sub_tree.id ]]
-   extra     = [[ GROUP BY node.id HAVING depth <= 1 ORDER BY node.lft ]]
+   extra     = [[ GROUP BY node.id HAVING depth = 1 ORDER BY node.lft ]]
+   --extra     = [[ GROUP BY node.id HAVING depth <= 1 ORDER BY node.lft ]]
 
 
    content = query (tablename, cond, extra, columns)
 
    return content
 end
+
+
+function insert_subnode_app_tree(app_child, app_parent) -- Adiciona nós filhos abaixo de todos os nos que possuiem app_id = app_parent
+                                    -- isso é feito tipicamente na inclusão de uma app como objeto de outra (subapp)
+      local nodes = query ("itvision_app_trees", "app_id = "..app_parent)
+
+text_file_writer("/tmp/nodes", app_child.. " x "..app_parent)
+
+      for i,v in ipairs(nodes) do
+         insert_node_app_tree(app_child, v.id, 1)
+      end
+end
+
 
 
 function delete_app_tree (origin) -- remove um noh dado por 'origin'

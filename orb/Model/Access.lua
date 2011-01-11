@@ -105,10 +105,7 @@ function insert (table_, content_)
    if content_.instance_id then 
       --content_.instance_id = Model.db.instance_id -- nao insere outras instancias
    end
-   for i,v in pairs(content_) do
-      content = content.." "..i.."="..v
-   end
-   assert ( db:insert (table_, content))
+   assert ( db:insert (table_, content_))
    db:close ()
 end
 

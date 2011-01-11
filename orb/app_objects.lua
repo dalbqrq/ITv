@@ -69,7 +69,7 @@ function add(web, id, msg)
 
    clause = [[ and o.name2 <> ']]..config.monitor.check_host..[[' ]]
    local SVC = Monitor.make_query_4(nil, nil, nil, nil, exclude .. clause .. extra)
-   local APP = Itvision.select_service_object(nil, nil, nil, true, id)
+   local APP = Itvision.select_app_service_object(nil, nil, nil, id)
    local APPOBJ = Itvision.select_app_app_objects(id)
 
    return render_add(web, HST, SVC, APP, APPOBJ, id, msg)
@@ -103,10 +103,8 @@ function insert_obj(web)
    end
 
    if web.input.type == 'app' then 
---daniel
       local app_child = apps:select(nil,"service_object_id = "..web.input.item)
-text_file_writer("/tmp/tree", app_child[1].id .." : ".. web.input.app_id .. " : "..web.input.item)
-      Itvision.insert_node_app_tree(app_child[1].id, web.input.app_id, 1)
+      Itvision.insert_subnode_app_tree(app_child[1].id, web.input.app_id)
    end
 
    --return web:redirect(web:link("/add/"..app_objects.app_id))
