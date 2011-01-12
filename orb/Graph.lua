@@ -81,8 +81,8 @@ function make_content(obj, rel)
             shape = "hexagon"
          end
 
-      color = set_color(v.ss_current_state, v.ao_type)
-      table.insert(content, node{name, shape=shape, height=1.2, width=1, fontsize=12., fixedsize=true,
+         color = set_color(v.ss_current_state, v.ao_type)
+         table.insert(content, node{name, shape=shape, height=1.2, width=1, fontsize=12., fixedsize=true,
                       fontname="Helvetica", label=label, color="black", fillcolor=color ,URL=url ,target="_self",
                       nodesep=0.05, style="bold,filled,solid", penwidth=2})
       end
@@ -136,6 +136,49 @@ function make_content(obj, rel)
          else
             relat_label = ""
          end
+
+         table.insert(content, edge{ from_name, to_name, label=relat_label } )
+      end
+   end
+
+   return content
+end
+
+
+function make_tree_content(obj, rel)
+   local content = {}
+
+   if obj[1] then
+      for _,v in ipairs(obj) do
+         local label, name, url, shape
+
+         label = v.a_name
+         name  = v.a_id
+         url   = "/orb/obj_info/app/"..v.o_object_id
+         shape = "invhouse"
+         shape = "octagon"
+         shape = "triangle"
+         shape = "diamond"
+         shape = "hexagon"
+
+         color = set_color(v.ss_current_state, v.ao_type)
+         table.insert(content, node{name, shape=shape, height=1.2, width=1, fontsize=12., fixedsize=true,
+                      fontname="Helvetica", label=label, color="black", fillcolor=color ,URL=url ,target="_self",
+                      nodesep=0.05, style="bold,filled,solid", penwidth=2})
+      end
+   end
+
+
+   if rel[1] then
+      for _,v in ipairs(rel) do
+         -- FROM -------------------------------
+         local from_name = v.parent_id
+
+         -- TO -------------------------------
+         local to_name = v.child_id
+
+         -- RELAT -------------------------------
+         relat_label = ""
 
          table.insert(content, edge{ from_name, to_name, label=relat_label } )
       end

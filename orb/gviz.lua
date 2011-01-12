@@ -20,7 +20,6 @@ function apps:select_apps(id)
    if id then
       clause = " id = "..id
    end
-   --return self:find_all(clause)
    return Model.query("itvision_apps", clause, "order by id")
 end
 
@@ -50,7 +49,6 @@ function show(web, id, no_header)
       end
    end
 
-   text_file_writer("/tmp/app", id )
    app = apps:select_apps(id)
 
    -- para presentacao Verto

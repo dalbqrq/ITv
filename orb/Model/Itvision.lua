@@ -30,7 +30,7 @@ end
 ----------------------------- SERVICES ----------------------------------
 
 function get_bp_id () -- usado para selecionar os 'services' que sao aplicacoes
-   local content = query ("nagios_objects", "name1 = '"..config.monitor.cmd_app.."'", extra_, columns_)
+   local content = query ("nagios_objects", "name1 = '"..config.monitor.cmd_app.."' and is_active = 1", extra_, columns_)
    return content[1].object_id
 end
 
@@ -78,7 +78,7 @@ function select_app_service_object (cond_, extra_, columns_, app_id)
    if cond_ ~= nil then cond_ = " and "..cond_ else cond_ = "" end
 
    cond_ = cond_.." and o.object_id not in ( select service_object_id from itvision_app_objects where app_id = "..app_id..") "
-   cond_ = cond_.." and o.object_id not in ( select service_object_id from itvision_apps where id = "..app_id..") "
+   cond_ = cond_.." and o.object_id not in ( select IFNULL ((select service_object_id from itvision_apps where id = "..app_id.."), -1) )"
    cond_ = cond_.." and o.object_id not in ( select distinct(a.service_object_id) from itvision_app_trees AS node, itvision_app_trees AS parent, itvision_apps a where node.lft BETWEEN parent.lft AND parent.rgt AND node.id in (select id from itvision_app_trees where app_id = "..app_id..") and parent.app_id <> "..app_id.." and a.id = parent.app_id and a.is_active = 1)"
    cond_ = cond_.." and o.is_active = 1 "
 
@@ -86,8 +86,8 @@ function select_app_service_object (cond_, extra_, columns_, app_id)
    local content = query ("nagios_services s, nagios_objects o ", 
       "s.service_object_id = o.object_id and s.check_command_object_id = "..bp_id..cond_, 
       extra_, columns_)
-   return content
 
+   return content
 end
 
 
@@ -542,6 +542,16 @@ function new_app_tree() -- Create table structure
 end
 
 
+function select_root_app_tree () -- Seleciona o noh raiz da arvore
+   local root = query ("itvision_app_trees", "lft = 1")
+   if root[1] then
+      return root[1].id, root
+   else
+      return nil, nil
+   end
+end
+
+
 function insert_node_app_tree(app_id, origin_, position_) -- Inclui novo noh
    --[[   content_ deve conter o app_id a ser inserido na inclusao.
       Se origin_ for nulo, entao deve ser a primeira entrada na arvore.
@@ -620,16 +630,6 @@ function insert_node_app_tree(app_id, origin_, position_) -- Inclui novo noh
 end
 
 
-function select_root_app_tree () -- Seleciona o noh raiz da arvore
-   local root = query ("itvision_app_trees", "lft = 1")
-   if root[1] then
-      return root[1].id, root
-   else
-      return nil, nil
-   end
-end
-
-
 function find_node_id(app_id, conected_to_root)
    local cond = ""
    if conected_to_root then cond = " and " end
@@ -695,8 +695,8 @@ function select_full_path_app_tree (origin) -- Seleciona toda sub-arvore a patir
                 app.name, papp.id as papp_id, papp.name as pname]]
    tablename = [[itvision_app_trees AS node, itvision_app_trees AS parent, 
                 itvision_apps as app, itvision_apps as papp]]
-   cond      = [[node.lft BETWEEN parent.lft AND parent.rgt AND parent.id = ]] .. origin .. 
-               [[ AND node.app_id = app.id AND parent.app_id = papp.id]]
+   cond      = [[node.lft BETWEEN parent.lft AND parent.rgt AND parent.id = ]]..origin..[[
+               AND node.app_id = app.id AND parent.app_id = papp.id]]
    extra     = [[ORDER BY node.lft]]
 
    content = query (tablename, cond, extra, columns)
@@ -808,7 +808,20 @@ function select_subrdinates_app_tree (origin) -- Encontra o noh subordinado imed
 
 
    content = query (tablename, cond, extra, columns)
+   return content
+end
 
+
+function select_tree_relat_to_graph() -- Lista apps e seus pais na arvore criada
+  local root_id = select_root_app_tree()
+
+   columns   = [[ node.id, node.instance_id, node.lft, node.rgt, node.app_id as child_id , parent.app_id as parent_id ]]
+   tablename = [[ itvision_app_trees AS node, itvision_app_trees AS parent ]]
+   cond      = [[ node.lft BETWEEN parent.lft AND parent.rgt 
+                  AND node.app_id <> parent.app_id ]]
+   extra     = [[ ORDER BY node.lft ]]
+
+   local content = query (tablename, cond, extra, columns)
    return content
 end
 

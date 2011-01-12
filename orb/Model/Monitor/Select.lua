@@ -33,6 +33,7 @@ local DEBUG = false
 	QUERY 7 - computador com porta com software e com monitor pendente
         QUERY 8 - computador com porta sem software e com monitor e service state pendente
         QUERY 9 - computador com porta com software e com monitor e service state pendente
+        QUERY 10 - aplicacao com monitor para grafico de arvore 
 
 ]]
 
@@ -42,7 +43,8 @@ local tables = {
    O valor dos 'aliases' é a resposta da pergunta: Qual é o campo da tabela 'name' que será usado para ligar com a tabela a 'alias'?
    Ou seja, é a chave estrangeira.
 ]]
-   a =   { name="itvision_apps",                   ao="id", } ,
+   a =   { name="itvision_apps",                   ao="id", at="id", o="service_object_id" } ,
+   at =  { name="itvision_app_trees",              a="app_id" } ,
    ao =  { name="itvision_app_objects",            a="app_id", o="service_object_id" } ,
    m =   { name="itvision_monitors",               o="service_object_id", s="service_object_id", ss="service_object_id", 
                                                       n="networkequipments_id", p="networkports_id", sv="softwareversions_id" },
@@ -213,6 +215,7 @@ end
 	QUERY 7 - computador com porta com software e com monitor pendente
         QUERY 8 - computador com porta sem software e com monitor e service state pendente
         QUERY 9 - computador com porta com software e com monitor e service state pendente
+        QUERY 10 - aplicacao com monitor para grafico de arvore 
 ]]
 
 local g_excludes = [[ and c.is_deleted = 0 and c.is_template = 0 and c.states_id = 1 ]]
@@ -603,6 +606,37 @@ function make_query_9(c_id, p_id, sv_id, clause)
 end
 
 
+----------------------------------------------------------------------
+--  QUERY 10 - aplicacao com monitor para grafico de arvore 
+----------------------------------------------------------------------
+function make_query_10(a_id, clause)
+   local q, t = {}, {}
+   t = { "o", "s", "ss", "a" }
+   --n = { "c", "p", "m", "csv", "sv", "sw" }
+   n = { }
+
+   local columns_ = make_columns(t)
+   local _,nulls_ = make_columns(n)
+   local tables_  = make_tables(t)
+   local cond_    = make_where(t)
+
+   cond_ = cond_ .. [[ 
+      and o.name1 = ']]..config.monitor.check_app..[[' 
+      and a.id in ( select distinct(app_id) from itvision_app_trees )
+   ]]
+
+   if a_id then cond_ = cond_ .. " and a.id = " .. a_id end
+   if clause then cond_ = cond_ .. " and " .. clause end
+
+   q = Model.query(tables_, cond_, nil, columns_)
+   for _,v in ipairs(q) do table.insert(v, 1, 10) end
+
+   --if DEBUG then print( "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
+
+   return q
+end
+
+
 
 ----------------------------------------------------------------------
 --  END of the QUERIES
@@ -674,6 +708,12 @@ function select_monitors_app_objs(app_id, clause)
       b.sv_name = b.sv_name or ""
       return a.c_name..a.p_ip..a.sw_name..a.sv_name < b.c_name..b.p_ip..b.sw_name..b.sv_name  end )
 
+   return q
+end
+
+
+function select_monitors_app_objs_to_tree(app_id, clause)
+   local q = make_query_10(app_id, clause)
    return q
 end
 
@@ -756,18 +796,14 @@ function how_to_use()
 ]]
 
    --a = tree(8)
-
-   --a = make_query_1()
-   --a = make_query_2()
-   a = make_query_8()
-   --a = make_query_4()
-
-   --a = make_query_5()
+   a = make_query_10()
    --a = select_monitors()
 
+--[[
    for i,v in ipairs(a) do
       print("A: ", v[1], v.c_alias, v.c_name, v.s_name, v.sv_name, v.p_itemtype, v.ao_type, v.c_geotag, v.m_service_object_id) 
    end
+]]
 
 
 end
