@@ -1,4 +1,51 @@
 
+select node.id, node.instance_id, node.lft, node.rgt, parent.lft, parent.rgt, node.app_id as child_id , parent.app_id as parent_id
+from   itvision_app_trees AS node, itvision_app_trees AS parent
+where  node.lft BETWEEN parent.lft AND parent.rgt 
+                  AND node.app_id <> parent.app_id
+ORDER BY node.lft
+
+select  node.id, node.instance_id, node.lft, node.rgt, node.app_id, parent.app_id, sub_parent.app_id, sub_tree.app_id, 
+            (COUNT(parent.id) - (sub_tree.depth + 1)) AS depth
+from    itvision_app_trees AS node, itvision_app_trees AS parent, itvision_app_trees AS sub_parent, 
+            (   SELECT node.id, parent.app_id as app_id, (COUNT(parent.id) - 1) AS depth
+            FROM itvision_app_trees AS node,
+            itvision_app_trees AS parent
+            WHERE node.lft BETWEEN parent.lft AND parent.rgt
+            AND node.id = 3
+            GROUP BY node.id
+            ORDER BY node.lft
+            ) AS sub_tree
+where node.lft BETWEEN parent.lft AND parent.rgt
+            AND node.lft BETWEEN sub_parent.lft AND sub_parent.rgt
+            AND sub_parent.id = sub_tree.id
+GROUP BY node.id HAVING depth <= 100 ORDER BY node.lft
+
+
+
+SELECT lft, rgt INTO @parent_left, @parent_right FROM itvision_app_trees WHERE id = 3;
+SELECT child.id
+FROM itvision_app_trees AS child
+LEFT JOIN itvision_app_trees AS ancestor ON
+    ancestor.lft BETWEEN @parent_left+1 AND @parent_right-1 AND
+    child.lft BETWEEN ancestor.lft+1 AND ancestor.rgt-1
+WHERE
+    child.lft BETWEEN @parent_left+1 AND @parent_right-1 AND
+    ancestor.id IS NULL
+
+
+select  child.id, child.app_id, child.lft, child.rgt  from  itvision_app_trees AS child 
+         LEFT JOIN itvision_app_trees AS ancestor OnnN
+         ancestor.lft BETWEEN 1+1 AND 10-1 AND
+         child.lft BETWEEN ancestor.lft+1 AND ancestor.rgt-1  where  child.lft BETWEEN 1+1 AND 10-1 AND
+         ancestor.id IS NULL  
+
+
+1 8
+2 5
+3 4
+6 7
+
 select 
 
 from

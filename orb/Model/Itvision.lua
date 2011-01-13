@@ -814,15 +814,24 @@ end
 
 
 function select_tree_relat_to_graph() -- Lista apps e seus pais na arvore criada
-  local root_id = select_root_app_tree()
+   local content = {}
+   local nodes = query("itvision_app_trees", nil, nil, "id, lft, rgt, app_id")
 
-   columns   = [[ node.id, node.instance_id, node.lft, node.rgt, node.app_id as child_id , parent.app_id as parent_id ]]
-   tablename = [[ itvision_app_trees AS node, itvision_app_trees AS parent ]]
-   cond      = [[ node.lft BETWEEN parent.lft AND parent.rgt 
-                  AND node.app_id <> parent.app_id ]]
-   extra     = [[ ORDER BY node.lft ]]
+   for i,v in ipairs(nodes) do
+      columns   = [[ child.id, child.app_id, child.lft, child.rgt ]]
+      tablename = [[ itvision_app_trees AS child 
+         LEFT JOIN itvision_app_trees AS ancestor ON
+         ancestor.lft BETWEEN ]]..v.lft..[[+1 AND ]]..v.rgt..[[-1 AND
+         child.lft BETWEEN ancestor.lft+1 AND ancestor.rgt-1 ]]
+      cond      = [[ child.lft BETWEEN ]]..v.lft..[[+1 AND ]]..v.rgt..[[-1 AND
+         ancestor.id IS NULL ]]
 
-   local content = query (tablename, cond, extra, columns)
+      local child = query (tablename, cond, nil, columns)
+      for j,w in ipairs(child) do
+         table.insert(content, { parent_id=v.app_id, child_id=w.app_id } )
+      end
+   end
+
    return content
 end
 

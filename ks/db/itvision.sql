@@ -27,7 +27,7 @@ CREATE TABLE `itvision_app_contacts` (
   `app_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   KEY `fk_id6` (`app_id`),
-  KEY `fk_id7` (`user_id`)
+  CONSTRAINT `fk_id6` FOREIGN KEY (`app_id`) REFERENCES `itvision_apps` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -106,7 +106,7 @@ CREATE TABLE `itvision_app_trees` (
   KEY `fk_app_id5` (`app_id`),
   KEY `fk_instance_id16` (`instance_id`),
   CONSTRAINT `fk_app_id5` FOREIGN KEY (`app_id`) REFERENCES `itvision_apps` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -121,7 +121,7 @@ CREATE TABLE `itvision_app_viewers` (
   `app_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   KEY `fk_id4` (`app_id`),
-  KEY `fk_id5` (`user_id`)
+  CONSTRAINT `fk_id4` FOREIGN KEY (`app_id`) REFERENCES `itvision_apps` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -141,12 +141,9 @@ CREATE TABLE `itvision_apps` (
   `is_active` tinyint(4) NOT NULL DEFAULT '0',
   `service_object_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `fk_instance_id10` (`instance_id`),
   KEY `fk_object_id6` (`service_object_id`),
-  CONSTRAINT `fk_instance_id20` FOREIGN KEY (`instance_id`) REFERENCES `nagios_instances` (`instance_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `fk_instance_id27` FOREIGN KEY (`instance_id`) REFERENCES `nagios_instances` (`instance_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `fk_object_id26` FOREIGN KEY (`service_object_id`) REFERENCES `nagios_objects` (`object_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -165,7 +162,7 @@ CREATE TABLE `itvision_checkcmd_params` (
   `default_value` varchar(45) DEFAULT NULL,
   `description` varchar(245) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=329 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=361 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -180,7 +177,7 @@ CREATE TABLE `itvision_checkcmds` (
   `cmd_object_id` int(11) NOT NULL,
   `command` varchar(65) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=185 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=192 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -311,4 +308,4 @@ CREATE TABLE `itvision_user_prefs` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2011-01-05  3:10:31
+-- Dump completed on 2011-01-13 15:54:46

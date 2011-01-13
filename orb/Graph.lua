@@ -172,10 +172,10 @@ function make_tree_content(obj, rel)
    if rel[1] then
       for _,v in ipairs(rel) do
          -- FROM -------------------------------
-         local from_name = v.parent_id
+         local from_name = tostring(v.parent_id)
 
          -- TO -------------------------------
-         local to_name = v.child_id
+         local to_name = tostring(v.child_id)
 
          -- RELAT -------------------------------
          relat_label = ""
