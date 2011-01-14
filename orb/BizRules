@@ -1,0 +1,23 @@
+
+- obj é um host ou um service
+- app é uma aplicacao
+- tree é a arvore de aplicacoes
+- bp é o sistema de business process
+
+
+insert obj in app -> 	if app inactive, activate it
+                        if obj is app then
+			   insert node in tree
+			   remove node if its parent is the root node
+			remake bp config
+			reload nagios
+
+
+remove obj in app ->	if last obj, deactivate it
+                        if obj is app then
+			   remove node in tree
+			   insert node below the root node if there is any other app
+			remake bp config
+			reload nagios
+
+

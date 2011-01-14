@@ -56,6 +56,7 @@ end
 function update_apps()
    local APPS = apps:select()
    activate_all_apps(APPS)
+   os.sleep(1) -- CLUDGE Espera um pouco pois as queries das caixas de insercao estao retornando vazias!
 end
 
 
@@ -64,29 +65,22 @@ function add(web, id, msg)
    local exclude = [[ o.object_id not in ( select service_object_id from itvision_app_objects where app_id = ]]..id..[[) 
                       and o.is_active = 1 ]]
    local extra   = [[ order by o.name1, o.name2 ]]
-
    local HST = Monitor.make_query_3(nil, nil, nil, exclude .. clause .. extra)
-
    clause = [[ and o.name2 <> ']]..config.monitor.check_host..[[' ]]
    local SVC = Monitor.make_query_4(nil, nil, nil, nil, exclude .. clause .. extra)
    local APP = Itvision.select_app_service_object(nil, nil, nil, id)
    local APPOBJ = Itvision.select_app_app_objects(id)
 
---text_file_writer("/tmp/app", #HST, #SVC.." : "..#APP.." : "..#APPOBJ)
-
    return render_add(web, HST, SVC, APP, APPOBJ, id, msg)
-
 end
 ITvision:dispatch_get(add, "/add/", "/add/(%d+)", "/add/(%d+):(.+)")
 
 
 
--- TODO: problema na inclusão de multiplos itens
 function insert_obj(web)
-   update_apps()
 
    app_objects:new()
---local r = ""
+   -- inclusão de multiplos itens. deve-se acionar a selecao de multiplos itens na interface. bug abaixo
    if type(web.input.item) == "table" then
       for i, v in ipairs(web.input.item) do
          app_objects.app_id = web.input.app_id
@@ -94,7 +88,6 @@ function insert_obj(web)
          app_objects.instance_id = Model.db.instance_id
          app_objects.service_object_id = v
          app_objects:save()
---r = r.."|"..v
       end
    else
       app_objects.app_id = web.input.app_id
@@ -104,12 +97,15 @@ function insert_obj(web)
       app_objects:save()
    end
 
+   local app = apps:select(web.input.app_id); app = app[1]
+
    if web.input.type == 'app' then 
       local app_child = apps:select(nil,"service_object_id = "..web.input.item)
       Itvision.insert_subnode_app_tree(app_child[1].id, web.input.app_id)
    end
 
-   os.sleep(1) -- CLUDGE Espera um pouco pois as queries das caixas de insercao estao retornando vazias!
+   update_apps()
+
    web.prefix = "/orb/app_tabs"
    return web:redirect(web:link("/list/"..app_objects.app_id..":"..tab_id))
 end
@@ -118,7 +114,6 @@ ITvision:dispatch_post(insert_obj, "/insert_obj")
 
 
 function delete_obj(web, app_id, obj_id)
-   update_apps()
 
    if app_id and obj_id then
       local clause = "app_id = "..app_id.." and service_object_id = "..obj_id
@@ -130,13 +125,12 @@ function delete_obj(web, app_id, obj_id)
      app_relats:delete_app_relat(app_id, nil, obj_id)
    end
 
-   --web.prefix = "/orb/app_objects"
-   --return web:redirect(web:link("/add/"..app_id))
+   update_apps()
+
    web.prefix = "/orb/app_tabs"
    return web:redirect(web:link("/list/"..app_id..":"..tab_id))
 end
 ITvision:dispatch_get(delete_obj, "/delete_obj/(%d+):(%d+)")
-
 
 
 ITvision:dispatch_static("/css/%.css", "/script/%.js")
