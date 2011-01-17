@@ -2,7 +2,7 @@
 
 -- includes & defs ------------------------------------------------------
 require "Model"
-require "Itvision"
+require "App"
 require "Monitor"
 require "View"
 require "util"
@@ -92,8 +92,8 @@ function list(web, id)
       if ( id == "/" or id == "/list" ) and APPS[1] ~= nil then id = APPS[1].id else id = nil end
    end
 
-   local APPOBJ = Itvision.select_app_app_objects(id)
-   local AR = Itvision.select_app_relat_object(id)
+   local APPOBJ = App.select_app_app_objects(id)
+   local AR = App.select_app_relat_object(id)
    id = id or ""
 
    return render_list(web, APPOBJ, APPS, AR, id)
@@ -118,7 +118,7 @@ function add(web, id, msg)
       end
    end
 
-   --local HST = Itvision.select_service_object(nil, nil, nil, nil, id, true)
+   --local HST = App.select_service_object(nil, nil, nil, nil, id, true)
    local exclude = [[ o.object_id not in ( select service_object_id from itvision_app_objects where app_id = ]]..id..[[) 
                       and o.is_active = 1 ]]
    local extra   = [[ order by o.name1, o.name2 ]]
@@ -127,15 +127,15 @@ function add(web, id, msg)
    clause = " "
    local HST = Monitor.make_query_3(nil, nil, nil, exclude .. clause .. extra)
 
-   --local SVC = Itvision.select_service_object(nil, nil, nil, nil, id, nil)
+   --local SVC = App.select_service_object(nil, nil, nil, nil, id, nil)
    clause = [[ and o.name2 <> ']]..config.monitor.check_host..[[' ]]
    local SVC = Monitor.make_query_4(nil, nil, nil, nil, exclude .. clause .. extra)
 
-   local APP = Itvision.select_service_object(nil, nil, nil, true, id)
-   --local APP = Itvision.select_app_service_object(nil, nil, nil, id) --TODO: 1
+   local APP = App.select_service_object(nil, nil, nil, true, id)
+   --local APP = App.select_app_service_object(nil, nil, nil, id) --TODO: 1
 
-   local APPOBJ = Itvision.select_app_app_objects(id)
-   local AR = Itvision.select_app_relat_object(id)
+   local APPOBJ = App.select_app_app_objects(id)
+   local AR = App.select_app_relat_object(id)
    local RT = app_relat_types:select_app_relat_types()
 
    return render_add(web, HST, SVC, APP, APPOBJ, APPS, AR, RT, id, msg)
@@ -187,7 +187,7 @@ function insert_relat(web)
       return web:redirect(web:link("/add/"..app_relats.app_id)..msg)
    end
 
-   local AR = Itvision.select_app_relat_object(web.input.app_id, web.input.from, web.input.to)
+   local AR = App.select_app_relat_object(web.input.app_id, web.input.from, web.input.to)
    if AR[1] then
       local v = AR[1]
       from = make_obj_name(v.from_name1, v.from_name2)
@@ -229,7 +229,7 @@ ITvision:dispatch_get(delete_obj, "/delete_obj/(%d+):(%d+)")
 
 function remove_relat(web, app_id, from, to)
    local A = app_relats:select_app_relat(app_id, from, to)
-   local AR = Itvision.select_app_relat_object(id, from, to)
+   local AR = App.select_app_relat_object(id, from, to)
    return render_remove_relat(web, A, AR)
 end
 ITvision:dispatch_get(remove_relat, "/remove_relat/(%d+):(%d+):(%d+)")

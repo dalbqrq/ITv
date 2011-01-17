@@ -152,16 +152,16 @@ function make_tree_content(obj, rel)
       for _,v in ipairs(obj) do
          local label, name, url, shape
 
-         label = v.a_name
+         label = v.a_name 
          name  = v.a_id
-         url   = "/orb/obj_info/app/"..v.o_object_id
+         url   = "/orb/obj_info/app/"..v.a_service_object_id
          shape = "invhouse"
          shape = "octagon"
          shape = "triangle"
          shape = "diamond"
          shape = "hexagon"
 
-         color = set_color(v.ss_current_state, v.ao_type)
+         color = set_color(v.ss_current_state, "app")
          table.insert(content, node{name, shape=shape, height=1.2, width=1, fontsize=12., fixedsize=true,
                       fontname="Helvetica", label=label, color="black", fillcolor=color ,URL=url ,target="_self",
                       nodesep=0.05, style="bold,filled,solid", penwidth=2})

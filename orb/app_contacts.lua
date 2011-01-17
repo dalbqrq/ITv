@@ -2,7 +2,7 @@
 
 -- includes & defs ------------------------------------------------------
 require "Model"
-require "Itvision"
+require "App"
 require "Glpi"
 require "Monitor"
 require "View"
@@ -49,7 +49,7 @@ function add(web, id, msg)
    local clause = " "
    local extra   = [[ order by o.name1, o.name2 ]]
 
-   local APP = Itvision.select_service_object(nil, nil, nil, true, id)
+   local APP = App.select_service_object(nil, nil, nil, true, id)
    local CONTACTS = Glpi.select_contacts_in_app(id)
    local USERS = Glpi.select_contacts_not_in_app(id)
 

@@ -1,5 +1,5 @@
 require "Model"
-require "Itvision"
+require "App"
 require "Checkcmds"
 require "config"
 require "util"
@@ -178,10 +178,9 @@ end
   PS: na definicao do business process, "display"quer dizer outra coisa (visibilidade) 
       Veja em /usr/local/monitorbp/README
 ]]
-function activate_app(app, objs, flag)
+function make_app_config(app, objs, flag)
    --app = app[1]
    local s = ""
-   local file_name = string.gsub(app.name," ", "_")
 
    if app.type == "and" then op = " & " else op = " | " end
 
@@ -208,14 +207,14 @@ end
 --[[
   Cria aquivo de conf para todas a aplicacoes
 ]]
-function activate_all_apps(apps)
+function make_all_apps_config(apps)
    local s = ""
    local op
    local file_name = config.monitor.bp_dir.."/etc/nagios-bp.conf"
 
    for i, v  in ipairs(apps) do
-      local objs = Itvision.select_app_app_objects(v.id)
-      if objs[1] then s = s .. activate_app(v, objs, v.is_active) end
+      local objs = App.select_app_app_objects(v.id)
+      if objs[1] then s = s .. make_app_config(v, objs, v.is_active) end
    end
 
    text_file_writer(file_name, s)

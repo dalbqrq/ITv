@@ -5,7 +5,7 @@ require "View"
 require "Graph"
 require "Model"
 require "Monitor"
-require "Itvision"
+require "App"
 require "orbit"
 
 module(Model.name, package.seeall,orbit.new)
@@ -39,7 +39,7 @@ function show(web, id)
    end
 
    local obj = Monitor.select_monitors_app_objs_to_tree()
-   local rel = Itvision.select_tree_relat_to_graph()
+   local rel = App.select_tree_relat_to_graph()
 
    return render_show(web, obj, rel)
 end

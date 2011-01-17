@@ -2,7 +2,7 @@
 
 -- includes & defs ------------------------------------------------------
 require "Model"
-require "Itvision"
+require "App"
 require "Monitor"
 require "View"
 require "util"
@@ -55,7 +55,7 @@ end
 
 function update_apps()
    local APPS = apps:select()
-   activate_all_apps(APPS)
+   make_all_apps_config(APPS)
    os.sleep(1) -- CLUDGE Espera um pouco pois as queries das caixas de insercao estao retornando vazias!
 end
 
@@ -68,8 +68,8 @@ function add(web, id, msg)
    local HST = Monitor.make_query_3(nil, nil, nil, exclude .. clause .. extra)
    clause = [[ and o.name2 <> ']]..config.monitor.check_host..[[' ]]
    local SVC = Monitor.make_query_4(nil, nil, nil, nil, exclude .. clause .. extra)
-   local APP = Itvision.select_app_service_object(nil, nil, nil, id)
-   local APPOBJ = Itvision.select_app_app_objects(id)
+   local APP = App.select_app_service_object(nil, nil, nil, id)
+   local APPOBJ = App.select_app_app_objects(id)
 
    return render_add(web, HST, SVC, APP, APPOBJ, id, msg)
 end
@@ -101,7 +101,7 @@ function insert_obj(web)
 
    if web.input.type == 'app' then 
       local app_child = apps:select(nil,"service_object_id = "..web.input.item)
-      Itvision.insert_subnode_app_tree(app_child[1].id, web.input.app_id)
+      App.insert_subnode_app_tree(app_child[1].id, web.input.app_id)
    end
 
    update_apps()

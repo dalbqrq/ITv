@@ -2,7 +2,7 @@
 
 -- includes & defs ------------------------------------------------------
 require "Model"
-require "Itvision"
+require "App"
 require "View"
 require "util"
 require "monitor_util"
@@ -30,13 +30,12 @@ function apps:select(id, clause_)
       clause = clause_
    end
 
-   --if clause == nil then clause = "name <> '_ROOT'" end
-
    extra  = " order by name "
-   local content = Model.query("itvision_apps", clause, extra)
-   local root = Itvision.select_root_app()
 
-   return content, root
+   local content = Model.query("itvision_apps", clause, extra)
+   local root = App.select_root_app()
+
+   return content, root, count
 end
 
 
@@ -73,7 +72,6 @@ end
 
 function objects:select_app(name2)
    if name2 then
-      --clause = "name2 = '"..name2.."' and name1 = '"..config.monitor.check_app.."' and is_active = 1"
       clause = "name2 = '"..name2.."' and name1 = '"..config.monitor.check_app.."' "
    else
       clause = nil
@@ -162,7 +160,7 @@ function insert(web)
    apps:save()
 
    local app = apps:select(nil, "name = '"..web.input.name.."'")
-   Itvision.insert_node_app_tree(app[1].id, nil, 1)
+   App.insert_node_app_tree(app[1].id, nil, 1)
    activate(web, app[1].id, 0)
    activate(web, app[1].id, 1)
 
@@ -187,9 +185,9 @@ function delete(web, id)
       Model.delete ("itvision_apps", "id = "..id) 
    end
 
-   local tree_id = Itvision.find_node_id(id)
+   local tree_id = App.find_node_id(id)
    for _,v in ipairs(tree_id) do
-      Itvision.delete_node_app_tree(v.id)
+      App.delete_node_app_tree(v.id)
    end
 
    web.prefix = "/orb/app"
@@ -214,20 +212,14 @@ function activate(web, id, flag)
       local clause = "id = "..id
       local tables = "itvision_apps"
       cols.is_active = flag
-      -- DEBUG: text_file_writer("/tmp/1", id.." : "..flag)
 
       local A = apps:select(id)
-      local O = Itvision.select_app_app_objects(id)
-      if A[1] and O[1] then
-         -- Sinaliza a app como ativa
-         Model.update (tables, cols, clause) 
-         -- Recria arquivo de config do business process e 
-         -- servicos do nagios para as aplicacoes
-         local APPS = apps:select()
-         activate_all_apps(APPS)
-
+      local count = App.count_app_objects(id)
+      if A[1] and count > 0 then
          -- se for uma operacao de ativacao entao atualiza o service_object_id da aplicacao criada
          if flag == 1 then
+            App.activate_app(id) 
+
             local s = objects:select_app(app_to_id(A[1].name))
             -- caso host ainda nao tenha sido incluido aguarde e tente novamente
             counter = 0
@@ -236,11 +228,11 @@ function activate(web, id, flag)
                os.reset_monitor()
                os.sleep(1)
                s = objects:select_app(app_to_id(A[1].name))
-               -- DEBUG: text_file_writer("/tmp/act_"..app_to_id(A[1].name), app_to_id(A[1].name).." : "..counter.."\n")
             end
             local svc = { id = A[1].id, service_object_id = s[1].object_id }
             apps:update(svc)
          else
+            App.deactivate_app(id) 
             os.reset_monitor()
          end
 
@@ -273,12 +265,6 @@ function render_list(web, A, root, msg, no_header)
    for i, v in ipairs(A) do
       local button_remove, button_edit, button_active = "-", "-", "-"
 
-      if v.is_active == "0" then
-         stract = strings.activate
-      else
-         stract = strings.deactivate
-      end
-
       --web.prefix = "/orb/app_objects"
       --local lnk = web:link("/list/"..v.id)
       web.prefix = "/orb/app_tabs"
@@ -289,7 +275,14 @@ function render_list(web, A, root, msg, no_header)
          button_remove = button_link(strings.remove, web:link("/remove/"..v.id), "negative")
       end
       button_edit   = button_link(strings.edit, web:link("/edit/"..v.id..":"..v.name..":"..v.type))
+
+      if v.is_active == "0" then
+         stract = strings.activate
+      else
+         stract = strings.deactivate
+      end
       button_active = button_link(stract, web:link("/activate/"..v.id..":"..v.is_active)) 
+
 
       row[#row+1] = {
          a{ href=lnk, v.name },

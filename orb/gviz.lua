@@ -5,7 +5,7 @@ require "View"
 require "Graph"
 require "Model"
 require "Monitor"
-require "Itvision"
+require "App"
 require "orbit"
 
 module(Model.name, package.seeall,orbit.new)
@@ -56,7 +56,7 @@ function show(web, id, no_header)
    --local app = apps:select_apps(id)
    --local obj = Model.select_app_to_graph(id)
    local obj = Monitor.select_monitors_app_objs(id)
-   local rel = Itvision.select_app_relat_to_graph(id)
+   local rel = App.select_app_relat_to_graph(id)
    app_name = app[1].name
    obj_id = app[1].service_object_id
 

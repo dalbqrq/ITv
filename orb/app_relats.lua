@@ -2,7 +2,7 @@
 
 -- includes & defs ------------------------------------------------------
 require "Model"
-require "Itvision"
+require "App"
 require "Monitor"
 require "View"
 require "util"
@@ -47,8 +47,8 @@ end
 
 
 function add(web, id, msg)
-   local APPOBJ = Itvision.select_app_app_objects(id)
-   local AR = Itvision.select_app_relat_object(id)
+   local APPOBJ = App.select_app_app_objects(id)
+   local AR = App.select_app_relat_object(id)
    local RT = app_relat_types:select_app_relat_types()
 
    return render_add(web, APPOBJ, AR, RT, id, msg)
@@ -74,7 +74,7 @@ function insert_relat(web)
       return web:redirect(web:link("/add/"..app_relats.app_id)..msg)
    end
 
-   local AR = Itvision.select_app_relat_object(web.input.app_id, web.input.from, web.input.to)
+   local AR = App.select_app_relat_object(web.input.app_id, web.input.from, web.input.to)
    if AR[1] then
       local v = AR[1]
       from = make_obj_name(v.from_name1, v.from_name2)

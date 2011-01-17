@@ -108,37 +108,6 @@ function select_root_app()
    return root[1].app_id
 end
 
------------------------------ NAGIOS X ITVISION X GLPI ----------------------------------
-
-function select_ci_monitor (w_wo, itemtype)
-    --[[
-      select c.id, n.id as nid, c.name, n.ip, n.itemtype 
-      from glpi_networkports n, glpi_computers c 
-      where c.id = n.items_id and itemtype="Computer"
-         and not exists (select 1 from itvision_monitors m where m.networkport_id = n.id);
-   ]]
-
-end
-
-function select_ci_with_monitor ()
-
-end
-
-
-function select_ci_without_monitor ()
-end
-
-
-function select_version_monitor(w_wo)
-end
-
-
-function select_version_with_monitor ()
-end
-
-
-function select_version_without_monitor ()
-end
 
 
 ----------------------------- APP ----------------------------------
@@ -163,6 +132,16 @@ end
 
 function select_app_object (cond_, extra_, columns_)
    local content = query ("itvision_app_objects", cond_, extra_, columns_)
+   return content
+end
+
+
+function insert_app_object (content_)
+   local table_ = "itvision_app_objects"
+   insert (table_, content_)
+   
+   local content = query (table_, "app_id = '"..content_.app_id.."'")
+   
    return content
 end
 
@@ -208,20 +187,23 @@ function select_app_to_graph (id)
 end
 
 
-function insert_app_object (content_)
-   local table_ = "itvision_app_objects"
-   insert (table_, content_)
-   
-   local content = query (table_, "app_id = '"..content_.app_id.."'")
-   
-   return content
-end
-
-
 ----------------------------- APP RELAT ----------------------------------
 
 function select_app_relat (cond_, extra_, columns_)
    local content = query ("itvision_app_relats", cond_, extra_, columns_)
+   return content
+end
+
+
+
+function insert_app_relat (content_)
+   local table_ = "itvision_app_relats"
+   insert (table_, content_)
+   
+   local content = query (table_, "app_id = "..content_.app_id.." and "..
+      "from_object_id = "..content_.from_object_id..
+      " and to_object_id = "..content_.to_object_id)
+   
    return content
 end
 
@@ -495,39 +477,26 @@ end
 
 
 
-
-function insert_app_relat (content_)
-   local table_ = "itvision_app_relats"
-   insert (table_, content_)
-   
-   local content = query (table_, "app_id = "..content_.app_id.." and "..
-      "from_object_id = "..content_.from_object_id..
-      " and to_object_id = "..content_.to_object_id)
-   
-   return content
-end
-
-
 ----------------------------- APP TREE ----------------------------------
 --[[
    Nested Set Model
    see: http://dev.mysql.com/tech-resources/articles/hierarchical-data.html
 
 
-function new_app_tree() -- Create table structure
-function insert_node_app_tree(app_id, origin_, position_) -- Inclui novo noh
-function select_root_app_tree () -- Seleciona o noh raiz da arvore
+function new_app_tree() 					-- Create table structure
+function insert_node_app_tree(app_id, origin_, position_) 	-- Inclui novo noh
+function select_root_app_tree () 				-- Seleciona o noh raiz da arvore
 function find_node_id(app_id, conected_to_root)
 function delete_node_app_tree(orgin_)
 function show_app_tree()
-function select_full_path_app_tree (origin) -- Seleciona toda sub-arvore a patir de um noh de origem
-function select_leaf_nodes_app_tree () -- Seleciona todas as folhas da arvore
-function select_simple_path_app_tree (origin) -- Seleciona um unico caminho partindo de um noh 
-function select_depth_app_tree (origin) -- Seleciona a profundidade de cada noh
-function select_depth_subtree_app_tree (origin) -- Seleciona a profundidade de cada noh a partir de 
-function select_subrdinates_app_tree (origin) -- Encontra o noh subordinado imediato
-function delete_app_tree (origin) -- remove um noh dado por 'origin'
-function move_app_tree(origin, destiny) -- move um ramo de arvore para outro noh
+function select_full_path_app_tree (origin) 			-- Seleciona toda sub-arvore a patir de um noh de origem
+function select_leaf_nodes_app_tree () 				-- Seleciona todas as folhas da arvore
+function select_simple_path_app_tree (origin) 			-- Seleciona um unico caminho partindo de um noh 
+function select_depth_app_tree (origin) 			-- Seleciona a profundidade de cada noh
+function select_depth_subtree_app_tree (origin) 		-- Seleciona a profundidade de cada noh a partir de 
+function select_subrdinates_app_tree (origin) 			-- Encontra o noh subordinado imediato
+function delete_app_tree (origin) 				-- remove um noh dado por 'origin'
+function move_app_tree(origin, destiny) 			-- move um ramo de arvore para outro noh
 
 
 

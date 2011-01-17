@@ -43,7 +43,7 @@ local tables = {
    O valor dos 'aliases' é a resposta da pergunta: Qual é o campo da tabela 'name' que será usado para ligar com a tabela a 'alias'?
    Ou seja, é a chave estrangeira.
 ]]
-   a =   { name="itvision_apps",                   ao="id", at="id", o="service_object_id" } ,
+   a =   { name="itvision_apps",                   ao="id", at="id" } ,
    at =  { name="itvision_app_trees",              a="app_id" } ,
    ao =  { name="itvision_app_objects",            a="app_id", o="service_object_id" } ,
    m =   { name="itvision_monitors",               o="service_object_id", s="service_object_id", ss="service_object_id", 
@@ -59,6 +59,14 @@ local tables = {
    csv = { name="glpi_computers_softwareversions", c="computers_id", sv="softwareversions_id" },
    sv =  { name="glpi_softwareversions",           m="id", csv="id", sw="softwares_id" },
    sw =  { name="glpi_softwares",                  sv="id" },
+
+
+-- Definicoes especiais para esta query que é usada somente para a criacao da arvore de apps
+   a_ =   { name="itvision_apps",                   o_="service_object_id" } ,
+   o_ =   { name="nagios_objects",                  a_="object_id", s_="object_id" }, 
+   s_ =   { name="nagios_services",                 o_="service_object_id", ss_="service_object_id" },
+   ss_ =  { name="nagios_servicestatus",            s_="service_object_id" },
+
 }
 
 
@@ -611,8 +619,7 @@ end
 ----------------------------------------------------------------------
 function make_query_10(a_id, clause)
    local q, t = {}, {}
-   t = { "o", "s", "ss", "a" }
-   --n = { "c", "p", "m", "csv", "sv", "sw" }
+   t = { "o_", "s_", "ss_", "a_" }
    n = { }
 
    local columns_ = make_columns(t)
@@ -620,9 +627,11 @@ function make_query_10(a_id, clause)
    local tables_  = make_tables(t)
    local cond_    = make_where(t)
 
+   columns_ = string.gsub(columns_, "__", "_") 
+
    cond_ = cond_ .. [[ 
-      and o.name1 = ']]..config.monitor.check_app..[[' 
-      and a.id in ( select distinct(app_id) from itvision_app_trees )
+      and o_.name1 = ']]..config.monitor.check_app..[[' 
+      and a_.id in ( select distinct(app_id) from itvision_app_trees )
    ]]
 
    if a_id then cond_ = cond_ .. " and a.id = " .. a_id end
