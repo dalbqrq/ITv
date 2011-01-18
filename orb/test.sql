@@ -24,12 +24,16 @@ ORDER BY parent.lft
 
 
 -- lista de aplicacoes para nagios_bp
-select distinct(node.app_id)
-from itvision_app_trees AS node, itvision_app_trees AS parent 
+
+
+select distinct(node.app_id), a.name, a.type, a.is_active, a.service_object_id
+from itvision_app_trees AS node, itvision_app_trees AS parent, itvision_apps AS a 
 where node.lft BETWEEN parent.lft AND parent.rgt 
-      AND parent.id = (select t.id from itvision_app_trees t, itvision_apps a
-                       where t.app_id = a.id and a.name = '_ROOT')
-   ORDER BY node.lft desc;
+      AND parent.id = (select id from itvision_app_trees where lft = 1)
+      AND node.app_id = a.id
+   ORDER BY node.lft desc
+
+
 
 -- lista de aplicacoes para adicao de subapp em uma app (app_objects)
  select distinct(a.service_object_id) from itvision_app_trees AS node, itvision_app_trees AS parent, itvision_apps a where node.lft BETWEEN parent.lft AND parent.rgt AND node.id in (select id from itvision_app_trees where app_id = 26) and parent.app_id <> 26 and a.id = parent.app_id and a.is_active = 1
@@ -83,3 +87,17 @@ where node.lft BETWEEN     parent.lft AND     parent.rgt
 ORDER BY node.lft ;
 
 -- apps
+
+select *
+from
+   nagios_objects o_,
+   nagios_services s_,
+   itvision_apps a_
+where
+   o_.object_id = s_.service_object_id and
+   o_.object_id = a_.service_object_id 
+      and o_.name1 = 'BUSPROC_HOST' 
+      and a_.is_active = 1
+      and a_.id in ( select distinct(app_id) from itvision_app_trees )
+      and s_.service_object_id not in (select service_object_id from nagios_servicestatus)
+

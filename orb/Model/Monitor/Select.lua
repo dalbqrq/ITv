@@ -72,15 +72,16 @@ local tables = {
 
 --[[ 
    A funcao make_columns() recebe uma string com um alias de tabela ou uma tabela com aliases de tabelas e
-   retorna duas strings: s, n
+   retorna três strings: s, n, z
 
    - Uma (s) com a lista de colunas de uma tabale, precedida pelo alias da tabela e seguido do novo
    nome da coluna composto por: alias"_"name_coluna
    - Outra (n) somente com os supostos novos nomes para colunas que de fato nao existem. O objetivo 
    disso é criar queries em seguencia cuja lista de campos seja homogênia.
+   - Por último (z), a relacao de campos com valors 0 (zero)
 ]]
 function make_columns(a)
-   local s, n = "", ""
+   local s, n, z = "", "", ""
    local t = {}
    local alias
 
@@ -94,21 +95,21 @@ function make_columns(a)
       local q = show_columns(tables[alias].name)
 
       for _,f in pairs(q) do
-         --DEBUG: print(f.Field, f.Key)
          local spc = ""
          if s ~= "" then 
             s = s..",\n"
             n = n..",\n"
+            z = z..",\n"
          end
 
          for c = 1,36-string.len(f.Field)-string.len(alias) do spc = spc.." " end
-         s = s.."   "..alias.."."..f.Field..spc.."as "..alias.."_"..f.Field --.."\n"
-         --n = n.."   ''                                   as "..alias.."_"..f.Field --.."\n"
-         n = n.."   null                                 as "..alias.."_"..f.Field --.."\n"
+         s = s.."   "..alias.."."..f.Field..spc.."as "..alias.."_"..f.Field
+         n = n.."   null                                 as "..alias.."_"..f.Field
+         z = z.."   0                                    as "..alias.."_"..f.Field
       end
    end
 
-   return s, n
+   return s, n, z
 end
 
 
@@ -613,7 +614,6 @@ function make_query_9(c_id, p_id, sv_id, clause)
    return q
 end
 
-
 ----------------------------------------------------------------------
 --  QUERY 10 - aplicacao com monitor para grafico de arvore 
 ----------------------------------------------------------------------
@@ -631,6 +631,7 @@ function make_query_10(a_id, clause)
 
    cond_ = cond_ .. [[ 
       and o_.name1 = ']]..config.monitor.check_app..[[' 
+      and a_.is_active = 1
       and a_.id in ( select distinct(app_id) from itvision_app_trees )
    ]]
 
@@ -639,6 +640,42 @@ function make_query_10(a_id, clause)
 
    q = Model.query(tables_, cond_, nil, columns_)
    for _,v in ipairs(q) do table.insert(v, 1, 10) end
+
+   --if DEBUG then print( "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
+
+   return q
+end
+
+
+----------------------------------------------------------------------
+--  QUERY 11 - aplicacao com monitor para grafico de arvore com ss pendente
+----------------------------------------------------------------------
+function make_query_11(a_id, clause)
+   local q, t = {}, {}
+   t = { "o_", "s_", "a_" }
+   z = { "ss_" }
+
+   local columns_ = make_columns(t)
+   local _,_,zeros_ = make_columns(z)
+   local tables_  = make_tables(t)
+   local cond_    = make_where(t)
+
+   columns_ = string.gsub(columns_, "__", "_") 
+
+   cond_ = cond_ .. [[ 
+      and o_.name1 = ']]..config.monitor.check_app..[[' 
+      and a_.is_active = 1
+      and a_.id in ( select distinct(app_id) from itvision_app_trees )
+      and s_.service_object_id not in (select service_object_id from nagios_servicestatus)
+   ]]
+
+   if a_id then cond_ = cond_ .. " and a.id = " .. a_id end
+   if clause then cond_ = cond_ .. " and " .. clause end
+
+   columns_ = columns_..",\n"..zeros_
+
+   q = Model.query(tables_, cond_, nil, columns_)
+   for _,v in ipairs(q) do table.insert(v, 1, 11) end
 
    --if DEBUG then print( "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
 
@@ -722,7 +759,13 @@ end
 
 
 function select_monitors_app_objs_to_tree(app_id, clause)
-   local q = make_query_10(app_id, clause)
+   local q = {}
+   local q10 = make_query_10(app_id, clause)
+   local q11 = make_query_11(app_id, clause)
+
+   for _,v in ipairs(q10) do table.insert(q, v) end
+   for _,v in ipairs(q11) do table.insert(q, v) end
+
    return q
 end
 
@@ -805,7 +848,7 @@ function how_to_use()
 ]]
 
    --a = tree(8)
-   a = make_query_10()
+   a = make_query_11()
    --a = select_monitors()
 
 --[[

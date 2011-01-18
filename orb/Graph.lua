@@ -23,6 +23,8 @@ function set_color(state, obj_type)
       color = host_alert[state+1].color
    elseif obj_type == 'svc' then
 ]]
+      -- state é nil quando aplicacao uma aplicacao é reativada e ainda nao possui servicestatus
+      if state == nil then state = 4 end 
       color = service_alert[state].color
 --[[
    elseif obj_type == 'app' then
@@ -152,7 +154,7 @@ function make_tree_content(obj, rel)
       for _,v in ipairs(obj) do
          local label, name, url, shape
 
-         label = v.a_name 
+         label = v.a_name ..":"..v.a_id
          name  = v.a_id
          url   = "/orb/obj_info/app/"..v.a_service_object_id
          shape = "invhouse"

@@ -41,9 +41,7 @@ function activate_app (app_id, flag)
    flag = flag or 1;
    local content_ = { is_active = flag }
    update (table_, content_, "id = "..app_id)
-
-   local APPS = select_app("is_active = 1")
-   make_all_apps_config(APPS)
+   remake_apps_config_file()
 
    return true
 end
@@ -55,6 +53,13 @@ function deactivate_app (app_id, flag)
    activate_app (app_id, flag)
 
    return true
+end
+
+require "App.Tree"
+
+function remake_apps_config_file()
+   local APPS = select_uniq_app_in_tree()
+   make_all_apps_config(APPS)
 end
 
 
@@ -85,6 +90,7 @@ end
 
 
 function select_app_app_objects (id)
+   -- seleciona objetos (hosts e services) de uma aplicacao 
    local cond_ = "o.object_id = ao.service_object_id and ao.app_id = a.id and o.object_id = m.service_object_id and m.networkports_id = p.id "
    if id then
       cond_ = cond_ .. " and a.id = "..id
@@ -96,19 +102,23 @@ function select_app_app_objects (id)
         m.name as name ]]
    local content = query (tables_, cond_, extra_, columns_)
 
-   local cond_ = "o.object_id = ao.service_object_id and ao.app_id = a.id and ao.type = 'app' "
+   -- seleciona sub-aplicacoes de uma aplicacao
+   local cond_ = [[ o.object_id = ao.service_object_id and ao.app_id = a.id and ab.service_object_id = o.object_id
+        and ab.is_active = 1 and ao.type = 'app' ]]
    if id then
       cond_ = cond_ .. " and a.id = "..id
    end
-   local tables_ = "nagios_objects o, itvision_app_objects ao, itvision_apps a "
+   local tables_ = [[ nagios_objects o, itvision_app_objects ao, itvision_apps a, itvision_apps ab ]]
    local columns_ = [[ o.object_id, o.objecttype_id, o.name1, o.name2, ao.type as obj_type, a.id as 
 	app_id, a.name as a_name, a.type as a_type, a.is_active, a.service_object_id as service_id, 
         NULL as itemtype, NULL as items_id,
         o.name2 as name ]]
    local content2 = query (tables_, cond_, extra_, columns_)
+
    for _,v in ipairs(content2) do
       table.insert(content,v)
    end
+
    return content
 end
 

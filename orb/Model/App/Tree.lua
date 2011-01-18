@@ -10,8 +10,8 @@ require "messages"
 
 
 function new_app_tree() 					-- Create table structure
-function insert_node_app_tree(app_id, origin_, position_) 	-- Inclui novo noh
 function select_root_app_tree () 				-- Seleciona o noh raiz da arvore
+function insert_node_app_tree(app_id, origin_, position_) 	-- Inclui novo noh
 function find_node_id(app_id, conected_to_root)
 function delete_node_app_tree(orgin_)
 function show_app_tree()
@@ -287,7 +287,7 @@ function select_subrdinates_app_tree (origin) -- Encontra o noh subordinado imed
 
    columns   = [[ node.id, node.instance_id, node.lft, node.rgt, node.app_id,
             (COUNT(parent.id) - (sub_tree.depth + 1)) AS depth ]]
-   tablename = [[ itvision_app_trees AS node, itvision_app_trees AS parent, itvision_app_trees AS sub_parent, 
+   tablename = [[ itvision_app_trees AS node, itvision_app_trees AS parent, itvision_app_trees AS sub_parent, itvision_apps AS a
             (   SELECT node.id, (COUNT(parent.id) - 1) AS depth
             FROM itvision_app_trees AS node,
             itvision_app_trees AS parent
@@ -298,7 +298,8 @@ function select_subrdinates_app_tree (origin) -- Encontra o noh subordinado imed
             ) AS sub_tree ]]
    cond      = [[ node.lft BETWEEN parent.lft AND parent.rgt
             AND node.lft BETWEEN sub_parent.lft AND sub_parent.rgt
-            AND sub_parent.id = sub_tree.id ]]
+            AND sub_parent.id = sub_tree.id
+            AND node.app_id = a.id AND a.iv_active = 1 ]]
    extra     = [[ GROUP BY node.id HAVING depth = 1 ORDER BY node.lft ]]
    --extra     = [[ GROUP BY node.id HAVING depth <= 1 ORDER BY node.lft ]]
 
@@ -310,16 +311,18 @@ end
 
 function select_tree_relat_to_graph() -- Lista apps e seus pais na arvore criada
    local content = {}
+   --local nodes = query("itvision_app_trees t, itvision_apps a", "t.app_id = a.id and a.is_active = 1", nil, "t.id as id, lft, rgt, app_id")
    local nodes = query("itvision_app_trees", nil, nil, "id, lft, rgt, app_id")
 
    for i,v in ipairs(nodes) do
       columns   = [[ child.id, child.app_id, child.lft, child.rgt ]]
-      tablename = [[ itvision_app_trees AS child 
+      tablename = [[ itvision_apps AS a, itvision_app_trees AS child 
          LEFT JOIN itvision_app_trees AS ancestor ON
          ancestor.lft BETWEEN ]]..v.lft..[[+1 AND ]]..v.rgt..[[-1 AND
          child.lft BETWEEN ancestor.lft+1 AND ancestor.rgt-1 ]]
       cond      = [[ child.lft BETWEEN ]]..v.lft..[[+1 AND ]]..v.rgt..[[-1 AND
-         ancestor.id IS NULL ]]
+         ancestor.id IS NULL 
+         AND child.app_id = a.id AND a.is_active = 1 ]]
 
       local child = query (tablename, cond, nil, columns)
       for j,w in ipairs(child) do
@@ -340,6 +343,20 @@ function insert_subnode_app_tree(app_child, app_parent) -- Adiciona nós filhos 
       end
 end
 
+
+function select_uniq_app_in_tree()						-- seleciona app unico na árvore (usado p/ config do nagiosbp)
+
+   columns   = [[ distinct(node.app_id) as id, a.name as name, a.type as type, a.is_active as is_active, 
+      a.service_object_id as service_object_id ]]
+   tablename = [[ itvision_app_trees AS node, itvision_app_trees AS parent, itvision_apps AS a ]]
+   cond      = [[ node.lft BETWEEN parent.lft AND parent.rgt
+      AND parent.id = (select id from itvision_app_trees where lft = 1) 
+      AND node.app_id = a.id ]]
+   extra     = [[ ORDER BY node.lft desc  ]]
+
+   content = query (tablename, cond, extra, columns)
+   return content
+end
 
 
 function delete_app_tree (origin) -- remove um noh dado por 'origin'
