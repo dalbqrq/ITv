@@ -34,7 +34,7 @@ apt-get -y upgrade
 install_pack openssh-server
 install_pack build-essential
 install_pack locate
-install_pack apache2
+install_pack apache2 
 install_pack libapache2-mod-php5
 install_pack libgd2-xpm-dev
 install_pack graphviz
@@ -59,7 +59,7 @@ install_pack nagios3
 install_pack nagios-nrpe-plugin
 install_pack nagios-nrpe-server
 install_pack ndoutils-nagios3-mysql
-install_pack php5-mysql # OCSNG
+install_pack php5-mysql # OCSNG - NEDI
 install_pack perl # OCSNG
 install_pack libapache2-mod-perl2 # OCSNG
 install_pack libxml-simple-perl # OCSNG
@@ -68,7 +68,7 @@ install_pack libdbi-perl # OCSNG
 install_pack libdbd-mysql-perl # OCSNG
 install_pack libcgi-simple-perl # OCSNG
 install_pack php5 # OCSNG
-install_pack php5-gd # OCSNG
+install_pack php5-gd # OCSNG - NEDI
 install_pack libapache-dbi-perl # OCSNG
 install_pack libnet-ip-perl # OCSNG
 install_pack libsoap-lite-perl # OCSNG
@@ -81,6 +81,11 @@ install_pack libgd-gd2-perl
 install_pack perlmagick
 install_pack librrds-perl
 install_pack nagiosgrapher
+install_pack libnet-snmp-perl  # NEDI
+install_pack libnet-telnet-cisco-perl # NEDI
+install_pack php5-snmp # NEDI
+install_pack libalgorithm-diff-perl # NEDI
+install_pack rrdtool # NEDI
 
 
 
@@ -452,6 +457,33 @@ cpan -i YAML
 
 sed -e "/Alias \/ocsreports/a \\
 Alias /ocs /ocsinventory-bla/bla" ocsinventory-reports.conf
+
+
+
+# --------------------------------------------------
+# NEDI
+# --------------------------------------------------
+install_msg NEDI
+
+cd /tmp
+wget http://nedi.ch/_media/files:nedi-1.0.5.tgz
+mv files:nedi-1.0.5.tgz nedi-1.0.5.tgz
+tar -xzf nedi-1.0.5.tgz
+mv nedi /usr/local
+chown -R netadm.netadm /usr/local/nedi
+chmod 775 /usr/local/nedi/html/log/
+
+echo "Alias /nedi "/usr/local/nedi"
+<Directory "/usr/local/nedi/html/">
+    Options None
+    AllowOverride None
+    Order allow,deny
+    Allow from all
+</Directory>"  >> /etc/apache2/conf.d/nedi.conf
+
+ln -s /usr/local/nedi/nedi.conf /etc/nedi.conf
+
+
 
 
 
