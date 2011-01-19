@@ -13,7 +13,7 @@ function new_app_tree() 					-- Create table structure
 function select_root_app_tree () 				-- Seleciona o noh raiz da arvore
 function insert_node_app_tree(app_id, origin_, position_) 	-- Inclui novo noh
 function find_node_id(app_id, conected_to_root)
-function delete_node_app_tree(orgin_)
+function delete_node_app_tree(origin_)
 function show_app_tree()
 function select_full_path_app_tree (origin) 			-- Seleciona toda sub-arvore a patir de um noh de origem
 function select_leaf_nodes_app_tree () 				-- Seleciona todas as folhas da arvore
@@ -129,17 +129,18 @@ end
 
 function find_node_id(app_id, conected_to_root)
    local cond = ""
+
    if conected_to_root then 
       local node = select_subordinates_app_tree (nil, app_id)
       cond = " id = "..node[1].id.." and "
    end
-text_file_writer("/tmp/fnode", app_id.."\n")
+
    local content = query ("itvision_app_trees", cond.." app_id = "..app_id)
    return content
 end
 
 
-function delete_node_app_tree(orgin_)
+function delete_node_app_tree(origin_)
    local lft, rgt, width, root_id
    local content = {}
 
@@ -153,9 +154,6 @@ function delete_node_app_tree(orgin_)
    lft   = tonumber(content[1].lft)
    rgt   = tonumber(content[1].rgt)
    width = tonumber(content[1].width)
-
-text_file_writer("/tmp/delnode", lft.." : "..rgt.." : "..widht.."\n")
-
 
    execute ( "LOCK TABLE itvision_app_trees WRITE" )
    execute ( "delete from itvision_app_trees where lft between "..lft.." and "..rgt )
@@ -190,7 +188,6 @@ function show_app_tree()
    end 
 end
    
-
 
 function select_full_path_app_tree (origin) -- Seleciona toda sub-arvore a patir de um noh de origem
    local root_id, root = {}

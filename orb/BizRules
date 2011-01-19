@@ -21,3 +21,15 @@ remove obj in app ->	if last obj, deactivate it
 			reload nagios
 
 
+- operacoes com nos da árvore
+
+
+insert node ->		se nova app, insere abaixo de root
+			se app existente, insere em origin_ e se existe abaixo de root, remove abaixo de root
+
+
+remove node ->		seleciona todos os nós,
+			para cada nó,
+				seleciona filhos,
+				para cada  filho... 
+      (completar no futuro. agora impedirei a remocao de nos com filhos)

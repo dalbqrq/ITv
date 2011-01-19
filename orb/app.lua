@@ -177,16 +177,17 @@ ITvision:dispatch_get(remove, "/remove/(%d+)")
 
 function delete(web, id)
    if id then
+      local tree_id = App.find_node_id(id)
+      for _,v in ipairs(tree_id) do
+text_file_writer("/tmp/appdel", v.id.." : "..#tree_id.."\n")
+         App.delete_node_app_tree(v.id)
+      end
+
       Model.delete ("itvision_app_relats", "app_id = "..id) 
       Model.delete ("itvision_app_objects", "app_id = "..id) 
       Model.delete ("itvision_app_contacts", "app_id = "..id) 
       Model.delete ("itvision_app_viewers", "app_id = "..id) 
       Model.delete ("itvision_apps", "id = "..id) 
-   end
-
-   local tree_id = App.find_node_id(id)
-   for _,v in ipairs(tree_id) do
-      App.delete_node_app_tree(v.id)
    end
 
    web.prefix = "/orb/app"
