@@ -140,7 +140,7 @@ function find_node_id(app_id, conected_to_root)
 end
 
 
-function delete_node_app_tree(origin_)
+function delete_node_app_tree(origin_)  -- remove toda sub-arvore abaixo de origin_
    local lft, rgt, width, root_id
    local content = {}
 
@@ -163,6 +163,32 @@ function delete_node_app_tree(origin_)
 
    return true
 end
+
+
+function delete_node_app(origin) -- remove um noh dado por 'origin' trazendo toda a sub-arvore para o pai de origin
+   local lft, rgt, width, root_id
+   local content = {}
+
+   if origin_ then
+      -- usuario deu a origem, entao verifica se ela existe
+      content = query ("itvision_app_trees", "id = ".. origin_, nil, "lft, rgt, rgt - lft + 1 as width")
+   else
+      return false
+   end
+
+   lft   = tonumber(content[1].lft)
+   rgt   = tonumber(content[1].rgt)
+   width = tonumber(content[1].width)
+
+   execute ( "LOCK TABLE itvision_app_trees WRITE" )
+   execute ( "delete from itvision_app_trees where lft = "..lft.." and rgt = "..rgt )
+   execute ( "update itvision_app_trees set lft = lft - 1 where lft > "..lft )
+   execute ( "update itvision_app_trees set rgt = rgt - 1 where rgt > "..rgt )
+   execute ( "UNLOCK TABLES" )
+
+   return true
+end
+
 
 
 function delete_node_app_conected_to_root(app_id)
@@ -368,13 +394,6 @@ function select_uniq_app_in_tree()						-- seleciona app unico na árvore (usado
    content = query (tablename, cond, extra, columns)
    return content
 end
-
-
-function delete_app_tree (origin) -- remove um noh dado por 'origin'
-   -- TODO: !
-   return false
-end
-
 
 function move_app_tree(origin, destiny) -- move um ramo de arvore para outro noh
    -- TODO: !

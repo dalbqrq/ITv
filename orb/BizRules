@@ -1,35 +1,39 @@
 
-- obj é um host ou um service
-- app é uma aplicacao
-- tree é a arvore de aplicacoes
-- bp é o sistema de business process
+
+- criar nova app
+	inserir app em _apps
+	inserir app em _app_tree abaixo de root
+	
+
+- excluir app
+	excluir todos objetos de _app_objects
+	excluir todos relacionamentos de _app_relats
+	excluir todos contatos de _app_contacts
+	excluir todos vizualizadores de _app_viewers
+	excluir app de _apps
+	excluir nó de _app_trees
+	mover filhos de nó para o pai de nó em _app_trees
+	
 
 
-insert obj in app -> 	if app inactive, activate it
-                        if obj is app then
-			   insert node in tree
-			   remove node if its parent is the root node
-			remake bp config
-			reload nagios
+- inserir obj em outra app
+	ativar app se inativa
+	inserir obj em _app_objects
+	se obj for uma app {
+	   inserir sub-arvore de sub-app em _app_tree abaixo de app
+	   remover sub-arvore de sub-app que esteja abaixo de root
+	}
+	remake bp config
+	reload nagios
 
 
-remove obj in app ->	if last obj, deactivate it
-                        if obj is app then
-			   remove node in tree
-			   insert node below the root node if there is any other app
-			remake bp config
-			reload nagios
+- remover obj de outra app
+	desativar se for o ultimo objeto
+	se obj for uma app {
+	   inserir sub-arvore de sub-app em _app_tree abaixo de root se nao existir
+        }
+	remake bp config
+	reload nagios
 
 
-- operacoes com nos da árvore
 
-
-insert node ->		se nova app, insere abaixo de root
-			se app existente, insere em origin_ e se existe abaixo de root, remove abaixo de root
-
-
-remove node ->		seleciona todos os nós,
-			para cada nó,
-				seleciona filhos,
-				para cada  filho... 
-      (completar no futuro. agora impedirei a remocao de nos com filhos)

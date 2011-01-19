@@ -218,7 +218,7 @@ function render_add(web, HST, SVC, APP, APPOBJ, app_id, msg)
    -- LISTA DE APPLIC PARA SEREM INCLUIDAS ---------------------------------
    local opt_app = {}
    for i,v in ipairs(APP) do
-      opt_app[#opt_app+1] = option{ value=v.object_id, v.name2 }
+      opt_app[#opt_app+1] = option{ value=v.object_id, v.name }
    end
    local app = { render_form(web:link(url_app), web:link("/add/"..app_id),
                { H("select") { size=list_size, style="width: 100%;", name="item", opt_app }, br(),

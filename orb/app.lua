@@ -179,8 +179,7 @@ function delete(web, id)
    if id then
       local tree_id = App.find_node_id(id)
       for _,v in ipairs(tree_id) do
-text_file_writer("/tmp/appdel", v.id.." : "..#tree_id.."\n")
-         App.delete_node_app_tree(v.id)
+         App.delete_node_app(v.id)
       end
 
       Model.delete ("itvision_app_relats", "app_id = "..id) 
@@ -220,14 +219,15 @@ function activate(web, id, flag)
          if flag == 1 then
             App.activate_app(id) 
 
-            local s = objects:select_app(app_to_id(A[1].name))
+            -- app as id local s = objects:select_app(app_to_id(A[1].name))
+            s = objects:select_app(A[1].id)
             -- caso host ainda nao tenha sido incluido aguarde e tente novamente
             counter = 0
             while s[1] == nil do
                counter = counter + 1
                os.reset_monitor()
                os.sleep(1)
-               s = objects:select_app(app_to_id(A[1].name))
+               s = objects:select_app(A[1].id)
             end
             local svc = { id = A[1].id, service_object_id = s[1].object_id }
             apps:update(svc)

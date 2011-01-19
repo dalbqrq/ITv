@@ -82,8 +82,8 @@ function select_app_service_object (cond_, extra_, columns_, app_id)
    cond_ = cond_.." and o.is_active = 1 "
 
    local bp_id = get_bp_id()
-   local content = query ("nagios_services s, nagios_objects o ", 
-      "s.service_object_id = o.object_id and s.check_command_object_id = "..bp_id..cond_, 
+   local content = query ("nagios_services s, nagios_objects o, itvision_apps a ", 
+      "s.service_object_id = o.object_id and a.service_object_id = o.object_id and s.check_command_object_id = "..bp_id..cond_, 
       extra_, columns_)
 
    return content

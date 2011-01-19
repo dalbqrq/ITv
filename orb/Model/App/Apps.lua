@@ -111,8 +111,7 @@ function select_app_app_objects (id)
    local tables_ = [[ nagios_objects o, itvision_app_objects ao, itvision_apps a, itvision_apps ab ]]
    local columns_ = [[ o.object_id, o.objecttype_id, o.name1, o.name2, ao.type as obj_type, a.id as 
 	app_id, a.name as a_name, a.type as a_type, a.is_active, a.service_object_id as service_id, 
-        NULL as itemtype, NULL as items_id,
-        o.name2 as name ]]
+        NULL as itemtype, NULL as items_id, o.name2 as name, ab.name as name ]]
    local content2 = query (tables_, cond_, extra_, columns_)
 
    for _,v in ipairs(content2) do
