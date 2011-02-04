@@ -3,12 +3,12 @@
 # ITvision MONITOR INSTALL for Ubuntu 10.04.1
 # --------------------------------------------------
 
-user=itv
-dbpass=itv
+user=itvision
+dbpass=itvision
 dbuser=$user
 dbname=itvision
 itvhome=/usr/local/itvision
-instance=VERTO
+instance=PRODERJ
 hostname=itvision
 
 function install_pack() {
@@ -129,8 +129,8 @@ cat << EOF > /etc/apache2/conf.d/itvision.conf
                 Allow from all
         </Directory>
 
-        ScriptAlias /adm /usr/local/itvision/adm
-        <Directory "/usr/local/itvision/adm">
+        ScriptAlias /adm $itvhome/adm
+        <Directory "$itvhome/adm">
                 AllowOverride None
                 Options +ExecCGI +MultiViews +SymLinksIfOwnerMatch FollowSymLinks
 
@@ -140,7 +140,7 @@ cat << EOF > /etc/apache2/conf.d/itvision.conf
 
 		AuthName "ITvision Access"
 		AuthType Basic
-		AuthUserFile /usr/local/itvision/bin/htpasswd.users
+		AuthUserFile $itvhome/bin/htpasswd
 		require valid-user
         </Directory>
 
@@ -148,8 +148,8 @@ cat << EOF > /etc/apache2/conf.d/itvision.conf
         # alert, emerg.
         LogLevel warn
 
-        ErrorLog /var/log/itvision/apache2/itvision_error.log
-        CustomLog /var/log/itvision/apache2/itivision_access.log combined
+        ErrorLog /var/log/apache2/itvision_error.log
+        CustomLog /var/log/apache2/itvision_access.log combined
 
 </VirtualHost>
 EOF
@@ -206,13 +206,14 @@ dbname=$dbname
 EOF
 
 mkdir $itvhome/html/gv
-chown -R $user.$user $itvhome/html/gv
 printf "html/gv\norb/config.lua\nbin/dbconf\nbin/htpasswd.users\n" >> $itvhome/.git/info/exclude
 
 sed -i -e 's/ErrorLog \/var\/log\/apache2\/error.log/ErrorLog \/var\/log\/itvision\/apache2\/error.log/g' \
 	-e 's/CustomLog \/var\/log\/apache2\/other_vhosts_access.log/CustomLog \/var\/log\/itvision\/apache2\/other_vhosts_access.log/g' /etc/apache2/apache2.conf
 
-htpasswd -bc /usr/local/itvision/bin/htpasswd.users $user $dbpass
+htpasswd -bc $itvhome/bin/htpasswd $user $dbpass
+chown -R $user.$user $itvhome/html/gv $itvhome/bin/htpasswd $itvhome/bin/dbconf
+
 
 # --------------------------------------------------
 # NAGIOS
@@ -578,7 +579,9 @@ aliases="\nalias mv='mv -i'\nalias cp='cp -i'\nalias rm='rm -i'\nalias psa='ps -
 printf "$path"    >> /home/$user/.bashrc
 printf "$aliases" >> /home/$user/.bashrc
 printf "$aliases" >> /root/.bashrc
-printf "export LUA_PATH='$itvhome/orb/?.lua;$itvhome/orb/inc/?.lua;./Model/?.lua;/usr/local/share/lua/5.1/?.lua'\n" >> /home/$user/.bashrc
+LUA_PATH="$itvhome/orb/?.lua;$itvhome/orb/inc/?.lua;$itvhome/orb/Model/?.lua;/usr/local/share/lua/5.1/?.lua"
+printf "export LUA_PATH='$LUA_PATH'\n" >> /home/$user/.bashrc
+
 
 
 
@@ -626,7 +629,18 @@ install_msg POS-CONFIGURACAO
 
 # Só agora executa a inicializacao das tabelas de checkcmd
 source /home/$user/.bashrc
-/usr/bin/lua /usr/local/itvision/orb/inc/update_checkcmds.lua
+/usr/bin/lua /usr/local/itvision/scr/update_checkcmds.lua
+
+# Cron setup
+sudo -u $user crontab -l > /tmp/crontab
+sudo -u $user cat << EOF >> /tmp/crontab
+LUA_PATH="$LUA_PATH"
+* * * * * /usr/bin/lua $itvhome/scr/pendings.lua
+EOF
+sudo -u $user crontab /tmp/crontab
+rm -f /tmp/crontab
+
+
 
 
 echo ""

@@ -38,6 +38,7 @@ define('GLPI_ROOT', '.');
 include (GLPI_ROOT . "/inc/includes.php");
 
 
+/* daniel@itvision.com.br
 if (!isset($_SESSION["glpicookietest"]) || $_SESSION["glpicookietest"]!='testcookie') {
    if (!is_writable(GLPI_SESSION_DIR)) {
       glpi_header($CFG_GLPI['root_doc'] . "/index.php?error=2");
@@ -45,6 +46,7 @@ if (!isset($_SESSION["glpicookietest"]) || $_SESSION["glpicookietest"]!='testcoo
       glpi_header($CFG_GLPI['root_doc'] . "/index.php?error=1");
    }
 }
+*/
 
 $_POST = array_map('stripslashes', $_POST);
 

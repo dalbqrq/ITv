@@ -1,10 +1,14 @@
-require "probe"
+require "Model"
 
 
-function mass_include_host_alive()
-   local cmp = Model.select_monitors(clause)
+function update_pending()
+   local qry = [[ select object_id from nagios_objects where name1 = 
+         (select networkports_id from itvision_monitors  where service_object_id = -1 and softwareversions_id is null) 
+         and name2 = ']]..config.monitor.check_host..[[' and objecttype_id = 2 ]]
+   local res = Model.query(cmd)
 
-   print("ITENS TO INCLUDE", table.getn(cmp))
+   local udt = [[ update itvision_monitors set service_object_id = ]]..res[1].object_id
+--TODO
 
    for i, v in ipairs(cmp) do
       local serv, ip, itemtype, name, id = "", "", "", "", ""

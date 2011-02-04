@@ -136,3 +136,19 @@ function execute (stmt_)
 end
 
 
+----------------------------- SPECIAL OPERATIONS ----------------------------------
+
+function insert_monitor (table_, content_)
+   local db = connect ()
+   if content_.instance_id then 
+      content_.instance_id = Model.db.instance_id -- nao insere outras instancias
+   end
+   assert ( db:insert (table_, content_))
+
+   local content = db:selectall ("max(id) as id", table_)
+   
+   db:close ()
+   return content[1].id
+end
+
+
