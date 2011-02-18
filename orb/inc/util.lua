@@ -100,22 +100,45 @@ end
 
 string.extract_latlon = function(str)
    str = string.gsub(str, "%s+", "")
+
+   -- tratar corretamente (converter) geotab no formato:  22°51'33.20"S,43°23'17.42"O
+   -- agora simplesmente eliminaremos estas entradas.
+   -- procurar expressao como esta em obj_info.lua:render_geotag()
+   if string.find(str, "°") ~= nil or string.find(str, "'") ~= nil then
+      return nil, nil
+   end
+
    local lat, lon = nil, nil
    local b, c = string.find(str, ",")
 
    if b and c then
-      lat = string.sub(str,1,b-1)
-      lon = string.sub(str,b+1,-1)
+      lat = tonumber(string.sub(str,1,b-1))
+      lon = tonumber(string.sub(str,b+1,-1))
    end
 
-   if lat and lon then
-   if tonumber(lat) < -180 or tonumber(lat) > 180 or tonumber(lon) < -90 or tonumber(lon) > 90 then
+   if type(lat) == "number" and type(lon) == "number" then
+      if lat < -180 or lat > 180 or lon < -90 or lon > 90 then
+         lat, lon = nil, nil
+      end
+   else
       lat, lon = nil, nil
-   end
    end
 
    return lat, lon
 end
+
+----------------------------- ECT ----------------------------------
+
+find_hostname = function( a, h, k ) 
+   local host_name
+
+   if a ~= "" and a ~= nil then host_name = a end
+   if host_name == nil and h ~= "" and h ~= nil then host_name = h end
+   if host_name == nil and k ~= "" and k ~= nil then host_name = k end
+
+   return host_name
+end
+
 
 ----------------------------- CSV ----------------------------------
 

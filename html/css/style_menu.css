@@ -1,0 +1,89 @@
+/**********************
+       TABLIST
+**********************/
+#tablist{
+  padding: 3px 0;
+  margin-left: 0;
+  margin-bottom: 0;
+  margin-top: 0.1em;
+  font: bold 12px/normal Arial, Helvetica, sans-serif;
+  border-bottom: 1px dotted black;
+}
+
+#tablist li{
+  list-style: none;
+  display: inline;
+  margin: 0;
+}
+
+#tablist li a{
+  text-decoration: none;
+  padding: 3px 1.8em;
+  padding: 3px 0.8em;
+  margin-left: 1px;
+  border-bottom: none;
+  background: white;
+}
+
+#tablist li a:link, #tablist li a:visited{
+  color: #303030;
+  color: #4E5763;
+}
+
+
+#tablist li a:hover{
+  color: black;
+  background: #F0F0F0;
+  border-color: navy;
+}
+
+#tablist li a.current{
+  color: black;
+  background: #F0F0F0;
+}
+
+#tablist li a.logout{
+  text-align: right;
+}
+
+/**********************
+       SUBTABLIST
+**********************/
+#subtablist{
+  padding: 3px 0;
+  margin-left: 0;
+  margin-bottom: 0;
+  margin-top: 0px;
+  font: bold 12px/normal Arial, Helvetica, sans-serif;
+}
+
+#subtablist li{
+  list-style: none;
+  display: inline;
+  margin: 0;
+}
+
+#subtablist li a{
+  text-decoration: none;
+  padding: 3px 0.5em;
+  margin-left: 5px;
+  border-top: none;
+  background: white;
+}
+
+#subtablist li a:link, #subtablist li a:visited{
+  color: #4E5763;
+}
+
+
+#subtablist li a:hover{
+  color: black;
+  background: #F0F0F0;
+}
+
+#subtablist li a.current{
+  color: black;
+  background: #F0F0F0;
+}
+
+

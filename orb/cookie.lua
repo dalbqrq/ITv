@@ -2,6 +2,7 @@
 
 -- includes & defs ------------------------------------------------------
 require "Model"
+require "View"
 require "auth"
 
 module(Model.name, package.seeall,orbit.new)

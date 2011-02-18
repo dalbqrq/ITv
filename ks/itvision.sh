@@ -3,12 +3,12 @@
 # ITvision MONITOR INSTALL for Ubuntu 10.04.1
 # --------------------------------------------------
 
-user=itv
-dbpass=itv
+user=itvision
+dbpass=itvision
 dbuser=$user
 dbname=itvision
 itvhome=/usr/local/itvision
-instance=VERTO
+instance=PRODERJ
 hostname=itvision
 
 function install_pack() {
@@ -231,7 +231,7 @@ sed -i.orig -e "s/nagios_user=nagios/nagios_user=$user/" \
 	-e "s/check_external_commands=0/check_external_commands=1/" \
 	-e "s/admin_email=root@localhost/admin_email=webmaster@itvision.com.br/" \
 	-e "s/log_file=\/var\/log\/nagios3\/nagios.log/log_file=\/var\/log\/itvision\/nagios3\/nagios.log/" \
-	-e "s/log_archive_path=\/var\/log\/nagios3\/archives/log_archive_path=\/var\/log\/itvision\/nagios3\/archives" \
+	-e "s/log_archive_path=\/var\/log\/nagios3\/archives/log_archive_path=\/var\/log\/itvision\/nagios3\/archives/" \
 	-e "s/admin_pager=pageroot@localhost/#admin_pager=pageroot@localhost/" \
 	-e "/conf.d/a \\
 cfg_dir=/etc/nagios3/hosts \\
@@ -579,7 +579,9 @@ aliases="\nalias mv='mv -i'\nalias cp='cp -i'\nalias rm='rm -i'\nalias psa='ps -
 printf "$path"    >> /home/$user/.bashrc
 printf "$aliases" >> /home/$user/.bashrc
 printf "$aliases" >> /root/.bashrc
-printf "export LUA_PATH='$itvhome/orb/?.lua;$itvhome/orb/inc/?.lua;$itvhome/orb/Model/?.lua;/usr/local/share/lua/5.1/?.lua'\n" >> /home/$user/.bashrc
+LUA_PATH="$itvhome/orb/?.lua;$itvhome/orb/inc/?.lua;$itvhome/orb/Model/?.lua;/usr/local/share/lua/5.1/?.lua"
+printf "export LUA_PATH='$LUA_PATH'\n" >> /home/$user/.bashrc
+
 
 
 
@@ -627,7 +629,18 @@ install_msg POS-CONFIGURACAO
 
 # Só agora executa a inicializacao das tabelas de checkcmd
 source /home/$user/.bashrc
-/usr/bin/lua /usr/local/itvision/orb/inc/update_checkcmds.lua
+/usr/bin/lua /usr/local/itvision/scr/update_checkcmds.lua
+
+# Cron setup
+sudo -u $user crontab -l > /tmp/crontab
+sudo -u $user cat << EOF >> /tmp/crontab
+LUA_PATH="$LUA_PATH"
+* * * * * /usr/bin/lua $itvhome/scr/pendings.lua
+EOF
+sudo -u $user crontab /tmp/crontab
+rm -f /tmp/crontab
+
+
 
 
 echo ""

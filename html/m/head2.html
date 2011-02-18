@@ -5,7 +5,7 @@
    function changeHead(headPage) {
       parent.headFrame.location.href = headPage;
    }
-   function changeBase(headPage, bodyPage) {
+   function changePage(headPage, bodyPage) {
       parent.headFrame.location.href = headPage;
       parent.bodyFrame.location.href = bodyPage;
    }
@@ -23,8 +23,8 @@
 
 <ul id="subtablist">
 <li><a class="current" href="http://www.cssdrive.com">Outra forma</a></li>
-<li><a href="javascript:void(0);" onClick="changePage('1.html', 'head.html')">Graficos</a></li>
-<li><a href="javascript:void(0);" onClick="changePage('2.html', 'head.html')">Relatorios</a></li>
+<li><a href="javascript:void(0);" onClick="changePage('head2.html', 'www.uol.com.br')">Graficos</a></li>
+<li><a href="javascript:void(0);" onClick="changePage('head2.html', 'www.impa.br')">Relatorios</a></li>
 <li><a href="http://www.news.com">Akira</a></li>
 </ul>
 
