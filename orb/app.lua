@@ -112,14 +112,7 @@ ITvision:dispatch_post(list, "/list")
 
 
 function show(web, id)
---[[
-   local A = apps:select(id)
-   local O = app_objects:select(id)
-   local R = app_relats:select(id)
-   return render_show(web, A, O, R)
-]]
    local clause = "id = "..id
-
    local A, root = apps:select(nil, clause)
    local no_header = true
    return render_list(web, A, root, nil, no_header)
@@ -143,11 +136,9 @@ function update(web, id)
       A.type = web.input.type
       A.is_active = web.input.is_active
       A.service_object_id = web.input.service_object_id
-
       Model.update (tables, A, clause) 
    end
 
-   --return web:redirect(web:link("/list"))
    web.prefix = "/orb/app_tabs"
    return web:redirect(web:link("/list/"..id..":"..tab_id))
 end
@@ -200,7 +191,7 @@ function delete(web, id)
    for _,v in ipairs(tree_id) do
       Itvision.delete_node_app_tree(v.id)
    end
-   --return web:redirect(web:link("/list"))
+
    web.prefix = "/orb/app"
    return web:redirect(web:link("/list"))
 end

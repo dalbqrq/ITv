@@ -105,7 +105,7 @@ function render_show(web, app, app_name, app_id, obj, rel, obj_id, no_header)
    if obj_id then 
       web.prefix = "/orb/obj_info"
       lnkgeo = web:link("/geotag/app:"..obj_id) 
-      web.prefix = "/orb/gviz/"
+      web.prefix = "/orb"
    end
    if no_header == nil then
       res[#res+1] = render_bar( { render_selector_bar(web, app, app_id, "/gviz/show"), 
