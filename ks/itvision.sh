@@ -296,6 +296,8 @@ cat /etc/nagiosgrapher/nagios3/commands.cfg >> /etc/nagios3/commands.cfg
 rm -f /etc/nagiosgrapher/nagios3/commands.cfg
 echo '<HTML><HEAD><META http-equiv="REFRESH" content="0;url=/nagios3/cgi-bin/graphs.cgi"></HEAD></HTML>'  > /usr/share/nagios3/htdocs/graphs.html
 mkdir -p /etc/nagiosgrapher/ngraph.d/itvision
+cp /etc/nagiosgrapher/ngraph.d/standard/check_ping.ncfg /etc/nagiosgrapher/ngraph.d/standard/check_host_alive.ncfg
+sed -i "s/PING/HOST_ALIVE/g" /etc/nagiosgrapher/ngraph.d/standard/check_host_alive.ncfg
 
 echo << EOF > /usr/share/nagios3/htdocs/grapher.html
 <html><head>
