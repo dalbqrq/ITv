@@ -101,3 +101,25 @@ where
       and a_.id in ( select distinct(app_id) from itvision_app_trees )
       and s_.service_object_id not in (select service_object_id from nagios_servicestatus)
 
+
+
+--
+
+   select  node.id as id, node.instance_id as instante_id, node.lft as lft, node.rgt as rgt, 
+            node.app_id as app_id, (COUNT(parent.id) - (sub_tree.depth + 1)) AS depth
+   from  itvision_app_trees AS node, itvision_app_trees AS parent, itvision_app_trees AS sub_parent, 
+                  itvision_apps AS a,
+            (   SELECT node.id, (COUNT(parent.id) - 1) AS depth
+            FROM itvision_app_trees AS node,
+            itvision_app_trees AS parent
+            WHERE node.lft BETWEEN parent.lft AND parent.rgt
+            AND node.id = 3
+            GROUP BY node.id
+            ORDER BY node.lft
+            ) AS sub_tree
+   where node.lft BETWEEN parent.lft AND parent.rgt
+            AND node.lft BETWEEN sub_parent.lft AND sub_parent.rgt
+            AND sub_parent.id = sub_tree.id
+            AND node.app_id = a.id AND a.is_active = 1
+            and node.app_id = 34
+   GROUP BY node.id HAVING depth = 1 ORDER BY node.lft

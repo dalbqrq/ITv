@@ -20,7 +20,7 @@ function select_leaf_nodes_app_tree () 				-- Seleciona todas as folhas da arvor
 function select_simple_path_app_tree (origin) 			-- Seleciona um unico caminho partindo de um noh 
 function select_depth_app_tree (origin) 			-- Seleciona a profundidade de cada noh
 function select_depth_subtree_app_tree (origin) 		-- Seleciona a profundidade de cada noh a partir de 
-function select_subrdinates_app_tree (origin) 			-- Encontra o noh subordinado imediato
+function select_subordinates_app_tree (origin) 			-- Encontra o noh subordinado imediato
 function delete_app_tree (origin) 				-- remove um noh dado por 'origin'
 function move_app_tree(origin, destiny) 			-- move um ramo de arvore para outro noh
 
@@ -129,7 +129,11 @@ end
 
 function find_node_id(app_id, conected_to_root)
    local cond = ""
-   if conected_to_root then cond = " and " end
+   if conected_to_root then 
+      local node = select_subordinates_app_tree (nil, app_id)
+      cond = " id = "..node[1].id.." and "
+   end
+text_file_writer("/tmp/fnode", app_id.."\n")
    local content = query ("itvision_app_trees", cond.." app_id = "..app_id)
    return content
 end
@@ -150,6 +154,8 @@ function delete_node_app_tree(orgin_)
    rgt   = tonumber(content[1].rgt)
    width = tonumber(content[1].width)
 
+text_file_writer("/tmp/delnode", lft.." : "..rgt.." : "..widht.."\n")
+
 
    execute ( "LOCK TABLE itvision_app_trees WRITE" )
    execute ( "delete from itvision_app_trees where lft between "..lft.." and "..rgt )
@@ -158,6 +164,12 @@ function delete_node_app_tree(orgin_)
    execute ( "UNLOCK TABLES" )
 
    return true
+end
+
+
+function delete_node_app_conected_to_root(app_id)
+   local node = select_subordinates_app_tree (nil, app_id)
+   delete_node_app_tree(node[1].id)
 end
 
 
@@ -279,15 +291,16 @@ function select_depth_subtree_app_tree (origin) -- Seleciona a profundidade de c
 end
 
 
-function select_subrdinates_app_tree (origin) -- Encontra o noh subordinado imediato
+function select_subordinates_app_tree (origin, app_id) -- Encontra o noh subordinado imediato
    local root_id, root = {}
    root_id, root = select_root_app_tree()
    origin = origin or root_id
    local content = {}
 
-   columns   = [[ node.id, node.instance_id, node.lft, node.rgt, node.app_id,
-            (COUNT(parent.id) - (sub_tree.depth + 1)) AS depth ]]
-   tablename = [[ itvision_app_trees AS node, itvision_app_trees AS parent, itvision_app_trees AS sub_parent, itvision_apps AS a
+   columns   = [[ node.id as id, node.instance_id as instante_id, node.lft as lft, node.rgt as rgt, 
+            node.app_id as app_id, (COUNT(parent.id) - (sub_tree.depth + 1)) AS depth ]]
+   tablename = [[ itvision_app_trees AS node, itvision_app_trees AS parent, itvision_app_trees AS sub_parent, 
+                  itvision_apps AS a,
             (   SELECT node.id, (COUNT(parent.id) - 1) AS depth
             FROM itvision_app_trees AS node,
             itvision_app_trees AS parent
@@ -299,10 +312,11 @@ function select_subrdinates_app_tree (origin) -- Encontra o noh subordinado imed
    cond      = [[ node.lft BETWEEN parent.lft AND parent.rgt
             AND node.lft BETWEEN sub_parent.lft AND sub_parent.rgt
             AND sub_parent.id = sub_tree.id
-            AND node.app_id = a.id AND a.iv_active = 1 ]]
+            AND node.app_id = a.id AND a.is_active = 1 ]]
    extra     = [[ GROUP BY node.id HAVING depth = 1 ORDER BY node.lft ]]
    --extra     = [[ GROUP BY node.id HAVING depth <= 1 ORDER BY node.lft ]]
 
+   if app_id then cond = cond.." and a.id = "..app_id end
 
    content = query (tablename, cond, extra, columns)
    return content
