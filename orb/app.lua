@@ -163,7 +163,8 @@ function insert(web)
    App.insert_node_app_tree(app[1].id, nil, 1)
    App.remake_apps_config_file()
 
-   return web:redirect(web:link("/list"))
+   web.prefix = "/orb/app_tabs"
+   return web:redirect(web:link("/list/"..app[1].id..":2"))
 end
 ITvision:dispatch_post(insert, "/insert")
 
@@ -179,15 +180,21 @@ function delete(web, id)
    if id then
       local tree_id = App.find_node_id(id)
       for _,v in ipairs(tree_id) do
-         App.delete_node_app(v.id)
+         App.delete_node_app_tree(v.id)
       end
 
-      Model.delete ("itvision_app_relats", "app_id = "..id) 
+      local o = objects:select_app(id)
+      if o[1] then
+         Model.delete ("itvision_app_objects", "service_object_id = "..o[1].object_id)
+      end
       Model.delete ("itvision_app_objects", "app_id = "..id) 
+      Model.delete ("itvision_app_relats", "app_id = "..id) 
       Model.delete ("itvision_app_contacts", "app_id = "..id) 
       Model.delete ("itvision_app_viewers", "app_id = "..id) 
       Model.delete ("itvision_apps", "id = "..id) 
    end
+
+   App.remake_apps_config_file()
 
    web.prefix = "/orb/app"
    return web:redirect(web:link("/list"))
@@ -219,6 +226,7 @@ function activate(web, id, flag)
          if flag == 1 then
             App.activate_app(id) 
 
+--[[
             -- app as id local s = objects:select_app(app_to_id(A[1].name))
             s = objects:select_app(A[1].id)
             -- caso host ainda nao tenha sido incluido aguarde e tente novamente
@@ -231,9 +239,9 @@ function activate(web, id, flag)
             end
             local svc = { id = A[1].id, service_object_id = s[1].object_id }
             apps:update(svc)
+]]
          else
             App.deactivate_app(id) 
-            os.reset_monitor()
          end
 
          msg = "/"..error_message(9).." "..A[1].name
@@ -298,7 +306,7 @@ function render_list(web, A, root, msg, no_header)
    if no_header == nil then
       res[#res+1] = render_content_header(strings.application, web:link("/add"), web:link("/list"))
       res[#res+1] = render_form_bar( render_filter(web), strings.search, web:link("/list"), web:link("/list") )
-      if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ msg } end
+      if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ font{ color="red", msg } } end
    end
    res[#res+1] = render_table(row, header)
 
