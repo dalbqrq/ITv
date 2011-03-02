@@ -1,11 +1,11 @@
 --------------------- APPLICATION STATUS (Only for IT Vision) --------------------
 
 APPLIC_UP			= 0
-APPLIC_DOWN			= 1
-APPLIC_WARNING			= 2
-APPLIC_PENDING			= 3
-APPLIC_DISABLE			= 4	-- Only for IT Vision 
-
+APPLIC_WARNING			= 1
+APPLIC_DOWN			= 2
+APPLIC_UNKNOWN			= 3
+APPLIC_PENDING			= 4
+APPLIC_DISABLE			= 5
 
 --------------------- HOST STATUS --------------------
 
@@ -35,17 +35,6 @@ DEPENDENCIES_FAILED		= 1
 
 PROPAGATE_TO_PARENT_HOSTS	= 1
 PROPAGATE_TO_CHILD_HOSTS	= 2
-
-
-
-------------------- SERVICE STATES -------------------
-
-STATE_OK			= 0
-STATE_WARNING			= 1
-STATE_CRITICAL			= 2
-STATE_UNKNOWN			= 3
-STATE_PENDING 			= 4	-- Only for IT Vision
-STATE_DISABLE 			= 5	-- Only for IT Vision
 
 
 

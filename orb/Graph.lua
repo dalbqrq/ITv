@@ -29,12 +29,15 @@ function set_color(state, obj_type)
    end
 ]]
 
-   if obj_type == 'svc' then
-      color = service_alert[state].color
-   elseif obj_type == 'app' then
+   if obj_type == 'app' then
       -- state é nil quando uma aplicacao é reativada e ainda nao possui servicestatus
       if state == nil then state = APPLIC_PENDING end
       color = applic_alert[state].color
+   elseif obj_type == 'svc' then
+      color = service_alert[state].color
+   elseif obj_type == 'hst' then
+      --color = host_alert[state].color
+      color = service_alert[state].color
    end
 
    return color
