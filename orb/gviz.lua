@@ -34,7 +34,7 @@ ITvision:dispatch_get(list, "/", "/list")
 
 
 function show(web, id, no_header)
-   Auth.check(web)
+   local auth = Auth.check(web)
    local app, app_name, obj_id
    local all_apps = apps:select_apps()
 

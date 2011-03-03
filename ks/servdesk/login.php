@@ -83,7 +83,8 @@ if ($auth->Login($_POST['login_name'],
       glpi_header($CFG_GLPI['root_doc'] . "/front/helpdesk.public.php$REDIRECT");
    } else {
       //glpi_header($CFG_GLPI['root_doc'] . "/front/central.php$REDIRECT");
-      glpi_header("/login.html$REDIRECT");
+      //glpi_header("/login.html$REDIRECT"); // daniel@itvision.com.br
+      glpi_header("/orb/login/cookie$REDIRECT"); // daniel@itvision.com.br
    }
 
 } else {

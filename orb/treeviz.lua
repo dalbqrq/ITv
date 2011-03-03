@@ -29,7 +29,7 @@ end
 
 
 function show(web, sep)
-   Auth.check(web)
+   local auth = Auth.check(web)
    if sep then sep = tonumber(sep) else sep = 1 end
    local all_apps = apps:select_apps()
 

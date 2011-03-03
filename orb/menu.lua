@@ -101,9 +101,9 @@ function render_menu(web, item, subitem)
    local itens, subitens = {}, {}
    local js = "javascript:void(0);"
 
-   local islog, user_name, id = Auth.is_logged_at_glpi(web)
+   local auth = Auth.is_logged_at_glpi(web)
 
-   if islog == false or ( item == 0 and subitem == 0 ) then
+   if auth == false or ( item == 0 and subitem == 0 ) then
       return ""
    end
 
@@ -113,7 +113,7 @@ function render_menu(web, item, subitem)
       itens[#itens+1] = li{ a{ class=active, href=js, onClick="changeHead('/orb/menu/"..i..":1')", v.name } }
    end
    itens[#itens+1] = li{ a{ class="logout", href=js, onClick="changePage('/orb/menu/0:0', '/orb/login/logout')", 
-                            "Logout: "..user_name } }
+                            "Logout: "..auth.user_name } }
 
    for i,v in ipairs(menu_itens[item].submenu) do
       local active = ""

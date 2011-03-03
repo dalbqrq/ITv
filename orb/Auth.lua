@@ -35,6 +35,7 @@ local session_path = "/usr/local/servdesk/files/_sessions"
 
 
 function is_logged_at_glpi(web)
+   local is_logged, user_name, id, sess_, glpi_cookie
    local glpi_cookie = get_cookie(web, glpi_cookie_name) 
 
    if glpi_cookie == nil then
@@ -49,11 +50,11 @@ function is_logged_at_glpi(web)
            glpiname|s:5:"admin";
    ]]
    local sess_ = text_file_reader(file_name)
-   local a, b, c, id = string.find(sess_, 'glpiID|s:(%d+):"(%d+)"')
-   local d, e, f, name = string.find(sess_, 'glpiname|s:(%d+):"(%a+)"')
+   local a, b, c, user_id = string.find(sess_, 'glpiID|s:(%d+):"(%d+)"')
+   local d, e, f, user_name = string.find(sess_, 'glpiname|s:(%d+):"(%a+)"')
 
-   if name ~= nil then
-      return true, name, id, sess_, glpi_cookie
+   if user_name ~= nil then
+      return { is_logged=true, user_name=user_name, user_id=user_id, session=sess_, cookie=glpi_cookie } 
    else
       return false
    end
@@ -61,13 +62,14 @@ end
 
 
 function check(web)
-   local is_logged, name, id = is_logged_at_glpi(web)
-   web.prefix = "/orb"
+   local auth = is_logged_at_glpi(web)
 
-   if is_logged then
-      return is_logged, name, id
+   if auth ~= false then
+      return auth
    else
-      return web:redirect(web:link("/login"))
+      web.prefix = "/orb"
+      web:redirect(web:link("/login"))
+      return false
    end
 end
 
