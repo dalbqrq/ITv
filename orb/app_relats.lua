@@ -169,7 +169,7 @@ function render_add(web, APPOBJ, AR, RT, app_id, msg)
    local res = {}
    local url_app = "/insert_obj"
    local url_relat = "/insert_relat"
-   local list_size = 2
+   local list_size = 10
    local header = ""
 
    -----------------------------------------------------------------------

@@ -125,7 +125,7 @@ function insert_contact_cfg_file (name, full_name, email, apps)
       app_list = app_list..sep..v.app_name
    end
 
-   local text = --mudar nome do grupo para id da app !![[
+   local text = [[
 define contact{
         use]].."\t\t"..[[generic-contact 
         contact_name]].."\t"..name..[[ 
@@ -198,7 +198,7 @@ function make_app_config(app, objs, flag)
    --ref = string.gsub(string.gsub(app.name,"(%p+)","_")," ","_")
    ref = app.id
 
-   s = "\n"..ref.." = "..s.."\n"
+   s = "\n#\n#  "..app.name.."\n#\n"..ref.." = "..s.."\n"
    s = s.."display "..flag..";"..ref..";"..ref.."\n\n"
 
    return s
@@ -223,6 +223,7 @@ function make_all_apps_config(apps)
 
    insert_contactgroup_cfg_file(apps)
 
+   os.sleep(1)
    os.reset_monitor()
 end
 

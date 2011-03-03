@@ -74,6 +74,7 @@ function make_content(obj, rel)
             shape = "ellipse"
          elseif v.ao_type == 'app' then
             label = v.o_name2
+            label = v.ax_name
             name  = string.gsub(v.o_name2, "[%s,%p]", "")
             url   = "/orb/obj_info/"..v.ao_type.."/"..v.o_object_id
             shape = "invhouse"

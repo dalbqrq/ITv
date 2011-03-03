@@ -165,7 +165,7 @@ function delete_node_app_tree(origin_)  -- remove toda sub-arvore abaixo de orig
 end
 
 
-function delete_node_app(origin) -- remove um noh dado por 'origin' trazendo toda a sub-arvore para o pai de origin
+function delete_node_app(origin_) -- remove um noh dado por 'origin_' trazendo toda a sub-arvore para o pai de 'origin_'
    local lft, rgt, width, root_id
    local content = {}
 
@@ -346,10 +346,15 @@ function select_subordinates_app_tree (origin, app_id) -- Encontra o noh subordi
 end
 
 
-function select_tree_relat_to_graph() -- Lista apps e seus pais na arvore criada
+function select_tree_relat_to_graph() -- Lista apps e seus filhos
    local content = {}
    --local nodes = query("itvision_app_trees t, itvision_apps a", "t.app_id = a.id and a.is_active = 1", nil, "t.id as id, lft, rgt, app_id")
-   local nodes = query("itvision_app_trees", nil, nil, "id, lft, rgt, app_id")
+   --local nodes = query("itvision_app_trees", nil, nil, "id, lft, rgt, app_id")
+      columns   = [[ t.id as id, lft, rgt, app_id ]]
+      tablename = [[ itvision_app_trees t, itvision_apps a ]]
+      cond      = [[  a.id = t.app_id
+         and a.is_active = 1 and a.service_object_id is not null ]]
+   local nodes = query(tablename, cond, nil, columns)
 
    for i,v in ipairs(nodes) do
       columns   = [[ child.id, child.app_id, child.lft, child.rgt ]]

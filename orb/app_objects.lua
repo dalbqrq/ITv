@@ -54,7 +54,7 @@ end
 -- controllers ------------------------------------------------------------
 
 function update_apps()
-   local APPS = apps:select()
+   local APPS = App.select_uniq_app_in_tree()
    make_all_apps_config(APPS)
    os.sleep(1) -- CLUDGE Espera um pouco pois as queries das caixas de insercao estao retornando vazias!
 end
@@ -102,9 +102,11 @@ function insert_obj(web)
    if web.input.type == 'app' then 
       local app_child = apps:select(nil,"service_object_id = "..web.input.item)
       App.insert_subnode_app_tree(app_child[1].id, web.input.app_id)
+      App.delete_node_app_conected_to_root(app_child[1].id)
+
+      update_apps()
    end
 
-   update_apps()
 
    web.prefix = "/orb/app_tabs"
    return web:redirect(web:link("/list/"..app_objects.app_id..":"..tab_id))
@@ -177,7 +179,7 @@ function render_add(web, HST, SVC, APP, APPOBJ, app_id, msg)
    local res = {}
    local url_app = "/insert_obj"
    local url_relat = "/insert_relat"
-   local list_size = 2
+   local list_size = 10
    local header = ""
 
    -----------------------------------------------------------------------

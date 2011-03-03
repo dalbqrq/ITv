@@ -48,7 +48,7 @@ local tables = {
    ao =  { name="itvision_app_objects",            a="app_id", o="service_object_id" } ,
    m =   { name="itvision_monitors",               o="service_object_id", s="service_object_id", ss="service_object_id", 
                                                       n="networkequipments_id", p="networkports_id", sv="softwareversions_id" },
-   o =   { name="nagios_objects",                  ao="object_id", m="object_id", s="object_id", ss="object_id" }, 
+   o =   { name="nagios_objects",                  ao="object_id", m="object_id", s="object_id", ss="object_id", ax="object_id" }, 
    s =   { name="nagios_services",                 ao="service_object_id", m="service_object_id", o="service_object_id", 
                                                       ss="service_object_id" },
    ss =  { name="nagios_servicestatus",            ao="service_object_id", m="service_object_id", o="service_object_id", 
@@ -60,6 +60,9 @@ local tables = {
    sv =  { name="glpi_softwareversions",           m="id", csv="id", sw="softwares_id" },
    sw =  { name="glpi_softwares",                  sv="id" },
 
+
+-- Definicoes especiais para query_5
+   ax =   { name="itvision_apps",                  o="service_object_id" } ,
 
 -- Definicoes especiais para esta query que é usada somente para a criacao da arvore de apps
    a_ =   { name="itvision_apps",                   o_="service_object_id" } ,
@@ -412,7 +415,7 @@ end
 ----------------------------------------------------------------------
 function make_query_5(a_id, clause)
    local q, t = {}, {}
-   t = { "o", "s", "ss", "a", "ao" }
+   t = { "o", "s", "ss", "a", "ao", "ax" }
    n = { "c", "p", "m", "csv", "sv", "sw" }
 
    local columns_ = make_columns(t)
@@ -641,7 +644,7 @@ function make_query_10(a_id, clause)
    q = Model.query(tables_, cond_, nil, columns_)
    for _,v in ipairs(q) do table.insert(v, 1, 10) end
 
-   --if DEBUG then print( "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
+   -- if DEBUG then print( "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
 
    return q
 end
@@ -848,7 +851,7 @@ function how_to_use()
 ]]
 
    --a = tree(8)
-   a = make_query_11()
+   a = make_query_5()
    --a = select_monitors()
 
 --[[
