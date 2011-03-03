@@ -65,7 +65,8 @@ local tables = {
    ax =   { name="itvision_apps",                  o="service_object_id" } ,
 
 -- Definicoes especiais para esta query que é usada somente para a criacao da arvore de apps
-   a_ =   { name="itvision_apps",                   o_="service_object_id" } ,
+   a_ =   { name="itvision_apps",                   o_="service_object_id", t_="id" } ,
+   t_ =   { name="itvision_app_trees",              a_="app_id" },
    o_ =   { name="nagios_objects",                  a_="object_id", s_="object_id" }, 
    s_ =   { name="nagios_services",                 o_="service_object_id", ss_="service_object_id" },
    ss_ =  { name="nagios_servicestatus",            s_="service_object_id" },
@@ -622,7 +623,7 @@ end
 ----------------------------------------------------------------------
 function make_query_10(a_id, clause)
    local q, t = {}, {}
-   t = { "o_", "s_", "ss_", "a_" }
+   t = { "o_", "s_", "ss_", "a_", "t_" }
    n = { }
 
    local columns_ = make_columns(t)
@@ -655,7 +656,7 @@ end
 ----------------------------------------------------------------------
 function make_query_11(a_id, clause)
    local q, t = {}, {}
-   t = { "o_", "s_", "a_" }
+   t = { "o_", "s_", "a_", "t_" }
    z = { "ss_" }
 
    local columns_ = make_columns(t)

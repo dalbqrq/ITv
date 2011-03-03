@@ -74,7 +74,7 @@ function insert_service_cfg_file (hostname, service_desc, check_cmd, check_args)
 
    if check_args == nil then
       check_args = ""
-      local tables_ = [[nagios_objects o, itvision_checkcmds c, itvision_checkcmd_params p]]
+      local tables_ = [[nagios_objects o, itvision_checkcmds c, itvision_checkcmd_default_params p]]
       local cond_   = [[o.objecttype_id = 12 and o.is_active = 1 and o.object_id = c.cmd_object_id and c.id = p.checkcmds_id 
                         and p.sequence is not null and o.name2 is null and o.name1 = ']]..check_cmd..[[']]
       local extras_ = [[order by p.sequence]]

@@ -8,7 +8,7 @@ function get_checkcmd_params()
    local cmds = Model.query("nagios_objects o, itvision_checkcmds c", "o.object_id = c.cmd_object_id", "order by name1", "name1, c.id as id, command")
    s = s.."cmds = {\n\n"
    for i, v in pairs(cmds) do
-      local params = Model.query("itvision_checkcmd_params", "checkcmds_id = "..v.id)
+      local params = Model.query("itvision_checkcmd_default_params", "checkcmds_id = "..v.id)
 
 
       s = s.."   "..v.name1.." = {\n"

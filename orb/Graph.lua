@@ -155,15 +155,16 @@ function make_content(obj, rel)
 end
 
 
-function make_tree_content(obj, rel)
+function make_tree_content(obj, rel, sep)
    local content = {}
 
    if obj[1] then
       for _,v in ipairs(obj) do
          local label, name, url, shape
 
-         label = v.a_name ..":"..v.a_id
+         label = v.a_name  -- DEBUG ..":"..v.a_id
          name  = v.a_id
+         if sep == 1 then name = name..v.t_id end
          url   = "/orb/obj_info/app/"..v.a_service_object_id
          shape = "invhouse"
          shape = "octagon"
@@ -182,10 +183,12 @@ function make_tree_content(obj, rel)
    if rel[1] then
       for _,v in ipairs(rel) do
          -- FROM -------------------------------
-         local from_name = tostring(v.parent_id)
+         local from_name = tostring(v.parent_app)
+         if sep == 1 then from_name = from_name..v.parent_id end
 
          -- TO -------------------------------
-         local to_name = tostring(v.child_id)
+         local to_name = tostring(v.child_app)
+         if sep == 1 then to_name = to_name..v.child_id end
 
          -- RELAT -------------------------------
          relat_label = ""

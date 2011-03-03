@@ -28,20 +28,19 @@ end
 -- controllers ---------------------------------------------------------
 
 
-function show(web, id)
+function show(web, sep)
    Auth.check(web)
+   if sep then sep = tonumber(sep) else sep = 1 end
    local all_apps = apps:select_apps()
 
-   if id == "/show" then
-      if not all_apps[1] then 
-         return render_blank(web)
-      end
+   if not all_apps[1] then 
+      return render_blank(web)
    end
 
    local obj = Monitor.select_monitors_app_objs_to_tree()
    local rel = App.select_tree_relat_to_graph()
 
-   return render_show(web, obj, rel)
+   return render_show(web, obj, rel, sep)
 end
 ITvision:dispatch_get(show,"/show", "/show/(%d+)")
 
@@ -53,7 +52,7 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 
 
 
-function render_show(web, obj, rel)
+function render_show(web, obj, rel, sep)
    local res = {}
    local engene = "dot"
    local file_type = "png"
@@ -68,10 +67,14 @@ function render_show(web, obj, rel)
    engene = "circo"
    engene = "dot"
 
-   local content = Graph.make_tree_content(obj, rel)
+   local content = Graph.make_tree_content(obj, rel, sep)
    Graph.render(gv_name, file_type, engene, content)
    local imgmap = text_file_reader(mapfile)
 
+   res[#res+1] = render_bar( {
+         a{ href=web:link("/treeviz/show/0"),  "Unificado" } ,
+         a{ href=web:link("/treeviz/show/1"),  "Separado" } ,
+   } )
    res[#res+1] = br()
    res[#res+1] = { imgmap }
    res[#res+1] = img{ 

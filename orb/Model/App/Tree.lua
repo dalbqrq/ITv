@@ -273,7 +273,7 @@ function select_tree_relat_to_graph() -- Lista apps e seus filhos
 
       local child = query (tablename, cond, nil, columns)
       for j,w in ipairs(child) do
-         table.insert(content, { parent_id=v.app_id, child_id=w.app_id } )
+         table.insert(content, { parent_app=v.app_id, parent_id=v.id, child_app=w.app_id, child_id=w.id } )
       end
    end
 
@@ -285,7 +285,7 @@ end
 function select_uniq_app_in_tree()  -- seleciona app unico na árvore (usado p/ config do nagiosbp)
 
    columns   = [[ distinct(node.app_id) as id, a.name as name, a.type as type, a.is_active as is_active, 
-      a.service_object_id as service_object_id ]]
+      a.service_object_id as service_object_id, node.lft, node.rgt ]]
    tablename = [[ itvision_app_trees AS node, itvision_app_trees AS parent, itvision_apps AS a ]]
    cond      = [[ node.lft BETWEEN parent.lft AND parent.rgt
       AND parent.id = (select id from itvision_app_trees where lft = 1) 

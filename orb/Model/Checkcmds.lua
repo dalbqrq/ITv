@@ -23,7 +23,7 @@ end
 
 
 function select_checkcmd_params(id, exclude_fixed_params)
-   local table_ = [[ nagios_objects o, itvision_checkcmds c, itvision_checkcmd_params p ]]
+   local table_ = [[ nagios_objects o, itvision_checkcmds c, itvision_checkcmd_default_params p ]]
    local cond_ = [[ objecttype_id = 12 and is_active = 1 and 
       o.object_id = c.cmd_object_id and
       c.id = p.checkcmds_id and

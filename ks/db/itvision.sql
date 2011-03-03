@@ -106,7 +106,21 @@ CREATE TABLE `itvision_app_trees` (
   KEY `fk_app_id5` (`app_id`),
   KEY `fk_instance_id16` (`instance_id`),
   CONSTRAINT `fk_app_id5` FOREIGN KEY (`app_id`) REFERENCES `itvision_apps` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=45 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `itvision_app_type`
+--
+
+DROP TABLE IF EXISTS `itvision_app_type`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `itvision_app_type` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(45) COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -140,10 +154,34 @@ CREATE TABLE `itvision_apps` (
   `type` enum('and','or') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'and',
   `is_active` tinyint(4) NOT NULL DEFAULT '0',
   `service_object_id` int(11) DEFAULT NULL,
+  `notes` longtext COLLATE utf8_unicode_ci,
+  `app_type_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
+  KEY `fk_instance_id10` (`instance_id`),
   KEY `fk_object_id6` (`service_object_id`),
+  CONSTRAINT `fk_instance_id20` FOREIGN KEY (`instance_id`) REFERENCES `nagios_instances` (`instance_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `fk_instance_id27` FOREIGN KEY (`instance_id`) REFERENCES `nagios_instances` (`instance_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `fk_object_id26` FOREIGN KEY (`service_object_id`) REFERENCES `nagios_objects` (`object_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=45 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `itvision_checkcmd_default_params`
+--
+
+DROP TABLE IF EXISTS `itvision_checkcmd_default_params`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `itvision_checkcmd_default_params` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `checkcmds_id` int(11) NOT NULL,
+  `sequence` int(11) DEFAULT NULL,
+  `flag` varchar(20) DEFAULT NULL,
+  `variable` varchar(25) NOT NULL,
+  `default_value` varchar(45) DEFAULT NULL,
+  `description` varchar(245) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=329 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -155,14 +193,13 @@ DROP TABLE IF EXISTS `itvision_checkcmd_params`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `itvision_checkcmd_params` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `service_object_id` int(11) NOT NULL,
   `checkcmds_id` int(11) NOT NULL,
   `sequence` int(11) DEFAULT NULL,
-  `flag` varchar(20) DEFAULT NULL,
-  `variable` varchar(25) NOT NULL,
-  `default_value` varchar(45) DEFAULT NULL,
-  `description` varchar(245) DEFAULT NULL,
+  `flag` varchar(20) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `variable` varchar(25) COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=361 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=329 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -177,7 +214,7 @@ CREATE TABLE `itvision_checkcmds` (
   `cmd_object_id` int(11) NOT NULL,
   `command` varchar(65) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=192 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=185 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -308,4 +345,4 @@ CREATE TABLE `itvision_user_prefs` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2011-01-13 15:54:46
+-- Dump completed on 2011-03-02 21:13:33

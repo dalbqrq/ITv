@@ -132,7 +132,7 @@ function update(web, id)
       local clause = "id = "..id
       A.name = web.input.name
       A.type = web.input.type
-      A.is_active = web.input.is_active
+      --A.is_active = web.input.is_active
       A.service_object_id = web.input.service_object_id
       Model.update (tables, A, clause) 
    end

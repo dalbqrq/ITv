@@ -4,7 +4,7 @@ require "Checkcmd_params"
 
 function update_checkcmd_params()
    Model.delete("itvision_checkcmds")
-   Model.delete("itvision_checkcmd_params")
+   Model.delete("itvision_checkcmd_default_params")
    for i, v in pairs(cmds) do
       print(i)
       q = Model.query("nagios_objects", "name1 = '"..i.."'")
@@ -20,7 +20,7 @@ function update_checkcmd_params()
       for j, w in pairs(v.args) do
          w.checkcmds_id = r[1].id
          print ("PARAMS: ", w.variable, w.description, w.checkcmds_id, w.default_value )
-         Model.insert("itvision_checkcmd_params", w)
+         Model.insert("itvision_checkcmd_default_params", w)
       end
 
       print()
