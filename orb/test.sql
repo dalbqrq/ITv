@@ -1,3 +1,6 @@
+-- lista árvore
+select name, lft, rgt, t.id, app_id from itvision_app_trees t, itvision_apps a where t.app_id = a.id;
+
 select node.id, node.instance_id, node.lft, node.rgt, a.name, node.app_id, parent.id as parent,
              (COUNT(parent.id) - (sub_tree.depth + 1)) AS depth 
  from itvision_apps a, itvision_app_trees AS node, itvision_app_trees AS parent, itvision_app_trees AS sub_parent,

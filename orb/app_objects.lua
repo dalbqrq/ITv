@@ -97,8 +97,6 @@ function insert_obj(web)
       app_objects:save()
    end
 
-   local app = apps:select(web.input.app_id); app = app[1]
-
    if web.input.type == 'app' then 
       local app_child = apps:select(nil,"service_object_id = "..web.input.item)
       App.insert_subnode_app_tree(app_child[1].id, web.input.app_id)

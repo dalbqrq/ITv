@@ -193,11 +193,18 @@ end
 
 function delete_node_app_conected_to_root(app_id)
    local node = select_subordinates_app_tree (nil, app_id)
-   delete_node_app_tree(node[1].id)
+
+   if node[1] then
+      delete_node_app_tree(node[1].id)
+      return true
+   else
+      return false
+   end
 end
 
 
 function show_app_tree()
+--select name, lft, rgt, t.id, app_id from itvision_app_trees t, itvision_apps a where t.app_id = a.id;
    local stmt_ = [[
       SELECT CONCAT( REPEAT( ' ', (COUNT(parent.app_id) - 1) ), node.app_id) AS app_id
       FROM itvision_app_trees AS node,
@@ -378,11 +385,27 @@ end
 
 function insert_subnode_app_tree(app_child, app_parent) -- Adiciona nós filhos abaixo de todos os nos que possuiem app_id = app_parent
                                     -- isso é feito tipicamente na inclusão de uma app como objeto de outra (subapp)
-      local nodes = query ("itvision_app_trees", "app_id = "..app_parent)
+   local parents = query ("itvision_app_trees", "app_id = "..app_parent)
+   local origin  = query("itvision_app_trees", "app_id = "..app_child, nil, "min(id) as id, app_id, lft, rgt, instance_id"); origin = origin[1]
+   local subtree = select_full_path_app_tree(origin.id)
+   local width = origin.rgt - origin.lft + 1
+--daniel
 
-      for i,v in ipairs(nodes) do
-         insert_node_app_tree(app_child, v.id, 1)
+   execute ( "LOCK TABLE itvision_app_trees WRITE" )
+   for i,p in ipairs(parents) do
+      for j,n in ipairs(subtree) do
+         local lft = n.lft - origin.lft + p.rgt
+         local rgt = n.rgt - origin.lft + p.rgt
+         local node = { app_id=n.app_id, lft=lft, rgt=rgt, instance_id=n.instance_id }
+
+         insert  ( "itvision_app_trees", node)
       end
+
+      execute ( "update itvision_app_trees set lft = lft + "..width.." where lft > "..p.rgt)
+      execute ( "update itvision_app_trees set rgt = rgt + "..width.." where rgt >= "..p.rgt)
+   end
+   execute ( "UNLOCK TABLES" )
+
 end
 
 
