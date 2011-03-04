@@ -110,7 +110,7 @@ end
 
 
 function insert_contact_cfg_file (name, full_name, email, apps)
-   --if not  ( name and full_name and email ) then return false end
+   -- name é o app_id que vem a ser o identificador univarsal da app
    local app_list = ""
    local sep, cmd
    local filename = config.monitor.dir.."/contacts/"..name..".cfg"
@@ -122,7 +122,7 @@ function insert_contact_cfg_file (name, full_name, email, apps)
          sep = ","
       end
 
-      app_list = app_list..sep..v.app_name
+      app_list = app_list..sep..v.app_id
    end
 
    local text = [[

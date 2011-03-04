@@ -17,20 +17,25 @@ local node, edge, subgraph, cluster, digraph, strictdigraph =
 function set_color(state, obj_type)
    local color
    state = tonumber(state)
--- Hoje, todos os tipos de objetos de uma aplicacao sao representado por um service!
+
 --[[
    if obj_type == 'hst' then
       color = host_alert[state+1].color
    elseif obj_type == 'svc' then
-]]
-      -- state é nil quando aplicacao uma aplicacao é reativada e ainda nao possui servicestatus
-      if state == nil then state = 4 end 
+   if obj_type == 'svc' then
       color = service_alert[state].color
---[[
    elseif obj_type == 'app' then
       color = applic_alert[state+1].color
    end
 ]]
+
+   if obj_type == 'svc' then
+      color = service_alert[state].color
+   elseif obj_type == 'app' then
+      -- state é nil quando uma aplicacao é reativada e ainda nao possui servicestatus
+      if state == nil then state = APPLIC_PENDING end
+      color = applic_alert[state].color
+   end
 
    return color
 end
@@ -73,7 +78,6 @@ function make_content(obj, rel)
             url   = "/orb/obj_info/"..v.ao_type.."/"..v.o_object_id
             shape = "ellipse"
          elseif v.ao_type == 'app' then
-            label = v.o_name2
             label = v.ax_name
             name  = string.gsub(v.o_name2, "[%s,%p]", "")
             url   = "/orb/obj_info/"..v.ao_type.."/"..v.o_object_id
