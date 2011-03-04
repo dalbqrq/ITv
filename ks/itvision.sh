@@ -196,13 +196,10 @@ dbname=$dbname
 EOF
 
 mkdir $itvhome/html/gv
-printf "html/gv\norb/config.lua\nbin/dbconf\nbin/htpasswd.users\n" >> $itvhome/.git/info/exclude
+printf "html/gv\norb/config.lua\nbin/dbconf\nbin/lua_path\n" >> $itvhome/.git/info/exclude
 
 sed -i -e 's/ErrorLog \/var\/log\/apache2\/error.log/ErrorLog \/var\/log\/itvision\/apache2\/error.log/g' \
 	-e 's/CustomLog \/var\/log\/apache2\/other_vhosts_access.log/CustomLog \/var\/log\/itvision\/apache2\/other_vhosts_access.log/g' /etc/apache2/apache2.conf
-
-htpasswd -bc $itvhome/bin/htpasswd $user $dbpass
-chown -R $user.$user $itvhome/html/gv $itvhome/bin/htpasswd $itvhome/bin/dbconf
 
 
 echo "INSERT INTO itvision.itvision_apps set instance_id = 1, entities_id = 0, name = 'ROOT';" | mysql -u root --password=$dbpass
@@ -606,6 +603,7 @@ printf "$aliases" >> /home/$user/.bashrc
 printf "$aliases" >> /root/.bashrc
 LUA_PATH="$itvhome/orb/?.lua;$itvhome/orb/inc/?.lua;$itvhome/scr/?.lua;$itvhome/orb/Model/?.lua;/usr/local/share/lua/5.1/?.lua"
 printf "export LUA_PATH='$LUA_PATH'\n" >> /home/$user/.bashrc
+printf "LUA_PATH='$LUA_PATH'\n" > $itvhome/bin/lua_path
 export LUA_PATH=$LUA_PATH
 
 
@@ -665,6 +663,10 @@ LUA_PATH="$LUA_PATH"
 EOF
 sudo -u $user crontab /tmp/crontab
 rm -f /tmp/crontab
+
+# Algumas permissoes
+#htpasswd -bc $itvhome/bin/htpasswd $user $dbpass; $itvhome/bin/htpasswd 
+chown -R $user.$user $itvhome/html/gv $itvhome/bin/dbconf $itvhome/bin/lua_path
 
 
 
