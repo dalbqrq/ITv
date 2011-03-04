@@ -114,6 +114,7 @@ function render_show(web, app, app_name, app_id, obj, rel, obj_id, no_header)
          a{ href=lnkgeo,  "Mapa" } ,
          a{ href=lnkedt,  strings.edit } ,
       } )
+   else
       refresh_time = nil
    end
    --res[#res+1] = render_content_header("", nil, nil, nil, lnkgeo)

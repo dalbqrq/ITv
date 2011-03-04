@@ -293,7 +293,7 @@ function render_list(web, A, root, msg, no_header)
 
 
       row[#row+1] = {
-         a{ href=lnk, v.name },
+         a{ href=lnk, v.name.." #" },
          strings["logical_"..v.type],
          NoOrYes[tonumber(v.is_active)+1].name,
          button_remove,

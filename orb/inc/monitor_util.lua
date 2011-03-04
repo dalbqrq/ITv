@@ -129,11 +129,11 @@ function insert_contact_cfg_file (name, full_name, email, apps)
 
    local text = [[
 define contact{
-        use]].."\t\t"..[[generic-contact 
         contact_name]].."\t"..name..[[ 
         alias]].."\t\t"..full_name..[[ 
         email]].."\t\t"..email..[[ 
-        contactgroup]].."\t"..app_list..[[
+        contact_groups]].."\t"..app_list..[[
+
         service_notification_period     24x7
         host_notification_period        24x7
         service_notification_options    w,u,c,r
@@ -253,7 +253,7 @@ function insert_contactgroup_cfg_file (apps)
    for _,v in ipairs(apps) do
       text = text ..[[
 define contactgroup{
-        contactgroup_name]].."\t"..v.name..[[ 
+        contactgroup_name]].."\t"..v.id..[[ 
         alias]].."\t\t\t"..v.name..[[ 
         }
 
