@@ -24,4 +24,5 @@ function update_new_services()
 
 end
 
+--update_new_services()
 

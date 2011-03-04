@@ -69,7 +69,7 @@ function update_contact(user_id)
    else
       a.firstname = a.firstname or ""
       a.realname  = a.realname or ""
-      insert_contact_cfg_file (a.app_id, a.firstname.." "..a.realname, a.email, apps)
+      insert_contact_cfg_file (user_id, a.firstname.." "..a.realname, a.email, apps)
    end
 end
 

@@ -22,4 +22,5 @@ function update_new_apps()
 
 end
 
+--update_new_apps()
 

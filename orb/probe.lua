@@ -51,6 +51,9 @@ function objects:count_alike(name1, name2)
       clause = clause.." and name2 like '"..name2.."%'"
    end
 
+   if clause ~= "" then clause = clause.." and " end
+   clause = clause .. " objecttype_id = 2 and is_active = 1"
+
    q = Model.query("nagios_objects", clause)
    if q then res = #q + 1 end
    
@@ -67,7 +70,7 @@ function objects:select_host(name1)
       clause = " o.name1 like '"..config.monitor.check_app.."%' "
    end
 
-   clause = clause .. " and o.name2 is null and o.is_active = 1"
+   clause = clause .. " and objecttype_id = 1 and o.name2 is null and o.is_active = 1"
 
    return Model.query("nagios_objects o", clause)
 end
@@ -85,6 +88,7 @@ function objects:select_checks(cmd)
    local clause = ""
    if cmd then
       clause = " object_id = '"..cmd.."' "
+      clause = clause .. " and objecttype_id = 12 and is_active = 1"
    end
 
    return Model.query("nagios_objects", clause)
@@ -215,7 +219,8 @@ p_id    = address             = 147.65.1.3
 ------------------------------------------------------------------------------------------------------------------------------
 function insert_host(web, p_id, sv_id, c_id, n_id, c_name, ip)
    local msg = ""
-   local hst_name = ip.."_"..c_id
+   --local hst_name = ip.."_"..c_id
+   local hst_name = p_id
 
    h = objects:select_host(hst_name)
 
@@ -235,6 +240,8 @@ function insert_host(web, p_id, sv_id, c_id, n_id, c_name, ip)
       msg = msg.."Check do HOST: "..c_name.." já existe! "
    end   
 
+   os.sleep(1)
+   os.reset_monitor()
    if web then
       return web:redirect(web:link("/list/"..msg..""))
    else
@@ -251,7 +258,8 @@ ITvision:dispatch_post(insert_host, "/insert_host/(%d+):(%d+):(%d+):(%d+):(.+):(
 ------------------------------------------------------------------------------------------------------------------------------
 function insert_service(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, ip)
    local msg = ""
-   local hst_name = ip.."_"..c_id
+   --local hst_name = ip.."_"..c_id
+   local hst_name = p_id
 
    local flags, opts = {}, {}
    local chk, chk_id
