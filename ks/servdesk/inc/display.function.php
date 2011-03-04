@@ -1843,6 +1843,7 @@ function nullFooter() {
    $FOOTER_LOADED=true;
 
    if (!isCommandLine()) {
+/* daniel@itvision.com.br
       echo "<div class='bas'></div></div></div>";
 
       echo "<div id='footer-login'>";
@@ -1852,6 +1853,7 @@ function nullFooter() {
       echo "</a></div>";
 
       echo "</body></html>";
+*/
    }
    closeDBConnections();
 }
