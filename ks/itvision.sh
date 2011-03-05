@@ -69,6 +69,8 @@ install_pack libdbd-mysql-perl # OCSNG
 install_pack libcgi-simple-perl # OCSNG
 install_pack php5 # OCSNG
 install_pack php5-gd # OCSNG - NEDI
+install_pack php5-ldap
+install_pack php5-imap
 install_pack libapache-dbi-perl # OCSNG
 install_pack libnet-ip-perl # OCSNG
 install_pack libsoap-lite-perl # OCSNG
@@ -86,7 +88,9 @@ install_pack libnet-telnet-cisco-perl # NEDI
 install_pack php5-snmp # NEDI
 install_pack libalgorithm-diff-perl # NEDI
 install_pack rrdtool # NEDI
-
+install_pack mbrola # Synthesizing Voice
+install_pack mrbrola-br3 # Synthesizing Voice
+install_pack festival # Synthesizing Voice
 
 
 # --------------------------------------------------
@@ -315,7 +319,9 @@ mysqldump -u root --password=$dbpass -v ndoutils > /tmp/ndoutils.sql
 mysql -u root --password=$dbpass $dbname < /tmp/ndoutils.sql
 echo "DROP DATABASE ndoutils;" | mysql -u root --password=$dbpass
 
-chown -R $user.$user /var/log/itvision/nagios3 /etc/init.d/nagios-nrpe-server /etc/init.d/nagios3 /etc/nagios3 /etc/nagios /etc/nagios-plugins /var/run/nagios /var/run/nagios3 /usr/lib/nagios /usr/sbin/log2ndo /usr/lib/nagios3 /etc/apache2 /var/cache/nagios3 /var/lib/nagios /var/lib/nagios3 /usr/share/nagios3/ /usr/lib/cgi-bin/nagios3
+chown -R $user.$user /var/log/itvision/nagios3 /etc/init.d/nagios-nrpe-server /etc/init.d/nagios3 /etc/nagios3 /etc/nagios /etc/nagios-plugins /var/run/nagios /var/run/nagios3 /usr/lib/nagios /usr/sbin/log2ndo /usr/lib/nagios3 /etc/apache2 /var/cache/nagios3 /var/lib/nagios /var/lib/nagios3 /usr/share/nagios3/ /usr/lib/cgi-bin/nagios3 
+chown root.netadm /usr/lib/nagios/plugins/check_dhcp
+chmod 4750 /usr/lib/nagios/plugins/check_dhcp
 
 
 
@@ -562,6 +568,13 @@ luarocks install luagraph
 #
 sed -i.orig '/^#/ a\
 . '$itvhome'/bin/lua_path' /usr/local/bin/wsapi.cgi
+
+
+
+# --------------------------------------------------
+# FESTIVAL MBROLA 
+# --------------------------------------------------
+install_msg FESTIVAL MBROLA Synthesizing
 
 
 
