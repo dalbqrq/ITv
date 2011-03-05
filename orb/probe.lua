@@ -219,7 +219,6 @@ p_id    = address             = 147.65.1.3
 ------------------------------------------------------------------------------------------------------------------------------
 function insert_host(web, p_id, sv_id, c_id, n_id, c_name, ip)
    local msg = ""
-   --local hst_name = ip.."_"..c_id
    local hst_name = c_id.."_"..p_id
 
    h = objects:select_host(hst_name)
@@ -258,7 +257,6 @@ ITvision:dispatch_post(insert_host, "/insert_host/(%d+):(%d+):(%d+):(%d+):(.+):(
 ------------------------------------------------------------------------------------------------------------------------------
 function insert_service(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, ip)
    local msg = ""
-   --local hst_name = ip.."_"..c_id
    local hst_name = c_id.."_"..p_id
 
    local flags, opts = {}, {}
@@ -424,7 +422,7 @@ function render_checkcmd(web, chk_id, hst_name, ip, url_test, url_insert, chk_pa
    if chk_params then p = chk_params end
    local chk = path.."/"..c[1].command
 
-   monitor_name = monitor_name or c[1].name1
+   monitor_name = monitor_name or c[1].label
    
    for i, v in ipairs(p) do
       v.flag = v.flag or ""
@@ -446,12 +444,12 @@ function render_checkcmd(web, chk_id, hst_name, ip, url_test, url_insert, chk_pa
             { "<INPUT TYPE=HIDDEN NAME=\"flag"..count.."\" value=\""..v.flag.."\">" ,
               "<INPUT TYPE=HIDDEN NAME=\"opt"..count.."\" value=\""..value.."\" "..readonly..">",
               "<INPUT TYPE=HIDDEN NAME=\"seq\" value=\""..v.sequence.."\">" } }
+
+         row[#row + 1] = { count,
+            { "<INPUT TYPE=HIDDEN NAME=\"flag"..i.."\" value=\""..v.flag.."\">" ,
+              "<INPUT TYPE=TEXT NAME=\"opt"..i.."\" value=\""..value.."\" "..readonly..">" }, v.description }
+
       end
-
-      row[#row + 1] = { i,
-         { "<INPUT TYPE=HIDDEN NAME=\"flag"..i.."\" value=\""..v.flag.."\">" ,
-           "<INPUT TYPE=TEXT NAME=\"opt"..i.."\" value=\""..value.."\" "..readonly..">" }, v.description }
-
       args = args.." "..v.flag.." "..value
    end
 
@@ -506,7 +504,7 @@ function render_add(web, cmp, chk, params, chk_params, monitor_name)
       if params.p_id    then url_test = url_test..":"..params.p_id    end
       if params.sv_id   then url_test = url_test..":"..params.sv_id   end
 
-      cmd = { select_option_onchange("check", chk, "object_id", "name1", chk_id, web:link(url_test)), " " }
+      cmd = { select_option_onchange("check", chk, "object_id", "label", chk_id, web:link(url_test)), " " }
       row[#row + 1] = { hst_name, v.p_ip, serv, itemtype, cmd, }
 
       url_test = url_test..":"..chk_id
