@@ -56,11 +56,12 @@ function is_logged_at_glpi(web)
 
 
    if user_name ~= nil then
-      local profile = { is_logged=true, user_name=user_name, user_id=user_id, session=sess_, cookie=glpi_cookie } 
+      local profile = { is_logged=true, user_name=user_name, user_id=user_id, session=sess_, cookie=glpi_cookie,
+                        profile=nil } 
       local prof_ = text_file_reader(prof_filename)
       if prof_ == nil then
       end
-      return 
+      return profile
    else
       return false
    end
