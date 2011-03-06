@@ -1,0 +1,1 @@
+glpiprofiles|a:1:{i:4;a:2:{s:4:"name";s:11:"super-admin";s:8:"entities";a:1:{i:0;a:3:{s:2:"id";s:1:"0";s:4:"name";N;s:12:"is_recursive";s:1:"1";}}}}glpiID|s:1:"2";glpi_use_mode|s:1:"0";glpi_plugins|a:0:{NULL{NULL}}glpiactiveentities|a:1:{i:0;i:0;}glpiname|s:5:"admin";glpirealname|s:0:"";glpifirstname|N;
