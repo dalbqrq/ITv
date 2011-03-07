@@ -1,4 +1,9 @@
 #!/bin/bash
+
+
+#
+# URL PATH NAGIOS3 PARA MONITOR
+#
 data=`date +%d%m%Y`
 read $1
 user=$1
@@ -45,4 +50,10 @@ EOF
 
 sed -i.bkp.$data -e "s/\/cgi-bin\/nagios3/cgi-bin\/monitor/" /usr/share/nagios3/htdocs
 sed -i.bkp.$data -e 's/nagios3/monitor/' /usr/share/nagios3/htdocs/graphs.html
+
+#
+#  ALTERACAO NO CODIGO FONTE GLPI
+#
+\cp -f /usr/local/itvision/ks/servdesk/inc/crontask.class.php /usr/local/servdesk/inc
+
 
