@@ -292,7 +292,7 @@ end
 -- views ------------------------------------------------------------
 
 menu_itens = {
-   { name="Monitor", link="/orb/gviz/show",
+   { name="Monitor", link="#",
       submenu = {
       { name="Visão", field=nil, link="/orb/gviz/show" },
       { name="Árvore", field="application", link="/orb/treeviz/show" },
@@ -301,7 +301,7 @@ menu_itens = {
       { name="Tipo de Relacionamento", field="app_relat_type", link="/orb/app_relat_types" },
       },
    },
-   { name="ServiceDesk", link="/servdesk/front/central.php",
+   { name="ServiceDesk", link="#",
       submenu = {
       { name="Central", field=nil, link="/servdesk/front/central.php" },
       { name="Ticket", field=nil, link="/servdesk/front/ticket.php" },
@@ -310,7 +310,7 @@ menu_itens = {
    },
    { name="CMDB", link="#",
       submenu = {
-      { name="Computadores", field="computers", link="/servdesk/front/computer.php" },
+      { name="Computadores", field="computer", link="/servdesk/front/computer.php" },
       { name="Software", field="software", link="/servdesk/front/software.php" },
       { name="Equip. de Redes", field="networking", link="/servdesk/front/networkequipment.php" },
       { name="Telefones", field="phone", link="/servdesk/front/phone.php"  },
@@ -362,13 +362,42 @@ menu_itens = {
       { name="Sobre", link="/orb/about" },
       }, 
    },
-
 }
 
 
 function get_menu_itens(profile)
-   return menu_itens
+   local m = {}
+
+   for i, v in ipairs(menu_itens) do
+      local s = {}
+      for j,w in ipairs(v.submenu) do
+         if type(w.field) == "string" and profile[w.field] then
+            table.insert(s,w)
+         elseif type(w.field) == "table" then
+            local inc = nil
+            for _,z in ipairs(w.field) do
+               if z and profile[z] then inc = true end
+            end
+            if inc then
+               table.insert(s,w)
+            end
+         else
+            table.insert(s,w)
+         end
+      end
+      if s[1] then 
+         table.insert(m, i, {})
+         m[i].name = v.name
+         m[i].link = "#"
+         m[i].submenu = s
+      end
+   end
+   text_file_writer("/tmp/m", table.dump(m))
+   text_file_writer("/tmp/p", table.dump(profile))
+   return m
 end
+
+
 
 --[[
 
