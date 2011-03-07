@@ -309,7 +309,6 @@ $LANG['computers'][53]="Service Pack";
 $LANG['computers'][54]="Sem telefone conectado"; 
 $LANG['computers'][55]="Telefone(s)"; 
 $LANG['computers'][56]="Status atualizado. Os itens conectados foram atualizados utilizando este status."; 
-$LANG['computers'][57]="Alias";
 
 $LANG['connect'][0]="Conexões diretas"; 
 $LANG['connect'][1]="Não conectado"; 
@@ -465,11 +464,11 @@ $LANG['document'][49]="O arquivo está alterado (bad checksum)";
 $LANG['document'][50]="Attached items"; 
 
 $LANG['entity'][0]="Entidade"; 
-$LANG['entity'][2]="Entidade raiz"; 
+$LANG['entity'][2]="RAIZ ITvision"; 
 $LANG['entity'][3]="Associar a uma entidade"; 
 $LANG['entity'][5]="Atribuição automática de computador"; 
 $LANG['entity'][6]="Atribuir usuário automaticamente"; 
-$LANG['entity'][7]="Estrutura da árvore"; 
+$LANG['entity'][7]="ITv_árvore"; 
 $LANG['entity'][8]="Por entidade"; 
 $LANG['entity'][9]="Entidades subordinadas"; 
 $LANG['entity'][10]="Selecione a entidade desejada"; 
@@ -1087,6 +1086,12 @@ $LANG['Menu'][38]="Inventário";
 $LANG['Menu'][39]="Gateway de e-mail"; 
 $LANG['Menu'][40]="Favoritos"; 
 $LANG['Menu'][41]="Direitos"; 
+//daniel@itvision.com.br
+$LANG['Menu'][50]="Monitoração"; 
+$LANG['Menu'][51]="Aplicações"; 
+$LANG['Menu'][52]="Checagem"; 
+//daniel@itvision.com.br
+$LANG['Menu'][53]="Tipo de Relacionamento"; 
 
 $LANG['monitors'][14]="Microfone"; 
 $LANG['monitors'][15]="Auto-Falantes"; 

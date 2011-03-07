@@ -50,11 +50,3 @@ EOF
 
 sed -i.bkp.$data -e "s/\/cgi-bin\/nagios3/cgi-bin\/monitor/" /usr/share/nagios3/htdocs
 sed -i.bkp.$data -e 's/nagios3/monitor/' /usr/share/nagios3/htdocs/graphs.html
-
-#
-#   Atualiza db 
-#
-. /usr/local/itvision/bin/dbconf
-mysql -u $user --password=$dbpass $dbname < /usr/local/itvision/ks/db/itvision_update3.sql
-
-

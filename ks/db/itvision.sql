@@ -176,7 +176,7 @@ CREATE TABLE `itvision_checkcmd_default_params` (
   `default_value` varchar(45) DEFAULT NULL,
   `description` varchar(245) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -189,12 +189,13 @@ DROP TABLE IF EXISTS `itvision_checkcmd_params`;
 CREATE TABLE `itvision_checkcmd_params` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `service_object_id` int(11) NOT NULL,
+  `name1` varchar(40) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `name2` varchar(40) COLLATE utf8_unicode_ci DEFAULT NULL,
   `checkcmds_id` int(11) NOT NULL,
   `sequence` int(11) DEFAULT NULL,
-  `flag` varchar(20) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `variable` varchar(25) COLLATE utf8_unicode_ci NOT NULL,
+  `value` varchar(40) COLLATE utf8_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -208,6 +209,7 @@ CREATE TABLE `itvision_checkcmds` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `cmd_object_id` int(11) NOT NULL,
   `command` varchar(65) NOT NULL,
+  `label` varchar(65) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;

@@ -61,14 +61,14 @@ function is_logged_at_glpi(web)
    end
 
    local sess_filename = session_path.."/sess_"..glpi_cookie
-   -- Nao grava profile: local prof_filename = session_path.."/prof_"..glpi_cookie..".lua"
+   local prof_filename = session_path.."/prof_"..glpi_cookie..".lua"
 
    -- Veja no final deste arquivo um exemplo da tabela criada a partir do arquivo de sessao do glpi
    -- que contem informacoes extridas do arquivo de sessao do glpi contendo o profile do usuário logado
 
    local sess_ = text_file_reader(sess_filename)
    local prof_ = get_profile(sess_)
-   -- Nao grava profile: --text_file_writer(prof_filename, table.dump(prof_))
+   text_file_writer(prof_filename, table.dump(prof_))
 
    if prof_.glpiname ~= nil then
       return { is_logged=true, user_name=prof_.glpiname, user_id=prof_.glpiID, session=sess_, cookie=glpi_cookie, 
