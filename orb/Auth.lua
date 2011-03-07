@@ -42,6 +42,14 @@ local glpi_cookie_name = "PHPSESSID"
 local session_path = "/usr/local/servdesk/files/_sessions"
 
 
+function logout(web)
+   local glpi_cookie = get_cookie(web, glpi_cookie_name) 
+   delete_cookie(web, glpi_cookie_name, glpi_cookie)
+   local prof_filename = session_path.."/prof_"..glpi_cookie..".lua"
+   remove_file(prof_filename)
+end
+
+
 function is_logged_at_glpi(web)
    local is_logged, user_name, id, sess_, glpi_cookie
    local glpi_cookie = get_cookie(web, glpi_cookie_name) 
@@ -53,19 +61,22 @@ function is_logged_at_glpi(web)
    local sess_filename = session_path.."/sess_"..glpi_cookie
    local prof_filename = session_path.."/prof_"..glpi_cookie..".lua"
 
-   local sess_ = text_file_reader(sess_filename)
    -- Veja no final deste arquivo um exemplo da tabela criada a partir do arquivo de sessao do glpi
    -- que contem informacoes extridas do arquivo de sessao do glpi contendo o profile do usuário logado
-   local profile = get_profile(sess_)
-   text_file_writer(prof_filename, "profile = "..table.dump(profile))
+
+   local prof_sess_lua = text_file_reader(prof_filename)
+   if not prof_sess_lua then
+      local sess_glpi = text_file_reader(sess_filename)
+      local prof_sess = get_profile(sess_glpi)
+      text_file_writer(prof_filename, "local profile = "..table.dump(prof_sess).."\n\nreturn profile\n")
+      prof_sess_lua = text_file_reader(prof_filename)
+   end
+
+   local prof_ = loadstring(prof_sess_lua)
+   local profile = prof_()
 
    if profile.glpiname ~= nil then
-      local profile = { is_logged=true, user_name=profile.glpiname, user_id=profile.glpiID, session=sess_, cookie=glpi_cookie,
-                        profile=nil } 
-      local prof_ = text_file_reader(prof_filename)
-      if prof_ == nil then
-      end
-      return profile
+      return { is_logged=true, user_name=profile.glpiname, user_id=profile.glpiID, cookie=glpi_cookie, profile=profile } 
    else
       return false
    end
@@ -116,27 +127,21 @@ function string.strip(s,tab)
          v = string.strip(v,true)
       elseif t == "i" then
          _, _, v, s = string.find(v,"(%d*);(.+)")
-         v = tonumber(v)
       elseif t == "b" then
          _, _, v, s = string.find(v,"(%d);(.+)")
-         v = tonumber(v)
       else
          break
       end
+
       if not tab then 
          res["glpi"..l] = v
       else
          if cnt == 0 then
             cnt = cnt + 1
-            b = v
+            if tonumber(v) then b = "["..v.."]" else b = v end
          else
             cnt = 0
-            -- Esta opcao ordena os indices numericos
-            --if tonumber(b) then
-            --   table.insert(res, v)
-            --else
-               res[b] = v
-            --end
+            res[b] = v
          end
       end
    end

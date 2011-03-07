@@ -21,8 +21,7 @@ ITvision:dispatch_get(login, "/")
 
 
 function logout(web)
-   web.prefix = "/servdesk"
-   return web:redirect(web:link("/logout.php"))
+    return render_logout(web)
 end
 ITvision:dispatch_get(logout, "/logout")
 
@@ -82,6 +81,14 @@ function render_cookie(web)
       err = true
    end
    return render_login(web, err)
+end
+
+
+function render_logout(web)
+   Auth.logout(web)
+   web.prefix = "/servdesk"
+   --return web:redirect(web:link("/logout.php"))
+   return web:redirect(web:link("/login.php"))
 end
 
 

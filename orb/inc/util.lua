@@ -14,21 +14,22 @@ loop = 500000
 
 
 
-table.dump = function (t, tab)
-   local tab_ = "   "
+table.dump = function (t, tab, recur)
+   local tab_, col = "   ", ""
    if tab then tab = tab..tab_ else tab = "" end
    local s = tab.."{\n"
 
    for i,v in pairs (t) do
       if type(v) == "table" then
-         s = s..tab..tab_..i.." = "..table.dump(v, tab)
+         s = s..tab..tab_..i.." = "..table.dump(v, tab, true)
       else
          if type(v) ~= "number" then qts="\"" else qts="" end
          if type(tonumber(i)) ~= "number" then lbl=i.." = " else lbl="" end
          s = s..string.format("%s%s%s%s%s,\n", tab..tab_, lbl, qts, tostring(v), qts)
       end
    end
-   s = s..tab.."}\n"
+   if recur == true then col = "," end
+   s = s..tab.."}"..col.."\n"
 
    return s
 end

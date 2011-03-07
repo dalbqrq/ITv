@@ -2,7 +2,6 @@ require "util"
 
 local s = text_file_reader("./s4")
 
-
 function string.strip(s,tab)
    local res = {}
    local cnt = 0
@@ -54,10 +53,9 @@ function string.strip(s,tab)
    return res
 end
 
-
 local r = string.strip(s)
 local t = table.dump(r)
-print(t)
+--print(t)
 
 
 --print(r.profiles[1].name)
