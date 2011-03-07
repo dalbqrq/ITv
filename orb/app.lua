@@ -293,6 +293,12 @@ function render_list(web, A, root, msg, no_header)
       end
       button_active = button_link(stract, web:link("/activate/"..v.id..":"..v.is_active)) 
 
+      if permission == "r" then
+         button_remove = "-"
+         button_edit = "-"
+         button_active = "-"
+      end
+
 
       row[#row+1] = {
          a{ href=lnk, v.name.." #" },
@@ -320,26 +326,12 @@ function render_list(web, A, root, msg, no_header)
 end
 
 
---[[  
-   MUDEI DE IDEIA, VOU CONTINUAR USANDO app_object.lua e app_relats.lua PARA ENTRAR
-   COM OS COMPONENTES DA APLICACAO!!!
-
-   Diferente dos demais metodos "show", este serve para incluir e excluir os componentes
-   e os relacionamentos de uma aplicacao.
-]]
-function render_show(web, app, obj, rel )
-   app = app[1]
-   local res = {}
-   local row = {}
-
-   return render_layout(res)
-end
-
-
 -- TODO: edit deve receber os valores a serem alterados
 function render_add(web, edit)
    local val1, val2, strbar, link
+   local add_link = web:link("/add")
    local res = {}
+   local permission = Auth.check_permission(web, "application", true)
 
    if edit then 
       strbar = strings.update 
@@ -356,8 +348,8 @@ function render_add(web, edit)
       "<INPUT TYPE=HIDDEN NAME=\"is_active\" value=\"0\">",
    }
    
-   res[#res+1] = render_content_header(strings.application, web:link("/add"), web:link("/list"))
-   res[#res+1] = render_form_bar( inc, strbar, link, web:link("/add") )
+   res[#res+1] = render_content_header(strings.application, add_link, web:link("/list"))
+   res[#res+1] = render_form_bar( inc, strbar, link, add_link )
 
    return render_layout(res)
 end
@@ -366,6 +358,7 @@ end
 function render_remove(web, A)
    local res = {}
    local url = ""
+   local permission = Auth.check_permission(web, "application", true)
 
    if A then
       A = A[1]

@@ -3,6 +3,7 @@
 -- includes & defs ------------------------------------------------------
 require "Model"
 require "App"
+require "Auth"
 require "Monitor"
 require "View"
 require "util"
@@ -163,7 +164,9 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 
 function make_app_objects_table(web, A)
    local row, ic = {}, {}
+   local remove_button = {}
    local obj = ""
+   local permission = Auth.check_permission(web, "application")
 
    web.prefix = "/orb/app_objects"
 
@@ -188,11 +191,20 @@ function make_app_objects_table(web, A)
          web.prefix = "/orb/app_objects"
       end
 
+      if permission == "w" then
+         remove_button = button_link(strings.remove, web:link("/delete_obj/"..v.app_id..":"..v.object_id), "negative")
+      else
+         remove_button = { "-" }
+      end
+--[[
+         remove_button = button_link(strings.remove, web:link("/delete_obj/"..v.app_id..":"..v.object_id), "negative")
+]]
+
 
       row[#row + 1] = { 
          obj,
          name_hst_svc_app(v.obj_type),
-         button_link(strings.remove, web:link("/delete_obj/"..v.app_id..":"..v.object_id), "negative"),
+         remove_button
       }
    end
 
@@ -207,6 +219,7 @@ function render_add(web, HST, SVC, APP, APPOBJ, app_id, msg)
    local url_relat = "/insert_relat"
    local list_size = 10
    local header = ""
+   local permission = Auth.check_permission(web, "application")
 
    -----------------------------------------------------------------------
    -- Objetos da Aplicacao
@@ -220,46 +233,48 @@ function render_add(web, HST, SVC, APP, APPOBJ, app_id, msg)
    res[#res+1] = br()
 
 
+   if permission == "w" then
 
-   -- LISTA DE HOSTS PARA SEREM INCLUIDOS ---------------------------------
-   local opt_hst = {}
-   for i,v in ipairs(HST) do
-      local hst_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
-      opt_hst[#opt_hst+1] = option{ value=v.o_object_id, hst_name.." ("..v.p_ip..")" }
-   end
-   local hst = { render_form(web:link(url_app), web:link("/add/"..app_id),
-               { H("select") { size=list_size, style="width: 100%;", name="item", opt_hst }, br(),
-                 input{ type="hidden", name="app_id", value=app_id },
-                 input{ type="hidden", name="type", value="hst" } }, true, strings.add ) }
+      -- LISTA DE HOSTS PARA SEREM INCLUIDOS ---------------------------------
+      local opt_hst = {}
+      for i,v in ipairs(HST) do
+         local hst_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
+         opt_hst[#opt_hst+1] = option{ value=v.o_object_id, hst_name.." ("..v.p_ip..")" }
+      end
+      local hst = { render_form(web:link(url_app), web:link("/add/"..app_id),
+                  { H("select") { size=list_size, style="width: 100%;", name="item", opt_hst }, br(),
+                    input{ type="hidden", name="app_id", value=app_id },
+                    input{ type="hidden", name="type", value="hst" } }, true, strings.add ) }
    
 
-   -- LISTA DE SERVICES PARA SEREM INCLUIDOS ---------------------------------
-   local opt_svc = {}
-   for i,v in ipairs(SVC) do
-      local hst_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
-      opt_svc[#opt_svc+1] = option{ value=v.o_object_id, make_obj_name(hst_name.." ("..v.p_ip..")", v.m_name)}
-   end  
-   local svc = { render_form(web:link(url_app), web:link("/add/"..app_id),
+      -- LISTA DE SERVICES PARA SEREM INCLUIDOS ---------------------------------
+      local opt_svc = {}
+      for i,v in ipairs(SVC) do
+         local hst_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
+         opt_svc[#opt_svc+1] = option{ value=v.o_object_id, make_obj_name(hst_name.." ("..v.p_ip..")", v.m_name)}
+      end  
+         local svc = { render_form(web:link(url_app), web:link("/add/"..app_id),
                { H("select") { size=list_size, style="width: 100%;", name="item", opt_svc }, br(),
-                 input{ type="hidden", name="app_id", value=app_id },
-                 input{ type="hidden", name="type", value="svc" } }, true, strings.add ) }
+                    input{ type="hidden", name="app_id", value=app_id },
+                    input{ type="hidden", name="type", value="svc" } }, true, strings.add ) }
 
 
-   -- LISTA DE APPLIC PARA SEREM INCLUIDAS ---------------------------------
-   local opt_app = {}
-   for i,v in ipairs(APP) do
-      opt_app[#opt_app+1] = option{ value=v.object_id, v.name.." #" }
+      -- LISTA DE APPLIC PARA SEREM INCLUIDAS ---------------------------------
+      local opt_app = {}
+      for i,v in ipairs(APP) do
+         opt_app[#opt_app+1] = option{ value=v.object_id, v.name.." #" }
+      end
+      local app = { render_form(web:link(url_app), web:link("/add/"..app_id),
+                  { H("select") { size=list_size, style="width: 100%;", name="item", opt_app }, br(),
+                    input{ type="hidden", name="app_id", value=app_id },
+                    input{ type="hidden", name="type", value="app" } }, true, strings.add ) }
+
+
+      header = { strings.host, strings.service, strings.application }
+      res[#res+1] = render_table({ {hst, svc, app} }, header)
+
+      res[#res+1] = br()
    end
-   local app = { render_form(web:link(url_app), web:link("/add/"..app_id),
-               { H("select") { size=list_size, style="width: 100%;", name="item", opt_app }, br(),
-                 input{ type="hidden", name="app_id", value=app_id },
-                 input{ type="hidden", name="type", value="app" } }, true, strings.add ) }
-
-
-   header = { strings.host, strings.service, strings.application }
-   res[#res+1] = render_table({ {hst, svc, app} }, header)
-
-   res[#res+1] = br()
 
    return render_layout(res)
 end

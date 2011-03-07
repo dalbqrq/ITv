@@ -265,26 +265,24 @@ end
 
 
 function render_form_bar(form_content, button_name, url_post, url_reset)
-         --td{ width='150px', 
-               --td{ width='80', class='center', 
-   return form{ name = "input", method = "post", action = url_post,
-      --H('table') { class='tab_cadre_fixe', tr{ class='tab_bg_1', 
-      H('table') { class='tab_cadrehov', tr{ class='tab_bg_1', 
-         td{ 
-            H('table') { tr{ td{ class='left', form_content } } }
-         }, 
-         td{ 
-            H('table') { width='100%', tr{ 
+   if url_post then
+      submit = H('table') { width='100%', tr{ 
                td{ class='center', 
                   input{ type='submit', value=button_name,  class='submit' }
                }, 
                td{ 
-                  --a{ href=url_bookmark, img{ src='/pics/bookmark_record.png' } }
                   a{ href=url_reset, img{ src='/pics/reset.png', class='calendrier' } }
                } 
             } }
-         } 
-      } } --, br() 
+
+   end
+   return form{ name = "input", method = "post", action = url_post,
+      H('table') { class='tab_cadrehov', tr{ class='tab_bg_1', 
+         td{ 
+            H('table') { tr{ td{ class='left', form_content } } }
+         }, 
+         td{  submit } 
+      } }
    }
 end
 

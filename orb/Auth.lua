@@ -108,15 +108,15 @@ end
 
 -- Verifica se usuario tem permissao de acesso à determinada página
 -- O parametro 'field' eh fornecido pela pagina que estah tentado ser acessada
-function check_permission(web, field)
+function check_permission(web, field, redirect_if_not_write_perm)
    local auth = check(web)
 
-   if auth.profile[field] then
-      return auth.profile[field]
-   else
+   if not auth.profile[field] or ( redirect_if_not_write_perm and auth.profile[field] == "r"  ) then
       web.prefix = "/"
       web:redirect(web:link("denied.html"))
       return "FALSE"
+   else
+      return auth.profile[field]
    end
 end
 

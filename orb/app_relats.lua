@@ -109,6 +109,8 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 
 function make_app_relat_table(web, AR)
    local row, ic = {}, {}
+   local remove_button = ""
+   local permission = Auth.check_permission(web, "application")
 
    web.prefix = "/orb/app_relats"
 
@@ -147,6 +149,12 @@ function make_app_relat_table(web, AR)
          to = v.to_name.." #"
       end
 
+      if permission == "w" then
+         remove_button = button_link(strings.remove, web:link("/delete_relat/"..v.app_id..":"..v.from_object_id
+             ..":"..v.to_object_id), "negative")
+      else
+         remove_button = "-"
+      end
 
       if v.connection_type == "physical" then contype = strings.physical else contype = strings.logical end
 
@@ -154,8 +162,7 @@ function make_app_relat_table(web, AR)
          from,
          v.art_name,
          to,
-         button_link(strings.remove, web:link("/delete_relat/"..v.app_id..":"..v.from_object_id
-             ..":"..v.to_object_id), "negative"),
+         remove_button
       }
    end
 
@@ -171,6 +178,7 @@ function render_add(web, APPOBJ, AR, RT, app_id, msg)
    local url_relat = "/insert_relat"
    local list_size = 10
    local header = ""
+   local permission = Auth.check_permission(web, "application")
 
    -----------------------------------------------------------------------
    -- Relacionamentos da aplicacao
@@ -182,73 +190,76 @@ function render_add(web, APPOBJ, AR, RT, app_id, msg)
    res[#res+1] = render_table(make_app_relat_table(web, AR), header)
    res[#res+1] = br()
 
-   -- LISTA APP ORIGEM DOS RELACIONAMENTO ---------------------------------
-   local opt_from = {}
-   local obj
-   if APPOBJ[1] then
-      for i,v in ipairs(APPOBJ) do
-         if v.itemtype == "Computer" then
-            ic = Model.query("glpi_computers", "id = "..v.items_id)
-            ic = ic[1]
-         elseif v.itemtype == "NetworkEquipment" then
-            ic = Model.query("glpi_networkequipments", "id = "..v.items_id)
-            ic = ic[1]
-         end
+   if permission == "w" then
 
-         if v.obj_type == "hst" then
-            obj = find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.ip..")"
-         elseif v.obj_type == "svc" then
-            obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.ip..")", v.name)
-         else
-            obj = v.name.." #"
+      -- LISTA APP ORIGEM DOS RELACIONAMENTO ---------------------------------
+      local opt_from = {}
+      local obj
+      if APPOBJ[1] then
+         for i,v in ipairs(APPOBJ) do
+            if v.itemtype == "Computer" then
+               ic = Model.query("glpi_computers", "id = "..v.items_id)
+               ic = ic[1]
+            elseif v.itemtype == "NetworkEquipment" then
+               ic = Model.query("glpi_networkequipments", "id = "..v.items_id)
+               ic = ic[1]
+            end
+
+            if v.obj_type == "hst" then
+               obj = find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.ip..")"
+            elseif v.obj_type == "svc" then
+               obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.ip..")", v.name)
+            else
+               obj = v.name.." #"
+            end
+            opt_from[#opt_from+1] = option{ value=v.object_id, obj }
          end
-         opt_from[#opt_from+1] = option{ value=v.object_id, obj }
       end
-   end
-   --local from = H("select") { multiple="multiple", size=list_size, name="from", opt_from, }
-   local from = H("select") { size=list_size, name="from", opt_from }
+      --local from = H("select") { multiple="multiple", size=list_size, name="from", opt_from, }
+      local from = H("select") { size=list_size, name="from", opt_from }
 
-   -- LISTA TIPOS DE RELACIONAMENTO  ---------------------------------
-   local opt_rel = {}
-   for i,v in ipairs(RT) do
-     opt_rel[#opt_rel+1] = option{ value=v.id, v.name }
-   end
-   local rel = H("select") { size=list_size, name="relat", opt_rel }
-
-   -- LISTA APP DESTINO DOS RELACIONAMENTO ---------------------------------
-   local opt_to = {}
-   if APPOBJ[1] then
-      for i,v in ipairs(APPOBJ) do
-         if v.itemtype == "Computer" then
-            ic = Model.query("glpi_computers", "id = "..v.items_id)
-            ic = ic[1]
-         elseif v.itemtype == "NetworkEquipment" then
-            ic = Model.query("glpi_networkequipments", "id = "..v.items_id)
-            ic = ic[1]
-         end
-
-         if v.obj_type == "hst" then
-            obj = find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.ip..")"
-         elseif v.obj_type == "svc" then
-            obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.ip..")", v.name)
-         else
-            obj = v.name.." #"
-         end
-         opt_to[#opt_to+1] = option{ value=v.object_id, obj }
+      -- LISTA TIPOS DE RELACIONAMENTO  ---------------------------------
+      local opt_rel = {}
+      for i,v in ipairs(RT) do
+        opt_rel[#opt_rel+1] = option{ value=v.id, v.name }
       end
+      local rel = H("select") { size=list_size, name="relat", opt_rel }
+
+      -- LISTA APP DESTINO DOS RELACIONAMENTO ---------------------------------
+      local opt_to = {}
+      if APPOBJ[1] then
+         for i,v in ipairs(APPOBJ) do
+            if v.itemtype == "Computer" then
+               ic = Model.query("glpi_computers", "id = "..v.items_id)
+               ic = ic[1]
+            elseif v.itemtype == "NetworkEquipment" then
+               ic = Model.query("glpi_networkequipments", "id = "..v.items_id)
+               ic = ic[1]
+            end
+
+            if v.obj_type == "hst" then
+               obj = find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.ip..")"
+            elseif v.obj_type == "svc" then
+               obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.ip..")", v.name)
+            else
+               obj = v.name.." #"
+            end
+            opt_to[#opt_to+1] = option{ value=v.object_id, obj }
+         end
+      end
+      local to = H("select") { size=list_size, name="to", opt_to }
+
+      -- INFORMACAO OCULTA PARA A INCLUSAO DO RELACIONAMENTO  --------------------
+      aid = input{ type="hidden", name="app_id", value=app_id }
+
+      local t = { { from, rel, {to, aid} } }
+
+      if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ font{ color="red", msg } }  end
+
+      header =  { strings.origin, strings.type, strings.destiny }
+      --res[#res+1] = render_form_bar( render_table(t, header) , strings.add, web:link(url_relat), web:link("/add/"..app_id))
+      res[#res+1] = render_form( web:link(url_relat), web:link("/add/"..app_id), render_table(t, header), true, strings.add )
    end
-   local to = H("select") { size=list_size, name="to", opt_to }
-
-   -- INFORMACAO OCULTA PARA A INCLUSAO DO RELACIONAMENTO  --------------------
-   aid = input{ type="hidden", name="app_id", value=app_id }
-
-   local t = { { from, rel, {to, aid} } }
-
-   if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ font{ color="red", msg } }  end
-
-   header =  { strings.origin, strings.type, strings.destiny }
-   --res[#res+1] = render_form_bar( render_table(t, header) , strings.add, web:link(url_relat), web:link("/add/"..app_id))
-   res[#res+1] = render_form( web:link(url_relat), web:link("/add/"..app_id), render_table(t, header), true, strings.add )
 
    return render_layout(res)
 end
