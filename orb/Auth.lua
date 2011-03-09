@@ -71,12 +71,12 @@ function is_logged_at_glpi(web)
        buscar em 'sess_filename' as strings abaixo 
            glpiID|s:1:"2";
            glpiname|s:5:"admin"; 
-           glpiactive_entity|i:0;
+           glpiactive_entity|s:1:"3";
            glpiactiveprofile|a:88:{s:2:"id";s:1:"2";
    ]]
    local _, _, _, user_id = string.find(sess_, 'glpiID|s:(%d+):"(%d+)"')
    local _, _, _, user_name = string.find(sess_, 'glpiname|s:(%d+):"([%w-_%.]+)";')
-   local _, _,    entity_id = string.find(sess_, 'glpiactive_entity|i:(%d+);')
+   local _, _, _, entity_id = string.find(sess_, 'glpiactive_entity|s:(%d+):"(%d+)";')
    local _, _, _, _, _, profile_id = string.find(sess_, 'glpiactiveprofile|a:(%d+):{s:(%d+):"id";s:(%d+):"(%d+)";')
 
    local profile 

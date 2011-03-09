@@ -151,13 +151,14 @@ ITvision:dispatch_get(add, "/add")
 
 
 function insert(web)
+   local auth = Auth.check(web)
    apps:new()
    apps.name = web.input.name
    apps.type = web.input.type
    apps.is_active = web.input.is_active
    --app.service_object_id = web.input.service_object_id
    apps.instance_id = Model.db.instance_id
-   apps.entities_id = 0
+   apps.entities_id = auth.entity_id
    apps:save()
 
    local app = apps:select(nil, "name = '"..web.input.name.."'")
@@ -332,6 +333,7 @@ function render_add(web, edit)
    local add_link = web:link("/add")
    local res = {}
    local permission = Auth.check_permission(web, "application", true)
+   local auth = Auth.check(web)
 
    if edit then 
       strbar = strings.update 
