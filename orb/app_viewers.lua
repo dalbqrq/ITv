@@ -3,6 +3,7 @@
 -- includes & defs ------------------------------------------------------
 require "Model"
 require "App"
+require "Auth"
 require "Glpi"
 require "Monitor"
 require "View"
@@ -85,17 +86,24 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 
 function make_app_viewers_table(web, CONTACTS)
    local row = {}
+   local remove_link = ""
    web.prefix = "/orb/app_viewers"
+   local permission = Auth.check_permission(web, "application")
 
    for i, v in ipairs(CONTACTS) do
       v.firstname = v.firstname or " "
       v.realname  = v.realname  or " "
       v.email     = v.email     or " "
+      if permission == "w" then
+         remove_link = button_link(strings.remove, web:link("/delete/"..v.app_id..":"..v.user_id), "negative")
+      else
+         remove_link =  "-"
+      end
       row[#row + 1] = { 
          v.name,
          v.firstname.." "..v.realname,
          v.email,
-         button_link(strings.remove, web:link("/delete/"..v.app_id..":"..v.user_id), "negative"),
+         remove_link,
       }
    end
 
@@ -106,15 +114,18 @@ end
 function make_app_users_table(web, USERS, app_id)
    local row = {}
    web.prefix = "/orb/app_viewers"
+   local permission = Auth.check_permission(web, "application")
 
    for i, v in ipairs(USERS) do
-      local button = ""
-      if string.find(v.email,"@") then 
-         web.prefix = "/orb/app_viewers"
-         button = button_link(strings.add, web:link("/insert/"..app_id..":"..v.id), "positive")
-      else
-         web.prefix = "/servdesk"
-         button = button_link(strings.edit, web:link("/front/user.form.php?id="..v.id), "positive")
+      local button = "-"
+      if permission == "w" then
+         if string.find(v.email,"@") then 
+            web.prefix = "/orb/app_viewers"
+            button = button_link(strings.add, web:link("/insert/"..app_id..":"..v.id), "positive")
+         else
+            web.prefix = "/servdesk"
+            button = button_link(strings.edit, web:link("/front/user.form.php?id="..v.id), "positive")
+         end
       end
       v.firstname = v.firstname or " "
       v.realname  = v.realname  or " "

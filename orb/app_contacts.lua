@@ -3,6 +3,7 @@
 -- includes & defs ------------------------------------------------------
 require "Model"
 require "App"
+require "Auth"
 require "Glpi"
 require "Monitor"
 require "View"

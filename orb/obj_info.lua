@@ -3,6 +3,7 @@
 -- includes & defs ------------------------------------------------------
 require "Model"
 require "Monitor"
+require "Auth"
 require "View"
 require "util"
 require "state"
@@ -76,6 +77,7 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 -- views ------------------------------------------------------------
 
 function render_hst(web, obj_id, A)
+   local permission = Auth.check_permission(web, "application")
    local res = {}
    local row = {}
    local lnkgeo = web:link("/geotag/hst:"..obj_id)
@@ -101,6 +103,7 @@ end
 
 
 function render_svc(web, obj_id, A)
+   local permission = Auth.check_permission(web, "application")
    local res = {}
    local row
 
@@ -153,6 +156,7 @@ end
 
 
 function render_app(web, obj_id, A)
+   local permission = Auth.check_permission(web, "application")
 --[[
    local res = {}
    local row = {}
@@ -181,6 +185,8 @@ end
 
 
 function render_geotag(web, obj_id, objtype, A)
+   -- Este render deverá ficar aberto para o funcionamento do google map sem licenca
+   --local permission = Auth.check_permission(web, "application")
    local res = {obj_id, objtype}
    local geotag, latlon = "", ""
    local marker_maker, position = "", ""

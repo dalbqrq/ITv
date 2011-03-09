@@ -3,6 +3,7 @@
 -- includes & defs ------------------------------------------------------
 require "Model"
 require "Monitor"
+require "Auth"
 require "Checkcmds"
 require "View"
 require "util"
@@ -338,6 +339,7 @@ end
 ------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------
 function render_list(web, cmp, chk, msg)
+   local permission = Auth.check_permission(web, "checkcmds")
    local row, res, link, url = {}, {}, {}, ""
    local header = {
       strings.alias.."/"..strings.name, "IP", "Software / Versão", strings.type, strings.command, strings.alias, "."
@@ -361,13 +363,17 @@ function render_list(web, cmp, chk, msg)
 
       if v.s_check_command_object_id == nil then 
          chk = ""
-         if tonumber(v.m_service_object_id) == -1 then
-            link = font{ color="orange", "Pendente" }
-         elseif serv ~= "" then
-            link = a{ href= web:link("/add/"..v[1]..":"..c_id..":"..v.p_id..":"..v.sv_id), strings.add }
+         if permission == "w" then
+            if tonumber(v.m_service_object_id) == -1 then
+               link = font{ color="orange", "Pendente" }
+            elseif serv ~= "" then
+               link = a{ href= web:link("/add/"..v[1]..":"..c_id..":"..v.p_id..":"..v.sv_id), strings.add }
+            else
+               link = a{ href= web:link("/insert_host/"..v.p_id..":"..v.sv_id..":"..v.c_id..":"..v.n_id..":"
+                                         ..hst_name..":"..ip), strings.add.." host" }
+            end
          else
-            link = a{ href= web:link("/insert_host/"..v.p_id..":"..v.sv_id..":"..v.c_id..":"..v.n_id..":"
-                                      ..hst_name..":"..ip), strings.add.." host" }
+            link = "-"
          end
       else
          content = objects:select_checks(v.s_check_command_object_id)
@@ -385,7 +391,14 @@ function render_list(web, cmp, chk, msg)
 
       if v.sw_name ~= "" then itemtype = "Service" end
       web.prefix = "/orb/probe"
-      row[#row + 1] = { a{ href=url, hst_name}, ip, serv, itemtype, chk, alias, link }
+
+      local name
+      if permission == "w" then
+         name = a{ href=url, hst_name}
+      else
+         name = hst_name
+      end
+      row[#row + 1] = { name, ip, serv, itemtype, chk, alias, link }
    end
 
    res[#res+1] = render_content_header("Checagem", nil, web:link("/list"))
@@ -411,6 +424,7 @@ end
 ------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------
 function render_checkcmd(web, chk_id, hst_name, ip, url_test, url_insert, chk_params, monitor_name)
+   local permission = Auth.check_permission(web, "checkcmds")
    local row, row_hidden, cmd = {}, {}, ""
    local readonly, text = "", ""
    local header = { strings.parameter.." #", strings.value, strings.description }
@@ -469,9 +483,13 @@ function render_checkcmd(web, chk_id, hst_name, ip, url_test, url_insert, chk_pa
    params_hidden = {hidden, br(), br(), render_table(display_show, nil), row_hidden}
    text = strings.parameter.."s do comando "..c[1].name1
 
-   res[#res+1] = center{ render_form(web:link(url_test), nil, params, true, strings.test ) }
-   res[#res+1] = { br(), os.capture(chk.." "..args, true) }
-   res[#res+1] = center{ render_form(web:link(url_insert), nil, params_hidden, true, "Criar checagem" ) }
+   if permission == "w" then
+      res[#res+1] = center{ render_form(web:link(url_test), nil, params, true, strings.test ) }
+      res[#res+1] = { br(), os.capture(chk.." "..args, true) }
+      res[#res+1] = center{ render_form(web:link(url_insert), nil, params_hidden, true, "Criar checagem" ) }
+   else
+      res[#res+1] = params
+   end
 
    return res
 end

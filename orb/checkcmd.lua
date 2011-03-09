@@ -2,6 +2,7 @@
 
 -- includes & defs ------------------------------------------------------
 require "Model"
+require "Auth"
 require "View"
 require "util"
 require "monitor_util"
@@ -49,6 +50,7 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 
 
 function render_chkexec(web, cmd, count, flags, opts)
+   local permission = Auth.check_permission(web, "checkcmds", true)
    local path = "/usr/lib/nagios/plugins"
    local chk = path.."/"..cmd.." "
    local res = {}
@@ -72,6 +74,7 @@ end
 
 
 function render_chktest(web, cmd, opts)
+   local permission = Auth.check_permission(web, "checkcmds", true)
    local path = "/usr/lib/nagios/plugins"
    local chk = path.."/"..cmd.." "
    local res = {}

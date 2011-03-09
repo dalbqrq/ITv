@@ -8,7 +8,7 @@ require "util"
 module(Model.name, package.seeall,orbit.new)
 
 local apps = Model.itvision:model "apps"
-local app_treess = Model.itvision:model "app_treess"
+local app_trees = Model.itvision:model "app_trees"
 
 
 
@@ -64,7 +64,7 @@ ITvision:dispatch_get(edit, "/edit/(%d+)")
 function update(web, id)
    local A = {}
    if id then
-      local tables = "itvision_app_treess"
+      local tables = "itvision_app_tress"
       local clause = "id = "..id
       --A:new()
       A.name = web.input.name
@@ -111,7 +111,7 @@ ITvision:dispatch_get(remove, "/remove/(%d+)")
 function delete(web, id)
    if id then
       local clause = "id = "..id
-      local tables = "itvision_app_treess"
+      local tables = "itvision_app_tress"
       Model.delete (tables, clause) 
    end
 

@@ -3,6 +3,7 @@
 -- includes & defs ------------------------------------------------------
 require "Model"
 require "View"
+require "Auth"
 require "util"
 
 module(Model.name, package.seeall,orbit.new)
@@ -103,6 +104,7 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 function render_list(web, A)
    local rows = {}
    local res = {}
+   local permission = Auth.check_permission(web, "app_relat_type")
    
 --[[
    res[#res + 1] = p{ button_link(strings.add, web:link("/add")) }
@@ -110,15 +112,27 @@ function render_list(web, A)
 ]]
 
    for i, v in ipairs(A) do
+      local button_remove, button_edit = "-", "-"
+      if permission == "w" then
+         button_remove = button_link(strings.remove, web:link("/remove/"..v.id), "negative")
+         button_edit = button_link(strings.edit, web:link("/edit/"..v.id))
+      end
+         -- link usado para acessar o render_show() 
+         --td{ a{ href= web:link("/show/"..v.id), v.name} }, 
       rows[#rows + 1] = tr{ class='tab_bg_1',
-         td{ a{ href= web:link("/show/"..v.id), v.name} },
+         td{ v.name },
          td{ strings[v.type] },
-         td{ button_link(strings.remove, web:link("/remove/"..v.id), "negative") },
-         td{ button_link(strings.edit, web:link("/edit/"..v.id)) },
+         td{ button_remove },
+         td{ button_edit },
       }
    end
 
-   res[#res + 1]  = render_content_header("Tipo de Relacionamento", web:link("/add"), web:link("/list"))
+   if permission == "w" then
+      res[#res + 1]  = render_content_header("Tipo de Relacionamento", web:link("/add"), web:link("/list"))
+   else
+      res[#res + 1]  = render_content_header("Tipo de Relacionamento", nil, web:link("/list"))
+   end
+
    res[#res + 1]  = H("table") { border="0", class="tab_cadrehov",
       thead{ 
          tr{ class="tab_bg_2",
@@ -137,6 +151,8 @@ function render_list(web, A)
 end
 
 
+-- Esta funcao de render_show() estah desativada por parece inutil!
+-- ela era acessada pelo link que agora estah comentado em render_add()
 function render_show(web, A)
    A = A[1]
    local res = {}
@@ -175,6 +191,7 @@ function render_add(web, edit)
    local val1 = ""
    local val2 = ""
    local url = ""
+   local permission = Auth.check_permission(web, "app_relat_type", true)
 
    if edit then
       edit = edit[1]
