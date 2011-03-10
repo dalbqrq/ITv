@@ -18,11 +18,13 @@ function make_obj_name(host, service)
    --if service ~= config.monitor.check_host then
    if service then
       if name ~= "" then
-         name = " @ "..name
+         --name = " @ "..name
+         name = name.." @ "
       else
-         name = " (app)"..name
+         name = name.." #"
       end
-      name = service..name
+      --name = service..name
+      name = name..service
    end
 
    return name

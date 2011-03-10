@@ -14,6 +14,7 @@ module(Model.name, package.seeall,orbit.new)
 local apps = Model.itvision:model "apps"
 local app_objects = Model.itvision:model "app_objects"
 local app_relats = Model.itvision:model "app_relats"
+local objects = Model.nagios:model "objects"
 
 local tab_id = 2
 
@@ -50,6 +51,10 @@ function apps:select(id, clause_)
    return Model.query("itvision_apps", clause, extra)
 end
 
+
+function objects:select_app(obj_id)
+   return Model.query("nagios_objects", "object_id = "..obj_id.." and name1 = '"..config.monitor.check_app.."'")
+end
 
 -- controllers ------------------------------------------------------------
 
@@ -100,8 +105,11 @@ function insert_obj(web)
    if web.input.type == 'app' then 
       local app_child = apps:select(nil,"service_object_id = "..web.input.item)
       App.insert_subnode_app_tree(app_child[1].id, web.input.app_id)
+--[[ nao apaga mais noh ligado a root
       App.delete_node_app_conected_to_root(app_child[1].id)
-
+      _, root = App.select_root_app_tree()
+      Model.delete("itvision_app_objects", "app_id = "..root.app_id.." and service_object_id = "..web.input.item)
+]]
       update_apps()
    end
 
@@ -114,21 +122,36 @@ ITvision:dispatch_post(insert_obj, "/insert_obj")
 
 
 function delete_obj(web, app_id, obj_id)
+   local msg = ""
 
    if app_id and obj_id then
-      local clause = "app_id = "..app_id.." and service_object_id = "..obj_id
-      local tables = "itvision_app_objects"
-      Model.delete (tables, clause) 
+      local is_last = false
+      local subapp = objects:select_app(obj_id)
+      if subapp[1] then
+         is_last = App.is_last_subapp(subapp[1].name2, true)
+      end
+
+      if is_last == false then
+         local clause = "app_id = "..app_id.." and service_object_id = "..obj_id
+         local tables = "itvision_app_objects"
+         Model.delete (tables, clause) 
  
-     -- apaga tambem todos os relacionamentos 
-     app_relats:delete_app_relat(app_id, obj_id, nil)
-     app_relats:delete_app_relat(app_id, nil, obj_id)
+         -- apaga tambem todos os relacionamentos 
+         app_relats:delete_app_relat(app_id, obj_id, nil)
+         app_relats:delete_app_relat(app_id, nil, obj_id)
+     else
+        msg = ":Aplicação não pode ser removida da RAIZ."
+     end
+
+      if subapp[1] then
+         App.delete_child_from_parent(subapp[1].name2, app_id)
+      end
    end
 
    update_apps()
 
    web.prefix = "/orb/app_tabs"
-   return web:redirect(web:link("/list/"..app_id..":"..tab_id))
+   return web:redirect(web:link("/list/"..app_id..":"..tab_id..msg))
 end
 ITvision:dispatch_get(delete_obj, "/delete_obj/(%d+):(%d+)")
 
@@ -158,8 +181,12 @@ function make_app_objects_table(web, A)
       elseif v.obj_type == "svc" then
          obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.name)
       else
-         obj = v.name
+         obj = v.name.." #"
+         web.prefix = "/orb/app_tabs"
+         obj = button_link(obj, web:link("/list/"..v.id..":"..tab_id), "negative")
+         web.prefix = "/orb/app_objects"
       end
+
 
       row[#row + 1] = { 
          obj,
@@ -185,10 +212,12 @@ function render_add(web, HST, SVC, APP, APPOBJ, app_id, msg)
    -----------------------------------------------------------------------
    res[#res+1] = show(web, app_id)
    res[#res+1] = br()
+   if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ font{ color="red", msg } } end
    --res[#res+1] = render_content_header(strings.app_object)
    header = { strings.object.." ("..strings.service.."@"..strings.host..")", strings.type, "." }
    res[#res+1] = render_table(make_app_objects_table(web, APPOBJ), header)
    res[#res+1] = br()
+
 
 
    -- LISTA DE HOSTS PARA SEREM INCLUIDOS ---------------------------------
@@ -218,7 +247,7 @@ function render_add(web, HST, SVC, APP, APPOBJ, app_id, msg)
    -- LISTA DE APPLIC PARA SEREM INCLUIDAS ---------------------------------
    local opt_app = {}
    for i,v in ipairs(APP) do
-      opt_app[#opt_app+1] = option{ value=v.object_id, v.name }
+      opt_app[#opt_app+1] = option{ value=v.object_id, v.name.." #" }
    end
    local app = { render_form(web:link(url_app), web:link("/add/"..app_id),
                { H("select") { size=list_size, style="width: 100%;", name="item", opt_app }, br(),
@@ -230,7 +259,6 @@ function render_add(web, HST, SVC, APP, APPOBJ, app_id, msg)
    res[#res+1] = render_table({ {hst, svc, app} }, header)
 
    res[#res+1] = br()
-   if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ msg } end
 
    return render_layout(res)
 end

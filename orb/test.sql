@@ -106,7 +106,7 @@ where
 
 
 
---
+-- SUBORDINATE
 
    select  node.id as id, node.instance_id as instante_id, node.lft as lft, node.rgt as rgt, 
             node.app_id as app_id, (COUNT(parent.id) - (sub_tree.depth + 1)) AS depth
@@ -116,7 +116,7 @@ where
             FROM itvision_app_trees AS node,
             itvision_app_trees AS parent
             WHERE node.lft BETWEEN parent.lft AND parent.rgt
-            AND node.id = 3
+            AND node.app_id = 18
             GROUP BY node.id
             ORDER BY node.lft
             ) AS sub_tree
@@ -124,7 +124,7 @@ where
             AND node.lft BETWEEN sub_parent.lft AND sub_parent.rgt
             AND sub_parent.id = sub_tree.id
             AND node.app_id = a.id AND a.is_active = 1
-            and node.app_id = 34
+            and node.app_id = 52
    GROUP BY node.id HAVING depth = 1 ORDER BY node.lft
 
 

@@ -14,10 +14,10 @@ module(Model.name, package.seeall,orbit.new)
 
 -- controllers ------------------------------------------------------------
 
-function list(web, app_id, active_tab)
-   return render_list(web, app_id, active_tab)
+function list(web, app_id, active_tab, msg)
+   return render_list(web, app_id, active_tab, msg)
 end
-ITvision:dispatch_get(list, "/(%d+):(%d+)", "/list/(%d+):(%d+)")
+ITvision:dispatch_get(list, "/(%d+):(%d+)", "/list/(%d+):(%d+)", "/list/(%d+):(%d+):(.+)")
 
 ITvision:dispatch_static("/css/%.css", "/script/%.js")
 
@@ -25,10 +25,11 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 -- views ------------------------------------------------------------
 
 
-function render_list(web, app_id, active_tab)
+function render_list(web, app_id, active_tab, msg)
+   if msg then msg = ":"..msg else msg = "" end
    local t = { 
       { title="Principal", html="", href="/orb/app/show/"..app_id },
-      { title="Objetos", html="", href="/orb/app_objects/add/"..app_id }, 
+      { title="Objetos", html="", href="/orb/app_objects/add/"..app_id..msg }, 
       { title="Relacionamentos", html="", href="/orb/app_relats/add/"..app_id }, 
       { title="Contatos", html="", href="/orb/app_contacts/add/"..app_id }, 
       { title="Vizualizadores", html="", href="/orb/app_viewers/add/"..app_id }, 

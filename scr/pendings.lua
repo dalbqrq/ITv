@@ -33,7 +33,7 @@ function update_new_apps()
    for i,v in ipairs(app) do
       -- print(v.app_id,  config.database.instance_id, v.object_id, 'app' )
       local _, root = App.select_root_app_tree ()
-      local ao = { app_id = root[1].app_id, instance_id = config.database.instance_id, 
+      local ao = { app_id = root.app_id, instance_id = config.database.instance_id, 
                    service_object_id = v.object_id, type = 'app' }
       Model.update("itvision_apps", { service_object_id = v.object_id }, "id = "..v.app_id)
       Model.insert("itvision_app_objects", ao)
