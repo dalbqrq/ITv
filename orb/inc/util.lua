@@ -92,6 +92,48 @@ table.toString = function (t)
    return s
 end
 
+
+table.count = function(t, item)
+   local count = 0
+   for i,v in pairs(t) do
+      if item == v then count = count + 1 end
+   end
+   return count
+end
+
+
+table.unique = function(t)
+   local n = {}
+   for i,v in ipairs(t) do
+      if(table.count(n, v) == 0) then
+         n[#n+1] = v
+      end
+   end
+   return n
+end
+
+
+
+table.count_item = function(t, entry, item)
+   local count = 0
+   for i,v in pairs(t) do
+      if entry[item] == v[item] then count = count + 1 end
+   end
+   return count
+end
+
+
+table.unique_item = function(t, item)
+   local n = {}
+   for i,v in ipairs(t) do
+      if(table.count_item(n, v, item) == 0) then
+         n[#n+1] = v
+      end
+   end
+   return n
+end
+
+
 ----------------------------- STRING ----------------------------------
 
 string.toid = function (str)

@@ -293,6 +293,7 @@ function select_uniq_app_in_tree()  -- seleciona app unico na árvore (usado p/ 
    extra     = [[ ORDER BY node.lft desc  ]]
 
    content = query (tablename, cond, extra, columns)
+   content = table.unique_item(content, "id")
    return content
 end
 
