@@ -3,14 +3,6 @@ SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL';
 
-ALTER TABLE `itvision`.`itvision_app_viewers` 
-  ADD CONSTRAINT `fk_id4`
-  FOREIGN KEY (`app_id` )
-  REFERENCES `itvision`.`itvision_apps` (`id` )
-  ON DELETE NO ACTION
-  ON UPDATE NO ACTION
-, DROP INDEX `fk_id5` ;
-
 
 
 ALTER TABLE `itvision`.`itvision_apps` ADD COLUMN `app_type_id` INT(11) NULL DEFAULT NULL  AFTER `service_object_id` , ADD COLUMN `notes` LONGTEXT NULL DEFAULT NULL  AFTER `service_object_id` ;
