@@ -112,7 +112,7 @@ mysql -u root --password=$dbpass $dbname < $itvhome/ks/db/itvision.sql
 mkdir -p /var/log/itvision/apache2
 mkdir -p /var/log/itvision/nagios3
 mkdir -p /var/log/itvision/nagiosgrapher
-chow -R $user.$user /var/log/itvision
+chown -R $user.$user /var/log/itvision
 chmod -R 755 /var/log/itvision
 cat << EOF > /etc/apache2/conf.d/itvision.conf
 <VirtualHost *:80>
@@ -364,7 +364,7 @@ sed -i.orig -e "139a \\
   <tr> \\
     <td width=13><img src=\"images/greendot.gif\" width=\"13\" height=\"14\" name=\"statuswrl-dot\"></td> \\
     <td nowrap><a href=\"/nagiosbp/cgi-bin/nagios-bp.cgi?mode=bi\" target=\"main\" onMouseOver=\"switchdot('statuswrl-dot',1)\" onMouseOut=\"switchdot('statuswrl-dot',0)\" class=\"NavBarItem\">Business Impact</a></td> \\
-  </tr>" /usr/share/nagios3/htdocs/side.html
+  </tr>" /usr/share/nagios3/htdocs/side.php
 
 
 
@@ -457,7 +457,7 @@ wget http://nedi.ch/_media/files:nedi-1.0.5.tgz
 mv files:nedi-1.0.5.tgz nedi-1.0.5.tgz
 tar -xzf nedi-1.0.5.tgz
 mv nedi /usr/local
-chown -R netadm.netadm /usr/local/nedi
+chown -R $user.$user /usr/local/nedi
 chmod 775 /usr/local/nedi/html/log/
 
 echo "Alias /nedi "/usr/local/nedi"
@@ -603,6 +603,7 @@ printf "$aliases" >> /home/$user/.bashrc
 printf "$aliases" >> /root/.bashrc
 LUA_PATH="$itvhome/orb/?.lua;$itvhome/orb/inc/?.lua;$itvhome/scr/?.lua;$itvhome/orb/Model/?.lua;/usr/local/share/lua/5.1/?.lua"
 printf "export LUA_PATH='$LUA_PATH'\n" >> /home/$user/.bashrc
+export LUA_PATH=$LUA_PATH
 
 
 

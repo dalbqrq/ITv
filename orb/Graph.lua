@@ -181,6 +181,8 @@ function make_tree_content(obj, rel, sep)
 
 
    if rel[1] then
+      --if sep == 0 then table.unique(rel) end
+      table.unique(rel)
       for _,v in ipairs(rel) do
          -- FROM -------------------------------
          local from_name = tostring(v.parent_app)
