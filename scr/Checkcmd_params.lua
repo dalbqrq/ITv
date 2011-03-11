@@ -118,7 +118,7 @@ cmds = {
       },
    },
 
-   MYSQL = {
+   MYSQL_DATABASE = {
       command = "check_mysql",
       args = {
          { sequence=nil, flag="-H",  variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP" },

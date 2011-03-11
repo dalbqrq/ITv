@@ -44,10 +44,8 @@ CREATE TABLE `itvision_app_objects` (
   `service_object_id` int(11) NOT NULL,
   `type` enum('app','hst','svc') CHARACTER SET latin1 NOT NULL,
   KEY `fk_app_id4` (`app_id`),
-  KEY `fk_object_id3` (`service_object_id`),
   KEY `fk_instance_id11` (`instance_id`),
-  CONSTRAINT `fk_app_id6` FOREIGN KEY (`app_id`) REFERENCES `itvision_apps` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `fk_object_id3` FOREIGN KEY (`service_object_id`) REFERENCES `nagios_objects` (`object_id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `fk_app_id6` FOREIGN KEY (`app_id`) REFERENCES `itvision_apps` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 

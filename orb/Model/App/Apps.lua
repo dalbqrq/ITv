@@ -13,7 +13,11 @@ end
 
 function select_root_app()
    local root = Model.query("itvision_apps a, itvision_app_trees at", "a.id = at.app_id and at.lft = 1", nil, "a.id as app_id")
-   return root[1].app_id
+   if root[1] then
+      return root[1].app_id
+   else
+      return nil
+   end
 end
 
 
