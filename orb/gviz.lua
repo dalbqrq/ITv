@@ -101,15 +101,18 @@ function render_show(web, app, app_name, app_id, obj, rel, obj_id, no_header)
    Graph.render(app_name, file_type, engene, content)
    local imgmap = text_file_reader(mapfile)
 
-   local lnkgeo = nil
+   local lnkgeo, lnkedt  = nil, nil
    if obj_id then 
       web.prefix = "/orb/obj_info"
       lnkgeo = web:link("/geotag/app:"..obj_id) 
+      web.prefix = "/orb/app_tabs"
+      lnkedt = web:link("/list/"..app_id..":2") 
       web.prefix = "/orb"
    end
    if no_header == nil then
       res[#res+1] = render_bar( { render_selector_bar(web, app, app_id, "/gviz/show"), 
-         a{ href=lnkgeo,  "Visão Georeferenciada" } ,
+         a{ href=lnkgeo,  "Mapa" } ,
+         a{ href=lnkedt,  strings.edit } ,
       } )
       refresh_time = nil
    end

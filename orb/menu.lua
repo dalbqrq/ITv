@@ -86,11 +86,13 @@ menu_itens = {
       { name="Plugins", link="/servdesk/front/plugin.php" },
       },
    },
+}
+
+--[[
    { name="Ajuda", link="/blank.html",
       submenu = { },
    },
-}
-
+]]
 
 
 function render_menu(web, item, subitem)

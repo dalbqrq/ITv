@@ -72,8 +72,8 @@ function render_show(web, obj, rel, sep)
    local imgmap = text_file_reader(mapfile)
 
    res[#res+1] = render_bar( {
-         a{ href=web:link("/treeviz/show/0"),  "Unificado" } ,
-         a{ href=web:link("/treeviz/show/1"),  "Separado" } ,
+         a{ href=web:link("/treeviz/show/0"),  "Unificada" } ,
+         a{ href=web:link("/treeviz/show/1"),  "Separada" } ,
    } )
    res[#res+1] = br()
    res[#res+1] = { imgmap }
