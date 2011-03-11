@@ -41,6 +41,29 @@ function button_form(label, btype, class, div)
 end
 
 
+function make_logo(instance_name) 
+   if instance_name == "IMPA" then
+      return {
+         { src="/pics/transparent.png", width='700px', height='40' },
+         { src="/pics/logo_impa.png", height='45px'  },
+      }
+   
+   elseif instance_name == "PRODERJ" then
+      return {
+         { src="/pics/transparent.png", width='540px', height='40px' },
+         { src="/pics/logo_verto.jpg", height='35px' },
+         { src="/pics/transparent.png", width='40px', height='44px' },
+         { src="/pics/logo_proderj.jpg", height='35px' },
+      }
+
+   elseif instance_name == "VERTO" then
+      return {
+         { src="/pics/transparent.png", width='670', height='40px' },
+         { src="/pics/logo_verto.jpg", height='35px' },
+      }
+   end
+end
+
 
 function render_menu_frame(inner_html)
    local change_script = [[
@@ -52,6 +75,14 @@ function render_menu_frame(inner_html)
             parent.bodyFrame.location.href = bodyPage;
          }
    ]]
+
+   local imgs = make_logo(config.database.instance_name)
+   local imgs = make_logo("PRODERJ")
+   local logo = {}
+
+   for _,v in ipairs(imgs) do
+      logo[#logo+1] = img{ src=v.src, width=v.width, height=v.height }
+   end
 
    return html{
       head{
@@ -66,13 +97,9 @@ function render_menu_frame(inner_html)
       },
 
       body{
-         div{ id="header", img{ src="/pics/logo_itv.png" },
-            img{ src="/pics/transparent.png", width='700px', height='54px' },
-            img{ src="/pics/logo_impa.png", height='45px'  },
-            --img{ src="/pics/logo_verto.jpg", height='35px' },
-            --img{ src="/pics/transparent.png", width='40px', height='44px' },
-            --img{ src="/pics/logo_proderj.jpg", height='35px' },
-            --ul{ id="nav", class="dropdown dropdown-linear", inner_html }
+         div{ id="header", 
+            img{ src="/pics/logo_itv.png" },
+            logo,
             inner_html
          }
       }
