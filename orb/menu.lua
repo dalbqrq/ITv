@@ -15,7 +15,8 @@ function select_profile(user_id)
    columns_ = "p.name as p_name"
    table_   = "glpi_users u, glpi_profiles_users pu, glpi_profiles p"
    -- endidade é 0 pois estou levando em conta que ainda nao existe entidades!
-   cond_    = "u.id = pu.users_id and pu.profiles_id = p.id and pu.entities_id = 0 and u.id = "..user_id
+   --cond_    = "u.id = pu.users_id and pu.profiles_id = p.id and pu.entities_id = 0 and u.id = "..user_id
+   cond_    = "u.id = pu.users_id and pu.profiles_id = p.id and u.id = "..user_id
    
    local profile = Model.query(table_, cond_, nil, columns_)
 

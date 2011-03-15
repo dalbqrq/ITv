@@ -245,6 +245,7 @@ function insert_service(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, 
    local args = web.input.args
    local count = web.input.count
    local monitor_name = web.input.monitor_name
+   local chk_id = web.input.chk_id
    local chk_name = web.input.chk_name
    local check_args = ""
 
@@ -254,6 +255,8 @@ function insert_service(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, 
 
    for i = 1,count do
       check_args = check_args.."!"..web.input["opt"..i]
+--daniel
+      params:insert(hst_name, service_desc, chk_id)
    end
 
    ------------------------------------------------------
@@ -418,12 +421,9 @@ function render_checkcmd(web, chk_id, hst_name, ip, url_test, url_insert, chk_pa
       if string.sub(v.variable,1,4) == "$ARG" then
          count = count + 1
          row_hidden[#row_hidden + 1] = { 
---[[
-            { "<INPUT TYPE=HIDDEN NAME=\"flag"..i.."\" value=\""..v.flag.."\">" ,
-              "<INPUT TYPE=HIDDEN NAME=\"opt"..i.."\" value=\""..value.."\" "..readonly..">" } }
-]]
             { "<INPUT TYPE=HIDDEN NAME=\"flag"..count.."\" value=\""..v.flag.."\">" ,
-              "<INPUT TYPE=HIDDEN NAME=\"opt"..count.."\" value=\""..value.."\" "..readonly..">" } }
+              "<INPUT TYPE=HIDDEN NAME=\"opt"..count.."\" value=\""..value.."\" "..readonly..">",
+              "<INPUT TYPE=HIDDEN NAME=\"seq\" value=\""..v.sequence.."\">" } }
       end
 
       row[#row + 1] = { i,
