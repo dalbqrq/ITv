@@ -111,6 +111,21 @@ function monitors:insert_monitor(networkport, softwareversion, service_object, n
 end
 
 
+function insert_params( hst_name, service_desc, chk_id, seq, value )
+
+   local param = { 
+      name1 = hst_name,
+      name2 = service_desc,
+      checkcmds_id = chk_id,
+      sequence = seq,
+      value = value,
+   }
+
+   return Model.insert("itvision_checkcmd_params", param)
+
+end
+
+
 -- controllers ------------------------------------------------------------
 
 ------------------------------------------------------------------------------------------------------------------------------
@@ -255,8 +270,7 @@ function insert_service(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, 
 
    for i = 1,count do
       check_args = check_args.."!"..web.input["opt"..i]
---daniel
-      params:insert(hst_name, service_desc, chk_id)
+      insert_params( hst_name, service_desc, chk_id, i, web.input["opt"..i] )
    end
 
    ------------------------------------------------------

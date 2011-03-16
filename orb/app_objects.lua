@@ -169,6 +169,7 @@ function make_app_objects_table(web, A)
 
    for i, v in ipairs(A) do
       if v.itemtype == "Computer" then
+         --ic = Model.query("glpi_computers c, glpi_networkports p", "id = "..v.items_id.." and networkequipments_id = p.id")
          ic = Model.query("glpi_computers", "id = "..v.items_id)
          ic = ic[1]
       elseif v.itemtype == "NetworkEquipment" then
@@ -177,9 +178,9 @@ function make_app_objects_table(web, A)
       end
 
       if v.obj_type == "hst" then
-         obj = find_hostname(ic.alias, ic.name, ic.itv_key)
+         obj = find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.ip..")"
       elseif v.obj_type == "svc" then
-         obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.name)
+         obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.ip..")", v.name)
       else
          obj = v.name.." #"
          web.prefix = "/orb/app_tabs"
@@ -224,7 +225,7 @@ function render_add(web, HST, SVC, APP, APPOBJ, app_id, msg)
    local opt_hst = {}
    for i,v in ipairs(HST) do
       local hst_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
-      opt_hst[#opt_hst+1] = option{ value=v.o_object_id, hst_name }
+      opt_hst[#opt_hst+1] = option{ value=v.o_object_id, hst_name.." ("..v.p_ip..")" }
    end
    local hst = { render_form(web:link(url_app), web:link("/add/"..app_id),
                { H("select") { size=list_size, style="width: 100%;", name="item", opt_hst }, br(),
@@ -236,7 +237,7 @@ function render_add(web, HST, SVC, APP, APPOBJ, app_id, msg)
    local opt_svc = {}
    for i,v in ipairs(SVC) do
       local hst_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
-      opt_svc[#opt_svc+1] = option{ value=v.o_object_id, make_obj_name(hst_name, v.m_name) }
+      opt_svc[#opt_svc+1] = option{ value=v.o_object_id, make_obj_name(hst_name.." ("..v.p_ip..")", v.m_name)}
    end  
    local svc = { render_form(web:link(url_app), web:link("/add/"..app_id),
                { H("select") { size=list_size, style="width: 100%;", name="item", opt_svc }, br(),

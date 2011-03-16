@@ -9,13 +9,17 @@ function update_new_services()
        nil, "m.name1 as name1, m.name2 as name2")
 
    for i, v in ipairs(res) do
-      local udt = [[ update itvision_monitors set state = 1, service_object_id = 
+      local udt1 = [[ update itvision_monitors set state = 1, service_object_id = 
+         (select object_id from nagios_objects where name1 = ']]..v.name1..[[' and name2 = ']]..v.name2..[[')
+         where name1 = ']]..v.name1..[[' and name2 = ']]..v.name2..[[' ;]]
+      local udt2 = [[ update itvision_checkcmd_params set service_object_id = 
          (select object_id from nagios_objects where name1 = ']]..v.name1..[[' and name2 = ']]..v.name2..[[')
          where name1 = ']]..v.name1..[[' and name2 = ']]..v.name2..[[' ;]]
 
       print( "Updating: ",v.name1, v.name2)
          
-      Model.execute(udt)
+      Model.execute(udt1)
+      Model.execute(udt2)
    end
 
 end

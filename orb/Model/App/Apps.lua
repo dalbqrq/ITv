@@ -102,7 +102,7 @@ function select_app_app_objects (id)
    local tables_ = "nagios_objects o, itvision_app_objects ao, itvision_apps a, glpi_networkports p, itvision_monitors m"
    local columns_ = [[ o.object_id, o.objecttype_id, o.name1, o.name2, ao.type as obj_type, a.id as 
 	app_id, a.name as a_name, a.type as a_type, a.is_active, a.service_object_id as service_id, 
-        p.itemtype as itemtype, p.items_id as items_id,
+        p.itemtype as itemtype, p.items_id as items_id, p.ip as ip,
         m.name as name ]]
    local content = query (tables_, cond_, extra_, columns_)
 
@@ -186,6 +186,8 @@ function select_app_relat_object (id, from, to)
                       n1.items_id as from_items_id,
                       n2.itemtype as to_itemtype,
                       n2.items_id as to_items_id,
+                      n1.ip as from_ip,
+                      n2.ip as to_ip,
                       m1.name as from_name,
                       m2.name as to_name,
                       m1.type as from_type,
@@ -209,21 +211,20 @@ function select_app_relat_object (id, from, to)
                       o2.name1 = ']]..config.monitor.check_app..[[']]
    local columns_ = [[o1.name1 as from_name1, o1.name2 as from_name2, 
                       o2.name1 as to_name1, o2.name2 as to_name2,
-
                       ar.from_object_id, ar.to_object_id,
                       ar.app_id as app_id, ap.name as app_name, 
                       ar.app_relat_type_id, 
                       ar.from_object_id, ar.to_object_id,
                       art.name as art_name, art.type as art_type,
-
                       n1.itemtype as from_itemtype,
                       n1.items_id as from_items_id,
                       NULL as to_itemtype,
                       NULL as to_items_id,
-
+                      n1.ip as from_ip,
+                      NULL as to_ip,
                       m1.name as from_name,
                       m1.type as from_type,
-                      o2.name2 as to_name,
+                      ap.name as to_name,
                       'app' as to_type 
                     ]]
 
@@ -256,8 +257,10 @@ function select_app_relat_object (id, from, to)
                       n2.items_id as from_items_id,
                       NULL as to_itemtype,
                       NULL as to_items_id,
+                      NULL as from_ip,
+                      n2.ip as to_ip,
 
-                      o1.name2 as from_name,
+                      ap.name as from_name,
                       'app' as from_type,
                       m2.name as to_name,
                       m2.type as to_type
@@ -267,15 +270,19 @@ function select_app_relat_object (id, from, to)
    if from and to then cond_ = cond_  .. " and from_object_id = "..from.." and to_object_id = "..to end
    local content3 = query (tables_, cond_, extra_, columns_)
 
-   -- POR FIM, SELECIONA RELACIONAMENTOS ENTRE APLICACOES NA ORIGEM e HOSTS e SERVICES NO DESTINO
+   -- POR FIM, SELECIONA RELACIONAMENTOS ENTRE APLICACOES NA ORIGEM e NO DESTINO
    local tables_  = [[itvision_app_relats ar, nagios_objects o1, nagios_objects o2, 
-                      itvision_app_relat_types art, itvision_apps ap ]]
+                      itvision_app_relat_types art, itvision_apps ap,
+                      itvision_apps a1, itvision_apps a2 ]]
    local cond_    = [[ar.from_object_id = o1.object_id and 
                       ar.to_object_id = o2.object_id and
                       ar.app_relat_type_id = art.id and
                       ar.app_id = ap.id and
                       o1.name1 = ']]..config.monitor.check_app..[[' and 
-                      o2.name1 = ']]..config.monitor.check_app..[[']]
+                      o2.name1 = ']]..config.monitor.check_app..[[' and
+                      a1.id = o1.name2 and
+                      a2.id = o2.name2
+                      ]]
    local columns_ = [[o1.name1 as from_name1, o1.name2 as from_name2, 
                       o2.name1 as to_name1,   o2.name2 as to_name2,
 
@@ -290,9 +297,9 @@ function select_app_relat_object (id, from, to)
                       NULL as to_itemtype,
                       NULL as to_items_id,
 
-                      o1.name2 as from_name,
+                      a1.name as from_name,
                       'app' as from_type,
-                      o2.name2 as to_name,
+                      a2.name as to_name,
                       'app' as to_type
                     ]]
 

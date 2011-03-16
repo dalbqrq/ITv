@@ -123,9 +123,9 @@ function make_app_relat_table(web, AR)
 
       local from
       if v.from_type == "hst" then
-         from = find_hostname(ic.alias, ic.name, ic.itv_key)
+         from = find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.from_ip..")"
       elseif v.from_type == "svc" then
-         from = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.from_name)
+         from = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.from_ip..")", v.from_name)
       else
          from = v.from_name.." #"
       end
@@ -140,9 +140,9 @@ function make_app_relat_table(web, AR)
 
       local to
       if v.to_type == "hst" then
-         to = find_hostname(ic.alias, ic.name, ic.itv_key)
+         to = find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.to_ip..")"
       elseif v.to_type == "svc" then
-         to = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.to_name)
+         to = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.to_ip..")", v.to_name)
       else
          to = v.to_name.." #"
       end
@@ -196,11 +196,11 @@ function render_add(web, APPOBJ, AR, RT, app_id, msg)
          end
 
          if v.obj_type == "hst" then
-            obj = find_hostname(ic.alias, ic.name, ic.itv_key)
+            obj = find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.ip..")"
          elseif v.obj_type == "svc" then
-            obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.name)
+            obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.ip..")", v.name)
          else
-            obj = v.name
+            obj = v.name.." #"
          end
          opt_from[#opt_from+1] = option{ value=v.object_id, obj }
       end
@@ -228,11 +228,11 @@ function render_add(web, APPOBJ, AR, RT, app_id, msg)
          end
 
          if v.obj_type == "hst" then
-            obj = find_hostname(ic.alias, ic.name, ic.itv_key)
+            obj = find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.ip..")"
          elseif v.obj_type == "svc" then
-            obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.name)
+            obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.ip..")", v.name)
          else
-            obj = v.name
+            obj = v.name.." #"
          end
          opt_to[#opt_to+1] = option{ value=v.object_id, obj }
       end

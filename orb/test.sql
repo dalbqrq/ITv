@@ -1,3 +1,8 @@
+-- new columns
+
+ALTER TABLE itvision.itvision_checkcmd_params ADD COLUMN name2 VARCHAR(40) NULL DEFAULT NULL  AFTER service_object_id ;
+ALTER TABLE itvision.itvision_checkcmd_params ADD COLUMN name1 VARCHAR(40) NULL DEFAULT NULL  AFTER service_object_id ;
+
 -- lista árvore
 select name, lft, rgt, t.id, app_id from itvision_app_trees t, itvision_apps a where t.app_id = a.id;
 
