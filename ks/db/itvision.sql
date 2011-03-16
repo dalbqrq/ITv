@@ -156,8 +156,7 @@ CREATE TABLE `itvision_apps` (
   `app_type_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_instance_id10` (`instance_id`),
-  KEY `fk_object_id6` (`service_object_id`),
-  CONSTRAINT `fk_object_id26` FOREIGN KEY (`service_object_id`) REFERENCES `nagios_objects` (`object_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+  KEY `fk_object_id6` (`service_object_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
