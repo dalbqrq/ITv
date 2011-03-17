@@ -220,7 +220,7 @@ p_id    = address             = 147.65.1.3
 function insert_host(web, p_id, sv_id, c_id, n_id, c_name, ip)
    local msg = ""
    --local hst_name = ip.."_"..c_id
-   local hst_name = p_id
+   local hst_name = c_id.."_"..p_id
 
    h = objects:select_host(hst_name)
 
@@ -259,7 +259,7 @@ ITvision:dispatch_post(insert_host, "/insert_host/(%d+):(%d+):(%d+):(%d+):(.+):(
 function insert_service(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, ip)
    local msg = ""
    --local hst_name = ip.."_"..c_id
-   local hst_name = p_id
+   local hst_name = c_id.."_"..p_id
 
    local flags, opts = {}, {}
    local chk, chk_id
