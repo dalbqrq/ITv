@@ -96,7 +96,7 @@ cmds = {
    HTTPURL = {
       command = "check_http",
       args = {
-         { sequence=nil, flag="-I",  variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP" },
+         --{ sequence=4, flag="-I",  variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP" },
          { sequence=1, flag="-H",  variable="$ARG1$", default_value=nil, description="URL (Endereço de página web)" },
          { sequence=2, flag="-p",  variable="$ARG2$", default_value="80", description="Porta" },
          { sequence=3, flag="-u",  variable="$ARG3$", default_value="/", description="Caminho (path)" },

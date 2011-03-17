@@ -929,9 +929,9 @@ class Computer extends CommonDBTM {
       $tab[90]['name']      = $LANG['title'][37];
 
       $tab[17]['table']     = $this->getTable();
-      $tab[17]['field']     = 'contact';
-      $tab[17]['linkfield'] = 'contact';
-      $tab[17]['name']      = $LANG['common'][18];
+      $tab[17]['field']     = 'alias';
+      $tab[17]['linkfield'] = 'alias';
+      $tab[17]['name']      = $LANG['computers'][57];
 
       $tab[18]['table']     = $this->getTable();
       $tab[18]['field']     = 'contact_num';
