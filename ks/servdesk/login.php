@@ -38,6 +38,7 @@ define('GLPI_ROOT', '.');
 include (GLPI_ROOT . "/inc/includes.php");
 
 
+/* daniel@itvision.com.br
 if (!isset($_SESSION["glpicookietest"]) || $_SESSION["glpicookietest"]!='testcookie') {
    if (!is_writable(GLPI_SESSION_DIR)) {
       glpi_header($CFG_GLPI['root_doc'] . "/index.php?error=2");
@@ -45,6 +46,7 @@ if (!isset($_SESSION["glpicookietest"]) || $_SESSION["glpicookietest"]!='testcoo
       glpi_header($CFG_GLPI['root_doc'] . "/index.php?error=1");
    }
 }
+*/
 
 $_POST = array_map('stripslashes', $_POST);
 
@@ -81,18 +83,20 @@ if ($auth->Login($_POST['login_name'],
       glpi_header($CFG_GLPI['root_doc'] . "/front/helpdesk.public.php$REDIRECT");
    } else {
       //glpi_header($CFG_GLPI['root_doc'] . "/front/central.php$REDIRECT");
-      glpi_header("/orb/gviz/show$REDIRECT");
+      //glpi_header("/login.html$REDIRECT"); // daniel@itvision.com.br
+      glpi_header("/orb/login/cookie$REDIRECT"); // daniel@itvision.com.br
    }
 
 } else {
 
+   glpi_header("/orb/login/err$REDIRECT");
    // we have done at least a good login? No, we exit.
-   nullHeader("Login", $CFG_GLPI["root_doc"] . '/index.php');
-   echo '<div class="center b">' . $auth->getErr() . '<br><br>';
+//   nullHeader("Login", $CFG_GLPI["root_doc"] . '/index.php');
+//   echo '<div class="center b">' . $auth->getErr() . '<br><br>';
    // Logout whit noAUto to manage auto_login with errors
-   echo '<a href="' . $CFG_GLPI["root_doc"] . '/logout.php?noAUTO=1'.str_replace("?","&",$REDIRECT).'">' .
-          $LANG['login'][1] . '</a></div>';
-   nullFooter();
+//   echo '<a href="' . $CFG_GLPI["root_doc"] . '/logout.php?noAUTO=1'.str_replace("?","&",$REDIRECT).'">' .
+//          $LANG['login'][1] . '</a></div>';
+   //nullFooter();
    exit();
 }
 

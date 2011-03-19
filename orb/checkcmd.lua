@@ -1,12 +1,11 @@
 #!/usr/bin/env wsapi.cgi
 
 -- includes & defs ------------------------------------------------------
+require "Model"
+require "View"
 require "util"
 require "monitor_util"
-require "View"
 
-require "orbit"
-require "Model"
 module(Model.name, package.seeall,orbit.new)
 
 
@@ -37,6 +36,12 @@ end
 ITvision:dispatch_post(chkexec, "/")
 
 
+function chktest(web, cmd, opts)
+   return render_chktest(web, cmd, opts)
+end
+ITvision:dispatch_get(chktest, "/test/(.+):(.+)")
+
+
 ITvision:dispatch_static("/css/%.css", "/script/%.js")
 
 
@@ -60,6 +65,24 @@ function render_chkexec(web, cmd, count, flags, opts)
       res[#res+1] = { br(), br(), strings.fillall }
    else
       res[#res+1] = { br(), br(), os.capture(chk, true) }
+   end
+
+   return render_layout(res)
+end
+
+
+function render_chktest(web, cmd, opts)
+   local path = "/usr/lib/nagios/plugins"
+   local chk = path.."/"..cmd.." "
+   local res = {}
+   local err = false
+   
+   opts = string.gsub(opts,"!", " ")
+ 
+   if err == true then
+      res[#res+1] = { br(), br(), strings.fillall }
+   else
+      res[#res+1] = { br(), br(), os.capture(chk.." "..opts, true) }
    end
 
    return render_layout(res)

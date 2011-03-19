@@ -12,56 +12,24 @@ loop = 500000
 
 ----------------------------- TABLE ----------------------------------
 
-table.cat = function (t)
-   local out
-   for i, v in pairs(t) do
-      if out then
-         out = out.." , "..i.." = "..v
-      else
-         out = i.." = "..v
-      end
-   end
-   return out
-end
 
 
-table.show = function (t)
-   print( "{" )
+table.dump = function (t, tab)
+   local tab_ = "   "
+   if tab then tab = tab..tab_ else tab = "" end
+   local s = tab.."{\n"
+
    for i,v in pairs (t) do
-      --print(("\n") )
       if type(v) == "table" then
-         local vv = "{\n"
-         for a,b in pairs(v) do
-            vv = string.format ("%s  %s = \"%s\",\n", vv, a, tostring(b))
-         end
-         v = vv.." },"
-         print( (string.format (" %s = %s", i, tostring(v))) )
+         s = s..tab..tab_..i.." = "..table.dump(v, tab)
       else
-         print( (string.format (" %s = \"%s\",", i, tostring(v))) )
+         if type(v) ~= "number" then qts="\"" else qts="" end
+         if type(tonumber(i)) ~= "number" then lbl=i.." = " else lbl="" end
+         s = s..string.format("%s%s%s%s%s,\n", tab..tab_, lbl, qts, tostring(v), qts)
       end
    end
-   if next(t) then
-      --print( "\n" )
-   end
-   print( "}\n" )
-end
+   s = s..tab.."}\n"
 
-
-table.dump = function (t)
-   local s = ""
-   local val = ""
-   if #t > 0 then
-      for _,row in ipairs(t) do
-         dump(row)
-      end
-   else
-      for field,val in pairs(t) do
-         if type(val) == "string" then
-            val = val:sub(1,60)
-         end
-	 s = s..field.."<"..type(val).."> = "..val
-      end
-   end
    return s
 end
 
@@ -92,6 +60,48 @@ table.toString = function (t)
    return s
 end
 
+
+table.count = function(t, item)
+   local count = 0
+   for i,v in pairs(t) do
+      if item == v then count = count + 1 end
+   end
+   return count
+end
+
+
+table.unique = function(t)
+   local n = {}
+   for i,v in ipairs(t) do
+      if(table.count(n, v) == 0) then
+         n[#n+1] = v
+      end
+   end
+   return n
+end
+
+
+
+table.count_item = function(t, entry, item)
+   local count = 0
+   for i,v in pairs(t) do
+      if entry[item] == v[item] then count = count + 1 end
+   end
+   return count
+end
+
+
+table.unique_item = function(t, item)
+   local n = {}
+   for i,v in ipairs(t) do
+      if(table.count_item(n, v, item) == 0) then
+         n[#n+1] = v
+      end
+   end
+   return n
+end
+
+
 ----------------------------- STRING ----------------------------------
 
 string.toid = function (str)
@@ -100,13 +110,45 @@ end
 
 string.extract_latlon = function(str)
    str = string.gsub(str, "%s+", "")
+
+   -- tratar corretamente (converter) geotab no formato:  22°51'33.20"S,43°23'17.42"O
+   -- agora simplesmente eliminaremos estas entradas.
+   -- procurar expressao como esta em obj_info.lua:render_geotag()
+   if string.find(str, "°") ~= nil or string.find(str, "'") ~= nil then
+      return nil, nil
+   end
+
+   local lat, lon = nil, nil
    local b, c = string.find(str, ",")
 
-   local lat = string.sub(str,1,b-1)
-   local lon = string.sub(str,b+1,-1)
+   if b and c then
+      lat = tonumber(string.sub(str,1,b-1))
+      lon = tonumber(string.sub(str,b+1,-1))
+   end
+
+   if type(lat) == "number" and type(lon) == "number" then
+      if lat < -180 or lat > 180 or lon < -90 or lon > 90 then
+         lat, lon = nil, nil
+      end
+   else
+      lat, lon = nil, nil
+   end
 
    return lat, lon
 end
+
+----------------------------- ECT ----------------------------------
+
+find_hostname = function( a, h, k ) 
+   local host_name
+
+   if a ~= "" and a ~= nil then host_name = a end
+   if host_name == nil and h ~= "" and h ~= nil then host_name = h end
+   if host_name == nil and k ~= "" and k ~= nil then host_name = k end
+
+   return host_name
+end
+
 
 ----------------------------- CSV ----------------------------------
 
@@ -213,9 +255,12 @@ end
 
 
 function text_file_reader(filename)
+   local text
    local f = io.open(filename, 'r')
-   local text = f:read("*all")
-   f:close()
+   if f ~= nil then 
+      text = f:read("*all")
+      f:close()
+   end
 
    return text
 end
@@ -227,6 +272,10 @@ function text_file_writer(filename, text)
    f:close()
 end
 
+
+function remove_file(filename)
+   return os.capture("/bin/rm -f "..filename)
+end
 
 ----------------------------- OS ----------------------------------
 

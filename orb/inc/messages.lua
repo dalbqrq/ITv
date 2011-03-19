@@ -159,11 +159,12 @@ err_msg.pt_BR = {
 	[5] = "Localização inserida na árvore de localizações.",
 	[6] = "ERRO: Lista não encontrada.",
 	[7] = "ERRO: Selecione uma 'Origem', um 'Tipo de Relacionamento' e um 'Destino'.",
-	[8] = "ERRO: A conexão entre os seguintes objetos já existe:",
+	[8] = "ERRO: A conexão entre os objetos já existe.",
 	[9] = "A seguinte Aplicação foi ativada:",
 	[10] = "ERRO: A seguinte Aplicação não possui objetos associados:",
-	[11] = "ERRO: Monitoração de Host não foi incluida. Por favor entre em contato com o administrador.",
+	[11] = "Por favor, aguarde a atualização da base de dados.",
 	[12] = "ERRO: Monitoração de Service não foi incluida. Por favor entre em contato com o administrador.",
+	[13] = "Usuário ou senha inválido. Logue novamente.", 
 }
 
 err_msg.us = {
@@ -177,8 +178,9 @@ err_msg.us = {
 	[8] = "ERROR: The conection of the following objects already existes:",
 	[9] = "The following Application was activated:",
 	[10] = "ERROR: There is no objects associated with the following Application:",
-	[11] = "ERROR: Host monitoring was not included. Please, contact the administrator.",
+	[11] = "Please, wait for the database update.",
 	[12] = "ERROR: Service monitoring was not included. Please, contact the administrator.",
+	[13] = "Invalid user or password. Login again.", 
 }
 
 

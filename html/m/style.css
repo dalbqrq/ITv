@@ -18,8 +18,11 @@ margin: 0;
 
 #tablist li a{
 text-decoration: none;
+/*
 padding: 3px 0.5em;
-margin-left: 5px;
+*/
+padding: 3px 1.8em;
+margin-left: 1px;
 border: 1px solid #778;
 border-bottom: none;
 background: white;
@@ -61,7 +64,9 @@ margin: 0;
 text-decoration: none;
 padding: 3px 0.5em;
 margin-left: 5px;
+/*
 border: 1px solid #778;
+*/
 border-top: none;
 background: white;
 }
@@ -75,10 +80,14 @@ color: #303030;
 color: black;
 background: #F8F8F8;
 border-color: navy;
+text-decoration: underline;
 }
 
 #subtablist li a.current{
+/*
 background: #C8C8C8;
+*/
+text-decoration: underline;
 }
 
 

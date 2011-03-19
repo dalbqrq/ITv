@@ -1,7 +1,8 @@
-
+require "Model"
+require "App"
+require "Checkcmds"
 require "config"
 require "util"
-require "Model"
 
 local cfg_dir = config.monitor.dir.."/etc/itvision/"
 
@@ -14,13 +15,16 @@ function make_obj_name(host, service)
    if string.find(host,config.monitor.check_app) == nil then 
        name = host
    end
-   if service ~= config.monitor.check_host then
+   --if service ~= config.monitor.check_host then
+   if service then
       if name ~= "" then
-         name = " @ "..name
+         --name = " @ "..name
+         name = name.." @ "
       else
-         name = " (app)"..name
+         name = name.." #"
       end
-      name = service..name
+      --name = service..name
+      name = name..service
    end
 
    return name
@@ -28,6 +32,19 @@ end
 
 
 ----------------------------- CONFIG FILES ----------------------------------
+--[[
+          command_name        = PING
+          command_line        = chck_ping
+name1   = host_name           = Euler
+name2   = service_description = My_PING
+c_alias = alias               = euler
+          check_command       = PING!400.0,20%!999.0,70%
+p_id    = address             = 147.65.1.3
+
+
+]]
+
+
 
 function insert_host_cfg_file (hostname, alias, ip)
    if not  ( hostname and alias and ip ) then return false end
@@ -51,31 +68,31 @@ define host{
 end
 
 
-function insert_service_cfg_file (hostname, display_name, chk_name, chk_id, hide_check_host)
-   if not  ( display_name and hostname and chk_name and chk_id ) then return false end
+
+function insert_service_cfg_file (hostname, service_desc, check_cmd, check_args)
    local content, cmd, filename
-   local c, p
 
-   if hide_check_host then
-      c, p = get_check_params(chk_id)
-   else
-      c, p = get_checkhost_params(chk_id)
-   end
-
-   local chk = chk_name
+   if check_args == nil then
+      check_args = ""
+      local tables_ = [[nagios_objects o, itvision_checkcmds c, itvision_checkcmd_default_params p]]
+      local cond_   = [[o.objecttype_id = 12 and o.is_active = 1 and o.object_id = c.cmd_object_id and c.id = p.checkcmds_id 
+                        and p.sequence is not null and o.name2 is null and o.name1 = ']]..check_cmd..[[']]
+      local extras_ = [[order by p.sequence]]
+      local p = Model.query(tables_, cond_, extras_)
       
-   for i,v in ipairs(p) do
-      chk = chk.."!"..v.default_value 
+      for i,v in ipairs(p) do
+         check_args = check_args.."!"..v.default_value 
+      end
    end
 
-   filename = config.monitor.dir.."/services/"..hostname.."-"..display_name.."-"..chk_name..".cfg"
+   filename = config.monitor.dir.."/services/"..hostname.."-"..service_desc..".cfg"
 
    local text = [[
 define service{
         use]].."\t\t\t"..[[generic-service
         host_name]].."\t\t"..hostname..[[ 
-        service_description]].."\t"..display_name..[[ 
-        check_command]].."\t\t"..chk..[[ 
+        service_description]].."\t"..service_desc..[[ 
+        check_command]].."\t\t"..check_cmd..check_args..[[ 
         } 
 ]]
 
@@ -86,17 +103,43 @@ define service{
 end
 
 
-function insert_contact_cfg_file (name, full_name, email)
-   if not  ( name and full_name and email ) then return false end
-   name = string.gsub(tostring(name)," ","_")
-   local cmd, filename = config.monitor.dir.."/contacts/"..name..".cfg"
+
+function remove_contact_cfg_file (name)
+   local filename = config.monitor.dir.."/contacts/"..name..".cfg"
+   remove_file(filename)
+end
+
+
+
+function insert_contact_cfg_file (name, full_name, email, apps)
+   -- name é o app_id que vem a ser o identificador univarsal da app
+   local app_list = ""
+   local sep, cmd
+   local filename = config.monitor.dir.."/contacts/"..name..".cfg"
+
+   for _,v in ipairs(apps) do
+      if app_list == "" then 
+         sep = ""; 
+      else 
+         sep = ","
+      end
+
+      app_list = app_list..sep..v.app_id
+   end
 
    local text = [[
 define contact{
-        use]].."\t\t"..[[generic-contact 
         contact_name]].."\t"..name..[[ 
         alias]].."\t\t"..full_name..[[ 
         email]].."\t\t"..email..[[ 
+        contact_groups]].."\t"..app_list..[[
+
+        service_notification_period     24x7
+        host_notification_period        24x7
+        service_notification_options    w,u,c,r
+        host_notification_options       d,r
+        service_notification_commands   notify-service-by-email
+        host_notification_commands      notify-host-by-email
         }
 ]]
 
@@ -107,12 +150,12 @@ define contact{
 end
 
 
+
 --[[
 TODO: 
    Falta criar grupos de contatos e poder remover contados dos grupos
    Falta ainda associar service tipo BP aos contatos ou aos grupos de contatos
 ]]
-
 
 -- Ainda nao está funcionando
 function delete_cfg_file(filename, conf_type)
@@ -137,10 +180,9 @@ end
   PS: na definicao do business process, "display"quer dizer outra coisa (visibilidade) 
       Veja em /usr/local/monitorbp/README
 ]]
-function activate_app(app, objs, flag)
+function make_app_config(app, objs, flag)
    --app = app[1]
    local s = ""
-   local file_name = string.gsub(app.name," ", "_")
 
    if app.type == "and" then op = " & " else op = " | " end
 
@@ -155,9 +197,10 @@ function activate_app(app, objs, flag)
       
    end
 
-   ref = string.gsub(string.gsub(app.name,"(%p+)","_")," ","_")
+   --ref = string.gsub(string.gsub(app.name,"(%p+)","_")," ","_")
+   ref = app.id
 
-   s = "\n"..ref.." = "..s.."\n"
+   s = "\n#\n#  "..app.name.."\n#\n"..ref.." = "..s.."\n"
    s = s.."display "..flag..";"..ref..";"..ref.."\n\n"
 
    return s
@@ -167,18 +210,22 @@ end
 --[[
   Cria aquivo de conf para todas a aplicacoes
 ]]
-function activate_all_apps(apps)
+function make_all_apps_config(apps)
    local s = ""
    local op
    local file_name = config.monitor.bp_dir.."/etc/nagios-bp.conf"
 
    for i, v  in ipairs(apps) do
-      local objs = Model.select_app_app_objects(v.id)
-      if objs[1] then s = s .. activate_app(v, objs, v.is_active) end
+      local objs = App.select_app_app_objects(v.id)
+      if objs[1] then s = s .. make_app_config(v, objs, v.is_active) end
    end
 
    text_file_writer(file_name, s)
    insert_bp_cfg_file()
+
+   insert_contactgroup_cfg_file(apps)
+
+   os.sleep(1)
    os.reset_monitor()
 end
 
@@ -194,47 +241,31 @@ function insert_bp_cfg_file()
    cmd = cmd .. " -o "..config.monitor.dir.."/apps/apps.cfg"
 
    os.capture(cmd)
-   -- DEBUG: text_file_writer("/tmp/cmd.out", cmd)
 end
 
 
 
---[[
-check_ping!100.0,20%!500.0,60%
-check_local_disk!20%!10%!/
-check_local_users!20!50
-check_local_procs!250!400!RSZDT
-check_local_load!5.0,4.0,3.0!10.0,6.0,4.0
-check_local_swap!20!10
-check_ssh
-check_http
+function insert_contactgroup_cfg_file (apps)
+   if not apps then return false end
+   local filename = config.monitor.dir.."/apps/contactgroups.cfg"
+   local text = ""
 
-cmds = {
-   DHCP      = { def="$USER1$/check_dhcp $ARG1$", default=nil },
-   FTP       = { def="$USER1$/check_ftp -H $HOSTADDRESS$ $ARG1$", default=nil },
-   HPJD      = { def="$USER1$/check_hpjd -H $HOSTADDRESS$ $ARG1$", default=nil },
-   HTTP      = { def="$USER1$/check_http -I $HOSTADDRESS$", default="" },
-   HTTPNAME  = { def="$USER1$/check_http -H $HOSTNAME$ $ARG1$", default="" },
-   HTTPURL   = { def="$USER1$/check_http -I $ARG1$", default="" },
-   IMAP      = { def="$USER1$/check_imap -H $HOSTADDRESS$ $ARG1$", default=nil },
-   DISK      = { def="$USER1$/check_disk -w $ARG1$ -c $ARG2$ -p $ARG3$", default=nil },
-   LOAD      = { def="$USER1$/check_load -w $ARG1$ -c $ARG2$", default=nil },
-   MRTGTRAF  = { def="$USER1$/check_mrtgtraf -F $ARG1$ -a $ARG2$ -w $ARG3$ -c $ARG4$ -e $ARG5$", default=nil },
-   PROCS     = { def="$USER1$/check_procs -w $ARG1$ -c $ARG2$ -s $ARG3$", default=nil },
-   SWAP      = { def="$USER1$/check_swap -w $ARG1$ -c $ARG2$", default=nil },
-   USERS     = { def="$USER1$/check_users -w $ARG1$ -c $ARG2$", default=nil },
-   NT        = { def="$USER1$/check_nt -H $HOSTADDRESS$ -p 12489 -v $ARG1$ $ARG2$", default=nil },
-   PING      = { def="$USER1$/check_ping -H $HOSTADDRESS$ -w $ARG1$ -c $ARG2$ -p 5", default="!400.0,20%!999.0,70%" },
-   HOST_PING = { def="$USER1$/check_ping -H $HOSTADDRESS$ -w $ARG1$ -c $ARG2$ -p 5", default="!400.0,20%!999.0,70%" },
-   HOST_ALIVE = { def="$USER1$/check_ping -H $HOSTADDRESS$ -w $ARG1$ -c $ARG2$ -p 5", default="!400.0,20%!999.0,70%" },
-   POP       = { def="$USER1$/check_pop -H $HOSTADDRESS$ $ARG1$", default=nil },
-   SMTP      = { def="$USER1$/check_smtp -H $HOSTADDRESS$ $ARG1$", default=nil },
-   SNMP      = { def="$USER1$/check_snmp -H $HOSTADDRESS$ $ARG1$", default=nil },
-   SSH       = { def="$USER1$/check_ssh $ARG1$ $HOSTADDRESS$", default="" },
-   TCP       = { def="$USER1$/check_tcp -H $HOSTADDRESS$ -p $ARG1$ $ARG2$", default=nil },
-   UDP       = { def="$USER1$/check_udp -H $HOSTADDRESS$ -p $ARG1$ $ARG2$", default=nil },
-}
+   for _,v in ipairs(apps) do
+      text = text ..[[
+define contactgroup{
+        contactgroup_name]].."\t"..v.id..[[ 
+        alias]].."\t\t\t"..v.name..[[ 
+        }
+
 
 ]]
+   end
+
+   text_file_writer (filename, text)
+   cmd = os.reset_monitor()
+
+   return true, cmd
+end
+
 
 

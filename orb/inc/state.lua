@@ -12,11 +12,12 @@ color = {
 
 
 applic_alert = {   
-	[APPLIC_UP]      = { name= "NORMAL",		status = APPLIC_UP,		color = color.green,	color_name = "green" },
-	[APPLIC_DOWN]    = { name= "CRITICO", 		status = APPLIC_DOWN,		color = color.red,	color_name = "red" },
-	[APPLIC_WARNING] = { name= "ANORMAL",		status = APPLIC_WARNING,	color = color.yellow,	color_name = "yellow" },
-	[APPLIC_PENDING] = { name= "PENDENTE",		status = APPLIC_PENDING,	color = color.blue,	color_name = "blue" },
-	[APPLIC_DISABLE] = { name= "DESABILITADO",	status = APPLIC_DISABLE,	color = color.orange,	color_name = "orange" },
+	[APPLIC_OK]       = { name= "NORMAL",		status = APPLIC_OK,		color = color.green,	color_name = "green" },
+	[APPLIC_WARNING]  = { name= "ANORMAL",	 	status = APPLIC_WARNING,	color = color.yellow,	color_name = "yellow" },
+	[APPLIC_CRITICAL] = { name= "CRITICO", 		status = APPLIC_CRITICAL,	color = color.red,	color_name = "red" },
+	[APPLIC_UNKNOWN]  = { name= "DESCONHECIDO",	status = APPLIC_UNKNOWN,	color = color.gray,	color_name = "gray" },
+	[APPLIC_PENDING]  = { name= "PENDENTE",		status = APPLIC_PENDING,	color = color.blue,	color_name = "blue" },
+	[APPLIC_DISABLE]  = { name= "DESABILITADO",	status = APPLIC_DISABLE,	color = color.orange,	color_name = "orange" }
 }
 
 

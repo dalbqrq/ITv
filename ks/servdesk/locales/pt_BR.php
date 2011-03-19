@@ -309,6 +309,7 @@ $LANG['computers'][53]="Service Pack";
 $LANG['computers'][54]="Sem telefone conectado"; 
 $LANG['computers'][55]="Telefone(s)"; 
 $LANG['computers'][56]="Status atualizado. Os itens conectados foram atualizados utilizando este status."; 
+$LANG['computers'][57]="Alias";
 
 $LANG['connect'][0]="Conexões diretas"; 
 $LANG['connect'][1]="Não conectado"; 

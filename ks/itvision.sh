@@ -3,12 +3,12 @@
 # ITvision MONITOR INSTALL for Ubuntu 10.04.1
 # --------------------------------------------------
 
-user=itv
-dbpass=itv
+user=itvision
+dbpass=itvision
 dbuser=$user
 dbname=itvision
 itvhome=/usr/local/itvision
-instance=VERTO
+instance=ROOT
 hostname=itvision
 
 function install_pack() {
@@ -34,7 +34,7 @@ apt-get -y upgrade
 install_pack openssh-server
 install_pack build-essential
 install_pack locate
-install_pack apache2
+install_pack apache2 
 install_pack libapache2-mod-php5
 install_pack libgd2-xpm-dev
 install_pack graphviz
@@ -59,7 +59,7 @@ install_pack nagios3
 install_pack nagios-nrpe-plugin
 install_pack nagios-nrpe-server
 install_pack ndoutils-nagios3-mysql
-install_pack php5-mysql # OCSNG
+install_pack php5-mysql # OCSNG - NEDI
 install_pack perl # OCSNG
 install_pack libapache2-mod-perl2 # OCSNG
 install_pack libxml-simple-perl # OCSNG
@@ -68,7 +68,9 @@ install_pack libdbi-perl # OCSNG
 install_pack libdbd-mysql-perl # OCSNG
 install_pack libcgi-simple-perl # OCSNG
 install_pack php5 # OCSNG
-install_pack php5-gd # OCSNG
+install_pack php5-gd # OCSNG - NEDI
+install_pack php5-ldap
+install_pack php5-imap
 install_pack libapache-dbi-perl # OCSNG
 install_pack libnet-ip-perl # OCSNG
 install_pack libsoap-lite-perl # OCSNG
@@ -81,7 +83,14 @@ install_pack libgd-gd2-perl
 install_pack perlmagick
 install_pack librrds-perl
 install_pack nagiosgrapher
-
+install_pack libnet-snmp-perl  # NEDI
+install_pack libnet-telnet-cisco-perl # NEDI
+install_pack php5-snmp # NEDI
+install_pack libalgorithm-diff-perl # NEDI
+install_pack rrdtool # NEDI
+install_pack mbrola # Synthesizing Voice
+install_pack mrbrola-br3 # Synthesizing Voice
+install_pack festival # Synthesizing Voice
 
 
 # --------------------------------------------------
@@ -107,7 +116,7 @@ mysql -u root --password=$dbpass $dbname < $itvhome/ks/db/itvision.sql
 mkdir -p /var/log/itvision/apache2
 mkdir -p /var/log/itvision/nagios3
 mkdir -p /var/log/itvision/nagiosgrapher
-chow -R $user.$user /var/log/itvision
+chown -R $user.$user /var/log/itvision
 chmod -R 755 /var/log/itvision
 cat << EOF > /etc/apache2/conf.d/itvision.conf
 <VirtualHost *:80>
@@ -133,8 +142,8 @@ cat << EOF > /etc/apache2/conf.d/itvision.conf
         # alert, emerg.
         LogLevel warn
 
-        ErrorLog /var/log/itvision/apache2/itvision_error.log
-        CustomLog /var/log/itvision/apache2/itivision_access.log combined
+        ErrorLog /var/log/apache2/itvision_error.log
+        CustomLog /var/log/apache2/itvision_access.log combined
 
 </VirtualHost>
 EOF
@@ -165,6 +174,7 @@ monitor = {
 }
 
 view = {
+	-- GERAR NOVA CHAVE EM: http://code.google.com/apis/maps/signup.html
         google_maps_key = "ABQIAAAAsqOIUfpoX_G_Pw0Ar48BRhRtyMmS1TXEK_DXFnd23B1n8zvUnRT_9hDq4-PHCmE33vrSdHVrdUyjgw" --itv.impa.br
 }
 
@@ -190,11 +200,19 @@ dbname=$dbname
 EOF
 
 mkdir $itvhome/html/gv
-chown -R $user.$user $itvhome/html/gv
-printf "html/gv\norb/config.lua\nbin/dbconf\n" >> $itvhome/.git/info/exclude
+printf "html/gv\norb/config.lua\nbin/dbconf\nbin/lua_path\n" >> $itvhome/.git/info/exclude
 
 sed -i -e 's/ErrorLog \/var\/log\/apache2\/error.log/ErrorLog \/var\/log\/itvision\/apache2\/error.log/g' \
 	-e 's/CustomLog \/var\/log\/apache2\/other_vhosts_access.log/CustomLog \/var\/log\/itvision\/apache2\/other_vhosts_access.log/g' /etc/apache2/apache2.conf
+
+
+echo "INSERT INTO itvision.itvision_apps set instance_id = 1, entities_id = 0, name = 'ROOT';" | mysql -u root --password=$dbpass
+echo "INSERT INTO itvision_app_trees set instance_id = 1, app_id = (select id from itvision_apps where name = 'ROOT' and is_active = 0), lft = 1, rgt = 2;"  | mysql -u root --password=$dbpass
+echo "INSERT INTO itvision_app_relat_types VALUES (1,'roda em','logical'),(2,'conectado a','physical'),(3,'usa','logical'),(4,'faz backup em','logical');" | mysql -u root --password=$dbpass
+
+
+
+
 
 # --------------------------------------------------
 # NAGIOS
@@ -212,7 +230,7 @@ sed -i.orig -e "s/nagios_user=nagios/nagios_user=$user/" \
 	-e "s/check_external_commands=0/check_external_commands=1/" \
 	-e "s/admin_email=root@localhost/admin_email=webmaster@itvision.com.br/" \
 	-e "s/log_file=\/var\/log\/nagios3\/nagios.log/log_file=\/var\/log\/itvision\/nagios3\/nagios.log/" \
-	-e "s/log_archive_path=\/var\/log\/nagios3\/archives/log_archive_path=\/var\/log\/itvision\/nagios3\/archives" \
+	-e "s/log_archive_path=\/var\/log\/nagios3\/archives/log_archive_path=\/var\/log\/itvision\/nagios3\/archives/" \
 	-e "s/admin_pager=pageroot@localhost/#admin_pager=pageroot@localhost/" \
 	-e "/conf.d/a \\
 cfg_dir=/etc/nagios3/hosts \\
@@ -267,6 +285,8 @@ cat /etc/nagiosgrapher/nagios3/commands.cfg >> /etc/nagios3/commands.cfg
 rm -f /etc/nagiosgrapher/nagios3/commands.cfg
 echo '<HTML><HEAD><META http-equiv="REFRESH" content="0;url=/nagios3/cgi-bin/graphs.cgi"></HEAD></HTML>'  > /usr/share/nagios3/htdocs/graphs.html
 mkdir -p /etc/nagiosgrapher/ngraph.d/itvision
+cp /etc/nagiosgrapher/ngraph.d/standard/check_ping.ncfg /etc/nagiosgrapher/ngraph.d/standard/check_host_alive.ncfg
+sed -i "s/PING/HOST_ALIVE/g" /etc/nagiosgrapher/ngraph.d/standard/check_host_alive.ncfg
 
 echo << EOF > /usr/share/nagios3/htdocs/grapher.html
 <html><head>
@@ -299,7 +319,9 @@ mysqldump -u root --password=$dbpass -v ndoutils > /tmp/ndoutils.sql
 mysql -u root --password=$dbpass $dbname < /tmp/ndoutils.sql
 echo "DROP DATABASE ndoutils;" | mysql -u root --password=$dbpass
 
-chown -R $user.$user /var/log/itvision/nagios3 /etc/init.d/nagios-nrpe-server /etc/init.d/nagios3 /etc/nagios3 /etc/nagios /etc/nagios-plugins /var/run/nagios /var/run/nagios3 /usr/lib/nagios /usr/sbin/log2ndo /usr/lib/nagios3 /etc/apache2 /var/cache/nagios3 /var/lib/nagios /var/lib/nagios3 /usr/share/nagios3/ /usr/lib/cgi-bin/nagios3
+chown -R $user.$user /var/log/itvision/nagios3 /etc/init.d/nagios-nrpe-server /etc/init.d/nagios3 /etc/nagios3 /etc/nagios /etc/nagios-plugins /var/run/nagios /var/run/nagios3 /usr/lib/nagios /usr/sbin/log2ndo /usr/lib/nagios3 /etc/apache2 /var/cache/nagios3 /var/lib/nagios /var/lib/nagios3 /usr/share/nagios3/ /usr/lib/cgi-bin/nagios3 
+chown root.netadm /usr/lib/nagios/plugins/check_dhcp
+chmod 4750 /usr/lib/nagios/plugins/check_dhcp
 
 
 
@@ -348,7 +370,7 @@ sed -i.orig -e "139a \\
   <tr> \\
     <td width=13><img src=\"images/greendot.gif\" width=\"13\" height=\"14\" name=\"statuswrl-dot\"></td> \\
     <td nowrap><a href=\"/nagiosbp/cgi-bin/nagios-bp.cgi?mode=bi\" target=\"main\" onMouseOver=\"switchdot('statuswrl-dot',1)\" onMouseOut=\"switchdot('statuswrl-dot',0)\" class=\"NavBarItem\">Business Impact</a></td> \\
-  </tr>" /usr/share/nagios3/htdocs/side.html
+  </tr>" /usr/share/nagios3/htdocs/side.php
 
 
 
@@ -401,15 +423,13 @@ cd $itvhome/ks/servdesk
 tar cf - * | ( cd /usr/local/servdesk; tar xfp -)
 
 
+echo "ALTER TABLE itvision.glpi_computers ADD COLUMN geotag VARCHAR(40) NULL DEFAULT NULL  AFTER ticket_tco ;" | mysql -u root --password=$dbpass
 echo "ALTER TABLE itvision.glpi_computers ADD COLUMN alias VARCHAR(30) NULL DEFAULT NULL  AFTER ticket_tco ;" | mysql -u root --password=$dbpass
 echo "ALTER TABLE itvision.glpi_computers ADD COLUMN itv_key VARCHAR(30) NULL DEFAULT NULL  AFTER ticket_tco ;" | mysql -u root --password=$dbpass
-echo "ALTER TABLE itvision.glpi_computers ADD COLUMN geotag VARCHAR(20) NULL DEFAULT NULL  AFTER ticket_tco ;" | mysql -u root --password=$dbpass
-echo "ALTER TABLE itvision.glpi_networkequipments ADD COLUMN geotag VARCHAR(20) NULL DEFAULT NULL  AFTER ticket_tco ;" | mysql -u root --password=$dbpass
+echo "ALTER TABLE itvision.glpi_networkequipments ADD COLUMN geotag VARCHAR(40) NULL DEFAULT NULL  AFTER ticket_tco ;" | mysql -u root --password=$dbpass
 echo "ALTER TABLE itvision.glpi_networkequipments ADD COLUMN alias VARCHAR(30) NULL DEFAULT NULL  AFTER ticket_tco ;" | mysql -u root --password=$dbpass
 echo "ALTER TABLE itvision.glpi_networkequipments ADD COLUMN itv_key VARCHAR(30) NULL DEFAULT NULL  AFTER ticket_tco ;" | mysql -u root --password=$dbpass
  
-
-
 # --------------------------------------------------
 # OCS INVENTORY v1.3.2
 # --------------------------------------------------
@@ -430,6 +450,33 @@ cpan -i YAML
 
 sed -e "/Alias \/ocsreports/a \\
 Alias /ocs /ocsinventory-bla/bla" ocsinventory-reports.conf
+
+
+
+# --------------------------------------------------
+# NEDI
+# --------------------------------------------------
+install_msg NEDI
+
+cd /tmp
+wget http://nedi.ch/_media/files:nedi-1.0.5.tgz
+mv files:nedi-1.0.5.tgz nedi-1.0.5.tgz
+tar -xzf nedi-1.0.5.tgz
+mv nedi /usr/local
+chown -R $user.$user /usr/local/nedi
+chmod 775 /usr/local/nedi/html/log/
+
+echo "Alias /nedi "/usr/local/nedi"
+<Directory "/usr/local/nedi/html/">
+    Options None
+    AllowOverride None
+    Order allow,deny
+    Allow from all
+</Directory>"  >> /etc/apache2/conf.d/nedi.conf
+
+ln -s /usr/local/nedi/nedi.conf /etc/nedi.conf
+
+
 
 
 
@@ -474,19 +521,23 @@ rm -f ~/SERVER* && rm -rf ~/demoCA*
 # --------------------------------------------------
 mkdir -p /var/log/itvision/mysql
 chown -R mysql.adm /var/log/itvision/mysql
-sed -i -e 's/\/var\/log\/mysql\/error.log/\/var\/log\/itvision\/mysql\/error.log/g' /etc/mysql/my.cnf 
-sed -i -e 's/notifempty/ifempty/g' \
+sed -i -e 's/\/var\/log\/mysql\/error.log/\/var\/log\/itvision\/mysql\/error.log/' /etc/mysql/my.cnf 
 	-e 's/weekly/daily/g' /etc/logrotate.d/apache2
 
-sed -i -e 's/notifempty/ifempty/g' \
-        -e 's/weekly/daily/g' /etc/logrotate.d/nagiosgrapher
+sed -i -e 's/weekly/daily/g' /etc/logrotate.d/nagiosgrapher
 
 sed -i -e '/compress/ i\
-ifempty' /etc/logrotate.d/mysql-server
+notifempty' /etc/logrotate.d/mysql-server
 
 sed -i -e '/compress/ i\
-ifempty' /etc/logrotate.d/ocsinventory-server
+notifempty' /etc/logrotate.d/ocsinventory-server
 
+cat << EOF > /etc/cron.d/logdate 
+00 03 * * * root /usr/sbin/logdate
+EOF
+
+# Gera perfil para apparmor ("SElinux do Ubuntu") habilitar o mysqld escrever em outro arquivo
+aa-complain /usr/sbin/mysqld
 
 # --------------------------------------------------
 # GRAPHVIZ
@@ -517,6 +568,13 @@ luarocks install luagraph
 #
 sed -i.orig '/^#/ a\
 . '$itvhome'/bin/lua_path' /usr/local/bin/wsapi.cgi
+
+
+
+# --------------------------------------------------
+# FESTIVAL MBROLA 
+# --------------------------------------------------
+install_msg FESTIVAL MBROLA Synthesizing
 
 
 
@@ -556,7 +614,11 @@ aliases="\nalias mv='mv -i'\nalias cp='cp -i'\nalias rm='rm -i'\nalias psa='ps -
 printf "$path"    >> /home/$user/.bashrc
 printf "$aliases" >> /home/$user/.bashrc
 printf "$aliases" >> /root/.bashrc
-printf "export LUA_PATH='$itvhome/orb/?.lua;$itvhome/orb/inc/?.lua;/usr/local/share/lua/5.1/?.lua'\n" >> /home/$user/.bashrc
+LUA_PATH="$itvhome/orb/?.lua;$itvhome/orb/inc/?.lua;$itvhome/scr/?.lua;$itvhome/orb/Model/?.lua;/usr/local/share/lua/5.1/?.lua"
+printf "export LUA_PATH='$LUA_PATH'\n" >> /home/$user/.bashrc
+printf "LUA_PATH='$LUA_PATH'\n" > $itvhome/bin/lua_path
+export LUA_PATH=$LUA_PATH
+
 
 
 
@@ -580,6 +642,8 @@ install_msg CLEAN UP
 /usr/sbin/invoke-rc.d apache2 stop
 /usr/sbin/invoke-rc.d nagiosgrapher stop
 /usr/sbin/invoke-rc.d postfix stop
+/usr/sbin/invoke-rc.d mysql stop
+/usr/sbin/invoke-rc.d mysql start
 /usr/sbin/invoke-rc.d postfix start
 /usr/sbin/invoke-rc.d apache2 start
 /usr/sbin/invoke-rc.d nagios-nrpe-server start
@@ -602,7 +666,22 @@ install_msg POS-CONFIGURACAO
 
 # Só agora executa a inicializacao das tabelas de checkcmd
 source /home/$user/.bashrc
-/usr/bin/lua /usr/local/itvision/orb/inc/update_checkcmds.lua
+/usr/bin/lua /usr/local/itvision/scr/update_checkcmds.lua
+
+# Cron setup
+sudo -u $user crontab -l > /tmp/crontab
+sudo -u $user cat << EOF >> /tmp/crontab
+LUA_PATH="$LUA_PATH"
+* * * * * /usr/bin/lua $itvhome/scr/pendings.lua
+EOF
+sudo -u $user crontab /tmp/crontab
+rm -f /tmp/crontab
+
+# Algumas permissoes
+#htpasswd -bc $itvhome/bin/htpasswd $user $dbpass; $itvhome/bin/htpasswd 
+chown -R $user.$user $itvhome/html/gv $itvhome/bin/dbconf $itvhome/bin/lua_path
+
+
 
 
 echo ""

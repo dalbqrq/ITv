@@ -1,3 +1,0 @@
-require "model_access"
-
-

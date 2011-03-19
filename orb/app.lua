@@ -1,12 +1,12 @@
 #!/usr/bin/env wsapi.cgi
 
 -- includes & defs ------------------------------------------------------
+require "Model"
+require "App"
+require "View"
 require "util"
 require "monitor_util"
-require "View"
 
-require "orbit"
-require "Model"
 module(Model.name, package.seeall,orbit.new)
 
 local apps        = Model.itvision:model "apps"
@@ -14,6 +14,8 @@ local app_objects = Model.itvision:model "app_objects"
 local app_relats  = Model.itvision:model "app_relats"
 local objects     = Model.nagios:model "objects"
 local services    = Model.nagios:model "services"
+
+local tab_id = 1
 
 -- models ------------------------------------------------------------
 
@@ -28,8 +30,12 @@ function apps:select(id, clause_)
       clause = clause_
    end
 
-   extra  = " order by id "
-   return Model.query("itvision_apps", clause, extra)
+   extra  = " order by name "
+
+   local content = Model.query("itvision_apps", clause, extra)
+   local root = App.select_root_app()
+
+   return content, root, count
 end
 
 
@@ -66,7 +72,6 @@ end
 
 function objects:select_app(name2)
    if name2 then
-      --clause = "name2 = '"..name2.."' and name1 = '"..config.monitor.check_app.."' and is_active = 1"
       clause = "name2 = '"..name2.."' and name1 = '"..config.monitor.check_app.."' "
    else
       clause = nil
@@ -97,20 +102,20 @@ function list(web, msg)
    local clause = nil
    if web.input.app_name then clause = " name like '%"..web.input.app_name.."%' " end
 
-   local A = apps:select(nil, clause)
-   return render_list(web, A, msg)
+   local A, root = apps:select(nil, clause)
+   return render_list(web, A, root, msg)
 end
 ITvision:dispatch_get(list, "/", "/list", "/list/(.+)")
 ITvision:dispatch_post(list, "/list")
 
 
 function show(web, id)
-   local A = apps:select(id)
-   local O = app_objects:select(id)
-   local R = app_relats:select(id)
-   return render_show(web, A, O, R)
+   local clause = "id = "..id
+   local A, root = apps:select(nil, clause)
+   local no_header = true
+   return render_list(web, A, root, nil, no_header)
 end 
-ITvision:dispatch_get(show, "/show", "/show/(%d+)")
+ITvision:dispatch_get(show, "/show/(%d+)")
 
 
 function edit(web, id, nm, tp)
@@ -127,13 +132,13 @@ function update(web, id)
       local clause = "id = "..id
       A.name = web.input.name
       A.type = web.input.type
-      A.is_active = web.input.is_active
+      --A.is_active = web.input.is_active
       A.service_object_id = web.input.service_object_id
-
       Model.update (tables, A, clause) 
    end
 
-   return web:redirect(web:link("/list"))
+   web.prefix = "/orb/app_tabs"
+   return web:redirect(web:link("/list/"..id..":"..tab_id))
 end
 ITvision:dispatch_post(update, "/update/(%d+)")
 
@@ -153,7 +158,13 @@ function insert(web)
    apps.instance_id = Model.db.instance_id
    apps.entities_id = 0
    apps:save()
-   return web:redirect(web:link("/list"))
+
+   local app = apps:select(nil, "name = '"..web.input.name.."'")
+   App.insert_node_app_tree(app[1].id, nil, 1)
+   App.remake_apps_config_file()
+
+   web.prefix = "/orb/app_tabs"
+   return web:redirect(web:link("/list/"..app[1].id..":2"))
 end
 ITvision:dispatch_post(insert, "/insert")
 
@@ -167,11 +178,25 @@ ITvision:dispatch_get(remove, "/remove/(%d+)")
 
 function delete(web, id)
    if id then
-      local clause = "id = "..id
-      local tables = "itvision_apps"
-      Model.delete (tables, clause) 
+      local tree_id = App.find_node_id(id)
+      for _,v in ipairs(tree_id) do
+         App.delete_node_app_tree(v.id)
+      end
+
+      local o = objects:select_app(id)
+      if o[1] then
+         Model.delete ("itvision_app_objects", "service_object_id = "..o[1].object_id)
+      end
+      Model.delete ("itvision_app_objects", "app_id = "..id) 
+      Model.delete ("itvision_app_relats", "app_id = "..id) 
+      Model.delete ("itvision_app_contacts", "app_id = "..id) 
+      Model.delete ("itvision_app_viewers", "app_id = "..id) 
+      Model.delete ("itvision_apps", "id = "..id) 
    end
 
+   App.remake_apps_config_file()
+
+   web.prefix = "/orb/app"
    return web:redirect(web:link("/list"))
 end
 ITvision:dispatch_get(delete, "/delete/(%d+)")
@@ -193,34 +218,30 @@ function activate(web, id, flag)
       local clause = "id = "..id
       local tables = "itvision_apps"
       cols.is_active = flag
---text_file_writer("/tmp/1", id.." : "..flag)
 
       local A = apps:select(id)
-      local O = Model.select_app_app_objects(id)
-      if A[1] and O[1] then
-         -- Sinaliza a app como ativa
-         Model.update (tables, cols, clause) 
-         -- Recria arquivo de config do business process e 
-         -- servicos do nagios para as aplicacoes
-         local APPS = apps:select()
-         activate_all_apps(APPS)
-
+      local count = App.count_app_objects(id)
+      if A[1] and count > 0 then
          -- se for uma operacao de ativacao entao atualiza o service_object_id da aplicacao criada
          if flag == 1 then
-            local s = objects:select_app(app_to_id(A[1].name))
+            App.activate_app(id) 
+
+--[[
+            -- app as id local s = objects:select_app(app_to_id(A[1].name))
+            s = objects:select_app(A[1].id)
             -- caso host ainda nao tenha sido incluido aguarde e tente novamente
             counter = 0
             while s[1] == nil do
                counter = counter + 1
                os.reset_monitor()
                os.sleep(1)
-               s = objects:select_app(app_to_id(A[1].name))
-text_file_writer("/tmp/act_"..app_to_id(A[1].name), app_to_id(A[1].name).." : "..counter.."\n")
+               s = objects:select_app(A[1].id)
             end
             local svc = { id = A[1].id, service_object_id = s[1].object_id }
             apps:update(svc)
+]]
          else
-            os.reset_monitor()
+            App.deactivate_app(id) 
          end
 
          msg = "/"..error_message(9).." "..A[1].name
@@ -244,35 +265,49 @@ function render_filter(web)
 end
 
 
-function render_list(web, A, msg)
+function render_list(web, A, root, msg, no_header)
    local res = {}
    local row = {}
    local svc, stract
 
    for i, v in ipairs(A) do
+      local button_remove, button_edit, button_active = "-", "-", "-"
+
+      --web.prefix = "/orb/app_objects"
+      --local lnk = web:link("/list/"..v.id)
+      web.prefix = "/orb/app_tabs"
+      local lnk = web:link("/list/"..v.id..":1")
+      web.prefix = "/orb/app"
+
+      if v.id ~= root then 
+         button_remove = button_link(strings.remove, web:link("/remove/"..v.id), "negative")
+      end
+      button_edit   = button_link(strings.edit, web:link("/edit/"..v.id..":"..v.name..":"..v.type))
+
       if v.is_active == "0" then
          stract = strings.activate
       else
          stract = strings.deactivate
       end
+      button_active = button_link(stract, web:link("/activate/"..v.id..":"..v.is_active)) 
 
-      web.prefix = "/orb/app_objects"
-      local lnk = web:link("/list/"..v.id)
-      web.prefix = "/orb/app"
 
       row[#row+1] = {
-         a{ href=lnk, v.name },
+         a{ href=lnk, v.name.." #" },
          strings["logical_"..v.type],
          NoOrYes[tonumber(v.is_active)+1].name,
-         button_link(strings.remove, web:link("/remove/"..v.id), "negative"),
-         button_link(strings.edit, web:link("/edit/"..v.id..":"..v.name..":"..v.type)),
-         button_link(stract, web:link("/activate/"..v.id..":"..v.is_active)) }
+         button_remove,
+         button_edit,
+         button_active,
+      }
    end
 
    local header =  { strings.name, strings.type, strings.is_active, ".", ".", "." }
-   res[#res+1] = render_content_header(strings.application, web:link("/add"), web:link("/list"))
-   res[#res+1] = render_form_bar( render_filter(web), strings.search, web:link("/list"), web:link("/list") )
-   if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ msg } end
+   if no_header == nil then
+      res[#res+1] = render_content_header(strings.application, web:link("/add"), web:link("/list"))
+      res[#res+1] = render_form_bar( render_filter(web), strings.search, web:link("/list"), web:link("/list") )
+      if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ font{ color="red", msg } } end
+   end
    res[#res+1] = render_table(row, header)
 
    return render_layout(res)
@@ -328,15 +363,17 @@ function render_remove(web, A)
 
    if A then
       A = A[1]
+      web.prefix = "/orb/app"
       url_ok = web:link("/delete/"..A.id)
-      url_cancel = web:link("/list")
-   end
+      web.prefix = "/orb/app_tabs"
+      url_cancel = web:link("/list/"..A.id..":"..tab_id)
 
-   res[#res+1] = p{
-      strings.exclude_quest.." "..strings.application.." "..A.name.."?",
-      p{ button_link(strings.yes, web:link(url_ok)) },
-      p{ button_link(strings.cancel, web:link(url_cancel)) },
-   }
+      res[#res+1] = p{
+         strings.exclude_quest.." "..strings.application.." "..A.name.."?",
+         p{ button_link(strings.yes, url_ok) },
+         p{ button_link(strings.cancel, url_cancel) },
+      }
+   end
 
    return render_layout(res)
 end

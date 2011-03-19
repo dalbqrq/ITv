@@ -1,18 +1,15 @@
 #!/usr/bin/env wsapi.cgi
 --[[ 
-
   How to Make a Text Link Submit A Form:
   http://www.thesitewizard.com/archive/textsubmit.shtml
 
   FORMS I HTML4
   http://www.w3.org/2007/03/html-forms/#(1)
-
 ]]
-
 require "Model"
-module(Model.name, package.seeall, orbit.new)
 require "messages"
 
+module(Model.name, package.seeall, orbit.new)
 
 
 local scrt = [[
@@ -26,6 +23,16 @@ local scrt = [[
       } 
    } 
    ]]
+
+
+local entity_script = [[
+         cleanhide('modal_entity_content');
+         var entity_window=new Ext.Window({
+            layout:'fit', width:800, height:400, closeAction:'hide',
+            modal: true, autoScroll: true, title: 'Selecione a entidade desejada',
+            autoLoad: '/servdesk/ajax/entitytree.php?target=/servdesk/front/computer.php' });
+   ]] 
+
 
 function do_button(web, label, url, question)
    -- TODO: do_button() NAO ESTAh FUNCIONANDO !!!!
@@ -43,108 +50,50 @@ function button_form(label, btype, class, div)
 end
 
 
---[[ 
-  Cada entrada da tabela menu_item é uma tabela com os seguintes campos:
-  { level, name, link }
-
-  O campo level pode ter os seguinte valores:
-     0 - item principal sem submenu
-     1 - item principal que eh entrada para um submenu
-     2 - item de submenu
-
-  Ex:
-    Um menu com a seguite disposicao:
+function make_logo(instance_name) 
+   if instance_name == "IMPA" then
+      return {
+         { src="/pics/transparent.png", width='700px', height='40' },
+         { src="/pics/logo_impa.png", height='45px'  },
+      }
    
-       menu1   |   menu2   |   menu3   |   menu4
-                   item2.1     item3.1     item4.1
-                   item2.2                 item4.2
-                   item2.3
+   elseif instance_name == "PRODERJ" then
+      return {
+         { src="/pics/transparent.png", width='540px', height='40px' },
+         { src="/pics/logo_verto.jpg", height='35px' },
+         { src="/pics/transparent.png", width='40px', height='44px' },
+         { src="/pics/logo_proderj.jpg", height='35px' },
+      }
 
-    Ficaria assim:
-       menu_itens = {
-	   { 0, "menu1",   "href.html" },
-	   { 1, "menu2",   "href.html" },
-	   { 2, "item2.1", "href.html" },
-	   { 2, "item2.2", "href.html" },
-	   { 2, "item2.3", "href.html" },
-	   { 1, "menu3",   "href.html" },
-	   { 2, "item3.1", "href.html" },
-	   { 1, "menu4",   "href.html" },
-	   { 2, "item4.1", "href.html" },
-	   { 2, "item4.2", "href.html" },
-    }
-]]
-menu_itens = {
-	{ 1, "Monitor", "/orb/gviz/show" },
-	{ 2, "Lógico", "/orb/gviz/show" },
-	{ 2, "Físico", "/orb/gviz/show" },
-	--{ 2, "Árvore", "/orb/app_tree" },
-	{ 2, "Aplicações", "/orb/app" },
-	{ 2, "Objetos & Relacionamentos", "/orb/app_objects" },
-	--{ 2, "Objetos", "/orb/app_object" },
-	--{ 2, "Relacionamento", "/orb/app_relat" },
-	{ 2, "Checagem", "/orb/probe" },
-	{ 2, "Tipo de Relacionamento", "/orb/app_relat_types" },
-	--{ 2, "Teste de Atividade", "/orb/probe" },
-	--{ 2, "Relatórios", "/blank.html" },
-	{ 1, "ServiceDesk", "/servdesk/front/central.php" },
-	{ 2, "Central", "/servdesk/front/central.php" },
-	{ 2, "ticket", "/servdesk/front/ticket.php" },
-	{ 2, "Estatística", "/servdesk/front/stat.php" },
-	{ 1, "CMDB", "#" },
-	{ 2, "Computadores", "/servdesk/front/computer.php" },
-	{ 2, "Software", "/servdesk/front/software.php" },
-	{ 2, "Equip. de Redes", "/servdesk/front/networkequipment.php" },
-	{ 2, "Telefones", "/servdesk/front/phone.php"  },
-	{ 2, "Periféricos", "/servdesk/front/peripheral.php" },
-	{ 2, "Status", "/servdesk/front/states.php" },
-	{ 2, "Base de Conhecimento", "/servdesk/front/knowbaseitem.php" },
-	{ 2, "Fornecedores", "/servdesk/front/supplier.php" },
-	{ 2, "Contratos", "/servdesk/front/contract.php" },
-	{ 2, "Contatos", "/servdesk/front/contact.php" },
-	{ 1, "Administrar", "#" },
-	{ 2, "Login", "/orb/login" },
-	{ 2, "Usuários", "/servdesk/front/user.php" },
-	{ 2, "Grupos", "/servdesk/front/group.php" },
-	{ 2, "Regras", "/servdesk/front/rule.php" },
-	{ 2, "Logs", "/servdesk/front/event.php" },
-	{ 2, "Comandos de Teste", "/orb/checkcmd" },
-	{ 2, "Manutenção", "/orb/system" },
-	{ 0, "Ajuda", "/blank.html" },
-}
-
--- o parametro 'link_at_level_1' diz se o menu cujo nivel eh 1 serah tratado como um link
-function render_menu(link_at_level_1) 
-   local o_level = 0
-   local s = ""
-
-   for i, v in ipairs(menu_itens) do
-      local level = v[1]
-      local name  = v[2]
-      local link  = v[3]
-
-      if ( ( level == 0 or level == 1 ) and o_level == 2 ) then
-         s = s .. "\t</ul>\n</li>\n"
-      end
-
-      if level == 0 or level == 2 then
-         s = s .. "\t\t<li><a href=\""..link.."\" target=\"content\">"..name.."</a></li>\n"
-      elseif level == 1 then
-         if link_at_level_1 then
-            s = s .. "<li><a href=\""..link.."\" class=\"dir\">"..name.."</a>\n\t<ul>\n"
-         else
-            s = s .. "<li><span class=\"dir\">"..name.."</span>\n\t<ul>\n"
-         end
-      end
-
-      o_level = level
+   elseif instance_name == "VERTO" then
+      return {
+         { src="/pics/transparent.png", width='670', height='40px' },
+         { src="/pics/logo_verto.jpg", height='35px' },
+      }
+   else
+      return { }
    end
-
-   return { s }
 end
 
 
 function render_menu_frame(inner_html)
+   local change_script = [[
+         function changeHead(headPage) {
+            parent.headFrame.location.href = headPage;
+         }
+         function changePage(headPage, bodyPage) {
+            parent.headFrame.location.href = headPage;
+            parent.bodyFrame.location.href = bodyPage;
+         }
+   ]]
+
+   local imgs = make_logo(config.database.instance_name)
+   local logo = {}
+
+   for _,v in ipairs(imgs) do
+      logo[#logo+1] = img{ src=v.src, width=v.width, height=v.height }
+   end
+
    return html{
       head{
          title("ITvision"),
@@ -152,19 +101,16 @@ function render_menu_frame(inner_html)
          meta{ name="author", content="ATMA (http://www.itvision.com.br)" },
          meta{ name="description", content="IT monitoring" },
          link{ href="/pics/favicon.ico", rel="shortcut icon" },
-         link{ href="/css/menu/helper.css", media="screen", rel="stylesheet", type="text/css" },
-         link{ href="/css/menu/dropdown.linear.css", media="screen", rel="stylesheet", type="text/css" },
-         link{ href="/css/menu/default.ultimate.linear.css", media="screen", rel="stylesheet", type="text/css" },
          link{ href="/css/style.css", media="screen", rel="stylesheet", type="text/css" },
+         link{ href="/css/style_menu.css", media="screen", rel="stylesheet", type="text/css" },
+         script{ type="text/javascript", change_script },
       },
 
       body{
-         div{ id="header", img{ src="/pics/logo_itv.png" },
-            img{ src="/pics/transparent.png", width='500px', height='54px' },
-            img{ src="/pics/logo_verto.jpg", height='35px' },
-            img{ src="/pics/transparent.png", width='40px', height='44px' },
-            img{ src="/pics/logo_gov.png", height='35px' },
-            ul{ id="nav", class="dropdown dropdown-linear", inner_html }
+         div{ id="header", 
+            img{ src="/pics/logo_itv.png" },
+            logo,
+            inner_html
          }
       }
    }
@@ -173,7 +119,7 @@ end
 
 function render_layout(inner_html, refresh_time)
    local refresh = {}
-   if refresh_time then
+   if type(tonumber(refresh_time)) == "number" then
       refresh = meta{ ["http-equiv"]="Refresh", content=refresh_time, target="main" }
    end
 
@@ -181,14 +127,32 @@ function render_layout(inner_html, refresh_time)
       head{ 
          title("ITvision"),
          meta{ ["http-equiv"] = "Content-Type", content = "text/html; charset=utf-8" },
-         refresh,
          meta{ ["http-equiv"] = "Cache-Control", content = "No-Cache" },
          meta{ ["http-equiv"] = "Pragma",        content = "No-Cache" },
-         link{ href="/pics/favicon.ico", rel="shortcut icon" },
-         link{ href="/css/style.css", media="screen", rel="stylesheet", type="text/css" },
-         link{ href="/css/glpi_styles.css", media="screen", rel="stylesheet", type="text/css" },
-         --script{ type="text/javascript", src="http://itv/js/scripts.js" },
+         refresh,
+
+
+         link{ rel="shortcut icon", href="/pics/favicon.ico" },
+         link{ rel='stylesheet', type='text/css', media='screen', href="/css/style.css" },
+         link{ rel='stylesheet', type='text/css', media='print',  href='/servdesk/css/print.css' },
+         link{ rel='stylesheet', type='text/css', media='screen', href="/servdesk/css/style.css" },
+         link{ rel='stylesheet', type='text/css', media='screen', href="/css/glpi_styles.css" },
+         link{ rel='stylesheet', type='text/css', media='screen', href='/servdesk/lib/extjs/resources/css/ext-all.css' } ,
+         link{ rel='stylesheet', type='text/css', media='screen', href='/servdesk/css/ext-all-glpi.css' },
+
+
+         script{ type="text/javascript", src='/servdesk/lib/extjs/adapter/ext/ext-base.js' },
+         script{ type="text/javascript", src='/servdesk/lib/extjs/ext-all.js' },
+         script{ type="text/javascript", src='/servdesk/lib/extjs/locale/ext-lang-pt_BR.js' },
+         script{ type="text/javascript", src='/servdesk/lib/extrajs/xdatefield.js' },
+         script{ type="text/javascript", src='/servdesk/lib/extrajs/datetime.js' },
+         script{ type="text/javascript", src='/servdesk/lib/extrajs/spancombobox.js' },
+         script{ type="text/javascript", src='/servdesk/script.js' },
+
+
          script{ type="text/javascript", scrt },
+         script{ type="text/javascript", entity_script },
+
       },
       body{ div{ id='page', inner_html } }
       --body{ inner_html }
@@ -272,20 +236,19 @@ function render_table(t, h)
       hea = tr{ class="tab_bg_1", hea }
    end
 
-      local span = 1
+   local span = 1
    for r, v in ipairs(t) do
       for c, w in pairs(v) do
-
-if c == "colspan" then 
-   span = w
-else 
-         if r == 1 and h ~= nil and table.getn(h) == 0 then -- h vazio ({}) e header dentro de t
-            hea[#hea+1] = th{ align="center", w }
-         else                                               -- nao possui header, tudo eh linha
-            col[#col+1] = td{ colspan=span, w }
+         if c == "colspan" then 
+            span = w
+         else 
+            if r == 1 and h ~= nil and table.getn(h) == 0 then -- h vazio ({}) e header dentro de t
+               hea[#hea+1] = th{ align="center", w }
+            else                                               -- nao possui header, tudo eh linha
+               col[#col+1] = td{ colspan=span, w }
+            end
+            span = 1
          end
-   span = 1
-end
       end
 
       if r == 1 and h ~= nil and table.getn(h) == 0 then  -- h vazio ({}) e header dentro de t
@@ -293,11 +256,11 @@ end
       else 
          row[#row+1] = tr{ class='tab_bg_1', col }
       end
-
       col = {}
    end
 
-   return H("table") { border="0", class="tab_cadrehov", thead{ hea }, tbody{ row } }
+   --return H("table") { border="0", class="tab_cadrehov", thead{ hea }, tbody{ row } }
+   return H("table") { border="0", class="tab_cadre_fixe", thead{ hea }, tbody{ row } }
 end
 
 
@@ -345,12 +308,17 @@ function render_selector_bar(web, A, id, path)
    end
 
    return form{ H("select"){ ONCHANGE="location = this.options[this.selectedIndex].value;", res } }
-   
 end
 
 
 function render_bar(t)
-   return { H("table") { class='tab_cadre_fixe', tr{ class='tab_bg_1', td{ t } } }, br() }
+   local r = {}
+   if type(t) == "table" then
+      for _,v in ipairs(t) do r[#r+1] = td {v} end
+      return H("table") { class='tab_cadre_fixe', tr{ class='tab_bg_1', r } }
+   else
+      return H("table") { class='tab_cadre_fixe', tr{ class='tab_bg_1', td{ t } } }
+   end
 end
 
 
@@ -582,8 +550,69 @@ function render_content_header(name, add, list, edit, geotag, back)
       myul[#myul+1] = li{ a{ href="#", onClick="history.go(-1)", "Back" } }
    end
 
+      myul[#myul+1] = li{ 
+         a {onclick='entity_window.show();', href='#modal_entity_content', title='RAIZ ITvision', class='entity_select', 
+            id='global_entity_select', "RAIZ ITvision"} }
+
    return div{ id='menu_navigate', div { id='c_ssmenu2', ul{ myul } } }
 end
+
+
+
+--[[
+<div class='sep'></div><div id="tabspanel" class='center-h'></div>
+<script type='text/javascript'> var tabpanel = new Ext.TabPanel({
+            applyTo: 'tabspanel', activeTab: 0, deferredRender: false, autoTabs : true,
+            width:950, enableTabScroll: true, resizeTabs: false, plain: true,
+            renderTo: 'tabspanel', border: false,
+
+            items: [{
+                  title: 'Tab 1',
+                  html: 'www.uol.com.br',
+                  autoLoad: 'blank.html'
+            },{
+                  title: 'Tab 2',
+                  html: 'www.google.com',
+                  autoLoad: 'orb/login'
+            }]
+
+      });
+</script>
+]]
+function render_tabs(t, active_tab)
+   res = {}
+   obj = {}
+
+--[[
+      autoTabs: true, 
+      deferredRender: false, 
+      renderTo: 'tabscontent', 
+]]
+   tab_config = [[ 
+      applyTo: 'tabspanel', 
+      activeTab: ]]..active_tab..[[, 
+      width: 950, 
+      enableTabScroll: true, 
+      resizeTabs: false, 
+      plain: true, 
+      border: false, 
+   ]]
+
+   obj[#obj+1] = "var tabpanel = new Ext.TabPanel({ "..tab_config.." items: ["
+   for i,v in ipairs(t) do
+      obj[#obj+1] = "{ id: '"..i.."', title: '"..v.title.."', html: '"..v.html.."', autoLoad: '"..v.href.."' },"
+   end
+   obj[#obj+1] = "] });"
+
+   res[#res+1] = div{ class='sep' }
+   res[#res+1] = div{ id="tabspanel", class='center-h' }
+   res[#res+1] = script{ type='text/javascript', obj }
+   res[#res+1] = div { id='tabcontent' }
+   res[#res+1] = script{ type='text/javascript', "loadDefaultTab();" }
+
+   return res
+end
+
 
 
 function button_link(label, link, class)

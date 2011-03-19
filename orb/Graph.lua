@@ -17,18 +17,28 @@ local node, edge, subgraph, cluster, digraph, strictdigraph =
 function set_color(state, obj_type)
    local color
    state = tonumber(state)
--- Hoje, todos os tipos de objetos de uma aplicacao sao representado por um service!
+
 --[[
    if obj_type == 'hst' then
       color = host_alert[state+1].color
    elseif obj_type == 'svc' then
-]]
+   if obj_type == 'svc' then
       color = service_alert[state].color
---[[
    elseif obj_type == 'app' then
       color = applic_alert[state+1].color
    end
 ]]
+
+   if obj_type == 'app' then
+      -- state é nil quando uma aplicacao é reativada e ainda nao possui servicestatus
+      if state == nil then state = APPLIC_PENDING end
+      color = applic_alert[state].color
+   elseif obj_type == 'svc' then
+      color = service_alert[state].color
+   elseif obj_type == 'hst' then
+      --color = host_alert[state].color
+      color = service_alert[state].color
+   end
 
    return color
 end
@@ -55,26 +65,24 @@ function make_content(obj, rel)
    local show_ip = false
 
    if obj[1] then
-      text_file_writer("/tmp/c"..obj[1].a_name, table.getn(obj))
       for _,v in ipairs(obj) do
-         -- DEBUG 
-         text_file_writer("/tmp/"..v.ao_type.."-"..v.o_object_id, v.o_object_id.." :: "..v.o_name1.." :: "..v.o_name2.." :: "..v.ss_current_state)
-   
-         local name, shape  = "", ""
+
+         local name, shape = "", ""
+         local hst_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
+
          if v.ao_type == 'hst' then
-            name = v.o_name1
-            if not show_ip then name = string.gsub(name,"-(.+)", "") end
-            label = v.o_name1 -- DEBUG  ..":"..v.ss_current_state
+            label = hst_name
+            name  = string.gsub(hst_name, "[%s,%p]", "")
             url   = "/orb/obj_info/"..v.ao_type.."/"..v.o_object_id
             shape = "box"
          elseif v.ao_type == 'svc' then
-            name = v.o_name1.."-"..v.o_name2
-            label = v.o_name2  -- DEBUG ..":"..v.curr_state
+            label = v.m_name
+            name  = string.gsub(hst_name..v.m_name, "[%s,%p]", "")
             url   = "/orb/obj_info/"..v.ao_type.."/"..v.o_object_id
             shape = "ellipse"
          elseif v.ao_type == 'app' then
-            name = v.o_name2
-            label = string.gsub(v.o_name2,"_+"," ") --DEBUG ..":"..v.curr_state
+            label = v.ax_name
+            name  = string.gsub(v.o_name2, "[%s,%p]", "")
             url   = "/orb/obj_info/"..v.ao_type.."/"..v.o_object_id
             shape = "invhouse"
             shape = "octagon"
@@ -83,56 +91,109 @@ function make_content(obj, rel)
             shape = "hexagon"
          end
 
---[[ TODO: 5
-
-select app_id, a.name as a_name, ao.type as ao_type, o.name1, o.name2, ss.current_state as curr_state
-from itvision_apps a, itvision_app_objects ao, nagios_services s, nagios_objects o, nagios_servicestatus ss,
-     itvision_monitors m, glpi_networkports n, glpi_computers c
-where a.id = ao.app_id and ao.object_id = s.service_object_id and 
-s.service_object_id = o.object_id and s.service_object_id = ss.service_object_id and
-a.id = 1 and
-m.networkports_id = n.id and
-c.id = n.items_id and
-
-]]
-
-      color = set_color(v.ss_current_state, v.ao_type)
-      name = string.gsub(name, "%p", "")
-      table.insert(content, node{name, shape=shape, height=1.2, width=1, fontsize=12., fixedsize=true,
+         color = set_color(v.ss_current_state, v.ao_type)
+         table.insert(content, node{name, shape=shape, height=1.2, width=1, fontsize=12., fixedsize=true,
                       fontname="Helvetica", label=label, color="black", fillcolor=color ,URL=url ,target="_self",
                       nodesep=0.05, style="bold,filled,solid", penwidth=2})
       end
    end
 
+
    if rel[1] then
       for _,v in ipairs(rel) do
-         local from_name, to_name = "", ""
+         local from_name, to_name, ic = "", "", nil
+         hst_name = ""
+
+         -- FROM -------------------------------
+         if v.from_itemtype == "Computer" then
+            ic = Model.query("glpi_computers", "id = "..v.from_items_id)
+            ic = ic[1]
+         elseif v.from_itemtype == "NetworkEquipment" then
+            ic = Model.query("glpi_networkequipments", "id = "..v.from_items_id)
+            ic = ic[1]
+         end
+
          if string.find(v.o1_name1, config.monitor.check_app) then
-            from_name = v.o1_name2
+            from_name = string.gsub(v.m1_name, "[%s,%p]", "")
          elseif v.o1_name2 == config.monitor.check_host then
-            from_name = v.o1_name1
-            if not show_ip then from_name = string.gsub(from_name,"-(.+)", "") end
+            from_name = string.gsub(find_hostname(ic.alias, ic.name, ic.itv_key), "[%s,%p]", "")
          else
-            from_name = v.o1_name1.."-"..v.o1_name2
+            from_name = string.gsub(find_hostname(ic.alias, ic.name, ic.itv_key)..v.m1_name, "[%s,%p]", "")
+         end
+
+
+         -- TO -------------------------------
+         if v.to_itemtype == "Computer" then
+            ic = Model.query("glpi_computers", "id = "..v.to_items_id)
+            ic = ic[1]
+         elseif v.to_itemtype == "NetworkEquipment" then
+            ic = Model.query("glpi_networkequipments", "id = "..v.to_items_id)
+            ic = ic[1]
          end
 
          if string.find(v.o2_name1, config.monitor.check_app) then
-            to_name = v.o2_name2
+            to_name = string.gsub(v.m2_name, "[%s,%p]", "")
          elseif v.o2_name2 == config.monitor.check_host then
-            to_name = v.o2_name1
-            if not show_ip then to_name = string.gsub(to_name,"-(.+)", "") end
+            to_name = string.gsub(find_hostname(ic.alias, ic.name, ic.itv_key), "[%s,%p]", "")
          else
-            to_name = v.o2_name1.."-"..v.o2_name2
+            to_name = string.gsub(find_hostname(ic.alias, ic.name, ic.itv_key)..v.m2_name, "[%s,%p]", "")
          end
 
-         from_name = string.gsub(from_name, "%p", "")
-         to_name = string.gsub(to_name, "%p", "")
 
+         -- RELAT -------------------------------
          if use_relat_label then
             relat_label = v.art_name
          else
             relat_label = ""
          end
+
+         table.insert(content, edge{ from_name, to_name, label=relat_label } )
+      end
+   end
+
+   return content
+end
+
+
+function make_tree_content(obj, rel, sep)
+   local content = {}
+
+   if obj[1] then
+      for _,v in ipairs(obj) do
+         local label, name, url, shape
+
+         label = v.a_name  -- DEBUG ..":"..v.a_id
+         name  = v.a_id
+         if sep == 1 then name = name..v.t_id end
+         url   = "/orb/obj_info/app/"..v.a_service_object_id
+         shape = "invhouse"
+         shape = "octagon"
+         shape = "triangle"
+         shape = "diamond"
+         shape = "hexagon"
+
+         color = set_color(v.ss_current_state, "app")
+         table.insert(content, node{name, shape=shape, height=1.2, width=1, fontsize=12., fixedsize=true,
+                      fontname="Helvetica", label=label, color="black", fillcolor=color ,URL=url ,target="_self",
+                      nodesep=0.05, style="bold,filled,solid", penwidth=2})
+      end
+   end
+
+
+   if rel[1] then
+      --if sep == 0 then table.unique(rel) end
+      table.unique(rel)
+      for _,v in ipairs(rel) do
+         -- FROM -------------------------------
+         local from_name = tostring(v.parent_app)
+         if sep == 1 then from_name = from_name..v.parent_id end
+
+         -- TO -------------------------------
+         local to_name = tostring(v.child_app)
+         if sep == 1 then to_name = to_name..v.child_id end
+
+         -- RELAT -------------------------------
+         relat_label = ""
 
          table.insert(content, edge{ from_name, to_name, label=relat_label } )
       end
@@ -158,8 +219,9 @@ function render(app_name, file_type, engene, content)
 
    local g = digraph{"G",
       size="10.0,10.0",
-      node = { nodesep=.5, style="rounded" },
-      unpack(content)
+      node = { label=app_name, nodesep=.5, style="rounded" },
+      --label = "\\n"..app_name,
+      unpack(content),
    }
 
    g:layout(engene) -- if engene == nil, then use the default 'dot'

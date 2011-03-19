@@ -1,12 +1,12 @@
 #!/usr/bin/env wsapi.cgi
 
 -- includes & defs ------------------------------------------------------
-require "util"
+require "Model"
+require "Monitor"
 require "View"
+require "util"
 require "state"
 
-require "orbit"
-require "Model"
 module(Model.name, package.seeall,orbit.new)
 
 local apps = Model.itvision:model "apps"
@@ -26,14 +26,14 @@ end
 -- controllers ------------------------------------------------------------
 
 function show_hst(web, obj_id)
-   local A = Model.make_query_3(nil, nil, nil, "m.service_object_id = "..obj_id)
+   local A = Monitor.make_query_3(nil, nil, nil, "m.service_object_id = "..obj_id)
    return render_hst(web, obj_id, A)
 end
 ITvision:dispatch_get(show_hst, "/hst/(%d+)")
 
 
 function show_svc(web, obj_id)
-   local A = Model.make_query_4(nil, nil, nil, nil, "m.service_object_id = "..obj_id)
+   local A = Monitor.make_query_4(nil, nil, nil, nil, "m.service_object_id = "..obj_id)
    return render_svc(web, obj_id, A)
 end
 ITvision:dispatch_get(show_svc, "/svc/(%d+)")
@@ -59,10 +59,10 @@ function geotag(web, objtype, obj_id)
    if objtype == "app" then
       app = apps:select(nil, obj_id) 
 
-      A = Model.tree(app[1].id)
+      A = Monitor.tree(app[1].id)
 
    elseif objtype == "hst" then
-      A = Model.make_query_3(nil, nil, nil, "m.service_object_id = "..obj_id)
+      A = Monitor.make_query_3(nil, nil, nil, "m.service_object_id = "..obj_id)
    end
 
    return render_geotag(web, obj_id, objtype, A)
@@ -212,6 +212,14 @@ function render_geotag(web, obj_id, objtype, A)
       if v.ss_current_state then
          if v.c_geotag == nil then geotag = v.n_geotag else geotag = v.c_geotag end
          geotag = geotag or ""
+
+         -- tratar corretamente (converter) geotab no formato:  22°51'33.20"S,43°23'17.42"O
+         -- agora simplesmente eliminaremos estas entradas.
+         -- procurar expressao como esta em util.lua:string.extract_latlon()
+         if string.find(geotag, "°") then geotag = "" end
+         if string.find(geotag, "'") then geotag = "" end
+
+
          res[#res+1] = " | "..geotag.." | "
          local icon = service_alert[tonumber(v.ss_current_state)].color_name
 

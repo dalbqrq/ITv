@@ -1,0 +1,10 @@
+#!/bin/bash
+
+ics=ics.csv
+
+l=`head -1 $ics| cut -d";" -f$1 | sed -e "s/\"//g"`
+
+echo $l
+read
+
+cut -d";" -f$1 $ics | grep -v "$l" | sed -e "s/\"//g" | sort | uniq -c
