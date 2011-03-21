@@ -77,7 +77,6 @@ function render_menu_frame(inner_html)
    ]]
 
    local imgs = make_logo(config.database.instance_name)
-   local imgs = make_logo("PRODERJ")
    local logo = {}
 
    for _,v in ipairs(imgs) do
