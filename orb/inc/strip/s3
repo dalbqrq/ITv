@@ -1,3 +1,4 @@
+glpi_plugins|a:0:{}
 glpi_use_mode|s:1:"0";
 glpiID|s:1:"2";
 glpiname|s:5:"admin";
@@ -9,6 +10,7 @@ glpiextauth|i:0;
 glpiauthtype|s:1:"1";
 glpiroot|s:9:"/servdesk";
 glpicrontimer|i:1300808892;
+glpi_tabs|a:0:{}
 glpidate_format|s:1:"0";
 glpidefault_requesttypes_id|s:1:"1";
 glpidropdown_chars_limit|s:2:"50";
@@ -28,9 +30,15 @@ glpipriority_5|s:7:"#ffadad";
 glpipriority_6|s:7:"#ff5555";
 glpishow_jobs_at_login|s:1:"1";
 glpiuse_flat_dropdowntree|s:1:"0";
+glpiactiveentities|a:1:{i:0;i:0;}
+glpisearch|a:0:{}
+glpisearchcount|a:0:{}
+glpisearchcount2|a:0:{}
 glpiactiveentities_string|s:3:"'0'";
+glpiparententities|a:0:{}
 glpiparententities_string|s:0:"";
 glpiactive_entity|i:0;
 glpiactive_entity_name|s:36:"Entidade raiz (Estrutura da árvore)";
 glpiactive_entity_shortname|s:36:"Entidade raiz (Estrutura da árvore)";
 glpishowallentities|i:1;
+glpigroups|a:0:{}
