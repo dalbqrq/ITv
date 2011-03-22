@@ -3,8 +3,8 @@
 # ITvision MONITOR INSTALL for Ubuntu 10.04.1
 # --------------------------------------------------
 
-user=itvision
-dbpass=itvision
+user=itv
+dbpass=itv
 dbuser=$user
 dbname=itvision
 itvhome=/usr/local/itvision
@@ -103,7 +103,7 @@ install_pack festival # Synthesizing Voice
 /usr/sbin/invoke-rc.d nagiosgrapher stop
 rm -rf /var/cache/nagios3/ndo.sock
 
-
+exit
 
 # --------------------------------------------------
 # ITVISION
@@ -207,8 +207,8 @@ sed -i -e 's/ErrorLog \/var\/log\/apache2\/error.log/ErrorLog \/var\/log\/itvisi
 
 
 echo "INSERT INTO itvision.itvision_apps set instance_id = 1, entities_id = 0, name = 'ROOT';" | mysql -u root --password=$dbpass
-echo "INSERT INTO itvision_app_trees set instance_id = 1, app_id = (select id from itvision_apps where name = 'ROOT' and is_active = 0), lft = 1, rgt = 2;"  | mysql -u root --password=$dbpass
-echo "INSERT INTO itvision_app_relat_types VALUES (1,'roda em','logical'),(2,'conectado a','physical'),(3,'usa','logical'),(4,'faz backup em','logical');" | mysql -u root --password=$dbpass
+echo "INSERT INTO itvision.itvision_app_trees set instance_id = 1, app_id = (select id from itvision_apps where name = 'ROOT' and is_active = 0), lft = 1, rgt = 2;"  | mysql -u root --password=$dbpass $dbname
+echo "INSERT INTO itvision.itvision_app_relat_types VALUES (1,'roda em','logical'),(2,'conectado a','physical'),(3,'usa','logical'),(4,'faz backup em','logical');" | mysql -u root --password=$dbpass $dbname
 
 
 
@@ -448,8 +448,7 @@ cpan -i YAML
 \rm -f /tmp/ans; for i in `seq 16`; do echo >> /tmp/ans; done
 /usr/local/OCSNG_UNIX_SERVER-1.3.2/setup.sh < /tmp/ans
 
-sed -e "/Alias \/ocsreports/a \\
-Alias /ocs /ocsinventory-bla/bla" ocsinventory-reports.conf
+sed -i -e "s/Alias \/ocsreports/Alias \/ocs/g" /etc/apache2/conf.d/ocsinventory-reports.conf
 
 
 
