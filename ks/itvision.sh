@@ -225,6 +225,7 @@ sed -i.orig -e "s/nrpe_user=nagios/nrpe_user=$user/" \
 	-e "s/allowed_hosts=127.0.0.1/#allowed_hosts=127.0.0.1/" /etc/nagios/nrpe.cfg
 sed -i.orig -e "s/www-data/$user/g" /etc/apache2/envvars
 sed -i.orig -e "s/nagiosadmin/$user/g" /etc/nagios3/cgi.cfg
+sed -i 's/url_html_path=\/nagios3/url_html_path=\/monitor/' /etc/nagios3/cgi.cfg
 sed -i.orig -e "s/nagios_user=nagios/nagios_user=$user/" \
 	-e "s/nagios_group=nagios/nagios_group=$user/" \
 	-e "s/check_external_commands=0/check_external_commands=1/" \
@@ -239,6 +240,11 @@ cfg_dir=/etc/nagios3/services \\
 cfg_dir=/etc/nagios3/contacts" /etc/nagios3/nagios.cfg
 sed -i.orig -e "s/chown nagios:nagios/chown $user:root/" /etc/init.d/nagios3
 sed -i.orig -e "s/chown nagios/chown $user/" /etc/init.d/nagios-nrpe-server
+sed -i.orig -e "s/\/cgi-bin\/nagios3/\/cgi-bin\/monitor/" \
+	-e "s/\/nagios3\/cgi-bin/\/monitor\/cgi-bin/" \
+	-e "s/\/nagios3\/stylesheets/\/monitor\/stylesheets/"
+	-e "s/\/nagios3/\/monitor/" /etc/nagios3/apache2.conf
+
 
 mkdir -p /etc/nagios3/orig/conf.d /etc/nagios3/hosts /etc/nagios3/services /etc/nagios3/apps /etc/nagios3/contacts
 mv /etc/nagios3/*.orig /etc/nagios3/orig
