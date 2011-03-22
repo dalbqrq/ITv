@@ -10,12 +10,12 @@ function update_checkcmd_params()
       q = Model.query("nagios_objects", "name1 = '"..i.."'")
       if q[1] then id = q[1].object_id else id='NULL' end
 
-      cmd = { cmd_object_id = id, command = v.command }
+      cmd = { cmd_object_id = id, command = v.command, label = v.label }
    
       Model.insert("itvision_checkcmds", cmd)
       r = Model.query("itvision_checkcmds", "cmd_object_id = "..id)
 
-      print("CHEKCMDS: ", r[1].id, cmd.cmd_object_id, cmd.command )
+      print("CHEKCMDS: ", r[1].id, cmd.cmd_object_id, cmd.command, cmd.label )
 
       for j, w in pairs(v.args) do
          w.checkcmds_id = r[1].id

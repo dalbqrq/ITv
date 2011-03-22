@@ -16,7 +16,7 @@ function select_checkcmds(id, hide_check_host)
       cond_ = cond_ ..[[ and o.name1 <> ']]..config.monitor.check_host..[[']]
    end
 
-   local extra_ = [[ order by name1 ]]
+   local extra_ = [[ order by label ]]
 
    return Model.query(table_, cond_, extra_)
 end

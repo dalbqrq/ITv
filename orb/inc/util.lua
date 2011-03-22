@@ -255,9 +255,12 @@ end
 
 
 function text_file_reader(filename)
+   local text
    local f = io.open(filename, 'r')
-   local text = f:read("*all")
-   f:close()
+   if f ~= nil then 
+      text = f:read("*all")
+      f:close()
+   end
 
    return text
 end

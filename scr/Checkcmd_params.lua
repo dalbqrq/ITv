@@ -1,6 +1,7 @@
 cmds = {
 
    CUPS = {
+      label = "CUPS",
       command = "check_http",
       args = {
          { sequence=nil, flag="-I",  variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP Server CUPS" },
@@ -9,6 +10,7 @@ cmds = {
    },
 
    DHCP = {
+      label = "DHCP",
       command = "check_dhcp",
       args = {
          { sequence=nil, flag="-s",  variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP DHCP" },
@@ -16,6 +18,7 @@ cmds = {
    },
 
    DHCP_INTERFACE = {
+      label = "DHCP_INTERFACE",
       command = "check_dhcp",
       args = {
          { sequence=nil, flag="-s",  variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP DHCP" },
@@ -24,6 +27,7 @@ cmds = {
    },
 
    DIG = {
+      label = "DIG",
       command = "check_dig",
       args = {
          { sequence=1, flag="-H",  variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP" },
@@ -32,6 +36,7 @@ cmds = {
    },
 
    DNS = {
+      label = "DNS",
       command = "check_dns",
       args = {
          { sequence=1, flag="-H",  variable="$HOSTANAME$", default_value=nil, description="Hostname" },
@@ -40,6 +45,7 @@ cmds = {
    },
 
    FTP = {
+      label = "FTP",
       command = "check_ftp",
       args = {
          { sequence=nil, flag="-H",  variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP" },
@@ -48,6 +54,7 @@ cmds = {
    },
 
    HOST_ALIVE = {
+      label = "HOST_ALIVE",
       command = "check_ping",
       args = {
          { sequence=nil, flag="-H",  variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP" },
@@ -58,6 +65,7 @@ cmds = {
    },
 
    HTTP = {
+      label = "HTTP",
       command = "check_http",
       args = {
          { sequence=nil, flag="-I",  variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP" },
@@ -65,6 +73,7 @@ cmds = {
    },
 
    HTTP2 = {
+      label = "HTTP_2",
       command = "check_http",
       args = {
          { sequence=1, flag="-H",  variable="$ARG1$", default_value=nil, description="Hostname" },
@@ -75,6 +84,7 @@ cmds = {
    },
 
    HTTPS = {
+      label = "HTTPS",
       command = "check_http",
       args = {
          { sequence=nil, flag="--ssl",  variable="", default_value="--ssl", description="Check SSL" },
@@ -84,6 +94,7 @@ cmds = {
    },
 
    HTTPS_AUTH = {
+      label = "HTTPS_AUTH",
       command = "check_http",
       args = {
          { sequence=nil, flag="--ssl",  variable="", default_value="--ssl", description="Check SSL" },
@@ -94,6 +105,7 @@ cmds = {
    },
 
    HTTPURL = {
+      label = "HTTP_URL",
       command = "check_http",
       args = {
          --{ sequence=4, flag="-I",  variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP" },
@@ -104,6 +116,7 @@ cmds = {
    },
 
    IMAP = {
+      label = "IMAP",
       command = "check_imap",
       args = {
          { sequence=nil, flag="-H",  variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP" },
@@ -111,6 +124,7 @@ cmds = {
    },
 
    LDAP = {
+      label = "LDAP",
       command = "check_ldap",
       args = {
          { sequence=nil, flag="-H",  variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP" },
@@ -119,6 +133,7 @@ cmds = {
    },
 
    MYSQL_DATABASE = {
+      label = "MYSQL_DATABASE",
       command = "check_mysql",
       args = {
          { sequence=nil, flag="-H",  variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP" },
@@ -129,6 +144,7 @@ cmds = {
    },
 
    NRPE = {
+      label = "NRPE",
       command = "check_nrpe",
       args = {
          { sequence=nil, flag="-H",  variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP" },
@@ -137,6 +153,7 @@ cmds = {
    },
 
    NTP = {
+      label = "NTP",
       command = "check_ntp_time",
       args = {
          { sequence=nil, flag="-H",  variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP" },
@@ -146,6 +163,7 @@ cmds = {
    },
 
    PGSQL = {
+      label = "PGSQL",
       command = "check_pgsql",
       args = {
          { sequence=nil, flag="-H",  variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP" },
@@ -156,6 +174,7 @@ cmds = {
    },
 
    PING = {
+      label = "PING",
       command = "check_ping",
       args = {
          { sequence=nil, flag="-H",  variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP" },
@@ -166,6 +185,7 @@ cmds = {
    },
 
    POP = {
+      label = "POP",
       command = "check_pop",
       args = {
          { sequence=nil, flag="-H",  variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP" },
@@ -173,6 +193,7 @@ cmds = {
    },
 
    RADIUS = {
+      label = "RADIUS",
       command = "check_radius",
       args = {
          { sequence=nil, flag="-H",  variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP" },
@@ -184,6 +205,7 @@ cmds = {
    },
 
    SMTP = {
+      label = "SMTP",
       command = "check_smtp",
       args = {
          { sequence=nil, flag="-H",  variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP" },
@@ -191,6 +213,7 @@ cmds = {
    },
 
    SQUID = {
+      label = "SQUID",
       command = "check_http",
       args = {
          { sequence=nil, flag="-H",  variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP)" },
@@ -201,6 +224,7 @@ cmds = {
    },
 
    SSH = {
+      label = "SSH",
       command = "check_ssh",
       args = {
          { sequence=nil, flag=nil,  variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP" },
@@ -208,6 +232,7 @@ cmds = {
    },
 
    TELNET = {
+      label = "TELNET",
       command = "check_telnet",
       args = {
          { sequence=nil, flag="-H",  variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP" },

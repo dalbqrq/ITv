@@ -42,20 +42,26 @@ function is_logged_at_glpi(web)
       return false
    end
 
-   local file_name = session_path.."/sess_"..glpi_cookie
+   local sess_filename = session_path.."/sess_"..glpi_cookie
+   local prof_filename = session_path.."/profile_"..glpi_cookie
 
    --[[ 
-       buscar em 'file_name' as strings abaixo 
+       buscar em 'sess_filename' as strings abaixo 
            glpiID|s:1:"2";
            glpiname|s:5:"admin";
    ]]
-   local sess_ = text_file_reader(file_name)
+   local sess_ = text_file_reader(sess_filename)
    local a, b, c, user_id = string.find(sess_, 'glpiID|s:(%d+):"(%d+)"')
    local d, e, f, user_name = string.find(sess_, 'glpiname|s:(%d+):"([%w-_%.]+)";')
 
 
    if user_name ~= nil then
-      return { is_logged=true, user_name=user_name, user_id=user_id, session=sess_, cookie=glpi_cookie } 
+      local profile = { is_logged=true, user_name=user_name, user_id=user_id, session=sess_, cookie=glpi_cookie,
+                        profile=nil } 
+      local prof_ = text_file_reader(prof_filename)
+      if prof_ == nil then
+      end
+      return profile
    else
       return false
    end
