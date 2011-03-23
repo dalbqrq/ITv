@@ -52,8 +52,9 @@ sed -i.bkp.$data -e "s/\/cgi-bin\/nagios3/cgi-bin\/monitor/" /usr/share/nagios3/
 sed -i.bkp.$data -e 's/nagios3/monitor/' /usr/share/nagios3/htdocs/graphs.html
 
 #
-#  ALTERACAO NO CODIGO FONTE GLPI
+#   Atualiza db 
 #
-\cp -f /usr/local/itvision/ks/servdesk/inc/crontask.class.php /usr/local/servdesk/inc
+. /usr/local/itvision/bin/dbconf
+mysql -u $user --password=$dbpass $dbname < /usr/local/itvision/ks/db/itvision_update3.sql
 
 
