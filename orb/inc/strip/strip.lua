@@ -1,62 +1,63 @@
-
 require "util"
-
 
 local s = text_file_reader("./s4")
 
-s = 'glpiprofiles|a:1:{i:4;a:2:{s:4:"name";s:11:"super-admin";s:8:"entities";a:1:{i:0;a:3:{s:2:"id";s:1:"0";s:4:"name";N;s:12:"is_recursive";s:1:"1";}}}}'
 
-while true do
+function string.strip(s,tab)
+   local res = {}
+   local cnt = 0
+   local l, t, v, b
 
-   _, _, l, t, v = string.find(s, "glpi([_%w]+)|(%a):(.+)")
+   while true do
+      if not s then break end
+      if not tab then 
+         _, _, l, t, v = string.find(s, "glpi([_%w]+)|(%a):(.+)")
+      else
+         _, _, t, v = string.find(s, "(%a)[:;](.+)")
+      end
 
-   if t == "N" then
-      print(l," = NULL")
-      _, _, v, s = string.find(v,";(.+)")
-   elseif t == "s" then
-      _, _, _, v, s = string.find(v,"(%d+):\"([^;.*]*)\";(.+)")
-      if not v then v = "" end
-      print(l," = ", "'"..v.."'")
-   elseif t == "a" then
-
------------------------------------------------------
-
-local i = 0
-while true do
-   i = i + 1
-
-   _, _, _, w, r = string.find(v,"(%d+):({[^{^}.*]*})(.+)")
-   if not w then 
-      break
-   else
-      print("INNER: ",w)
-      print("LIST: ",v)
-      v = string.gsub(v,w,"X")
-      print("LIST: ",v)
-      print("REST: ",r)
+      if t == "N" then
+         _, _, v, s = string.find(v,";(.+)")
+         v = t
+      elseif t == "s" then
+         _, _, _, v, s = string.find(v,"(%d+):\"([^;.*]*)\";(.+)")
+      elseif t == "a" then
+          _, _, _, v, s = string.find(v,"(%d+):(%b{})(.*)")
+         v = string.strip(v,true)
+      elseif t == "i" then
+         _, _, v, s = string.find(v,"(%d*);(.+)")
+         v = tonumber(v)
+      elseif t == "b" then
+         _, _, v, s = string.find(v,"(%d);(.+)")
+         v = tonumber(v)
+      else
+         break
+      end
+      if not tab then 
+         res["glpi"..l] = v
+      else
+         if cnt == 0 then
+            cnt = cnt + 1
+            b = v
+         else
+            cnt = 0
+            -- Esta opcao ordena os indices numericos
+            --if tonumber(b) then
+            --   table.insert(res, v)
+            --else
+               res[b] = v
+            --end
+         end
+      end
    end
 
-   if i > 4 then break end
-
-   print(l," = ", "'"..v.."'")
-
+   return res
 end
 
 
------------------------------------------------------
+local r = string.strip(s)
+local t = table.dump(r)
+print(t)
 
 
-   elseif t == "i" then
-      _, _, v, s = string.find(v,"(%d*);(.+)")
-      print(l," = ", v)
-   elseif t == "b" then
-      _, _, v, s = string.find(v,"(%d);(.+)")
-      print(l," = ", v)
-   else
-      break
-   end
-
-   if not s then break end
-
-end
-
+--print(r.profiles[1].name)

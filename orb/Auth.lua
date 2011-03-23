@@ -30,6 +30,14 @@ end
 
 
 -- GLPI ------------------------------------------------------------------------------
+   --[[ 
+       buscar em 'sess_filename' as strings abaixo 
+           glpiID|s:1:"2";
+           glpiname|s:5:"admin";
+   local a, b, c, user_id = string.find(sess_, 'glpiID|s:(%d+):"(%d+)"')
+   local d, e, f, user_name = string.find(sess_, 'glpiname|s:(%d+):"([%w-_%.]+)";')
+   ]]
+
 local glpi_cookie_name = "PHPSESSID"
 local session_path = "/usr/local/servdesk/files/_sessions"
 
@@ -45,18 +53,14 @@ function is_logged_at_glpi(web)
    local sess_filename = session_path.."/sess_"..glpi_cookie
    local prof_filename = session_path.."/profile_"..glpi_cookie
 
-   --[[ 
-       buscar em 'sess_filename' as strings abaixo 
-           glpiID|s:1:"2";
-           glpiname|s:5:"admin";
-   ]]
    local sess_ = text_file_reader(sess_filename)
-   local a, b, c, user_id = string.find(sess_, 'glpiID|s:(%d+):"(%d+)"')
-   local d, e, f, user_name = string.find(sess_, 'glpiname|s:(%d+):"([%w-_%.]+)";')
+   -- Veja no final deste arquivo um exemplo da tabela criada a partir do arquivo de sessao do glpi
+   -- que contem informacoes extridas do arquivo de sessao do glpi contendo o profile do usuário logado
+   local profile = get_profile(sess_)
+   text_file_writer(prof_filename, table.dump(profile))
 
-
-   if user_name ~= nil then
-      local profile = { is_logged=true, user_name=user_name, user_id=user_id, session=sess_, cookie=glpi_cookie,
+   if profile.glpiname ~= nil then
+      local profile = { is_logged=true, user_name=profile.glpiname, user_id=profile.glpiID, session=sess_, cookie=glpi_cookie,
                         profile=nil } 
       local prof_ = text_file_reader(prof_filename)
       if prof_ == nil then
@@ -79,6 +83,74 @@ function check(web)
       return false
    end
 end
+
+
+
+function get_phpuserid()
+   local cmd = "/usr/bin/php /usr/local/servdesk/inc/getuserid.php"
+   return os.capture(cmd)
+end
+
+
+-- Extrai as conficuracoes da string no arquivo de sessao criado pelo glpi
+function string.strip(s,tab)
+   local res = {}
+   local cnt = 0
+   local l, t, v, b
+
+   while true do
+      if not s then break end
+      if not tab then 
+         _, _, l, t, v = string.find(s, "glpi([_%w]+)|(%a):(.+)")
+      else
+         _, _, t, v = string.find(s, "(%a)[:;](.+)")
+      end
+
+      if t == "N" then
+         _, _, v, s = string.find(v,";(.+)")
+         v = t
+      elseif t == "s" then
+         _, _, _, v, s = string.find(v,"(%d+):\"([^;.*]*)\";(.+)")
+      elseif t == "a" then
+          _, _, _, v, s = string.find(v,"(%d+):(%b{})(.*)")
+         v = string.strip(v,true)
+      elseif t == "i" then
+         _, _, v, s = string.find(v,"(%d*);(.+)")
+         v = tonumber(v)
+      elseif t == "b" then
+         _, _, v, s = string.find(v,"(%d);(.+)")
+         v = tonumber(v)
+      else
+         break
+      end
+      if not tab then 
+         res["glpi"..l] = v
+      else
+         if cnt == 0 then
+            cnt = cnt + 1
+            b = v
+         else
+            cnt = 0
+            -- Esta opcao ordena os indices numericos
+            --if tonumber(b) then
+            --   table.insert(res, v)
+            --else
+               res[b] = v
+            --end
+         end
+      end
+   end
+
+   return res
+end
+
+
+function get_profile(s)
+   return string.strip(s)
+end
+
+
+
 
 
 -- ITvision ------------------------------------------------------------------------------
@@ -553,4 +625,282 @@ function get_menu_itens(profile)
 
 end
 
+--[[
 
+Tabela com informacoes extridaos do arquivo de sessao do glpi contendo o profile do usuário logado
+
+{
+   glpilanguage = "pt_BR",
+   glpinumber_format = "2",
+   glpisearchcount =    {
+      Profile = 1,
+      Computer = 1,
+   }
+   glpiis_categorized_soft_expanded = "1",
+   glpi_currenttime = "2011-03-23 13:24:09",
+   glpi_plugins =    {
+   }
+   glpiextauth = 0,
+   glpiis_not_categorized_soft_expanded = "1",
+   glpisearchcount2 =    {
+      Profile = 0,
+      Computer = 0,
+   }
+   glpiusers_idisation = 1,
+   glpitask_private = "0",
+   glpipriority_6 = "#ff5555",
+   glpipriority_4 = "#ffbfbf",
+   glpipriority_2 = "#ffe0e0",
+   glpidate_format = "0",
+   glpifollowup_private = "0",
+   glpiis_ids_visible = "0",
+   glpidefault_entity = "0",
+   glpimassiveactionselected =    {
+   }
+   glpilisturl =    {
+      Profile = "Computer",
+      DeviceControl = "DeviceGraphicCard",
+      DeviceMotherboard = "DeviceProcessor",
+      DeviceMemory = "DeviceHardDrive",
+      DeviceCase = "DevicePowerSupply",
+      DeviceSoundCard = "DevicePci",
+      DeviceNetworkCard = "DeviceDrive",
+   }
+   glpirealname = "",
+   glpishow_jobs_at_login = "1",
+   glpi_tabs =    {
+      profile = "-1",
+      computer = "1",
+   }
+   glpiactive_entity_name = "Entidade raiz (Estrutura da árvore)",
+   glpilisttitle =    {
+      DeviceSoundCard = "Computador = localhost",
+      DeviceMotherboard = "Computador = localhost",
+      DeviceCase = "Computador = localhost",
+      DevicePowerSupply = "Computador = localhost",
+      DevicePci = "Computador = localhost",
+      DeviceHardDrive = "Computador = localhost",
+      Profile = "Lista",
+      DeviceDrive = "Computador = localhost",
+      DeviceControl = "Computador = localhost",
+      DeviceProcessor = "Computador = localhost",
+      DeviceMemory = "Computador = localhost",
+      Computer = "Lista",
+      DeviceNetworkCard = "Computador = localhost",
+      DeviceGraphicCard = "Computador = localhost",
+   }
+   glpilist_limit = "20",
+   glpiactiveprofile =    {
+      contract = "w",
+      monitor = "w",
+      is_default = "0",
+      update_ticket = "1",
+      global_add_tasks = "1",
+      reservation_helpdesk = "1",
+      steal_ticket = "1",
+      reminder_public = "w",
+      bookmark_public = "w",
+      typedoc = "w",
+      document = "w",
+      reservation_central = "w",
+      user_authtype = "w",
+      knowbase = "w",
+      peripheral = "w",
+      printer = "w",
+      interface = "central",
+      view_ocsng = "r",
+      rule_ldap = "w",
+      link = "w",
+      config = "w",
+      show_planning = "1",
+      check_update = "r",
+      computer = "w",
+      search_config = "w",
+      search_config_global = "w",
+      networking = "w",
+      observe_ticket = "1",
+      entity_dropdown = "w",
+      logs = "r",
+      helpdesk_hardware = "3",
+      contact_enterprise = "w",
+      show_assign_ticket = "1",
+      infocom = "w",
+      statistic = "1",
+      device = "w",
+      helpdesk_status = "N",
+      update_tasks = "1",
+      profile = "w",
+      consumable = "w",
+      name = "super-admin",
+      rule_softwarecategories = "w",
+      show_full_ticket = "1",
+      helpdesk_item_type =       {
+         "Software",
+         "Phone",
+         "Computer",
+      }
+      password_update = "1",
+      show_all_planning = "1",
+      cartridge = "w",
+      group = "w",
+      show_group_planning = "1",
+      own_ticket = "1",
+      faq = "w",
+      group_add_followups = "1",
+      assign_ticket = "1",
+      ocsng = "w",
+      entity_rule_ticket = "w",
+      entity = "w",
+      rule_ticket = "r",
+      update_followups = "1",
+      update_priority = "1",
+      backup = "w",
+      notes = "w",
+      show_all_ticket = "1",
+      user = "w",
+      id = "4",
+      global_add_followups = "1",
+      rule_ocs = "w",
+      reports = "r",
+      add_followups = "1",
+      dropdown = "w",
+      transfer = "w",
+      phone = "w",
+      create_ticket = "1",
+      sync_ocsng = "w",
+      software = "w",
+      delete_ticket = "1",
+   }
+   glpi_multientitiesmode = 0,
+   glpiactiveentities_string = "'0'",
+   glpisearch =    {
+      Profile =       {
+         distinct = "N",
+         link =          {
+         }
+         order = "ASC",
+         contains2 =          {
+            "",
+         }
+         searchtype2 = "",
+         field2 =          {
+            "view",
+         }
+         itemtype2 = "",
+         is_deleted = 0,
+         sort = 1,
+         link2 =          {
+         }
+         start = 0,
+         contains =          {
+            "",
+         }
+         searchtype =          {
+            "contains",
+         }
+         field =          {
+            "view",
+         }
+      }
+      Computer =       {
+         distinct = "N",
+         link =          {
+         }
+         order = "ASC",
+         contains2 =          {
+            "",
+         }
+         searchtype2 = "",
+         field2 =          {
+            "view",
+         }
+         itemtype2 = "",
+         is_deleted = 0,
+         sort = 1,
+         link2 =          {
+         }
+         start = 0,
+         contains =          {
+            "",
+         }
+         searchtype =          {
+            "contains",
+         }
+         field =          {
+            "view",
+         }
+      }
+   }
+   glpishowallentities = 1,
+   glpicrontimer = 1300897445,
+   glpiname = "admin",
+   glpipriority_1 = "#fff2f2",
+   glpiauthtype = "1",
+   glpiactive_entity_shortname = "Entidade raiz (Estrutura da árvore)",
+   glpilistitems =    {
+      DeviceSoundCard =       {
+      }
+      DeviceMotherboard =       {
+      }
+      DeviceCase =       {
+      }
+      DevicePowerSupply =       {
+      }
+      DevicePci =       {
+      }
+      DeviceHardDrive =       {
+      }
+      Profile =       {
+         "2",
+         "1",
+         "4",
+         "3",
+      }
+      DeviceDrive =       {
+      }
+      DeviceControl =       {
+      }
+      DeviceProcessor =       {
+      }
+      DeviceMemory =       {
+      }
+      Computer =       {
+         "1",
+      }
+      DeviceNetworkCard =       {
+      }
+      DeviceGraphicCard =       {
+      }
+   }
+   glpiactive_entity = 0,
+   glpi_use_mode = "0",
+   glpiparententities_string = "",
+   glpiroot = "/servdesk",
+   glpiparententities =    {
+   }
+   glpigroups =    {
+   }
+   glpiactiveentities =    {
+      0,
+   }
+   glpiID = "2",
+   glpiprofiles =    {
+      4 =       {
+         name = "super-admin",
+         entities =          {
+            0 =             {
+               id = "0",
+               name = "N",
+            }
+         }
+      }
+   }
+   glpiuse_flat_dropdowntree = "0",
+   glpidropdown_chars_limit = "50",
+   glpipriority_5 = "#ffadad",
+   glpipriority_3 = "#ffcece",
+   glpidefault_requesttypes_id = "1",
+}
+
+
+]]

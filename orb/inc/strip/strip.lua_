@@ -1,46 +1,63 @@
-
 require "util"
 
-
 local s = text_file_reader("./s4")
---[[
-print(s)
-print("----------------------------------------------\n\n")
-print("label", "type", "size", "value")
-]]
 
---for l, t, z, v in string.gfind(s, "glpi([_%w]+)|(%a):(%d+):(.+)") do
-while true do
 
-   i, j, l, t, v = string.find(s, "glpi([_%w]+)|(%a):(.+)")
-   --print(l, t, v)
-   if t == "N" then
-      print(l," = NULL")
-      _, _, v, s = string.find(v,";(.+)")
-   elseif t == "s" then
-      _, _, _, v, s = string.find(v,"(%d+):\"([^;.*]*)\";(.+)")
-      --print(l," = ", "'"..v.."'", s)
-      if not v then v = "" end
-      print(l," = ", "'"..v.."'")
-   elseif t == "i" then
-      _, _, v, s = string.find(v,"(%d*);(.+)")
-      --print(l," = ", v, s)
-      print(l," = ", v)
-   elseif t == "a" then
-      print(v)
-      --_, _, _, v, s = string.find(v,"(%d+):{([^{^}.*]*)}(.+)")
-      _, _, _, v, s = string.find(v,"(%d+):{([.*]*)}(.+)")
-      if not v then v = "" end
-      print(l," = ", v)
-   elseif t == "b" then
-      _, _, v, s = string.find(v,"(%d);(.+)")
-      --print(l," = ", v, s)
-      print(l," = ", v)
-   else
-      break
+function string.strip(s,tab)
+   local res = {}
+   local cnt = 0
+   local l, t, v, b
+
+   while true do
+      if not s then break end
+      if not tab then 
+         _, _, l, t, v = string.find(s, "glpi([_%w]+)|(%a):(.+)")
+      else
+         _, _, t, v = string.find(s, "(%a)[:;](.+)")
+      end
+
+      if t == "N" then
+         _, _, v, s = string.find(v,";(.+)")
+         v = t
+      elseif t == "s" then
+         _, _, _, v, s = string.find(v,"(%d+):\"([^;.*]*)\";(.+)")
+      elseif t == "a" then
+          _, _, _, v, s = string.find(v,"(%d+):(%b{})(.*)")
+         v = string.strip(v,true)
+      elseif t == "i" then
+         _, _, v, s = string.find(v,"(%d*);(.+)")
+         v = tonumber(v)
+      elseif t == "b" then
+         _, _, v, s = string.find(v,"(%d);(.+)")
+         v = tonumber(v)
+      else
+         break
+      end
+      if not tab then 
+         res[l] = v
+      else
+         if cnt == 0 then
+            cnt = cnt + 1
+            b = v
+         else
+            cnt = 0
+            -- Esta opcao ordena os indices numericos
+            --if tonumber(b) then
+            --   table.insert(res, v)
+            --else
+               res[b] = v
+            --end
+         end
+      end
    end
 
-   if not s then break end
-
+   return res
 end
 
+
+local r = string.strip(s)
+local t = table.dump(r)
+--print(t)
+
+
+print(r.profiles[1].name)
