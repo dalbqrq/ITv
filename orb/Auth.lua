@@ -64,6 +64,18 @@ function is_logged_at_glpi(web)
    -- Veja no final deste arquivo um exemplo da tabela criada a partir do arquivo de sessao do glpi
    -- que contem informacoes extridas do arquivo de sessao do glpi contendo o profile do usuário logado
 
+   local sess_ = text_file_reader(sess_filename)
+   local profile = get_profile(sess_)
+   text_file_writer(prof_filename, table.dump(profile))
+
+   if profile.glpiname ~= nil then
+      local profile = { is_logged=true, user_name=profile.glpiname, user_id=profile.glpiID, session=sess_, cookie=glpi_cookie,
+                        profile=nil }
+      local prof_ = text_file_reader(prof_filename)
+      if prof_ == nil then
+      end
+      return profile
+--[[
    local prof_sess_lua = text_file_reader(prof_filename)
    if not prof_sess_lua then
       local sess_glpi = text_file_reader(sess_filename)
@@ -77,6 +89,7 @@ function is_logged_at_glpi(web)
 
    if profile.glpiname ~= nil then
       return { is_logged=true, user_name=profile.glpiname, user_id=profile.glpiID, cookie=glpi_cookie, profile=profile } 
+]]
    else
       return false
    end
