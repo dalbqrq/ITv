@@ -1,7 +1,5 @@
 #!/bin/bash
 data=`date +%d%m%Y`
-read $1
-user=$1
 
 sed -i.bkp.$data 's/url_html_path=\/nagios3/url_html_path=\/monitor/' /etc/nagios3/cgi.cfg
 cd /etc/apache2/conf.d
