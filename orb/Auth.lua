@@ -1,5 +1,7 @@
 module("Auth", package.seeall)
 
+require "Glpi"
+
 -- COOKIES ------------------------------------------------------------------------------
 
 function set_cookie(web, name, value, path, expiration)
@@ -31,14 +33,6 @@ end
 
 
 -- GLPI ------------------------------------------------------------------------------
-   --[[ 
-       buscar em 'sess_filename' as strings abaixo 
-           glpiID|s:1:"2";
-           glpiname|s:5:"admin";
-   local a, b, c, user_id = string.find(sess_, 'glpiID|s:(%d+):"(%d+)"')
-   local d, e, f, user_name = string.find(sess_, 'glpiname|s:(%d+):"([%w-_%.]+)";')
-   ]]
-
 local glpi_cookie_name = "PHPSESSID"
 local session_path = "/usr/local/servdesk/files/_sessions"
 
@@ -52,6 +46,10 @@ function logout(web)
 end
 
 
+--[[
+   Veja no final deste arquivo um exemplo da tabela criada a partir do arquivo de sessao do glpi
+   que contem informacoes extridas do arquivo de sessao do glpi contendo o profile do usuário logado
+]]
 function is_logged_at_glpi(web)
    local is_logged, user_name, id, sess_, glpi_cookie
    local glpi_cookie = get_cookie(web, glpi_cookie_name) 
@@ -61,18 +59,33 @@ function is_logged_at_glpi(web)
    end
 
    local sess_filename = session_path.."/sess_"..glpi_cookie
-   local prof_filename = session_path.."/prof_"..glpi_cookie..".lua"
-
-   -- Veja no final deste arquivo um exemplo da tabela criada a partir do arquivo de sessao do glpi
-   -- que contem informacoes extridas do arquivo de sessao do glpi contendo o profile do usuário logado
-
    local sess_ = text_file_reader(sess_filename)
    local prof_ = get_profile(sess_)
-   text_file_writer(prof_filename, table.dump(prof_))
 
-   if prof_.glpiname ~= nil then
-      return { is_logged=true, user_name=prof_.glpiname, user_id=prof_.glpiID, session=sess_, cookie=glpi_cookie, 
-               profile=prof_ }
+   --[[
+   local prof_filename = session_path.."/prof_"..glpi_cookie..".lua"
+   text_file_writer(prof_filename, table.dump(prof_))
+   ]]
+
+   --[[ 
+       buscar em 'sess_filename' as strings abaixo 
+           glpiID|s:1:"2";
+           glpiname|s:5:"admin"; 
+           glpiactive_entity|i:0;
+           glpiactiveprofile|a:88:{s:2:"id";s:1:"2";
+   ]]
+   local _, _, _, user_id = string.find(sess_, 'glpiID|s:(%d+):"(%d+)"')
+   local _, _, _, user_name = string.find(sess_, 'glpiname|s:(%d+):"([%w-_%.]+)";')
+   local _, _,    entity_id = string.find(sess_, 'glpiactive_entity|i:(%d+);')
+   local _, _, _, profile_id = string.find(sess_, 'glpiactiveprofile|a:(%d+):{s:(%d+):"id";s:(%d+):"(%d+)";')
+
+   local profile 
+
+   if profile_id then profile = Glpi.select_profile(profile_id) end
+
+   if user_id ~= nil then
+      return { is_logged=true, user_id=user_id, user_name=user_name, profile_id = profile_id,
+               entity_id = entity_id, cookie=glpi_cookie, profile=profile }
    else
       return false
    end

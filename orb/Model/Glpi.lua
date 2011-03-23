@@ -2,6 +2,15 @@ module("Glpi", package.seeall)
 
 require "util"
 
+----------------------------- PROFILES ----------------------------------
+
+function select_profile(profile_id)
+   local content = query ("glpi_profiles", "id = "..profile_id)
+   return content[1]
+end
+
+
+
 ----------------------------- COMPUTERS ----------------------------------
 
 function select_computers (cond_, extra_, columns_) 
