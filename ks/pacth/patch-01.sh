@@ -23,7 +23,7 @@ Alias /monitor/stylesheets /etc/nagios3/stylesheets
 # Where the HTML pages live
 Alias /monitor /usr/share/nagios3/htdocs
 
-<DirectoryMatch (/usr/share/nagios3/htdocs|/usr/lib/cgi-bin/monitor|/etc/nagios3/stylesheets)>
+<DirectoryMatch (/usr/share/nagios3/htdocs|/usr/lib/cgi-bin/nagios3|/etc/nagios3/stylesheets)>
         Options FollowSymLinks
 
         DirectoryIndex index.php
