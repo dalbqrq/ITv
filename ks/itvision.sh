@@ -225,6 +225,7 @@ sed -i.orig -e "s/nrpe_user=nagios/nrpe_user=$user/" \
 	-e "s/allowed_hosts=127.0.0.1/#allowed_hosts=127.0.0.1/" /etc/nagios/nrpe.cfg
 sed -i.orig -e "s/www-data/$user/g" /etc/apache2/envvars
 sed -i.orig -e "s/nagiosadmin/$user/g" /etc/nagios3/cgi.cfg
+sed -i 's/url_html_path=\/nagios3/url_html_path=\/monitor/' /etc/nagios3/cgi.cfg
 sed -i.orig -e "s/nagios_user=nagios/nagios_user=$user/" \
 	-e "s/nagios_group=nagios/nagios_group=$user/" \
 	-e "s/check_external_commands=0/check_external_commands=1/" \
@@ -239,6 +240,11 @@ cfg_dir=/etc/nagios3/services \\
 cfg_dir=/etc/nagios3/contacts" /etc/nagios3/nagios.cfg
 sed -i.orig -e "s/chown nagios:nagios/chown $user:root/" /etc/init.d/nagios3
 sed -i.orig -e "s/chown nagios/chown $user/" /etc/init.d/nagios-nrpe-server
+sed -i.orig -e "s/\/cgi-bin\/nagios3/\/cgi-bin\/monitor/" \
+	-e "s/\/nagios3\/cgi-bin/\/monitor\/cgi-bin/" \
+	-e "s/\/nagios3\/stylesheets/\/monitor\/stylesheets/"
+	-e "s/\/nagios3/\/monitor/" /etc/nagios3/apache2.conf
+
 
 mkdir -p /etc/nagios3/orig/conf.d /etc/nagios3/hosts /etc/nagios3/services /etc/nagios3/apps /etc/nagios3/contacts
 mv /etc/nagios3/*.orig /etc/nagios3/orig
@@ -260,6 +266,58 @@ done
 sed -i.orig -e "s/check_pop -H/check_pop -p 100 -H/g" $dir/mail.cfg
 sed -i.orig -e "s/check_imap -H/check_imap -p 143 -H/g" $dir/mail.cfg
 cp $itvhome/ks/files/plugin.d/* $dir
+
+ln -s /usr/lib/cgi-bin/nagios3 monitor; chown -R netadm.netadm /usr/lib/cgi-bin/monitor
+ln -s /etc/nagios3 monitor ;chown -R netadm.netadm /etc/monitor
+ln -s /usr/share/nagios3 monitor ; chown -R netadm.netadm /usr/share/monitor
+
+data=`date +%d%m%Y`
+read $1
+user=$1
+
+sed -i.bkp.$data 's/url_html_path=\/nagios3/url_html_path=\/monitor/' /etc/nagios3/cgi.cfg
+cd /etc/apache2/conf.d
+rm -f nagios3.conf
+ln -s /etc/nagios3/apache2.conf monitor.conf
+chown -R itvision.itvision monitor.conf
+mv /etc/nagios3/apache2.conf /etc/nagios3/apache2.conf.bkp.$date
+cat <<EOF > /etc/nagios3/apache2.conf
+# apache configuration for nagios 3.x
+# note to users of nagios 1.x and 2.x:
+#       throughout this file are commented out sections which preserve
+#       backwards compatibility with bookmarks/config for older nagios versios.
+#       simply look for lines following "nagios 1.x:" and "nagios 2.x" comments.
+
+ScriptAlias /cgi-bin/monitor /usr/lib/cgi-bin/nagios3
+ScriptAlias /monitor/cgi-bin /usr/lib/cgi-bin/nagios3
+
+# Where the stylesheets (config files) reside
+Alias /monitor/stylesheets /etc/nagios3/stylesheets
+
+# Where the HTML pages live
+Alias /monitor /usr/share/nagios3/htdocs
+
+<DirectoryMatch (/usr/share/nagios3/htdocs|/usr/lib/cgi-bin/monitor|/etc/nagios3/stylesheets)>
+        Options FollowSymLinks
+
+        DirectoryIndex index.php
+
+        AllowOverride AuthConfig
+        Order Allow,Deny
+        Allow From All
+
+        AuthName "Nagios Access"
+        AuthType Basic
+        AuthUserFile /etc/nagios3/htpasswd.users
+        # nagios 1.x:
+        #AuthUserFile /etc/nagios/htpasswd.users
+        require valid-user
+</DirectoryMatch>
+EOF
+
+sed -i.bkp.$data -e "s/\/cgi-bin\/nagios3/cgi-bin\/monitor/" /usr/share/nagios3/htdocs
+sed -i.bkp.$data -e 's/nagios3/monitor/' /usr/share/nagios3/htdocs/graphs.html
+
 
 
 
