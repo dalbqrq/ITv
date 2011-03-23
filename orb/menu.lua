@@ -53,7 +53,7 @@ function render_menu(web, item, subitem)
       itens[#itens+1] = li{ a{ class=active, href=js, onClick="changeHead('/orb/menu/"..i..":1')", v.name } }
    end
    itens[#itens+1] = li{ a{ class="logout", href=js, onClick="changePage('/orb/menu/0:0', '/orb/login/logout')", 
-                            "Logout: "..auth.user_name } }
+                            "Logout: "..auth.profile.glpiname } }
 
    for i,v in ipairs(menu_itens[item].submenu) do
       local active = ""

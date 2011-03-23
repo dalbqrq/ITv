@@ -13,7 +13,8 @@ function set_cookie(web, name, value, path, expiration)
 end
 
 
-function delete_cookie(web, name, value)
+function delete_cookie(web, name, path)
+   path = path or "/"
    web:delete_cookie(name, path)
 end
 
@@ -43,10 +44,11 @@ local session_path = "/usr/local/servdesk/files/_sessions"
 
 
 function logout(web)
+   --[[ Nao grava profile: 
    local glpi_cookie = get_cookie(web, glpi_cookie_name) 
-   delete_cookie(web, glpi_cookie_name, glpi_cookie)
    local prof_filename = session_path.."/prof_"..glpi_cookie..".lua"
    remove_file(prof_filename)
+   ]]
 end
 
 
@@ -59,37 +61,18 @@ function is_logged_at_glpi(web)
    end
 
    local sess_filename = session_path.."/sess_"..glpi_cookie
-   local prof_filename = session_path.."/prof_"..glpi_cookie..".lua"
+   -- Nao grava profile: local prof_filename = session_path.."/prof_"..glpi_cookie..".lua"
 
    -- Veja no final deste arquivo um exemplo da tabela criada a partir do arquivo de sessao do glpi
    -- que contem informacoes extridas do arquivo de sessao do glpi contendo o profile do usuário logado
 
    local sess_ = text_file_reader(sess_filename)
-   local profile = get_profile(sess_)
-   text_file_writer(prof_filename, table.dump(profile))
+   local prof_ = get_profile(sess_)
+   -- Nao grava profile: --text_file_writer(prof_filename, table.dump(prof_))
 
-   if profile.glpiname ~= nil then
-      local profile = { is_logged=true, user_name=profile.glpiname, user_id=profile.glpiID, session=sess_, cookie=glpi_cookie,
-                        profile=nil }
-      local prof_ = text_file_reader(prof_filename)
-      if prof_ == nil then
-      end
-      return profile
---[[
-   local prof_sess_lua = text_file_reader(prof_filename)
-   if not prof_sess_lua then
-      local sess_glpi = text_file_reader(sess_filename)
-      local prof_sess = get_profile(sess_glpi)
-      text_file_writer(prof_filename, "local profile = "..table.dump(prof_sess).."\n\nreturn profile\n")
-      prof_sess_lua = text_file_reader(prof_filename)
-   end
-
-   local prof_ = loadstring(prof_sess_lua)
-   local profile = prof_()
-
-   if profile.glpiname ~= nil then
-      return { is_logged=true, user_name=profile.glpiname, user_id=profile.glpiID, cookie=glpi_cookie, profile=profile } 
-]]
+   if prof_.glpiname ~= nil then
+      return { is_logged=true, user_name=prof_.glpiname, user_id=prof_.glpiID, session=sess_, cookie=glpi_cookie, 
+               profile=prof_ }
    else
       return false
    end

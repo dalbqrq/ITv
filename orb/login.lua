@@ -87,8 +87,7 @@ end
 function render_logout(web)
    Auth.logout(web)
    web.prefix = "/servdesk"
-   --return web:redirect(web:link("/logout.php"))
-   return web:redirect(web:link("/login.php"))
+   return web:redirect(web:link("/logout.php"))
 end
 
 
