@@ -289,354 +289,85 @@ end
 
 ]]
 
-
 -- views ------------------------------------------------------------
 
-menu_itens_admin = {
+menu_itens = {
    { name="Monitor", link="/orb/gviz/show",
       submenu = {
-      { name="Visão", link="/orb/gviz/show" },
-      { name="Árvore", link="/orb/treeviz/show" },
-      { name="Aplicações", link="/orb/app" },
-      { name="Checagem", link="/orb/probe" },
-      { name="Tipo de Relacionamento", link="/orb/app_relat_types" },
+      { name="Visão", field=nil, link="/orb/gviz/show" },
+      { name="Árvore", field="application", link="/orb/treeviz/show" },
+      { name="Aplicações", field="application", link="/orb/app" },
+      { name="Checagem", field="checkcmds", link="/orb/probe" },
+      { name="Tipo de Relacionamento", field="app_relat_type", link="/orb/app_relat_types" },
       },
    },
    { name="ServiceDesk", link="/servdesk/front/central.php",
       submenu = {
-      { name="Chamado", link="servdesk/front/helpdesk.public.php" },
-      { name="Central", link="/servdesk/front/central.php" },
-      { name="Ticket", link="/servdesk/front/ticket.php" },
-      { name="Estatística", link="/servdesk/front/stat.php" },
+      { name="Central", field=nil, link="/servdesk/front/central.php" },
+      { name="Ticket", field=nil, link="/servdesk/front/ticket.php" },
+      { name="Estatística", field=nil, link="/servdesk/front/stat.php" },
       },
    },
    { name="CMDB", link="#",
       submenu = {
-      { name="Computadores", link="/servdesk/front/computer.php" },
-      { name="Software", link="/servdesk/front/software.php" },
-      { name="Equip. de Redes", link="/servdesk/front/networkequipment.php" },
-      { name="Telefones", link="/servdesk/front/phone.php"  },
-      { name="Periféricos", link="/servdesk/front/peripheral.php" },
-      { name="Status", link="/servdesk/front/states.php" },
+      { name="Computadores", field="computers", link="/servdesk/front/computer.php" },
+      { name="Software", field="software", link="/servdesk/front/software.php" },
+      { name="Equip. de Redes", field="networking", link="/servdesk/front/networkequipment.php" },
+      { name="Telefones", field="phone", link="/servdesk/front/phone.php"  },
+      { name="Periféricos", field="peripheral", link="/servdesk/front/peripheral.php" },
+      { name="Status", field=nil, link="/servdesk/front/states.php" },
       },
    },
    { name="Gerência", link="#",
       submenu = {
-      { name="Relatórios", link="/servdesk/front/report.php" },
-      { name="Notas", link="/servdesk/front/reminder.php" },
-      { name="Base de Conhecimento", link="/servdesk/front/knowbaseitem.php" },
-      { name="Contatos", link="/servdesk/front/contact.php" },
-      { name="Fornecedores", link="/servdesk/front/supplier.php" },
-      { name="Orçamentos", link="/servdesk/front/budget.php" },
-      { name="Contratos", link="/servdesk/front/contract.php" },
-      { name="Documentos", link="/servdesk/front/document.php" },
-      { name="Empréstimos", link="/servdesk/front/reservationitem.php" },
---      { name="OCS-NG", link="/servdesk/front/ocsng.php?ocsservers_id=1" },
+      { name="Relatórios", field="reports", link="/servdesk/front/report.php" },
+      { name="Notas", field="notes", link="/servdesk/front/reminder.php" },
+      { name="Base de Conhecimento", field="knowbase", link="/servdesk/front/knowbaseitem.php" },
+      { name="Contatos", field="contract", link="/servdesk/front/contact.php" },
+      { name="Fornecedores", field="contact_enterprise", link="/servdesk/front/supplier.php" },
+      { name="Contratos", field="contact_enterprise", link="/servdesk/front/contract.php" },
+      { name="Orçamentos", field="budget", link="/servdesk/front/budget.php" },
+      { name="Documentos", field="documents", link="/servdesk/front/document.php" },
+      { name="Empréstimos", field="reservation_helpdesk", link="/servdesk/front/reservationitem.php" },
+      { name="OCS-NG", field="ocsng", link="/servdesk/front/ocsng.php?ocsservers_id=1" },
       },
    },
    { name="Administrar", link="#",
       submenu = {
-      { name="Usuários", link="/servdesk/front/user.php" },
-      { name="Grupos", link="/servdesk/front/group.php" },
-      { name="Entidades", link="/servdesk/front/entity.php" },
-      { name="Regras", link="/servdesk/front/rule.php" },
-      { name="Dicionários", link="/servdesk/front/dictionnary.php" },
-      { name="Perfis", link="/servdesk/front/profile.php" },
-      { name="Logs", link="/servdesk/front/event.php" },
-      { name="backup", link="/servdesk/front/backup.php" },
-      },
-   },
---[[
-   { name="Configurar", link="#",
-      submenu = {
-      { name="Dropdowns", link="/servdesk/front/dropdown.php" },
-      { name="Componentes", link="/servdesk/front/device.php" },
-      { name="Notificações", link="/servdesk/front/setup.notification.php" },
-      { name="Geral", link="/servdesk/front/config.form.php" },
-      { name="Ações Automáticas", link="/servdesk/front/crontask.php" },
-      { name="Autenticação", link="/servdesk/front/setup.auth.php" },
-      { name="Gateway de E-mail", link="/servdesk/front/mailcollector.php" },
-      { name="Modo OCS-NG", link="/servdesk/front/ocsserver.php" },
-      { name="Plugins", link="/servdesk/front/plugin.php" },
-      },
-   },
-]]
-}
-
---[[
-   { name="Ajuda", link="/blank.html",
-      submenu = { },
-   },
-]]
-
-
--- viewadmins ------------------------------------------------------------
-
-
-menu_itens_normal = {
-   { name="Monitor", link="/orb/gviz/show",
-      submenu = {
-      { name="Visão", link="/orb/gviz/show" },
-      { name="Árvore", link="/orb/treeviz/show" },
-      { name="Aplicações", link="/orb/app" },
-      { name="Checagem", link="/orb/probe" },
-      { name="Tipo de Relacionamento", link="/orb/app_relat_types" },
-      },
-   },
-   { name="ServiceDesk", link="/servdesk/front/central.php",
-      submenu = {
-      { name="Central", link="/servdesk/front/central.php" },
-      { name="Ticket", link="/servdesk/front/ticket.php" },
-      { name="Estatística", link="/servdesk/front/stat.php" },
-      },
-   },
-   { name="CMDB", link="#",
-      submenu = {
-      { name="Computadores", link="/servdesk/front/computer.php" },
-      { name="Software", link="/servdesk/front/software.php" },
-      { name="Equip. de Redes", link="/servdesk/front/networkequipment.php" },
-      { name="Telefones", link="/servdesk/front/phone.php"  },
-      { name="Periféricos", link="/servdesk/front/peripheral.php" },
-      { name="Status", link="/servdesk/front/states.php" },
-      },
-   },
-   { name="Gerência", link="#",
-      submenu = {
-      { name="Relatórios", link="/servdesk/front/report.php" },
-      { name="Notas", link="/servdesk/front/reminder.php" },
-      { name="Base de Conhecimento", link="/servdesk/front/knowbaseitem.php" },
-      { name="Contatos", link="/servdesk/front/contact.php" },
-      { name="Fornecedores", link="/servdesk/front/supplier.php" },
-      { name="Orçamentos", link="/servdesk/front/budget.php" },
-      { name="Contratos", link="/servdesk/front/contract.php" },
-      { name="Documentos", link="/servdesk/front/document.php" },
-      { name="Empréstimos", link="/servdesk/front/reservationitem.php" },
---[[
-      { name="OCS-NG", link="/servdesk/front/ocsng.php?ocsservers_id=1" },
-]]
-      },
-   },
-   { name="Administrar", link="#",
-      submenu = {
-      { name="Usuários", link="/servdesk/front/user.php" },
-      { name="Grupos", link="/servdesk/front/group.php" },
---[[
-      { name="Entidades", link="/servdesk/front/entity.php" },
-      { name="Regras", link="/servdesk/front/rule.php" },
-      { name="Dicionários", link="/servdesk/front/dictionnary.php" },
-      { name="Perfis", link="/servdesk/front/profile.php" },
-      { name="Logs", link="/servdesk/front/event.php" },
-      { name="backup", link="/servdesk/front/backup.php" },
-]]
-      },
-   },
---[[
-   { name="Configurar", link="#",
-      submenu = {
-      { name="Dropdowns", link="/servdesk/front/dropdown.php" },
-      { name="Componentes", link="/servdesk/front/device.php" },
-      { name="Notificações", link="/servdesk/front/setup.notification.php" },
-      { name="Geral", link="/servdesk/front/config.form.php" },
-      { name="Ações Automáticas", link="/servdesk/front/crontask.php" },
-      { name="Autenticação", link="/servdesk/front/setup.auth.php" },
-      { name="Gateway de E-mail", link="/servdesk/front/mailcollector.php" },
-      { name="Modo OCS-NG", link="/servdesk/front/ocsserver.php" },
-      { name="Plugins", link="/servdesk/front/plugin.php" },
-      },
-   },
-]]
-}
-
---[[
-   { name="Ajuda", link="/blank.html",
-      submenu = { },
-   },
-]]
-
-
--- views ------------------------------------------------------------
-
-menu_itens_post_only = {
-   { name="Monitor", link="/orb/gviz/show",
-      submenu = {
-      { name="Visão", link="/orb/gviz/show" },
-      { name="Árvore", link="/orb/treeviz/show" },
-      },
-   },
-   { name="ServiceDesk", link="#",
-      submenu = {
-      --{ name="Chamado", link="/servdesk/front/helpdesk.public.php" },
-      { name="Central", link="/servdesk/front/central.php" },
-      { name="Ticket", link="/servdesk/front/ticket.php" },
-      { name="Empréstimos", link="/servdesk/front/reservationitem.php" },
-      --{ name="FAQ", link="/servdesk/front/helpdesk.faq.php" },
-      },
-   },
---[[
-   { name="Monitor", link="/orb/gviz/show",
-      submenu = {
-      { name="Visão", link="/orb/gviz/show" },
-      { name="Árvore", link="/orb/treeviz/show" },
-      { name="Aplicações", link="/orb/app" },
-      { name="Checagem", link="/orb/probe" },
-      { name="Tipo de Relacionamento", link="/orb/app_relat_types" },
-      },
-   },
-   { name="ServiceDesk", link="/servdesk/front/central.php",
-      submenu = {
-      { name="Central", link="/servdesk/front/central.php" },
-      { name="Ticket", link="/servdesk/front/ticket.php" },
-      { name="Estatística", link="/servdesk/front/stat.php" },
-      },
-   },
-   { name="CMDB", link="#",
-      submenu = {
-      { name="Computadores", link="/servdesk/front/computer.php" },
-      { name="Software", link="/servdesk/front/software.php" },
-      { name="Equip. de Redes", link="/servdesk/front/networkequipment.php" },
-      { name="Telefones", link="/servdesk/front/phone.php"  },
-      { name="Periféricos", link="/servdesk/front/peripheral.php" },
-      { name="Status", link="/servdesk/front/states.php" },
-      },
-   },
-   { name="Gerência", link="#",
-      submenu = {
-      { name="Relatórios", link="/servdesk/front/report.php" },
-      { name="Notas", link="/servdesk/front/reminder.php" },
-      { name="Base de Conhecimento", link="/servdesk/front/knowbaseitem.php" },
-      { name="Contatos", link="/servdesk/front/contact.php" },
-      { name="Fornecedores", link="/servdesk/front/supplier.php" },
-      { name="Orçamentos", link="/servdesk/front/budget.php" },
-      { name="Contratos", link="/servdesk/front/contract.php" },
-      { name="Documentos", link="/servdesk/front/document.php" },
-      { name="Empréstimos", link="/servdesk/front/reservationitem.php" },
-      { name="OCS-NG", link="/servdesk/front/ocsng.php?ocsservers_id=1" },
-      },
-   },
-   { name="Administrar", link="#",
-      submenu = {
-      { name="Usuários", link="/servdesk/front/user.php" },
-      { name="Grupos", link="/servdesk/front/group.php" },
-      { name="Entidades", link="/servdesk/front/entity.php" },
-      { name="Regras", link="/servdesk/front/rule.php" },
-      { name="Dicionários", link="/servdesk/front/dictionnary.php" },
-      { name="Perfis", link="/servdesk/front/profile.php" },
-      { name="Logs", link="/servdesk/front/event.php" },
-      { name="backup", link="/servdesk/front/backup.php" },
+      { name="Usuários", field="user", link="/servdesk/front/user.php" },
+      { name="Grupos", field="group", link="/servdesk/front/group.php" },
+      { name="Entidades", field="entity", link="/servdesk/front/entity.php" },
+      { name="Regras", field={ "rule_ticket", "entity_rule_ticket", "rule_ocs", "rule_ldap" }, link="/servdesk/front/rule.php" },
+      { name="Dicionários", field={"rule_dictionnary_software", "rule_dictionnary_dropdown" }, link="/servdesk/front/dictionnary.php" },
+      { name="Perfis", field="profile", link="/servdesk/front/profile.php" },
+      { name="Logs", field="logs", link="/servdesk/front/event.php" },
+      { name="Backup", field="backup", link="/servdesk/front/backup.php" },
       },
    },
    { name="Configurar", link="#",
       submenu = {
-      { name="Dropdowns", link="/servdesk/front/dropdown.php" },
-      { name="Componentes", link="/servdesk/front/device.php" },
-      { name="Notificações", link="/servdesk/front/setup.notification.php" },
-      { name="Geral", link="/servdesk/front/config.form.php" },
-      { name="Ações Automáticas", link="/servdesk/front/crontask.php" },
-      { name="Autenticação", link="/servdesk/front/setup.auth.php" },
-      { name="Gateway de E-mail", link="/servdesk/front/mailcollector.php" },
-      { name="Modo OCS-NG", link="/servdesk/front/ocsserver.php" },
-      { name="Plugins", link="/servdesk/front/plugin.php" },
+      { name="Dropdowns", field="dropdown", link="/servdesk/front/dropdown.php" },
+      { name="Componentes", field="device", link="/servdesk/front/device.php" },
+      { name="Notificações", field="notification", link="/servdesk/front/setup.notification.php" },
+      { name="Geral", field="config", link="/servdesk/front/config.form.php" },
+      { name="Ações Automáticas", field="config", link="/servdesk/front/crontask.php" },
+      { name="Autenticação", field="config", link="/servdesk/front/setup.auth.php" },
+      { name="Gateway de E-mail", field="config", link="/servdesk/front/mailcollector.php" },
+      { name="Modo OCS-NG", field="config", link="/servdesk/front/ocsserver.php" },
+      { name="Plugins", field="config", link="/servdesk/front/plugin.php" },
       },
    },
-]]
+   { name="Ajuda", link="#",
+      submenu = {
+      { name="Sobre", link="/orb/about" },
+      }, 
+   },
+
 }
-
---[[
-   { name="Ajuda", link="/blank.html",
-      submenu = { },
-   },
-]]
-
-
--- views ------------------------------------------------------------
-
-menu_itens_super_admin = {
-   { name="Monitor", link="/orb/gviz/show",
-      submenu = {
-      { name="Visão", link="/orb/gviz/show" },
-      { name="Árvore", link="/orb/treeviz/show" },
-      { name="Aplicações", link="/orb/app" },
-      { name="Checagem", link="/orb/probe" },
-      { name="Tipo de Relacionamento", link="/orb/app_relat_types" },
-      },
-   },
-   { name="ServiceDesk", link="/servdesk/front/central.php",
-      submenu = {
-      { name="Central", link="/servdesk/front/central.php" },
-      { name="Ticket", link="/servdesk/front/ticket.php" },
-      { name="Estatística", link="/servdesk/front/stat.php" },
-      },
-   },
-   { name="CMDB", link="#",
-      submenu = {
-      { name="Computadores", link="/servdesk/front/computer.php" },
-      { name="Software", link="/servdesk/front/software.php" },
-      { name="Equip. de Redes", link="/servdesk/front/networkequipment.php" },
-      { name="Telefones", link="/servdesk/front/phone.php"  },
-      { name="Periféricos", link="/servdesk/front/peripheral.php" },
-      { name="Status", link="/servdesk/front/states.php" },
-      },
-   },
-   { name="Gerência", link="#",
-      submenu = {
-      { name="Relatórios", link="/servdesk/front/report.php" },
-      { name="Notas", link="/servdesk/front/reminder.php" },
-      { name="Base de Conhecimento", link="/servdesk/front/knowbaseitem.php" },
-      { name="Contatos", link="/servdesk/front/contact.php" },
-      { name="Fornecedores", link="/servdesk/front/supplier.php" },
-      { name="Orçamentos", link="/servdesk/front/budget.php" },
-      { name="Contratos", link="/servdesk/front/contract.php" },
-      { name="Documentos", link="/servdesk/front/document.php" },
-      { name="Empréstimos", link="/servdesk/front/reservationitem.php" },
-      { name="OCS-NG", link="/servdesk/front/ocsng.php?ocsservers_id=1" },
-      },
-   },
-   { name="Administrar", link="#",
-      submenu = {
-      { name="Usuários", link="/servdesk/front/user.php" },
-      { name="Grupos", link="/servdesk/front/group.php" },
-      { name="Entidades", link="/servdesk/front/entity.php" },
-      { name="Regras", link="/servdesk/front/rule.php" },
-      { name="Dicionários", link="/servdesk/front/dictionnary.php" },
-      { name="Perfis", link="/servdesk/front/profile.php" },
-      { name="Logs", link="/servdesk/front/event.php" },
-      { name="backup", link="/servdesk/front/backup.php" },
-      },
-   },
-   { name="Configurar", link="#",
-      submenu = {
-      { name="Dropdowns", link="/servdesk/front/dropdown.php" },
-      { name="Componentes", link="/servdesk/front/device.php" },
-      { name="Notificações", link="/servdesk/front/setup.notification.php" },
-      { name="Geral", link="/servdesk/front/config.form.php" },
-      { name="Ações Automáticas", link="/servdesk/front/crontask.php" },
-      { name="Autenticação", link="/servdesk/front/setup.auth.php" },
-      { name="Gateway de E-mail", link="/servdesk/front/mailcollector.php" },
-      { name="Modo OCS-NG", link="/servdesk/front/ocsserver.php" },
-      { name="Plugins", link="/servdesk/front/plugin.php" },
-      },
-   },
-}
-
---[[
-   { name="Ajuda", link="/blank.html",
-      submenu = { },
-   },
-]]
 
 
 function get_menu_itens(profile)
-
-   if profile == "admin" then
-      return menu_itens_admin
-   elseif profile == "post-only" then
-      return menu_itens_post_only
-   elseif profile == "normal" then
-      return menu_itens_normal
-   elseif profile == "super-admin" then
-      return menu_itens_super_admin
-   end
-
+   return menu_itens
 end
 
 --[[

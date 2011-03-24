@@ -10,19 +10,6 @@ module(Model.name, package.seeall,orbit.new)
 
 -- models ------------------------------------------------------------
 
-function select_profile(user_id)
-
-   columns_ = "p.name as p_name"
-   table_   = "glpi_users u, glpi_profiles_users pu, glpi_profiles p"
-   -- endidade é 0 pois estou levando em conta que ainda nao existe entidades!
-   --cond_    = "u.id = pu.users_id and pu.profiles_id = p.id and pu.entities_id = 0 and u.id = "..user_id
-   cond_    = "u.id = pu.users_id and pu.profiles_id = p.id and u.id = "..user_id
-   
-   local profile = Model.query(table_, cond_, nil, columns_)
-
-   return profile[1].p_name
-end
-
 -- controllers ------------------------------------------------------------
 
 function list(web, item, subitem)
@@ -45,7 +32,7 @@ function render_menu(web, item, subitem)
       return ""
    end
 
-   local menu_itens = Auth.get_menu_itens(select_profile(auth.user_id))
+   local menu_itens = Auth.get_menu_itens(auth.profile)
 
    for i,v in ipairs(menu_itens) do
       local active = ""
