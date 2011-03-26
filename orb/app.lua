@@ -386,8 +386,8 @@ function render_add(web, edit)
 
 --dniel
    local entities = {}
-   table.insert(entities, { i=1, name="---"..#auth.session.glpiactiveentities })
-   for i,v in ipairs(auth.session.glpiactiveentities) do
+   table.insert(entities, { i=1, name="---"..#auth.session.glpiactiveentities.." "..#auth.entities } )
+   for i,v in ipairs(auth.entities) do
       table.insert(entities, { i=i+1, name=v })
    end
 
