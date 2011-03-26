@@ -5,15 +5,13 @@
 # URL PATH NAGIOS3 PARA MONITOR
 #
 data=`date +%d%m%Y`
-read $1
-user=$1
-
+user=`id |awk -F"(" '{print $2}' |awk -F")" '{print $1}'`
 sed -i.bkp.$data 's/url_html_path=\/nagios3/url_html_path=\/monitor/' /etc/nagios3/cgi.cfg
 cd /etc/apache2/conf.d
 rm -f nagios3.conf
 ln -s /etc/nagios3/apache2.conf monitor.conf
-chown -R itvision.itvision monitor.conf
-mv /etc/nagios3/apache2.conf /etc/nagios3/apache2.conf.bkp.$date
+chown -R $user.$user monitor.conf
+mv /etc/nagios3/apache2.conf /etc/nagios3/apache2.conf.bkp.$data
 cat <<EOF > /etc/nagios3/apache2.conf
 # apache configuration for nagios 3.x
 # note to users of nagios 1.x and 2.x:
@@ -30,7 +28,7 @@ Alias /monitor/stylesheets /etc/nagios3/stylesheets
 # Where the HTML pages live
 Alias /monitor /usr/share/nagios3/htdocs
 
-<DirectoryMatch (/usr/share/nagios3/htdocs|/usr/lib/cgi-bin/monitor|/etc/nagios3/stylesheets)>
+<DirectoryMatch (/usr/share/nagios3/htdocs|/usr/lib/cgi-bin/nagios3|/etc/nagios3/stylesheets)>
         Options FollowSymLinks
 
         DirectoryIndex index.php
@@ -48,5 +46,8 @@ Alias /monitor /usr/share/nagios3/htdocs
 </DirectoryMatch>
 EOF
 
-sed -i.bkp.$data -e "s/\/cgi-bin\/nagios3/cgi-bin\/monitor/" /usr/share/nagios3/htdocs
+sed -i.bkp.$data -e "s/\/cgi-bin\/nagios3/\/cgi-bin\/monitor/" /usr/share/nagios3/htdocs/config.inc.php
 sed -i.bkp.$data -e 's/nagios3/monitor/' /usr/share/nagios3/htdocs/graphs.html
+
+/etc/init.d/nagios3 restart
+sudo /etc/init.d/apache2 restart
