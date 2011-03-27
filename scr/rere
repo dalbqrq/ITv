@@ -1,0 +1,25 @@
+#!/bin/bash
+
+lua sync_entities.lua ADD 4
+lua sync_entities.lua ADD 5
+lua sync_entities.lua ADD 1
+lua sync_entities.lua ADD 22
+lua sync_entities.lua ADD 23
+lua sync_entities.lua ADD 2
+lua sync_entities.lua ADD 6
+lua sync_entities.lua ADD 7
+lua sync_entities.lua ADD 20
+lua sync_entities.lua ADD 21
+lua sync_entities.lua ADD 3
+lua sync_entities.lua ADD 8
+lua sync_entities.lua ADD 15
+lua sync_entities.lua ADD 16
+lua sync_entities.lua ADD 17
+lua sync_entities.lua ADD 19
+lua sync_entities.lua ADD 9
+lua sync_entities.lua ADD 10
+lua sync_entities.lua ADD 11
+lua sync_entities.lua ADD 12
+lua sync_entities.lua ADD 13
+lua sync_entities.lua ADD 14
+

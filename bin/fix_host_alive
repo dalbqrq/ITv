@@ -1,0 +1,7 @@
+#!/bin/bash
+
+
+cd /etc/monitor/services
+for f in * ; do sed -i -e "s/check_command\t\tHOST_ALIVE /check_command\t\tHOST_ALIVE\!400.0,20%\!999.0,70%/g" $f; done
+
+remonitor

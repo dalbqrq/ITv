@@ -242,13 +242,11 @@ end
 
 function activate(web, id, flag)
    if tonumber(flag) == 0 then flag = 1 else flag = 0 end
-   local cols = {}
    local msg, counter
 
    if id then
       local clause = "id = "..id
       local tables = "itvision_apps"
-      cols.is_active = flag
 
       local A = apps:select(id)
       local count = App.count_app_objects(id)

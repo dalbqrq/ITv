@@ -20,4 +20,4 @@ lua update_checkcmds.lua
 cd /etc/nagios3
 \rm -f apps/* services/* hosts/*
 
-renagios
+remonitor

@@ -1,0 +1,24 @@
+#!/bin/bash
+#
+# I'm guessing you're trying to execute the CGI from a command line.
+# In order to do that, you need to set the REQUEST_METHOD environment
+# variable to either "GET", "HEAD", or "POST".  When using the
+# GET and HEAD methods, arguments can be passed to the CGI
+# by setting the "QUERY_STRING" environment variable.  If you're
+# using the POST method, data is read from standard input.  Also of
+# note: if you've enabled authentication in the CGIs, you must set the
+# "REMOTE_USER" environment variable to be the name of the user you're
+# "authenticated" as.
+# 
+# http://itv6/cgi-bin/monitor/cmd.cgi?cmd_typ=7&host=BUSPROC_HOST&service=3&force_check
+#
+
+export REQUEST_METHOD=GET
+export REMOTE_USER=itv
+
+
+export QUERY_STRING="cmd_typ=7&cmd_mod=2&host=BUSPROC_HOST&service=4&start_time=`date +'%Y-%m-%d %H:%M:%S'`&force_check"
+export QUERY_STRING="cmd_typ=7&cmd_mod=2&host=328_165&service=HOST_ALIVE&start_time=`date +'%Y-%m-%d %H:%M:%S'`&force_check"
+#echo $QUERY_STRING
+
+/usr/lib/cgi-bin/nagios3/cmd.cgi

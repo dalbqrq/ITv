@@ -48,6 +48,7 @@ function select_app (cond__, extra_, columns_)
                          select id as entity_id, name as entity_name, completename as entity_completename 
                          from glpi_entities) as e ]]
    local cond_   = [[ a.entities_id = e.entity_id ]]
+   local extra_  = [[ order by entity_completename ]]
 
    if cond__ then cond_ = cond_.." and "..cond__ end
    local content = query (tables_, cond_, extra_, columns_)

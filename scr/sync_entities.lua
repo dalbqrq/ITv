@@ -70,7 +70,7 @@ end
 
 ]]
 function entity_delete(id)
-   print("delete: "..id)
+   --DEBUG: print("delete: "..id)
    local entity = Model.query("glpi_entities e", "e.id = "..id)
 
 --[[
@@ -106,7 +106,7 @@ end
 
 ]]
 function entity_replace(id, id2)
-   print("replace: "..id.." to "..id2)
+   --DEBUG: print("replace: "..id.." to "..id2)
    -- VERIFICAR O CAMPO entity_id DE itvision_app_trees que parece nao estar sento atualizado coretamente
    local node = Model.query("itvision_app_trees t, itvision_apps a" , 
             "a.id = t.app_id and a.is_entity_root = true and a.entities_id = ".. id,
@@ -116,8 +116,7 @@ function entity_replace(id, id2)
          "a.id as app_id, t.id as node_id, a.service_object_id as object_id")
 
    if node[1] then
-     --DEBUG: print(node[1].origin)
-     App.delete_node_app(node[1].origin)
+     --DEBUG: print(node[1].origin) App.delete_node_app(node[1].origin)
    end
    Model.update("itvision_app_relats", {app_id = parent_app[1].id}, "app_id in (select id from itvision_apps where entities_id = ".. id ..")")
    Model.update("itvision_app_objects", {app_id = parent_app[1].id}, "app_id in (select id from itvision_apps where entities_id = ".. id ..")")
@@ -143,7 +142,7 @@ end
    
 ]]
 function entity_update(id, id2)
-   print("update: "..id.." to "..id2)
+   --DEBUG: print("update: "..id.." to "..id2)
    local entity = Model.query("glpi_entities e", "e.id = "..id)
    local child_app = Model.query("itvision_apps a, itvision_app_trees t", 
          "a.id = t.app_id and is_entity_root = true and a.entities_id = "..id, nil, 
@@ -153,11 +152,11 @@ function entity_update(id, id2)
          "a.id as app_id, t.id as node_id, a.service_object_id as object_id")
 
    local parent_node = App.select_parent(child_app[1].app_id)
-   print(entity[1].name, child_app[1].app_id, parent_app[1].app_id)
+   --DEBUG: print(entity[1].name, child_app[1].app_id, parent_app[1].app_id)
 
    Model.update("itvision_apps", {name = entity[1].name}, "entities_id = "..id)
 
-   print(parent_app[1].node_id, parent_node[1].id, child_app[1].app_id, parent_app[1].app_id)
+   --DEBUG: print(parent_app[1].node_id, parent_node[1].id, child_app[1].app_id, parent_app[1].app_id)
    if parent_node[1] and parent_app[1].node_id ~= parent_node[1].id then
      Model.update("itvision_app_objects", {app_id = parent_app[1].app_id}, 
          "service_object_id = "..child_app[1].object_id.." and app_id = "..parent_node[1].app_id)
@@ -192,3 +191,28 @@ entity_add(4)
 entity_add(5)
 
 ]]
+
+if arg[1] and arg[2]  then 
+   local cmd = tostring(arg[1])
+   local e_id = tonumber(arg[2])
+   local e_id2 = tonumber(arg[3])
+
+   print("cmd = "..cmd.." : e_id = "..e_id)
+   if e_id2 then print("e_id2 = "..e_id2) end
+
+   if cmd == "ADD" then
+      entity_add(e_id)
+   elseif cmd == "UPDATE" then
+      entity_update(e_id)
+   elseif cmd == "DELETE" then
+      if not e_id then print("e_id2 must not be nil"); return; end
+      entity_delete(e_id)
+   elseif cmd == "REPLACE" then
+      if not e_id then print("e_id must not be nil"); return; end
+      entity_replace(e_id)
+   else
+      print("Unknown command: "..cmd)
+   end
+end
+
+
