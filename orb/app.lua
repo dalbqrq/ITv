@@ -3,6 +3,7 @@
 -- includes & defs ------------------------------------------------------
 require "Model"
 require "App"
+require "Auth"
 require "View"
 require "util"
 require "monitor_util"
@@ -269,6 +270,7 @@ function render_list(web, A, root, msg, no_header)
    local res = {}
    local row = {}
    local svc, stract
+   local permission = Auth.check_permission(web, "application")
 
    for i, v in ipairs(A) do
       local button_remove, button_edit, button_active = "-", "-", "-"
@@ -304,7 +306,11 @@ function render_list(web, A, root, msg, no_header)
 
    local header =  { strings.name, strings.type, strings.is_active, ".", ".", "." }
    if no_header == nil then
-      res[#res+1] = render_content_header(strings.application, web:link("/add"), web:link("/list"))
+      if permission == "w" then
+         res[#res+1] = render_content_header(strings.application, web:link("/add"), web:link("/list"))
+      else
+         res[#res+1] = render_content_header(strings.application, nil, web:link("/list"))
+      end
       res[#res+1] = render_form_bar( render_filter(web), strings.search, web:link("/list"), web:link("/list") )
       if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ font{ color="red", msg } } end
    end

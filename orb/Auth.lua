@@ -77,21 +77,22 @@ function is_logged_at_glpi(web)
    local _, _, _, user_id = string.find(sess_, 'glpiID|s:(%d+):"(%d+)"')
    local _, _, _, user_name = string.find(sess_, 'glpiname|s:(%d+):"([%w-_%.]+)";')
    local _, _,    entity_id = string.find(sess_, 'glpiactive_entity|i:(%d+);')
-   local _, _, _, profile_id = string.find(sess_, 'glpiactiveprofile|a:(%d+):{s:(%d+):"id";s:(%d+):"(%d+)";')
+   local _, _, _, _, _, profile_id = string.find(sess_, 'glpiactiveprofile|a:(%d+):{s:(%d+):"id";s:(%d+):"(%d+)";')
 
    local profile 
 
    if profile_id then profile = Glpi.select_profile(profile_id) end
 
    if user_id ~= nil then
-      return { is_logged=true, user_id=user_id, user_name=user_name, profile_id = profile_id,
-               entity_id = entity_id, cookie=glpi_cookie, profile=profile }
+      return { is_logged=true, user_id=user_id, user_name=user_name, profile_id=profile_id,
+               entity_id=entity_id, cookie=glpi_cookie, profile=profile }
    else
       return false
    end
 end
 
 
+-- Verifica se usuario estah logado
 function check(web)
    local auth = is_logged_at_glpi(web)
 
@@ -101,6 +102,21 @@ function check(web)
       web.prefix = "/orb"
       web:redirect(web:link("/login"))
       return false
+   end
+end
+
+
+-- Verifica se usuario tem permissao de acesso à determinada página
+-- O parametro 'field' eh fornecido pela pagina que estah tentado ser acessada
+function check_permission(web, field)
+   local auth = check(web)
+
+   if auth.profile[field] then
+      return auth.profile[field]
+   else
+      web.prefix = "/"
+      web:redirect(web:link("denied.html"))
+      return "FALSE"
    end
 end
 
@@ -294,7 +310,7 @@ end
 menu_itens = {
    { name="Monitor", link="#",
       submenu = {
-      { name="Visão", field=nil, link="/orb/gviz/show" },
+      { name="Visão", field="application", link="/orb/gviz/show" },
       { name="Árvore", field="application", link="/orb/treeviz/show" },
       { name="Aplicações", field="application", link="/orb/app" },
       { name="Checagem", field="checkcmds", link="/orb/probe" },
@@ -337,8 +353,8 @@ menu_itens = {
       { name="Usuários", field="user", link="/servdesk/front/user.php" },
       { name="Grupos", field="group", link="/servdesk/front/group.php" },
       { name="Entidades", field="entity", link="/servdesk/front/entity.php" },
-      { name="Regras", field={ "rule_ticket", "entity_rule_ticket", "rule_ocs", "rule_ldap" }, link="/servdesk/front/rule.php" },
-      { name="Dicionários", field={"rule_dictionnary_software", "rule_dictionnary_dropdown" }, link="/servdesk/front/dictionnary.php" },
+      --{ name="Regras", field={ "rule_ticket", "entity_rule_ticket", "rule_ocs", "rule_ldap" }, link="/servdesk/front/rule.php" },
+      --{ name="Dicionários", field={"rule_dictionnary_software", "rule_dictionnary_dropdown" }, link="/servdesk/front/dictionnary.php" },
       { name="Perfis", field="profile", link="/servdesk/front/profile.php" },
       { name="Logs", field="logs", link="/servdesk/front/event.php" },
       { name="Backup", field="backup", link="/servdesk/front/backup.php" },
@@ -367,6 +383,7 @@ menu_itens = {
 
 function get_menu_itens(profile)
    local m = {}
+   local k = 0
 
    for i, v in ipairs(menu_itens) do
       local s = {}
@@ -381,18 +398,21 @@ function get_menu_itens(profile)
             if inc then
                table.insert(s,w)
             end
-         else
+         elseif w.field == nil then
             table.insert(s,w)
+         else
+            --DEBUG: table.insert(s,w)
          end
       end
       if s[1] then 
-         table.insert(m, i, {})
-         m[i].name = v.name
-         m[i].link = "#"
-         m[i].submenu = s
+         k = k+1
+         table.insert(m, k, {})
+         m[k].name = v.name
+         m[k].link = "#"
+         m[k].submenu = s
       end
    end
-   text_file_writer("/tmp/m", table.dump(m))
+   text_file_writer("/tmp/m.lua", table.dump(m))
    text_file_writer("/tmp/p", table.dump(profile))
    return m
 end

@@ -34,13 +34,13 @@ function render_menu(web, item, subitem)
 
    local menu_itens = Auth.get_menu_itens(auth.profile)
 
-   for i,v in ipairs(menu_itens) do
+   for i,v in pairs(menu_itens) do
       local active = ""
       if i == item then active = "current" end
       itens[#itens+1] = li{ a{ class=active, href=js, onClick="changeHead('/orb/menu/"..i..":1')", v.name } }
    end
    itens[#itens+1] = li{ a{ class="logout", href=js, onClick="changePage('/orb/menu/0:0', '/orb/login/logout')", 
-                            "Logout: "..auth.user_name} }
+                            "Logout: "..auth.user_name } }
 
    for i,v in ipairs(menu_itens[item].submenu) do
       local active = ""

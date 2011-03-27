@@ -532,6 +532,8 @@ function render_content_header(name, add, list, edit, geotag, back)
 
    if add then
       myul[#myul+1] = li{ a{ href=add, img{ src='/servdesk/pics/menu_add.png', title='Adicionar', alt='Adicionar'} } }
+   else
+      myul[#myul+1] = li{ img{ src='/servdesk/pics/menu_add_off.png'} }
    end
 
    if list then
