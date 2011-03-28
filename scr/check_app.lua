@@ -54,7 +54,8 @@ end
 local res, nom = check_app(arg[1])
 local info = ""
 if nom then
-   info = "The state of the application "..nom.." is "..applic_alert[res].name..". | "..res
+   --info = "The state of the application "..nom.." is "..applic_alert[res].name..". | "..res
+   info = nom.." | "..res
 end
 
 print("ITvisionAPP "..applic_alert[res].name..": "..info)

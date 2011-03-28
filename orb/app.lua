@@ -12,10 +12,11 @@ require "monitor_util"
 module(Model.name, package.seeall,orbit.new)
 
 local apps        = Model.itvision:model "apps"
+local app_trees   = Model.itvision:model "app_trees"
 local app_objects = Model.itvision:model "app_objects"
 local app_relats  = Model.itvision:model "app_relats"
-local objects     = Model.nagios:model "objects"
-local services    = Model.nagios:model "services"
+local objects     = Model.nagios:model   "objects"
+local services    = Model.nagios:model   "services"
 
 local tab_id = 1
 
@@ -35,9 +36,7 @@ function apps:select(id, clause_)
    extra  = " order by name "
 
    local content = Model.query("itvision_apps", clause, extra)
-   --UNUSED: local root = App.select_root_app()
-
-   return content, root, count
+   return content
 end
 
 
@@ -51,6 +50,22 @@ function apps:update(app)
 
       Model.update (tables, A, clause) 
    end
+end
+
+
+function app_trees:select(id, clause_)
+   local clause = nil
+
+   if id and clause_ then
+      clause = "id = "..id.." and "..clause_
+   elseif id then
+      clause = "id = "..id
+   elseif clause_ then
+      clause = clause_
+   end
+
+   local content = Model.query("itvision_app_trees", clause)
+   return content
 end
 
 
@@ -175,6 +190,17 @@ function insert(web)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
 
+   --[[
+      tag: VERSAO_APP_01 
+
+      O codigo comendado com o tag acima é uma tentativa de definir a aplicacoa pai de uma aplicacao
+      que está sendo criada. A altenativa que será programada é definir somente a entidade pai e
+      deixar a aplicacao fora da arvore de aplicacoes, uma especie de limbo, para ser colocada na
+      árvore a posteriore.
+   ]]
+
+   --VERSAO_APP_01: local app_parent = apps:select(web.input.app_parent)
+
    apps:new()
    apps.name = web.input.name
    apps.type = web.input.type
@@ -182,14 +208,19 @@ function insert(web)
    apps.service_object_id = nil
    apps.instance_id = Model.db.instance_id
    apps.is_entity_root = 0
-   --apps.entities_id = auth.session.glpiactive_entity
+   --VERSAO_APP_01: apps.entities_id = app_parent[1].entities_id
    apps.entities_id = web.input.entity
    apps.app_type_id = 2 -- leva em conta que a inicializacao da tabela itvision_app_type colocou o tipo aplicacao com id=1
    apps.visibility = web.input.visibility
    apps:save()
 
    local app = apps:select(nil, "name = '"..web.input.name.."'")
-   App.insert_node_app_tree(app[1].id, auth.entity_id, nil, 1)
+   --[[ VERSAO_APP_01:
+   local parent_app_tree = app_trees:select(nil, "app_id = "..web.input.app_parent)
+   for i,v in ipairs(parent_app_tree) do
+      App.insert_node_app_tree(app[1].id, app_parent[1].entity_id, v.id, 1)
+   end
+   ]]
    App.remake_apps_config_file()
 
    web.prefix = "/orb/app_tabs"
@@ -386,6 +417,7 @@ function render_add(web, edit)
 
    -- recupera entidades da tabela glpi_entities baseado nas entidades ativas de auth
    local entities = Glpi.select_active_entities(auth)
+   --VERSAO_APP_01: local apps = apps:select(nil, "entities_id in "..Auth.make_entity_clause(auth))
 
    -- cria conteudo do formulario em barra
    local inc = {
@@ -393,11 +425,13 @@ function render_add(web, edit)
       strings.logic..": ", select_and_or("type", edit.type ),  " ",
       strings.visibility..": ", select_private_public("visibility", edit.visibility ),  " ",
       strings.entity..": ", select_option("entity", entities, "id", "completename", auth.session.glpidefault_entity ),  " ",
+      --VERSAO_APP_01: strings.application..": ", select_option("app_parent", apps, "id", "name", auth.session.glpidefault_entity ),  " ",
       "<INPUT TYPE=HIDDEN NAME=\"is_active\" value=\"0\">",
    }
    
    res[#res+1] = render_content_header(auth, strings.application, add_link, web:link("/list"))
    res[#res+1] = render_form_bar( inc, strbar, link, add_link )
+   --res[#res+1] = render_form(link, add_link, inc, true, strings.add )
 
    return render_layout(res)
 end

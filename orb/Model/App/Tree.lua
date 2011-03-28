@@ -487,7 +487,7 @@ function delete_child_from_parent(child_app, parent_app)  -- remove sub aplicaca
       delete_node_app_tree(child[1].id)
       return true
    elseif not is_last then
-      delete_node_app_tree(child[1].id)
+      -- TODO: delete_node_app_tree(child[1].id)
       return true
    else
       return false

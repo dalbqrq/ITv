@@ -27,7 +27,7 @@ function sync_apps()
                    service_object_id = v.object_id, type = 'app' }
       print(table.dump(ao).."\n")
       Model.update("itvision_apps", { service_object_id = v.object_id }, "id = "..v.app_id)
-      Model.insert("itvision_app_objects", ao)
+      --Model.insert("itvision_app_objects", ao)
    end
 
 end

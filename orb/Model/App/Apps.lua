@@ -1,3 +1,4 @@
+require "monitor_util"
 
 APP_VISIBILITY_PRIVATE = 0
 APP_VISIBILITY_PUBLIC = 1
@@ -90,7 +91,8 @@ end
 require "App.Tree"
 
 function remake_apps_config_file()
-   local APPS = select_uniq_app_in_tree()
+   -- local APPS = select_uniq_app_in_tree() -- Nao precisa mais disso pois nao usa mais o nagiosbp
+   local APPS = query("itvision_apps", "is_active = 1")
    make_all_apps_config(APPS)
 end
 
