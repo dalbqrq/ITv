@@ -93,8 +93,7 @@ function render_filter(web)
    local res = {}
 
    res[#res+1] = {strings.name..": ", input{ type="text", name="hostname", value = web.input.hostname }, " "}
-   res[#res+1] = {strings.inventory..": ", input{ type="text", name="inventory", value = web.input.inventory }, " "}
-   res[#res+1] = {strings.sn..": ", input{ type="text", name="sn", value = web.input.sn }, " "}
+   -- EXEMPLO res[#res+1] = {strings.inventory..": ", input{ type="text", name="inventory", value = web.input.inventory }, " "} 
 
    return res
 end
@@ -118,9 +117,10 @@ function render_list(web, ics, msg)
       -- muitos dos ifs abaixo existem em funcao da direrenca entre as queries com Computer e as com Network
       v.c_id = v.c_id or 0 v.n_id = v.n_id or 0 v.p_id = v.p_id or 0 v.sv_id = v.sv_id or 0
       hst_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
+      if hst_name == nil then hst_name = v.a_name.." ["..v.a_id..":"..v.o_object_id.."]" end
       alias = v.m_name
 
-      if v.p_itemtype then itemtype = v.p_itemtype else itemtype = "NetworkEquipment" end
+      if v.p_itemtype then itemtype = v.p_itemtype else itemtype = strings.application end
       if v.p_ip then ip = v.p_ip else ip = v.n_ip end
       if v.c_id ~= 0 then c_id = v.c_id else c_id = v.n_id end
 
@@ -146,6 +146,9 @@ function render_list(web, ics, msg)
          url = web:link("/front/computer.form.php?id="..c_id)
       elseif itemtype == "NetworkEquipment" then
          url = web:link("/front/networkequipment.form.php?id="..c_id)
+      else 
+         web.prefix = "/orb/app_tabs"
+         url = web:link("/list/"..v.a_id..":2")
       end
 
       if v.sw_name ~= "" then itemtype = "Service" end

@@ -88,7 +88,7 @@ function deactivate_app (app_id, flag)
    return true
 end
 
-require "App.Tree"
+--require "App.Tree"
 
 function remake_apps_config_file()
    -- local APPS = select_uniq_app_in_tree() -- Nao precisa mais disso pois nao usa mais o nagiosbp

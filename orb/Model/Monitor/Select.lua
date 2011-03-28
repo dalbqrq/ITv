@@ -418,16 +418,21 @@ end
 ----------------------------------------------------------------------
 --TODO: VER ONDE ISSO É USADO E SE clause É NECESSARIO!!
 --      ISSO FOI RETIRADO POIS DAVA PROBLEMA NA CHAMADA DO orb/app_monitor/list
---function make_query_5(a_id, clause)
-function make_query_5(a_id)
+function make_query_5(a_id, clause)
    local q, t = {}, {}
-   t = { "o", "s", "ss", "a", "ao", "ax" }
+   if a_id then
+      t = { "o", "s", "ss", "a", "ao", "ax" }
+   else
+      t = { "o", "s", "ss", "a" }
+   end
    n = { "c", "p", "m", "csv", "sv", "sw" }
 
    local columns_ = make_columns(t)
    local _,nulls_ = make_columns(n)
    local tables_  = make_tables(t)
    local cond_    = make_where(t)
+
+   if clause then clause = string.gsub(clause, "p.entities_id", "a.entities_id") end
 
    cond_ = cond_ .. [[ 
       and o.name1 = ']]..config.monitor.check_app..[[' 
@@ -439,7 +444,7 @@ function make_query_5(a_id)
    q = Model.query(tables_, cond_, nil, columns_)
    for _,v in ipairs(q) do table.insert(v, 1, 5) end
 
-   --if DEBUG then print( "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
+   if DEBUG then print( "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
 
    return q
 end
@@ -757,11 +762,13 @@ function select_monitors_app_objs(app_id, clause)
       a.p_ip    = a.p_ip    or ""
       a.sw_name = a.sw_name or ""
       a.sv_name = a.sv_name or ""
+      a.ax_name = a.ax_name or ""
       b.c_name  = b.c_name  or ""
       b.p_ip    = b.p_ip    or ""
       b.sw_name = b.sw_name or ""
       b.sv_name = b.sv_name or ""
-      return a.c_name..a.p_ip..a.sw_name..a.sv_name < b.c_name..b.p_ip..b.sw_name..b.sv_name  end )
+      b.ax_name = b.ax_name or ""
+      return a.c_name..a.p_ip..a.sw_name..a.sv_name..a.ax_name < b.c_name..b.p_ip..b.sw_name..b.sv_name..b.ax_name  end )
 
    return q
 end
@@ -857,7 +864,7 @@ function how_to_use()
 ]]
 
    --a = tree(8)
-   a = make_query_5(1)
+   a = make_query_5()
    --a = select_monitors()
 
 --[[
@@ -869,4 +876,4 @@ function how_to_use()
 
 end
 
---if DEBUG then how_to_use() end
+if DEBUG then how_to_use() end

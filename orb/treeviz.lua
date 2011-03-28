@@ -26,6 +26,20 @@ function apps:select_apps(id, clause_)
 end
 
 
+function apps:select_tree_relat_to_graph(id, clause_)
+   local tables_ = "itvision_apps a, itvision_app_objects ao"
+   local clause   = "a.id =  ao.app_id and ao.type = 'app' and is_active = 1"
+
+   if id then
+      clause = clause.." and  id = "..id
+   end
+
+   if clause_ then clause = clause.." and "..clause_ end
+
+   return Model.query(tables_, clause)
+end
+
+
 -- controllers ---------------------------------------------------------
 
 
@@ -42,7 +56,8 @@ function show(web, sep)
    end
 
    local obj = Monitor.select_monitors_app_objs_to_tree(nil, " a_.entities_id in "..clause)
-   local rel = App.select_tree_relat_to_graph(" a.entities_id in "..clause)
+   --local rel = App.select_tree_relat_to_graph(" a.entities_id in "..clause)
+   local rel = apps.select_tree_relat_to_graph(" a.entities_id in "..clause)
 
    return render_show(web, obj, rel, sep)
 end

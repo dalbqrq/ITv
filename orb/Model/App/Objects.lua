@@ -76,10 +76,15 @@ end
 function select_app_service_object (cond_, extra_, columns_, app_id)
    if cond_ ~= nil then cond_ = " and "..cond_ else cond_ = "" end
 
+   -- Aplicacoes que já sao sub-aplicacoes (filhos) da aplicacao app_id
    cond_ = cond_.." and o.object_id not in ( select service_object_id from itvision_app_objects where app_id = "..app_id..") "
+   -- A propria aplicacao app_id
    cond_ = cond_.." and o.object_id not in ( select IFNULL ((select service_object_id from itvision_apps where id = "..app_id.."), -1) )"
-   cond_ = cond_.." and o.object_id not in ( select distinct(a.service_object_id) from itvision_app_trees AS node, itvision_app_trees AS parent, itvision_apps a where node.lft BETWEEN parent.lft AND parent.rgt AND node.id in (select id from itvision_app_trees where app_id = "..app_id..") and parent.app_id <> "..app_id.." and a.id = parent.app_id and a.is_active = 1)"
-   cond_ = cond_.." and o.is_active = 1 and a.app_type_id <> 1"
+   -- Algum ancestral da aplicacao em toda a árvore
+   --cond_ = cond_.." and o.object_id not in ( select distinct(a.service_object_id) from itvision_app_trees AS node, itvision_app_trees AS parent, itvision_apps a where node.lft BETWEEN parent.lft AND parent.rgt AND node.id in (select id from itvision_app_trees where app_id = "..app_id..") and parent.app_id <> "..app_id.." and a.id = parent.app_id and a.is_active = 1)"
+   -- Aplicacoes ativas
+   cond_ = cond_.." and o.is_active = 1"
+   --cond_ = cond_.." and a.app_type_id <> 1"
 
    local bp_id = get_bp_id()
    local content = query ("nagios_services s, nagios_objects o, itvision_apps a ", 
