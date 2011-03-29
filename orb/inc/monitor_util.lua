@@ -212,7 +212,7 @@ end
   Ele se usa da nova devinicao do comando BUSPROC_SERVICE que eh definido no script lua
   itv/scr/check_app.lua e eh chamado pelo seu script shell associado.
 ]]
-function make_app_config_scr(app, obj, flag)
+function make_app_config_scr(app)
 
    local text = [[
 define service{
@@ -235,9 +235,13 @@ function make_all_apps_config(apps)
    local file_name = config.monitor.dir.."/apps/apps.cfg"
 
    for i, v  in ipairs(apps) do
-      local objs = App.select_app_app_objects(v.id)
+      --local objs = App.select_app_app_objects(v.id)
       --if objs[1] then s = s .. make_app_config(v, objs, v.is_active) end
-      if objs[1] then s = s .. make_app_config_scr(v, objs, v.is_active) end
+      --if objs[1] then s = s .. make_app_config_scr(v, objs, v.is_active) end
+
+      if tonumber(v.is_active) == 1 then
+         s = s .. make_app_config_scr(v)
+      end
    end
 
    text_file_writer(file_name, s)

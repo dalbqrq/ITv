@@ -1,4 +1,5 @@
 require "Model"
+require "util"
 
 local DEBUG = true
 local DEBUG = false
@@ -634,7 +635,8 @@ end
 ----------------------------------------------------------------------
 function make_query_10(a_id, clause)
    local q, t = {}, {}
-   t = { "o_", "s_", "ss_", "a_", "t_" }
+   --t = { "o_", "s_", "ss_", "a_", "t_" }
+   t = { "o_", "s_", "ss_", "a_" }
    n = { }
 
    local columns_ = make_columns(t)
@@ -645,9 +647,9 @@ function make_query_10(a_id, clause)
    columns_ = string.gsub(columns_, "__", "_") 
 
    cond_ = cond_ .. [[ 
-      and o_.name1 = ']]..config.monitor.check_app..[[' 
+      and a_.id in ( select distinct(app_id) from itvision_app_trees )    
       and a_.is_active = 1
-      and a_.id in ( select distinct(app_id) from itvision_app_trees )
+      and o_.name1 = ']]..config.monitor.check_app..[[' 
    ]]
 
    if a_id then cond_ = cond_ .. " and a_.id = " .. a_id end
@@ -656,7 +658,7 @@ function make_query_10(a_id, clause)
    q = Model.query(tables_, cond_, nil, columns_)
    for _,v in ipairs(q) do table.insert(v, 1, 10) end
 
-   -- if DEBUG then print( "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
+   --if DEBUG then print( "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
 
    return q
 end
@@ -667,7 +669,8 @@ end
 ----------------------------------------------------------------------
 function make_query_11(a_id, clause)
    local q, t = {}, {}
-   t = { "o_", "s_", "a_", "t_" }
+   --t = { "o_", "s_", "a_", "t_" }
+   t = { "o_", "s_", "a_" }
    z = { "ss_" }
 
    local columns_ = make_columns(t)
@@ -680,8 +683,8 @@ function make_query_11(a_id, clause)
    cond_ = cond_ .. [[ 
       and o_.name1 = ']]..config.monitor.check_app..[[' 
       and a_.is_active = 1
-      and a_.id in ( select distinct(app_id) from itvision_app_trees )
       and s_.service_object_id not in (select service_object_id from nagios_servicestatus)
+      and a_.id in ( select distinct(app_id) from itvision_app_trees )
    ]]
 
    if a_id then cond_ = cond_ .. " and a_.id = " .. a_id end
@@ -848,25 +851,11 @@ function how_to_use()
    end
 ]]
 
---[[
-   print("========================")
-   a = select_monitors_app_objs(8)
-
-   for i,v in ipairs(a) do
-      print("A: ",table.getn(a), v.c_name, v.s_name, v.sv_name, v.p_itemtype, v.ao_type) 
-   end
-
-   a = make_query_5(5)
-   if type(a) == "string" then print(a) end
-   print("count: ", table.getn(a))
-   for i,v in ipairs(a) do 
-      print("A: ",v.ao_type, v.ao_service_object_id, v.a_id, v.a_name, v.o_name1, v.o_name2, v.ss_current_state) 
-   end
-]]
-
    --a = tree(8)
-   a = make_query_5()
+   --a = make_query_5()
    --a = select_monitors()
+
+   a = make_query_10()
 
 --[[
    for i,v in ipairs(a) do

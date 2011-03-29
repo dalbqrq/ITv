@@ -337,7 +337,7 @@ function render_list(web, A, root, msg, no_header)
       local category = strings.entity
 
       web.prefix = "/orb/app_tabs"
-      local lnk = web:link("/list/"..v.id..":1")
+      local lnk = web:link("/list/"..v.id..":2")
       web.prefix = "/orb/app"
 
       if v.is_entity_root == "0" then

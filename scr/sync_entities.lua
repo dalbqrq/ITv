@@ -49,23 +49,15 @@ function entity_add(id)
    }
    Model.insert("itvision_apps", new_app)
 
-   local child_app = Model.query("itvision_apps a", "entities_id = "..id.." and a.is_entity_root = 1")
 --[[ Comentado para remover a criacao da arvore e inserir (abaixo) entrada em app_objects 
+   local child_app = Model.query("itvision_apps a", "entities_id = "..id.." and a.is_entity_root = 1")
    local parent_node = Model.query("itvision_apps a, itvision_app_trees t", 
             "a.id = t.app_id and a.is_entity_root = true and a.id = "..parent_app[1].app_id, nil, "t.id as origin")
 
    App.insert_node_app_tree(child_app[1].id, id, parent_node[1].origin, 1)
 ]]
---[[
-   app_obj = {
-      app_id = parent_app[1].app_id,
-      instance_id  = config.database.instance_id,
-      service_object_id = nil,
-      type = 'app',
-   }
-   App.insert_app_object(app_obj)
-]]
-   App.remake_apps_config_file()
+
+   --App.remake_apps_config_file()
 end
 
 
