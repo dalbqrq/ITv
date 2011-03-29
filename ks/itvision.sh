@@ -480,7 +480,7 @@ mv nedi /usr/local
 chown -R $user.$user /usr/local/nedi
 chmod 775 /usr/local/nedi/html/log/
 
-echo "Alias /nedi "/usr/local/nedi"
+echo "Alias /nedi "/usr/local/nedi/html"
 <Directory "/usr/local/nedi/html/">
     Options None
     AllowOverride None
