@@ -380,8 +380,6 @@ function insert_node_app_tree(app_id, origin_, position_) -- Inclui novo noh
    node.rgt    = newRgt
    node.instance_id = config.database.instance_id
 
-text_file_writer("/tmp/insapp", condLft.." | "..condRgt)
-
    execute ( "LOCK TABLE itvision_app_trees WRITE" )
    if origin_ or root_id then
       execute("update itvision_app_trees set lft = lft + 2 where "..condLft)

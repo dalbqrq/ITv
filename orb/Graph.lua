@@ -232,3 +232,6 @@ function render(app_name, file_type, engene, content)
    
 end
 
+-- DEBUG: render("NADA", "png", "dot", {} )
+
+

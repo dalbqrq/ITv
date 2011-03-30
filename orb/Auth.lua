@@ -412,8 +412,6 @@ function get_menu_itens(profile)
          m[k].submenu = s
       end
    end
-   text_file_writer("/tmp/m.lua", table.dump(m))
-   text_file_writer("/tmp/p", table.dump(profile))
    return m
 end
 
