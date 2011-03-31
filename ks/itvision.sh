@@ -490,9 +490,29 @@ echo "Alias /nedi "/usr/local/nedi/html"
 
 ln -s /usr/local/nedi/nedi.conf /etc/nedi.conf
 
+cat << EOF > /usr/local/nedi/startnedi.sh
+start nedi from crontab. Creates logfiles
+opts="-Apovb"
+CMD="./nedi.pl $opts"
+LOGPATH="/var/log/itvision/nedi"
+LOGFILE="$LOGPATH/nedi.log"
+LASTRUN="$LOGPATH/lastrun.log"
+cd /opt/nedi
+now=`date +%Y%m%d:%H%M`
+echo "#$now start # $CMD" > $LASTRUN
+echo "#$now start" >> $LOGFILE
+$($CMD >> $LASTRUN)
+tail -8 $LASTRUN >> $LOGFILE
+now=`date +%Y%m%d:%H%M`
+echo "#$now stop" >> $LOGFILE
+echo "#$now stop" >> $LASTRUN'
+EOF
 
+chmod +x /usr/local/nedi/startnedi.sh
+sudo mkdir /var/log/itvision/nedi.log
+sudo chown -R $user:$user /var/log/itvision/nedi /usr/local/nedi
 
-
+echo "15 0,4,8,12,16,20 * * * /usr/local/nedi/startnedi.sh  # Discover and gather device configurations NEDI" >> /var/spool/cron/crontabs/$user
 
 # --------------------------------------------------
 # SMTP GMAIL APPS
