@@ -158,7 +158,7 @@ function insert(web)
    apps.is_active = web.input.is_active
    --app.service_object_id = web.input.service_object_id
    apps.instance_id = Model.db.instance_id
-   apps.entities_id = auth.entity_id
+   apps.entities_id = auth.session.glpiactive_entity
    apps.visibility = APP_VISIBILITY_PRIVATE
    apps:save()
 
