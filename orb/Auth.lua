@@ -62,9 +62,9 @@ function is_logged_at_glpi(web)
    local sess_ = text_file_reader(sess_filename)
    local prof_ = get_profile(sess_)
 
-   --[[
    local prof_filename = session_path.."/prof_"..glpi_cookie..".lua"
    text_file_writer(prof_filename, table.dump(prof_))
+   --[[
    ]]
 
    --[[ 
