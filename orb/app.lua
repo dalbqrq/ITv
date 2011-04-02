@@ -363,15 +363,15 @@ function render_list(web, A, root, msg, no_header)
 
       -- leva em conta a inicializacao padrao da tabela itvision_app_type
       if v.app_type_id == "1" then
-         tag = " +"
+         tag = "+ "
       elseif v.app_type_id == "2" then
-         tag = " #"
+         tag = "# "
       else
-         tag = " -"
+         tag = "- "
       end
 
       row[#row+1] = {
-         a{ href=lnk, v.name..tag },
+         a{ href=lnk, tag..v.name },
          v.entity_completename,
          category,
          strings["logical_"..v.type],
@@ -395,6 +395,7 @@ function render_list(web, A, root, msg, no_header)
       if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ font{ color="red", msg } } end
    end
    res[#res+1] = render_table(row, header)
+   if not no_header then res[#res+1] = { br(), br(), br(), br() } end
 
    return render_layout(res)
 end

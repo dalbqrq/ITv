@@ -159,7 +159,7 @@ function make_app_users_table(web, USERS, app_id)
    for i, v in ipairs(USERS) do
       local button = "-"
       if permission == "w" then
-         if string.find(v.email,"@") then 
+         if v.email and string.find(v.email,"@") then 
             web.prefix = "/orb/app_contacts"
             button = button_link(strings.add, web:link("/insert/"..app_id..":"..v.id), "positive")
          else

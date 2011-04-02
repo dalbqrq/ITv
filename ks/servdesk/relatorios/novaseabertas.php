@@ -5,10 +5,7 @@
 
 include("includes/conexao.inc");
 
-$query="SELECT t.ID, date, t.name as titulo, u.firstname as nome, u.realname as sobrenome, e.completename as entidade, FLOOR(hour(TIMEDIFF( NOW(), date))/24) as dia, hour(TIMEDIFF( NOW(), date)) - (FLOOR(hour(TIMEDIFF( NOW(), date))/24))*24 as hora, minute(TIMEDIFF( NOW(), date)) as minuto, priority, p.prioridade as prioridade, p.tempo as tempo, p.descricao as descricao
-from glpi_tracking t, glpi_entities e, prioridade p, glpi_users u
-where closedate is null and status='new' and t.FK_entities = e.ID and priority = p.prioridade and u.ID = author
-order by e.completename, dia desc, hora desc, minuto desc";
+$query="SELECT t.ID, date, t.name as titulo, u.firstname as nome, u.realname as sobrenome, e.completename as entidade, FLOOR(hour(TIMEDIFF( NOW(), date))/24) as dia, hour(TIMEDIFF( NOW(), date)) - (FLOOR(hour(TIMEDIFF( NOW(), date))/24))*24 as hora, minute(TIMEDIFF( NOW(), date)) as minuto, priority, p.prioridade as prioridade, p.tempo as tempo, p.descricao as descricao from glpi_tickets t, glpi_entities e, prioridade p, glpi_users u where closedate is null and status='new' and t.entities_id = e.ID and priority = p.prioridade and u.ID = t.users_id order by e.completename, dia desc, hora desc, minuto desc";
 $hoje=date("d/m/y H:i:s");
 $datadehoje = explode(" ",$hoje);
 $diadehoje = explode("/",$datadehoje[0]);
@@ -663,10 +660,8 @@ echo "</table>";
 
 include("includes/conexao.inc");
 
-$query="SELECT t.ID, date, t.name as titulo, u.firstname as nome, u.realname as sobrenome, e.completename as entidade, p.prioridade as prioridade, p.tempo as tempo, p.descricao as descricao, date_add(date, interval tempo hour) as vencsla, FLOOR(hour(TIMEDIFF( NOW(), date_add(date, interval tempo hour)))/24) as dia, hour(TIMEDIFF( NOW(), date_add(date, interval tempo hour))) - (FLOOR(hour(TIMEDIFF( NOW(), date_add(date, interval tempo hour)))/24))*24 as hora, minute(TIMEDIFF( NOW(), date_add(date, interval tempo hour))) as minuto
-from glpi_tracking t, glpi_entities e, prioridade p, glpi_users u
-where status<>'old_done'and status<>'old_notdone' and t.FK_entities = e.ID and priority = p.prioridade and u.ID = author
-order by e.completename, vencsla";
+//$query="SELECT t.ID, date, t.name as titulo, u.firstname as nome, u.realname as sobrenome, e.completename as entidade, p.prioridade as prioridade, p.tempo as tempo, p.descricao as descricao, date_add(date, interval tempo hour) as vencsla, FLOOR(hour(TIMEDIFF( NOW(), date_add(date, interval tempo hour)))/24) as dia, hour(TIMEDIFF( NOW(), date_add(date, interval tempo hour))) - (FLOOR(hour(TIMEDIFF( NOW(), date_add(date, interval tempo hour)))/24))*24 as hora, minute(TIMEDIFF( NOW(), date_add(date, interval tempo hour))) as minuto from glpi_tickets t, glpi_entities e, prioridade p, glpi_users u where status<>'old_done'and status<>'old_notdone' and t.entities_id = e.ID and priority = p.prioridade and u.ID = t.users_id order by e.completename, vencsla";
+$query="SELECT t.ID, date, t.name as titulo, u.firstname as nome, u.realname as sobrenome, e.completename as entidade, p.prioridade as prioridade, p.tempo as tempo, p.descricao as descricao, date_add(date, interval tempo hour) as vencsla, FLOOR(hour(TIMEDIFF( NOW(), date_add(date, interval tempo hour)))/24) as dia, hour(TIMEDIFF( NOW(), date_add(date, interval tempo hour))) - (FLOOR(hour(TIMEDIFF( NOW(), date_add(date, interval tempo hour)))/24))*24 as hora, minute(TIMEDIFF( NOW(), date_add(date, interval tempo hour))) as minuto from glpi_tickets t, glpi_entities e, prioridade p, glpi_users u where status<>'old'and status<>'closed' and t.entities_id = e.ID and priority = p.prioridade and u.ID = t.users_id order by e.completename, vencsla";
 $hoje=date("d/m/y H:i:s");
 $datadehoje = explode(" ",$hoje);
 $diadehoje = explode("/",$datadehoje[0]);

@@ -236,7 +236,7 @@ function select_app_relat_object (id, from, to)
    local cond_    = [[ar.from_object_id = o1.object_id and 
                       ar.to_object_id = o2.object_id and
                       ar.app_relat_type_id = art.id and
-                      ar.app_id = ap.id and
+                      o2.object_id = ap.service_object_id and
                       o1.object_id = m1.service_object_id and 
                       m1.networkports_id = n1.id and
                       o2.name1 = ']]..config.monitor.check_app..[[']]
@@ -271,7 +271,7 @@ function select_app_relat_object (id, from, to)
    local cond_    = [[ar.from_object_id = o1.object_id and 
                       ar.to_object_id = o2.object_id and
                       ar.app_relat_type_id = art.id and
-                      ar.app_id = ap.id and
+                      o1.object_id = ap.service_object_id and
                       o2.object_id = m2.service_object_id and 
                       m2.networkports_id = n2.id and
                       o1.name1 = ']]..config.monitor.check_app..[[']]
@@ -292,7 +292,7 @@ function select_app_relat_object (id, from, to)
                       n2.ip as to_ip,
 
                       ap.name as from_name,
-                      'app' as from_type,
+                        'app' as from_type,
                       m2.name as to_name,
                       m2.type as to_type
                     ]]
