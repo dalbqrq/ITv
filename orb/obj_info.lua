@@ -26,12 +26,26 @@ end
 
 -- controllers ------------------------------------------------------------
 
-function show_hst(web, obj_id)
+function show_hst(web, obj_id, active_tab)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
+   active_tab = active_tab or 1
 
    local A = Monitor.make_query_3(nil, nil, nil, "m.service_object_id = "..obj_id)
-   return render_hst(web, obj_id, A)
+
+   local t = { 
+      { title="Infos", html="", href="/orb/hst_info/"..obj_id },
+      { title="...", html="", href="#" },
+   }
+
+   local res = {}
+   web.prefix = "/orb/app"
+   res[#res+1] = render_content_header(auth.session.glpiactive_entity_shortname, strings.application, web:link("/add"), web:link("/list"))
+
+   res[#res+1] = render_tabs(t, active_tab)
+
+   return render_layout(res)
+
 end
 ITvision:dispatch_get(show_hst, "/hst/(%d+)")
 
