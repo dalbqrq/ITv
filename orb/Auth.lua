@@ -180,6 +180,31 @@ function get_profile(s)
 end
 
 
+function make_entity_clause(auth)
+   local clause = ""
+
+   local glpiactiveentities =    {
+      [0] = "0",
+      [9] = "9",
+      [8] = "8",
+      [6] = "6",
+      [5] = "5",
+      [1] = "1",
+      [2] = "2",
+      [3] = "3",
+      [4] = "4",
+   }
+
+
+   for _,i in ipairs(auth.session.glpiactiveentities) do
+      if clause == "" then clause = "(" else clause = clause..", " end
+      clause = clause..tonumber(i)
+   end
+   clause = clause..")"
+   clause = clause.. #glpiactiveentities .. " ".. glpiactiveentities[0]
+
+   return clause
+end
 
 
 

@@ -73,7 +73,8 @@ function render_list(web, app_id, active_tab, msg)
 
    local res = {}
    web.prefix = "/orb/app"
-   res[#res+1] = render_content_header(auth, strings.application, web:link("/add"), web:link("/list"))
+   --res[#res+1] = render_content_header(auth, strings.application, web:link("/add"), web:link("/list"))
+   res[#res+1] = render_content_header(auth.session.glpiactive_entity_shortname, strings.application, web:link("/add"), web:link("/list"))
 
    -- inicio da implementacao da navegacao pelas apps
    res[#res+1] = div{ id="menu_navigate", ul{ 

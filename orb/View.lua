@@ -157,7 +157,7 @@ function render_layout(inner_html, refresh_time)
          script{ type="text/javascript", src='/servdesk/lib/extrajs/datetime.js' }, {"\n"},
          script{ type="text/javascript", src='/servdesk/lib/extrajs/spancombobox.js' }, {"\n"},
          --script{ type="text/javascript", src='/js/confirmation.js' }, {"\n"},
-         script{ type="text/javascript", entity_script1 }, {"\n"},
+         --script{ type="text/javascript", entity_script1 }, {"\n"},
          --entity_script3,
          script{ type="text/javascript", src='/servdesk/script.js' }, {"\n"},
 
@@ -559,12 +559,18 @@ function render_content_header(auth, name, add, list, edit, geotag, back)
    end
 
 
+   if type(auth) == "string" then
+      myul[#myul+1] = li{ a{ href="#", auth }}
+   else
       myul[#myul+1] = li{ 
-         --script{ type="text/javascript", entity_script1 },
+         script{ type="text/javascript", entity_script1 },
          script{ type="text/javascript", entity_script2 },
          a {onclick='entity_window.show();', href='#modal_entity_content', 
             title=auth.session.glpiactive_entity_shortname, class='entity_select', 
             id='global_entity_select', auth.session.glpiactive_entity_shortname } }
+
+      myul[#myul+1] = li{ Auth.make_entity_clause(auth) }
+   end
 
 
    return div{ id='menu_navigate', div { id='c_ssmenu2', ul{ myul } } }
@@ -613,25 +619,26 @@ function render_tabs(t, active_tab)
 
    obj[#obj+1] = "var tabpanel = new Ext.TabPanel({ "..tab_config.." items: ["
    for i,v in ipairs(t) do
-      --obj[#obj+1] = "{ id: '"..i.."', title: '"..v.title.."', html: '"..v.html.."', autoLoad: '"..v.href.."' },"
+      obj[#obj+1] = "{ id: '"..i.."', title: '"..v.title.."', html: '"..v.html.."', autoLoad: '"..v.href.."' },"
+--[[
       obj[#obj+1] = "{ id: '"..i.."', title: '"..v.title.."', autoLoad: { url: '"..v.href.."', \
-                      scripts: true, nocache: true, params: '"..v.href.."'}, ".. [[
-  listeners:{ // Force glpi_tab storage
-                       beforeshow : function(panel){
-                        /* clean content because append data instead of replace it : no more problem */
-                        /* tabpanel.body.update(''); */
-                        /* update active tab*/
-                        Ext.Ajax.disableCaching = false;
-                        Ext.Ajax.request({
-                           url : ']]..v.href..[[',
-                           success: function(objServerResponse){
-                           //alert(objServerResponse.responseText);
-                        }
-                        });
-                     }
-                  }
-
- },]]
+                      scripts: true, nocache: true, params: '"..v.href.."'}, ".. 
+                      listeners:{ // Force glpi_tab storage
+                          beforeshow : function(panel){
+                          /* clean content because append data instead of replace it : no more problem */
+                          /* tabpanel.body.update(''); */
+                          /* update active tab*/
+                          Ext.Ajax.disableCaching = false;
+                          Ext.Ajax.request({
+                             url : '"..v.href.."',
+                             success: function(objServerResponse){
+                             //alert(objServerResponse.responseText);
+                             }
+                          });
+                          }
+                       }
+                     },
+]]
 
    end
    obj[#obj+1] = "] });"
