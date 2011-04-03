@@ -339,8 +339,8 @@ menu_itens = {
    { name="CMDB", link="#",
       submenu = {
       { name="Computadores", field="computer", link="/servdesk/front/computer.php" },
+      { name="Redes", field="networking", link="/servdesk/front/networkequipment.php" },
       { name="Software", field="software", link="/servdesk/front/software.php" },
-      { name="Equip. de Redes", field="networking", link="/servdesk/front/networkequipment.php" },
       { name="Telefones", field="phone", link="/servdesk/front/phone.php"  },
       { name="Periféricos", field="peripheral", link="/servdesk/front/peripheral.php" },
       { name="Status", field=nil, link="/servdesk/front/states.php" },

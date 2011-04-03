@@ -400,9 +400,9 @@ class NetworkEquipment extends CommonDBTM {
       echo "<td>";
       Dropdown::show('Domain', array('value' => $this->fields["domains_id"]));
       echo "</td>";
-      echo "<td rowspan='5'>".$LANG['common'][25]."&nbsp;:</td>";
-      echo "<td rowspan='5'>
-            <textarea cols='45' rows='8' name='comment' >".$this->fields["comment"]."</textarea>";
+      echo "<td rowspan='6'>".$LANG['common'][25]."&nbsp;:</td>";
+      echo "<td rowspan='6'>
+            <textarea cols='45' rows='10' name='comment' >".$this->fields["comment"]."</textarea>";
       echo "</td></tr>";
 /*
       echo "<tr class='tab_bg_1'>";
@@ -439,9 +439,26 @@ class NetworkEquipment extends CommonDBTM {
       echo "</tr>";
 // -------------------------- daniel@itvision.com.br
 
+      echo "<tr class='tab_bg_1'>";
+      // daniel@itvision.com.br - para alteracao de entidade
+      if ( haveRight("networking","w") ) {
+         echo "<td>".$LANG['entity'][0]."&nbsp;:</td>";
+         echo "<td>";
+         Dropdown::show('Entity', array('value' => $this->fields["entities_id"]));
+         //echo "</td></tr>";
+         echo "</td>";
+      } else {
+         echo "<td colspan=2></td>";
+      }
+      // daniel@itvision.com.br
+      echo "</tr>";
+
+// -------------------------- daniel@itvision.com.br
+
 
       echo "<tr class='tab_bg_1'>";
-      echo "<td colspan='2' class='center' height='30'>".$datestring."&nbsp;".$date;
+      echo "<td colspan='2' class='center' height='15'>".$datestring."&nbsp;".$date;
+      //echo "<td class='center' height='15'>".$datestring."&nbsp;".$date;
       if (!$template && !empty($this->fields['template_name'])) {
          echo "&nbsp;&nbsp;&nbsp;(".$LANG['common'][13]."&nbsp;: ".$this->fields['template_name'].")";
       }
