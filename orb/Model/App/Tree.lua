@@ -252,6 +252,27 @@ function select_subordinates_app_tree (origin, app_id) -- Encontra o noh subordi
 end
 
 
+
+----------------------------------------------------------------------------------------------------------------------
+function select_parent (origin, app_id) -- Encontra noh pai
+   local root_id, root = {}
+   root_id, root = select_root_app_tree()
+   origin = origin or root_id
+   local content = {}
+
+-- DANIEL - Continuar daqui....
+
+   columns   = "parent.id, parent.instance_id, parent.lft, parent.rgt, parent.app_id"
+   tablename = "itvision_app_trees AS node, itvision_app_trees AS parent"
+   cond      = "node.lft BETWEEN parent.lft AND parent.rgt AND node.id = " .. origin
+   extra     = nil
+
+   content = query (tablename, cond, extra, columns)
+
+   return content
+end
+
+
 ----------------------------------------------------------------------------------------------------------------------
 function select_tree_relat_to_graph() -- Lista apps e seus filhos
    local content = {}

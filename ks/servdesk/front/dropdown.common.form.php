@@ -52,10 +52,6 @@ if (isset($_POST["id"])) {
 if (isset($_POST["add"])) {
    $dropdown->check(-1,'w',$_POST);
 
-   if ($dropdown instanceof Entity) {
-   exec("echo ". $_POST["id"]." add >> /usr/local/itvision/scr/update_entity.queue");
-   }
-
    if ($newID=$dropdown->add($_POST)) {
       $dropdown->refreshParentInfos();
       if ($dropdown instanceof CommonDevice) {
@@ -65,6 +61,16 @@ if (isset($_POST["add"])) {
          Event::log($newID, get_class($dropdown), 4, "setup",$_SESSION["glpiname"]." added ".$_POST["name"].".");
       }
    }
+
+   // included by daniel@itvision.com.br
+   // Se a operacao for a inclusão de uma entidade, 
+   // acrescenta à uma fila para ser pos-processado pelo cron do itvision
+   // que deve incluir uma nova aplicacao para esta entidade criada
+   if ($dropdown instanceof Entity) {
+      //exec("echo ". $_POST["id"]." add >> /usr/local/itvision/scr/update_entity.queue");
+      exec("echo ". $newID." add >> /usr/local/itvision/scr/update_entity.queue");
+   }
+
    glpi_header($_SERVER['HTTP_REFERER']);
 
 } else if (isset($_POST["delete"])) {
@@ -75,6 +81,14 @@ if (isset($_POST["add"])) {
       $dropdown->showDeleteConfirmForm($_SERVER['PHP_SELF']);
       commonFooter();
    } else {
+      // included by daniel@itvision.com.br
+      // Se a operacao for a delecao de uma entidade, 
+      // acrescenta à uma fila para ser pos-processado pelo cron do itvision
+      // que deve incluir uma nova aplicacao para esta entidade criada
+      if ($dropdown instanceof Entity) {
+         exec("echo ". $_POST["id"]." delete >> /usr/local/itvision/scr/update_entity.queue");
+      }
+
       $dropdown->delete($_POST, 1);
       $dropdown->refreshParentInfos();
 
@@ -83,6 +97,14 @@ if (isset($_POST["add"])) {
    }
 
 } else if (isset($_POST["replace"])) {
+   // included by daniel@itvision.com.br
+   // Se a operacao for a replace de uma entidade, 
+   // acrescenta à uma fila para ser pos-processado pelo cron do itvision
+   // que deve incluir uma nova aplicacao para esta entidade criada
+   if ($dropdown instanceof Entity) {
+      exec("echo ". $_POST["id"]." replace ". $_POST["_replace_by"]." >> /usr/local/itvision/scr/update_entity.queue");
+   }
+
    $dropdown->check($_POST["id"],'w');
    $dropdown->delete($_POST, 1);
    $dropdown->refreshParentInfos();
@@ -91,6 +113,14 @@ if (isset($_POST["add"])) {
    glpi_header($dropdown->getSearchURL());
 
 } else if (isset($_POST["update"])) {
+   // included by daniel@itvision.com.br
+   // Se a operacao for a update de uma entidade, 
+   // acrescenta à uma fila para ser pos-processado pelo cron do itvision
+   // que deve incluir uma nova aplicacao para esta entidade criada
+   if ($dropdown instanceof Entity) {
+      exec("echo ". $_POST["id"]." update ". $_POST["entities_id"]." >> /usr/local/itvision/scr/update_entity.queue");
+   }
+
    $dropdown->check($_POST["id"],'w');
    $dropdown->update($_POST);
    $dropdown->refreshParentInfos();
