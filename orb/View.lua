@@ -569,7 +569,7 @@ function render_content_header(auth, name, add, list, edit, geotag, back)
             title=auth.session.glpiactive_entity_shortname, class='entity_select', 
             id='global_entity_select', auth.session.glpiactive_entity_shortname } }
 
-      myul[#myul+1] = li{ Auth.make_entity_clause(auth) }
+      --myul[#myul+1] = li{ Auth.make_entity_clause(auth) }
    end
 
 
