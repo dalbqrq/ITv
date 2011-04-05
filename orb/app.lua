@@ -276,6 +276,7 @@ function render_list(web, A, root, msg, no_header)
 
    for i, v in ipairs(A) do
       local button_remove, button_edit, button_active = "-", "-", "-"
+      local category = strings.entity
 
       --web.prefix = "/orb/app_objects"
       --local lnk = web:link("/list/"..v.id)
@@ -283,10 +284,12 @@ function render_list(web, A, root, msg, no_header)
       local lnk = web:link("/list/"..v.id..":1")
       web.prefix = "/orb/app"
 
-      if v.id ~= root then 
+      --if v.id ~= root then 
+      if v.is_entity_root == "0" then
+         category = strings.application
          button_remove = button_link(strings.remove, web:link("/remove/"..v.id), "negative")
+         button_edit   = button_link(strings.edit, web:link("/edit/"..v.id..":"..v.name..":"..v.type))
       end
-      button_edit   = button_link(strings.edit, web:link("/edit/"..v.id..":"..v.name..":"..v.type))
 
       if v.is_active == "0" then
          stract = strings.activate
@@ -304,6 +307,7 @@ function render_list(web, A, root, msg, no_header)
 
       row[#row+1] = {
          a{ href=lnk, v.name.." #" },
+         category,
          strings["logical_"..v.type],
          NoOrYes[tonumber(v.is_active)+1].name,
          button_remove,
@@ -312,7 +316,7 @@ function render_list(web, A, root, msg, no_header)
       }
    end
 
-   local header =  { strings.name, strings.type, strings.is_active, ".", ".", "." }
+   local header =  { strings.name, strings.category, strings.type, strings.is_active, ".", ".", "." }
    local c_header = {}
    if no_header == nil then
       if permission == "w" then

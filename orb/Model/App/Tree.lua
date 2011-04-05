@@ -256,19 +256,15 @@ end
 
 ----------------------------------------------------------------------------------------------------------------------
 function select_parent (app_id) -- Encontra noh pai - usado tipicamente para a inclusao de apps 
-    -- que representam entidades atraves de processo executado pelos scripts cron
+                  -- que representam entidades atraves de processo executado pelos scripts cron
+
+   -- retorna as entradas em order inversa sendo as primeiras tupla os ascendentes mais proximos
    local content = {}
 
-   columns   = "parent.id, parent.instance_id, parent.lft, parent.rgt, parent.app_id"
+   columns   = "parent.id, parent.instance_id, parent.lft, parent.rgt, parent.app_id, parent.instance_id"
    tablename = "itvision_app_trees AS node, itvision_app_trees AS parent"
    cond      = "parent.lft < node.lft AND parent.rgt > node.rgt AND node.app_id = " .. app_id
-   extra     = nil
-
---[[
-   select parent.id, parent.instance_id, parent.lft, parent.rgt, parent.app_id
-   from itvision_app_trees AS node, itvision_app_trees AS parent
-   where parent.lft < node.lft AND parent.rgt > node.rgt AND node.app_id = 7
-]]
+   extra     = "order by parent.lft desc"
 
    content = query (tablename, cond, extra, columns)
 
@@ -434,7 +430,7 @@ function insert_subnode_app_tree(app_child, app_parent) -- Adiciona nós filhos 
       for j,n in ipairs(subtree) do
          local lft = n.lft - origin.lft + p.rgt
          local rgt = n.rgt - origin.lft + p.rgt
-         local node = { app_id=n.app_id, lft=lft, rgt=rgt, instance_id=n.instance_id }
+         local node = { app_id=n.app_id, lft=lft, rgt=rgt, instance_id=n.instance_id, entity_id=n.entity_id }
 text_file_writer("/tmp/newnode", n.lft .." - ".. origin.lft .." + ".. p.rgt.." \n "..n.rgt .." - ".. origin.lft .." + ".. p.rgt.."\n")
 
          insert  ( "itvision_app_trees", node)

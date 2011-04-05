@@ -68,33 +68,39 @@ end
 
 function replace_entity(id, id2)
    print("replace: "..id.." to "..id2)
-   --local m = Model.query("itvision_monitors", "networkports_id = "..id)
-   --os.reset_monitor()
+-- CONTINUAR AQUI
+
+-- VERIFICAR O CAMPO entity_id DE itvision_app_trees que parece nao estar sento atualizado coretamente
+
+-- FAZER A MIGRACAO DOS OBJETOS DA ENTIDADE PARA A ENTIDADE SUPERIOR
+
+   --App.delete_node_app(..)
+
 end
 
 
 function update_entity(id, id2)
---DANIEL - continuar aqui....
-   print("update: "..id.." to "..id2)
+   --print("update: "..id.." to "..id2)
    local entity = Model.query("glpi_entities e", "e.id = "..id)
-   local child_app = Model.query("itvision_apps a, glpi_entities e", 
-               "e.id = "..id.." and e.id = a.entities_id and is_entity_root = true", nil, "a.id as app_id")
-   local parent_app = Model.query("itvision_apps a, glpi_entities e", 
-               "e.id = "..id2.." and e.id = a.entities_id and is_entity_root = true", nil, "a.id as app_id")
+   local child_app = Model.query("itvision_apps a, itvision_app_trees t", 
+         "a.id = t.app_id and is_entity_root = true and a.entities_id = "..id, nil, 
+         "a.id as app_id, t.id as node_id, a.service_object_id as object_id")
+   local parent_app = Model.query("itvision_apps a, itvision_app_trees t", 
+         "a.id = t.app_id and is_entity_root = true and a.entities_id = "..id2, nil, 
+         "a.id as app_id, t.id as node_id, a.service_object_id as object_id")
+
    local parent_node = App.select_parent(child_app[1].app_id)
+   --print(entity[1].name, child_app[1].app_id, parent_app[1].app_id)
 
-   updated_app = {
-      name = entity[1].name,
-   }
-   print(entity[1].name)
-   Model.update("itvision_apps", updated_app, "entities_id = "..id)
+   Model.update("itvision_apps", {name = entity[1].name}, "entities_id = "..id)
 
-   print (child_app[1].app_id)
-   --print (parent_app[1].app_id)
-   print ( parent_node[1].app_id, parent_node[1].id)
-
-   --App.insert_subnode_app_tree(child_app, parent_app)
-   --App.delete_child_from_parent(child_app, parent_app)
+   if parent_node[1] and parent_app[1].node_id ~= parent_node[1].id then
+     --print(parent_app[1].node_id, parent_node[1].id, child_app[1].app_id, parent_app[1].app_id)
+     Model.update("itvision_app_objects", {app_id = parent_app[1].app_id}, 
+         "service_object_id = "..child_app[1].object_id.." and app_id = "..parent_node[1].app_id)
+     App.insert_subnode_app_tree(child_app[1].app_id, parent_app[1].app_id)
+     App.delete_node_app_tree(child_app[1].node_id)
+   end
 end
 
 

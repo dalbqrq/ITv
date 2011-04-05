@@ -67,7 +67,6 @@ if (isset($_POST["add"])) {
    // acrescenta à uma fila para ser pos-processado pelo cron do itvision
    // que deve incluir uma nova aplicacao para esta entidade criada
    if ($dropdown instanceof Entity) {
-      //exec("echo ". $_POST["id"]." add >> /usr/local/itvision/scr/update_entity.queue");
       exec("echo ". $newID." add >> /usr/local/itvision/scr/update_entity.queue");
    }
 
@@ -113,17 +112,18 @@ if (isset($_POST["add"])) {
    glpi_header($dropdown->getSearchURL());
 
 } else if (isset($_POST["update"])) {
+   $dropdown->check($_POST["id"],'w');
+   $dropdown->update($_POST);
+   $dropdown->refreshParentInfos();
+
    // included by daniel@itvision.com.br
    // Se a operacao for a update de uma entidade, 
    // acrescenta à uma fila para ser pos-processado pelo cron do itvision
    // que deve incluir uma nova aplicacao para esta entidade criada
    if ($dropdown instanceof Entity) {
       exec("echo ". $_POST["id"]." update ". $_POST["entities_id"]." >> /usr/local/itvision/scr/update_entity.queue");
+      exec("/usr/local/itvision/scr/luaexec.bash > /tmp/LOG 2>&1");
    }
-
-   $dropdown->check($_POST["id"],'w');
-   $dropdown->update($_POST);
-   $dropdown->refreshParentInfos();
 
    Event::log($_POST["id"], get_class($dropdown), 4, "setup", $_SESSION["glpiname"]." ".$LANG['log'][21]);
    glpi_header($_SERVER['HTTP_REFERER']);
