@@ -97,11 +97,19 @@ end
 
 
 local entity_script1 = " \
-            //<![CDATA[ \
-               Ext.BLANK_IMAGE_URL = '/servdesk/lib/extjs/s.gif'; \
-               Ext.Updater.defaults.loadScripts = true; \
-               Ext.UpdateManager.defaults.indicatorText='<\span class='loading-indicator'>Carregando...<\/span>'; \
-            //]]> "
+//<![CDATA[ \
+Ext.BLANK_IMAGE_URL = '/servdesk/lib/extjs/s.gif'; \
+ Ext.Updater.defaults.loadScripts = true; \
+Ext.UpdateManager.defaults.indicatorText='<\\span class=\"loading-indicator\">Carregando...<\\\/span>'; \
+//]]> \
+"
+
+local entity_script3 = [[
+<!--[if IE]><script type="text/javascript">
+Ext.UpdateManager.defaults.indicatorText='<\span class="loading-indicator-ie">Carregando...<\/span>';
+</script>
+<![endif]-->
+]]
    
 local entity_script2 = [[
          cleanhide('modal_entity_content');
@@ -119,7 +127,8 @@ local entity_script2 = [[
 
 
 
-function render_layout(header, inner_html, refresh_time)
+--function render_layout(header, inner_html, refresh_time)
+function render_layout(inner_html, refresh_time)
    local refresh = {}
    if type(tonumber(refresh_time)) == "number" then
       refresh = meta{ ["http-equiv"]="Refresh", content=refresh_time, target="main" }
@@ -127,32 +136,35 @@ function render_layout(header, inner_html, refresh_time)
 
    return html{
       head{ 
-         title("ITvision"),
-         meta{ ["http-equiv"] = "Content-Type", content = "text/html; charset=utf-8" },
-         meta{ ["http-equiv"] = "Cache-Control", content = "No-Cache" },
-         meta{ ["http-equiv"] = "Pragma",        content = "No-Cache" },
-         refresh,
+         title("ITvision"), {"\n"},
+         meta{ ["http-equiv"] = "Content-Type", content = "text/html; charset=utf-8" }, {"\n"},
+         meta{ ["http-equiv"] = "Pragma",        content = "No-Cache" }, {"\n"},
+         meta{ ["http-equiv"] = "Cache-Control", content = "No-Cache" }, {"\n"},
+         refresh, {"\n"},
 
-         link{ rel="shortcut icon", href="/pics/favicon.ico" },
-         link{ rel='stylesheet', type='text/css', media='screen', href="/css/style.css" },
-         link{ rel='stylesheet', type='text/css', media='print',  href='/servdesk/css/print.css' },
-         link{ rel='stylesheet', type='text/css', media='screen', href="/servdesk/css/styles.css" },
-         link{ rel='stylesheet', type='text/css', media='screen', href="/css/glpi_styles.css" },
-         link{ rel='stylesheet', type='text/css', media='screen', href='/servdesk/lib/extjs/resources/css/ext-all.css' } ,
-         link{ rel='stylesheet', type='text/css', media='screen', href='/servdesk/css/ext-all-glpi.css' },
+         --link{ rel='stylesheet', type='text/css', media='screen', href="/css/style.css" }, {"\n"},
+         link{ rel='stylesheet', type='text/css', media='screen', href="/servdesk/css/styles.css" }, {"\n"},
+         link{ rel='stylesheet', type='text/css', media='print',  href='/servdesk/css/print.css' }, {"\n"},
+         link{ rel="shortcut icon", href="/pics/favicon.ico" }, {"\n"},
+         script{ type="text/javascript", src='/servdesk/lib/extjs/adapter/ext/ext-base.js' }, {"\n"},
+         script{ type="text/javascript", src='/servdesk/lib/extjs/ext-all.js' }, {"\n"},
+         --link{ rel='stylesheet', type='text/css', media='screen', href="/css/glpi_styles.css" }, {"\n"},
+         link{ rel='stylesheet', type='text/css', media='screen', href='/servdesk/lib/extjs/resources/css/ext-all.css' } , {"\n"},
+         link{ rel='stylesheet', type='text/css', media='screen', href='/servdesk/css/ext-all-glpi.css' }, {"\n"},
 
-         script{ type="text/javascript", src='/servdesk/lib/extjs/adapter/ext/ext-base.js' },
-         script{ type="text/javascript", src='/servdesk/lib/extjs/ext-all.js' },
-         script{ type="text/javascript", src='/servdesk/lib/extjs/locale/ext-lang-pt_BR.js' },
-         script{ type="text/javascript", src='/servdesk/lib/extrajs/xdatefield.js' },
-         script{ type="text/javascript", src='/servdesk/lib/extrajs/datetime.js' },
-         script{ type="text/javascript", src='/servdesk/lib/extrajs/spancombobox.js' },
-         script{ type="text/javascript", src='/js/confirmation.js' },
-         script{ type="text/javascript", entity_script1 },
-         script{ type="text/javascript", src='/servdesk/script.js' },
+         script{ type="text/javascript", src='/servdesk/lib/extjs/locale/ext-lang-pt_BR.js' }, {"\n"},
+         script{ type="text/javascript", src='/servdesk/lib/extrajs/xdatefield.js' }, {"\n"},
+         script{ type="text/javascript", src='/servdesk/lib/extrajs/datetime.js' }, {"\n"},
+         script{ type="text/javascript", src='/servdesk/lib/extrajs/spancombobox.js' }, {"\n"},
+         --script{ type="text/javascript", src='/js/confirmation.js' }, {"\n"},
+         script{ type="text/javascript", entity_script1 }, {"\n"},
+         --entity_script3,
+         script{ type="text/javascript", src='/servdesk/script.js' }, {"\n"},
+
 
       },
-      body{ header,  div{ id='page', inner_html } }
+      --body{ header,  div{ id='page', inner_html } }
+      body{ div{ id='page', inner_html } }
    }
 end
 
@@ -596,12 +608,31 @@ function render_tabs(t, active_tab)
       enableTabScroll: true, 
       resizeTabs: false, 
       plain: true, 
-      border: false, 
    ]]
+      --border: false, 
 
    obj[#obj+1] = "var tabpanel = new Ext.TabPanel({ "..tab_config.." items: ["
    for i,v in ipairs(t) do
-      obj[#obj+1] = "{ id: '"..i.."', title: '"..v.title.."', html: '"..v.html.."', autoLoad: '"..v.href.."' },"
+      --obj[#obj+1] = "{ id: '"..i.."', title: '"..v.title.."', html: '"..v.html.."', autoLoad: '"..v.href.."' },"
+      obj[#obj+1] = "{ id: '"..i.."', title: '"..v.title.."', autoLoad: { url: '"..v.href.."', \
+                      scripts: true, nocache: true, params: '"..v.href.."'}, ".. [[
+  listeners:{ // Force glpi_tab storage
+                       beforeshow : function(panel){
+                        /* clean content because append data instead of replace it : no more problem */
+                        /* tabpanel.body.update(''); */
+                        /* update active tab*/
+                        Ext.Ajax.disableCaching = false;
+                        Ext.Ajax.request({
+                           url : ']]..v.href..[[',
+                           success: function(objServerResponse){
+                           //alert(objServerResponse.responseText);
+                        }
+                        });
+                     }
+                  }
+
+ },]]
+
    end
    obj[#obj+1] = "] });"
 
@@ -609,7 +640,7 @@ function render_tabs(t, active_tab)
    res[#res+1] = div{ id="tabspanel", class='center-h' }
    res[#res+1] = script{ type='text/javascript', obj }
    res[#res+1] = div { id='tabcontent' }
-   res[#res+1] = script{ type='text/javascript', "loadDefaultTab();" }
+   --res[#res+1] = script{ type='text/javascript', "loadDefaultTab();" }
 
    return res
 end

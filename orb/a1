@@ -1,0 +1,48 @@
+<div id="tabspanel" class="center-h"></div>
+<script type="text/javascript">
+
+var tabpanel = new Ext.TabPanel({  
+      applyTo: 'tabspanel', 
+      activeTab: 1, 
+      width: 950, 
+      enableTabScroll: true, 
+      resizeTabs: false, 
+      plain: true, 
+      border: false, 
+      items: [
+         { 
+            id: '1', 
+            title: 'Principal',
+            html: '',
+            autoLoad: '/orb/app/show/46' },
+         { 
+            id: '2',
+            title: 'Objetos',
+            html: '',
+            autoLoad: '/orb/app_objects/add/46' },
+         { 
+            id: '3',
+            title: 'Relacionamentos',
+            html: '',
+            autoLoad: '/orb/app_relats/add/46' },
+         { 
+            id: '4',
+            title: 'Contatos',
+            html: '',
+            autoLoad: '/orb/app_contacts/add/46' },
+         { 
+            id: '5',
+            title: 'Vizualizadores',
+            html: '',
+            autoLoad: '/orb/app_viewers/add/46' },
+         { 
+            id: '6',
+            title: 'Visão Gráfica',
+            html: '',
+            autoLoad: '/orb/gviz/show/46:1' },
+       ]});
+
+</script>
+
+<div id="tabcontent"></div>
+<script type="text/javascript">loadDefaultTab();</script>
