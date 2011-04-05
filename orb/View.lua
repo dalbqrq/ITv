@@ -13,28 +13,6 @@ require "messages"
 module(Model.name, package.seeall, orbit.new)
 
 
-local scrt = [[
-   function confirmation(question, url) { 
-      var answer = confirm(question) 
-      if (answer){ 
-         //alert("The answer is OK!"); 
-         window.location = url;
-      } else { 
-         //alert("The answer is CANCEL!") 
-      } 
-   } 
-   ]]
-
-
-local entity_script = [[
-         cleanhide('modal_entity_content');
-         var entity_window=new Ext.Window({
-            layout:'fit', width:800, height:400, closeAction:'hide',
-            modal: true, autoScroll: true, title: 'Selecione a entidade desejada',
-            autoLoad: '/servdesk/ajax/entitytree.php?target=/servdesk/front/computer.php' });
-   ]] 
-
-
 function do_button(web, label, url, question)
    -- TODO: do_button() NAO ESTAh FUNCIONANDO !!!!
    return { form = { action = web:link(url),  input = { value = label, type = "submit" } } }
@@ -118,7 +96,30 @@ function render_menu_frame(inner_html)
 end
 
 
-function render_layout(inner_html, refresh_time)
+local entity_script1 = " \
+            //<![CDATA[ \
+               Ext.BLANK_IMAGE_URL = '/servdesk/lib/extjs/s.gif'; \
+               Ext.Updater.defaults.loadScripts = true; \
+               Ext.UpdateManager.defaults.indicatorText='<\span class='loading-indicator'>Carregando...<\/span>'; \
+            //]]> "
+   
+local entity_script2 = [[
+         cleanhide('modal_entity_content');
+         var entity_window=new Ext.Window({
+            layout:'fit', 
+            width:800, 
+            height:400, 
+            closeAction:'hide',
+            modal: true, 
+            autoScroll: true, 
+            title: 'Selecione a entidade desejada',
+            autoLoad: '/servdesk/ajax/entitytree.php' });
+   ]] 
+            --autoLoad: '/servdesk/ajax/entitytree.php?target=/servdesk/front/central.php' });
+
+
+
+function render_layout(header, inner_html, refresh_time)
    local refresh = {}
    if type(tonumber(refresh_time)) == "number" then
       refresh = meta{ ["http-equiv"]="Refresh", content=refresh_time, target="main" }
@@ -132,15 +133,13 @@ function render_layout(inner_html, refresh_time)
          meta{ ["http-equiv"] = "Pragma",        content = "No-Cache" },
          refresh,
 
-
          link{ rel="shortcut icon", href="/pics/favicon.ico" },
          link{ rel='stylesheet', type='text/css', media='screen', href="/css/style.css" },
          link{ rel='stylesheet', type='text/css', media='print',  href='/servdesk/css/print.css' },
-         link{ rel='stylesheet', type='text/css', media='screen', href="/servdesk/css/style.css" },
+         link{ rel='stylesheet', type='text/css', media='screen', href="/servdesk/css/styles.css" },
          link{ rel='stylesheet', type='text/css', media='screen', href="/css/glpi_styles.css" },
          link{ rel='stylesheet', type='text/css', media='screen', href='/servdesk/lib/extjs/resources/css/ext-all.css' } ,
          link{ rel='stylesheet', type='text/css', media='screen', href='/servdesk/css/ext-all-glpi.css' },
-
 
          script{ type="text/javascript", src='/servdesk/lib/extjs/adapter/ext/ext-base.js' },
          script{ type="text/javascript", src='/servdesk/lib/extjs/ext-all.js' },
@@ -148,15 +147,12 @@ function render_layout(inner_html, refresh_time)
          script{ type="text/javascript", src='/servdesk/lib/extrajs/xdatefield.js' },
          script{ type="text/javascript", src='/servdesk/lib/extrajs/datetime.js' },
          script{ type="text/javascript", src='/servdesk/lib/extrajs/spancombobox.js' },
+         script{ type="text/javascript", src='/js/confirmation.js' },
+         script{ type="text/javascript", entity_script1 },
          script{ type="text/javascript", src='/servdesk/script.js' },
 
-
-         script{ type="text/javascript", scrt },
-         script{ type="text/javascript", entity_script },
-
       },
-      body{ div{ id='page', inner_html } }
-      --body{ inner_html }
+      body{ header,  div{ id='page', inner_html } }
    }
 end
 
@@ -523,7 +519,6 @@ function select_hst_or_svc_or_app(name, default)
    return select_option(name, HostOrServiceOrApp, "id", "name", default)
 end
 
-
 function render_content_header(auth, name, add, list, edit, geotag, back)
    local myul = { li{ a{href='#', class='here', title="'"..name.."'", name} }, }
 
@@ -551,7 +546,10 @@ function render_content_header(auth, name, add, list, edit, geotag, back)
       myul[#myul+1] = li{ a{ href="#", onClick="history.go(-1)", "Back" } }
    end
 
+
       myul[#myul+1] = li{ 
+         --script{ type="text/javascript", entity_script1 },
+         script{ type="text/javascript", entity_script2 },
          a {onclick='entity_window.show();', href='#modal_entity_content', 
             title=auth.session.glpiactive_entity_shortname, class='entity_select', 
             id='global_entity_select', auth.session.glpiactive_entity_shortname } }
