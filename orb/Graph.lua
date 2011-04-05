@@ -84,11 +84,14 @@ function make_content(obj, rel)
             label = v.ax_name
             name  = string.gsub(v.o_name2, "[%s,%p]", "")
             url   = "/orb/obj_info/"..v.ao_type.."/"..v.o_object_id
-            shape = "invhouse"
-            shape = "octagon"
-            shape = "triangle"
-            shape = "diamond"
-            shape = "hexagon"
+            if v.ax_is_entity_root == "1" then 
+               shape = "invhouse"
+            else
+               shape = "triangle"
+               shape = "octagon"
+               shape = "diamond"
+               shape = "hexagon"
+            end
          end
 
          color = set_color(v.ss_current_state, v.ao_type)
@@ -162,15 +165,18 @@ function make_tree_content(obj, rel, sep)
       for _,v in ipairs(obj) do
          local label, name, url, shape
 
-         label = v.a_name  -- DEBUG ..":"..v.a_id
+         label = v.a_name  -- DEBUG .." : "..v.a_is_entity_root  -- DEBUG ..":"..v.a_id
          name  = v.a_id
          if sep == 1 then name = name..v.t_id end
          url   = "/orb/obj_info/app/"..v.a_service_object_id
-         shape = "invhouse"
-         shape = "octagon"
-         shape = "triangle"
-         shape = "diamond"
-         shape = "hexagon"
+         if v.a_is_entity_root == "1" then
+            shape = "invhouse"
+         else
+            shape = "triangle"
+            shape = "octagon"
+            shape = "diamond"
+            shape = "hexagon"
+         end
 
          color = set_color(v.ss_current_state, "app")
          table.insert(content, node{name, shape=shape, height=1.2, width=1, fontsize=12., fixedsize=true,

@@ -21,6 +21,7 @@ function select_simple_path_app_tree (origin) 	-- Seleciona um unico caminho par
 function select_depth_app_tree (origin) 	-- Seleciona a profundidade de cada noh
 function select_depth_subtree_app_tree (origin) -- Seleciona a profundidade de cada noh a partir de um noh especifico
 function select_subordinates_app_tree (origin, app_id) 	-- Encontra o noh subordinado imediato
+function select_parent (app_id)                 -- Encontra noh pai 
 function select_tree_relat_to_graph() 		-- Lista apps e seus filhos
 function select_uniq_app_in_tree()  		-- seleciona app unico na árvore (usado p/ config do nagiosbp)
 function select_child_from_parent(app_child, app_parent) -- seleciona noh dado por pai e filho na arvore
@@ -513,7 +514,7 @@ function delete_node_app(origin_) -- remove um noh dado por 'origin_' trazendo t
    execute ( "LOCK TABLE itvision_app_trees WRITE" )
    execute ( "delete from itvision_app_trees where lft = "..lft.." and rgt = "..rgt )
    execute ( "update itvision_app_trees set lft = lft - 1 where lft > "..lft )
-   execute ( "update itvision_app_trees set rgt = rgt - 1 where rgt > "..rgt )
+   execute ( "update itvision_app_trees set rgt = rgt - 2 where rgt > "..rgt )
    execute ( "UNLOCK TABLES" )
 
    return true

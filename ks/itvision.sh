@@ -91,6 +91,7 @@ install_pack rrdtool # NEDI
 install_pack mbrola # Synthesizing Voice
 install_pack mrbrola-br3 # Synthesizing Voice
 install_pack festival # Synthesizing Voice
+install_pack jhead 
 
 
 # --------------------------------------------------
