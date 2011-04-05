@@ -26,6 +26,7 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 
 
 function render_list(web, app_id, active_tab, msg)
+   local auth = Auth.check(web)
    if msg then msg = ":"..msg else msg = "" end
    local t = { 
       { title="Principal", html="", href="/orb/app/show/"..app_id },
@@ -72,7 +73,7 @@ function render_list(web, app_id, active_tab, msg)
 
    local res = {}
    web.prefix = "/orb/app"
-   res[#res+1] = render_content_header(strings.application, web:link("/add"), web:link("/list"))
+   res[#res+1] = render_content_header(auth, strings.application, web:link("/add"), web:link("/list"))
 
    -- inicio da implementacao da navegacao pelas apps
    res[#res+1] = div{ id="menu_navigate", ul{ 

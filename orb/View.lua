@@ -7,6 +7,7 @@
   http://www.w3.org/2007/03/html-forms/#(1)
 ]]
 require "Model"
+require "Auth"
 require "messages"
 
 module(Model.name, package.seeall, orbit.new)
@@ -523,7 +524,7 @@ function select_hst_or_svc_or_app(name, default)
 end
 
 
-function render_content_header(name, add, list, edit, geotag, back)
+function render_content_header(auth, name, add, list, edit, geotag, back)
    local myul = { li{ a{href='#', class='here', title="'"..name.."'", name} }, }
 
    myul[#myul+1] = li{ "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" }
@@ -551,8 +552,10 @@ function render_content_header(name, add, list, edit, geotag, back)
    end
 
       myul[#myul+1] = li{ 
-         a {onclick='entity_window.show();', href='#modal_entity_content', title='RAIZ ITvision', class='entity_select', 
-            id='global_entity_select', "RAIZ ITvision"} }
+         a {onclick='entity_window.show();', href='#modal_entity_content', 
+            title=auth.session.glpiactive_entity_shortname, class='entity_select', 
+            id='global_entity_select', auth.session.glpiactive_entity_shortname } }
+
 
    return div{ id='menu_navigate', div { id='c_ssmenu2', ul{ myul } } }
 end

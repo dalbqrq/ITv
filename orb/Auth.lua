@@ -79,13 +79,13 @@ function is_logged_at_glpi(web)
    local _, _, _, entity_id = string.find(sess_, 'glpiactive_entity|s:(%d+):"(%d+)";')
    local _, _, _, _, _, profile_id = string.find(sess_, 'glpiactiveprofile|a:(%d+):{s:(%d+):"id";s:(%d+):"(%d+)";')
 
+   local session_profile = prof_
    local profile 
-
    if profile_id then profile = Glpi.select_profile(profile_id) end
 
    if user_id ~= nil then
       return { is_logged=true, user_id=user_id, user_name=user_name, profile_id=profile_id,
-               entity_id=entity_id, cookie=glpi_cookie, profile=profile }
+               entity_id=entity_id, cookie=glpi_cookie, profile=profile, session=session_profile }
    else
       return false
    end
@@ -116,7 +116,7 @@ function check_permission(web, field, redirect_if_not_write_perm)
       web:redirect(web:link("denied.html"))
       return "FALSE"
    else
-      return auth.profile[field]
+      return auth.profile[field], auth
    end
 end
 

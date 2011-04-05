@@ -339,7 +339,7 @@ end
 ------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------
 function render_list(web, cmp, chk, msg)
-   local permission = Auth.check_permission(web, "checkcmds")
+   local permission, auth = Auth.check_permission(web, "checkcmds")
    local row, res, link, url = {}, {}, {}, ""
    local header = {
       strings.alias.."/"..strings.name, "IP", "Software / Versão", strings.type, strings.command, strings.alias, "."
@@ -401,7 +401,7 @@ function render_list(web, cmp, chk, msg)
       row[#row + 1] = { name, ip, serv, itemtype, chk, alias, link }
    end
 
-   res[#res+1] = render_content_header("Checagem", nil, web:link("/list"))
+   res[#res+1] = render_content_header(auth, "Checagem", nil, web:link("/list"))
    if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ font{ color="red", msg } } end
    res[#res+1] = render_form_bar( render_filter(web), strings.search, web:link("/list"), web:link("/list") )
    res[#res+1] = render_table(row, header)
@@ -499,6 +499,7 @@ end
 ------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------
 function render_add(web, cmp, chk, params, chk_params, monitor_name)
+   local auth = Auth.check(web)
    local v = cmp[1]
    local row = {}
    local res = {}
@@ -529,7 +530,7 @@ function render_add(web, cmp, chk, params, chk_params, monitor_name)
    end
 
 
-   res[#res+1] = render_content_header("Checagem", nil, web:link("/list"))
+   res[#res+1] = render_content_header(auth, "Checagem", nil, web:link("/list"))
    res[#res+1] = render_table(row, header)
    res[#res+1] = render_checkcmd(web, chk_id, hst_name, v.p_ip, url_test, url_insert, chk_params, monitor_name)
 

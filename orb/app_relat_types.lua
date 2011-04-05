@@ -104,7 +104,7 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 function render_list(web, A)
    local rows = {}
    local res = {}
-   local permission = Auth.check_permission(web, "app_relat_type")
+   local permission, auth = Auth.check_permission(web, "app_relat_type")
    
 --[[
    res[#res + 1] = p{ button_link(strings.add, web:link("/add")) }
@@ -128,9 +128,9 @@ function render_list(web, A)
    end
 
    if permission == "w" then
-      res[#res + 1]  = render_content_header("Tipo de Relacionamento", web:link("/add"), web:link("/list"))
+      res[#res + 1]  = render_content_header(auth, "Tipo de Relacionamento", web:link("/add"), web:link("/list"))
    else
-      res[#res + 1]  = render_content_header("Tipo de Relacionamento", nil, web:link("/list"))
+      res[#res + 1]  = render_content_header(auth, "Tipo de Relacionamento", nil, web:link("/list"))
    end
 
    res[#res + 1]  = H("table") { border="0", class="tab_cadrehov",
@@ -156,6 +156,7 @@ end
 function render_show(web, A)
    A = A[1]
    local res = {}
+   local auth = Auth.check(web)
 
 --[[
    res[#res + 1] = p{ button_link(strings.add, web:link("/add")) }
@@ -166,7 +167,7 @@ function render_show(web, A)
 ]]
 
    if A then
-      render_content_header("Tipo de Relacionamento", web:link("/add"), web:link("/list"))
+      render_content_header(auth, "Tipo de Relacionamento", web:link("/add"), web:link("/list"))
       res[#res + 1] = { H("table") { border="0", class="tab_cadrehov",
          tbody{
             tr{ th{ strings.name }, td{ A.name } },

@@ -77,7 +77,7 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 -- views ------------------------------------------------------------
 
 function render_hst(web, obj_id, A)
-   local permission = Auth.check_permission(web, "application")
+   local permission, auth = Auth.check_permission(web, "application")
    local res = {}
    local row = {}
    local lnkgeo = web:link("/geotag/hst:"..obj_id)
@@ -95,7 +95,7 @@ function render_hst(web, obj_id, A)
       }
    end
 
-   res[#res+1] = render_content_header(A[1].c_name, nil, nil, lnkedt , lnkgeo)
+   res[#res+1] = render_content_header(auth, A[1].c_name, nil, nil, lnkedt , lnkgeo)
    res[#res+1] = render_table(row, nil)
 
    return render_layout(res)
@@ -103,7 +103,7 @@ end
 
 
 function render_svc(web, obj_id, A)
-   local permission = Auth.check_permission(web, "application")
+   local permission, auth = Auth.check_permission(web, "application")
    local res = {}
    local row
 
@@ -126,7 +126,7 @@ function render_svc(web, obj_id, A)
    row[#row+1] = { "Numero", A.c_contact_num }
    row[#row+1] = { "Inventário", A.c_otherserial }
 
-   res[#res+1] = render_content_header("Hardware", nil, nil)
+   res[#res+1] = render_content_header(auth, "Hardware", nil, nil)
    res[#res+1] = render_table(row, nil)
 
 
@@ -137,7 +137,7 @@ function render_svc(web, obj_id, A)
    row[#row+1] = { "Software", A.sw_name }
    row[#row+1] = { "Versão", A.sv_name }
 
-   res[#res+1] = render_content_header("Software", nil, nil)
+   res[#res+1] = render_content_header(auth, "Software", nil, nil)
    res[#res+1] = render_table(row, nil)
 
   
@@ -147,7 +147,7 @@ function render_svc(web, obj_id, A)
    row = {}
    row[#row+1] = { "Status", "STATUS" }
 
-   res[#res+1] = render_content_header("Status", nil, nil)
+   res[#res+1] = render_content_header(auth, "Status", nil, nil)
    res[#res+1] = render_table(row, nil)
   
 
@@ -169,7 +169,7 @@ function render_app(web, obj_id, A)
       }
    end
 
-   res[#res+1] = render_content_header(A[1].name, nil, nil, lnkedt, lnkgeo)
+   res[#res+1] = render_content_header(auth, A[1].name, nil, nil, lnkedt, lnkgeo)
    res[#res+1] = render_table(row, nil)
 
    return render_layout(res)

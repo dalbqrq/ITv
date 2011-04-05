@@ -159,6 +159,7 @@ function insert(web)
    --app.service_object_id = web.input.service_object_id
    apps.instance_id = Model.db.instance_id
    apps.entities_id = auth.entity_id
+   apps.visibility = APP_VISIBILITY_PRIVATE
    apps:save()
 
    local app = apps:select(nil, "name = '"..web.input.name.."'")
@@ -271,7 +272,7 @@ function render_list(web, A, root, msg, no_header)
    local res = {}
    local row = {}
    local svc, stract
-   local permission = Auth.check_permission(web, "application")
+   local permission, auth = Auth.check_permission(web, "application")
 
    for i, v in ipairs(A) do
       local button_remove, button_edit, button_active = "-", "-", "-"
@@ -314,9 +315,9 @@ function render_list(web, A, root, msg, no_header)
    local header =  { strings.name, strings.type, strings.is_active, ".", ".", "." }
    if no_header == nil then
       if permission == "w" then
-         res[#res+1] = render_content_header(strings.application, web:link("/add"), web:link("/list"))
+         res[#res+1] = render_content_header(auth, strings.application, web:link("/add"), web:link("/list"))
       else
-         res[#res+1] = render_content_header(strings.application, nil, web:link("/list"))
+         res[#res+1] = render_content_header(auth, strings.application, nil, web:link("/list"))
       end
       res[#res+1] = render_form_bar( render_filter(web), strings.search, web:link("/list"), web:link("/list") )
       if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ font{ color="red", msg } } end
@@ -332,7 +333,7 @@ function render_add(web, edit)
    local val1, val2, strbar, link
    local add_link = web:link("/add")
    local res = {}
-   local permission = Auth.check_permission(web, "application", true)
+   local permission, auth = Auth.check_permission(web, "application", true)
    local auth = Auth.check(web)
 
    if edit then 
@@ -350,7 +351,7 @@ function render_add(web, edit)
       "<INPUT TYPE=HIDDEN NAME=\"is_active\" value=\"0\">",
    }
    
-   res[#res+1] = render_content_header(strings.application, add_link, web:link("/list"))
+   res[#res+1] = render_content_header(auth, strings.application, add_link, web:link("/list"))
    res[#res+1] = render_form_bar( inc, strbar, link, add_link )
 
    return render_layout(res)
@@ -360,7 +361,7 @@ end
 function render_remove(web, A)
    local res = {}
    local url = ""
-   local permission = Auth.check_permission(web, "application", true)
+   local permission, auth = Auth.check_permission(web, "application", true)
 
    if A then
       A = A[1]

@@ -1,4 +1,8 @@
 
+APP_VISIBILITY_PRIVATE = 0
+APP_VISIBILITY_ANCESTOR_ONLY = 1
+APP_VISIBILITY_PUBLIC = 2
+
 ----------------------------- SERVICE APP ----------------------------------
 
 function select_service_app (cond_, extra_, columns_)
