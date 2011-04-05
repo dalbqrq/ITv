@@ -431,7 +431,7 @@ function insert_subnode_app_tree(app_child, app_parent) -- Adiciona nós filhos 
          local lft = n.lft - origin.lft + p.rgt
          local rgt = n.rgt - origin.lft + p.rgt
          local node = { app_id=n.app_id, lft=lft, rgt=rgt, instance_id=n.instance_id, entity_id=n.entity_id }
-text_file_writer("/tmp/newnode", n.lft .." - ".. origin.lft .." + ".. p.rgt.." \n "..n.rgt .." - ".. origin.lft .." + ".. p.rgt.."\n")
+--text_file_writer("/tmp/newnode", n.lft .." - ".. origin.lft .." + ".. p.rgt.." \n "..n.rgt .." - ".. origin.lft .." + ".. p.rgt.."\n")
 
          insert  ( "itvision_app_trees", node)
       end
@@ -453,7 +453,7 @@ function delete_child_from_parent(child_app, parent_app)  -- remove sub aplicaca
       insert_subnode_app_tree(child_app, root.app_id)
       local o = Model.query("nagios_objects", "name1 = '"..config.monitor.check_app.."' and name2 = "..child_app)
       Model.insert("itvision_app_objects", 
-                    {app_id=parent_app, instance_id=config.database.instance_id, service_object_id=o[1].object_id, type="app"})
+            {app_id=parent_app, instance_id=config.database.instance_id, service_object_id=o[1].object_id, type="app"})
       delete_node_app_tree(child[1].id)
       return true
    elseif not is_last then

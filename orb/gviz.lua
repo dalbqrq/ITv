@@ -109,15 +109,16 @@ function render_show(web, app, app_name, app_id, obj, rel, obj_id, no_header)
       lnkedt = web:link("/list/"..app_id..":2") 
       web.prefix = "/orb"
    end
-   if auth then -- se nao estiver logado, valor de auth é "false" e não a arvore de autenticacao (mod Auth)
-      res[#res+1] = render_content_header(auth, strings.vision, nil, nil, nil)
-   end
+
 
    if no_header == nil then
       res[#res+1] = render_bar( { render_selector_bar(web, app, app_id, "/gviz/show"), 
          a{ href=lnkgeo,  "Mapa" } ,
          a{ href=lnkedt,  strings.edit } ,
       } )
+      if auth then -- se nao estiver logado, valor de auth é "false" e não a arvore de autenticacao (mod Auth)
+         res[#res+1] = render_content_header(auth, strings.vision, nil, nil, nil)
+      end
    else
       refresh_time = nil
    end

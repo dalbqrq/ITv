@@ -614,8 +614,8 @@ function render_tabs(t, active_tab)
       enableTabScroll: true, 
       resizeTabs: false, 
       plain: true, 
+      border: false, 
    ]]
-      --border: false, 
 
    obj[#obj+1] = "var tabpanel = new Ext.TabPanel({ "..tab_config.." items: ["
    for i,v in ipairs(t) do
@@ -646,7 +646,7 @@ function render_tabs(t, active_tab)
    res[#res+1] = div{ class='sep' }
    res[#res+1] = div{ id="tabspanel", class='center-h' }
    res[#res+1] = script{ type='text/javascript', obj }
-   res[#res+1] = div { id='tabcontent' }
+   --res[#res+1] = div { id='tabcontent' }
    --res[#res+1] = script{ type='text/javascript', "loadDefaultTab();" }
 
    return res

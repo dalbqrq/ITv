@@ -13,7 +13,6 @@ delete - ao se remover uma entidade, remove-se a aplicacoes e a retira da árvor
 update - altera-se o nome da respectiva aplicacao e, caso necessário, a reposiciona na arvore.
 replace - reposiciona a aplicacao na árvore de aplicacoes.
 
-
 ]]
 require "Model"
 require "App"
@@ -23,6 +22,15 @@ require "util"
 
 local entityfile = "/usr/local/itvision/scr/update_entity.queue"
 
+--[[ Adição de Entidade: 
+
+- cria nova aplicacao a partir do nome da entidade;
+- seleciona aplicacao pai (parent_app) a partir do campo entities_id da tabela glpi_entities;
+- recupera id da aplicacao criada e a coloca em child_app;
+- recupera nó da arvore de aplicacoes onde a nova aplicacao-entidade sera inserida e a coloca em parent_node
+- insere o novo nó na arvore atraves de metodo do pacote App
+
+]]
 function add_entity(id)
    --print("add: "..id)
    local entity = Model.query("glpi_entities e", "e.id = "..id)
@@ -41,7 +49,7 @@ function add_entity(id)
    }
    Model.insert("itvision_apps", new_app)
 
-   local child_app = Model.query("itvision_apps a", "entities_id = "..id.." and a.is_entity_root = true")
+   local child_app = Model.query("itvision_apps a", "entities_id = "..id.." and a.is_entity_root = 1")
    local parent_node = Model.query("itvision_apps a, itvision_app_trees t", 
             "a.id = t.app_id and a.is_entity_root = true and a.id = "..parent_app[1].app_id, nil, "t.id as origin")
 
@@ -49,8 +57,23 @@ function add_entity(id)
 end
 
 
+--[[ Remoção de Entidades: (o glpi so permite a remocao de uma entidade quando nao existem mais
+     IC associados a ela. Caso contrario, o processo vira uma troca (replace).
+
+TODO: Caso o usuário mova um IC de uma entidade para outra e esta pertence a uma aplicacao,
+      pade ocorrer uma dessincronia entre IC e Apps de uma entidade.
+
+- recupera nó a que a aplicacao-etidade pertence e a coloca em node;
+- remove o nó da arvore
+- remove qq aplicacao (incluindo objects e relats) que possa ainda haver dentro da entidade;
+- recria configuracao de nagios apps;
+
+]]
 function delete_entity(id)
-   --print("delete: "..id)
+   print("delete: "..id)
+   local entity = Model.query("glpi_entities e", "e.id = "..id)
+
+--[[
    local node = Model.query("itvision_app_trees t, itvision_apps a" , 
             "a.id = t.app_id and a.is_entity_root = true and a.entities_id = ".. id,
             nil, "t.id as origin")
@@ -59,6 +82,45 @@ function delete_entity(id)
      --print(node[1].origin)
      App.delete_node_app(node[1].origin)
    end
+   Model.delete("itvision_app_relats", "app_id in (select id from itvision_apps where entities_id = ".. id ..")")
+   Model.delete("itvision_app_objects", "app_id in (select id from itvision_apps where entities_id = ".. id ..")")
+   Model.delete("itvision_apps", "entities_id = ".. id)
+
+   local APPS = App.select_uniq_app_in_tree()
+   make_all_apps_config(APPS)
+]]
+   if entity[1] then
+      replace_entity(id, entity[1].entities_id)
+   end
+end
+
+--[[ Troca de entidade: (qdo se remove uma entidade que possui ICs associados)
+     Obs: o glpi só permite a troca (replace) de uma entidade pela sua entidade pai,
+
+- recupera nó a que a aplicacao-etidade pertence e a coloca em node;
+- recupera aplicacao pai e a coloca em parent_app
+- remove o nó da arvore
+- move todos os objetos que pertenciam a antiga aplicacao para a sua aplicacao pai
+- remove a aplicacao-entidade em questão
+- recria configuracao de nagios apps;
+
+]]
+function replace_entity(id, id2)
+   print("replace: "..id.." to "..id2)
+   -- VERIFICAR O CAMPO entity_id DE itvision_app_trees que parece nao estar sento atualizado coretamente
+   local node = Model.query("itvision_app_trees t, itvision_apps a" , 
+            "a.id = t.app_id and a.is_entity_root = true and a.entities_id = ".. id,
+            nil, "t.id as origin")
+   local parent_app = Model.query("itvision_apps a, itvision_app_trees t", 
+         "a.id = t.app_id and is_entity_root = true and a.entities_id = "..id2, nil, 
+         "a.id as app_id, t.id as node_id, a.service_object_id as object_id")
+
+   if node[1] then
+     --print(node[1].origin)
+     App.delete_node_app(node[1].origin)
+   end
+   Model.update("itvision_app_relats", {app_id = parent_app[1].id}, "app_id in (select id from itvision_apps where entities_id = ".. id ..")")
+   Model.update("itvision_app_objects", {app_id = parent_app[1].id}, "app_id in (select id from itvision_apps where entities_id = ".. id ..")")
    Model.delete("itvision_apps", "entities_id = ".. id)
 
    local APPS = App.select_uniq_app_in_tree()
@@ -66,21 +128,22 @@ function delete_entity(id)
 end
 
 
-function replace_entity(id, id2)
-   print("replace: "..id.." to "..id2)
--- CONTINUAR AQUI
+--[[ Atualizacao de Entidades: (id -> entidade a ser alterada; id2 -> entidade pai (que pode ser nova!)
 
--- VERIFICAR O CAMPO entity_id DE itvision_app_trees que parece nao estar sento atualizado coretamente
+- recupera entidade e a coloca em entity;
+- recupera aplicacao que deve ser alterada e a coloca em child_app;
+- recupera aplicacao pai que deve que pode ou nao ter sido alterada e a coloca em parent_app;
+- recupera a aplicacao pai de child_app a partir da arvore de aplicacoes e a coloca em parent_node;
+- atualiza nome da aplicacao-entidade;
+- caso tenha havido alteracao no pai da entidade,
+  - atualiza app_objects pois, qdo o objeto é uma aplicacao, o campo app_id é na também a aplicacao 
+    pai da aplicacao em questao;
+  - cria nova entrada na arvore de aplicacoes;
+  - remove a entrada agora velha;
 
--- FAZER A MIGRACAO DOS OBJETOS DA ENTIDADE PARA A ENTIDADE SUPERIOR
-
-   --App.delete_node_app(..)
-
-end
-
-
+]]
 function update_entity(id, id2)
-   --print("update: "..id.." to "..id2)
+   print("update: "..id.." to "..id2)
    local entity = Model.query("glpi_entities e", "e.id = "..id)
    local child_app = Model.query("itvision_apps a, itvision_app_trees t", 
          "a.id = t.app_id and is_entity_root = true and a.entities_id = "..id, nil, 
@@ -90,12 +153,12 @@ function update_entity(id, id2)
          "a.id as app_id, t.id as node_id, a.service_object_id as object_id")
 
    local parent_node = App.select_parent(child_app[1].app_id)
-   --print(entity[1].name, child_app[1].app_id, parent_app[1].app_id)
+   print(entity[1].name, child_app[1].app_id, parent_app[1].app_id)
 
    Model.update("itvision_apps", {name = entity[1].name}, "entities_id = "..id)
 
+   print(parent_app[1].node_id, parent_node[1].id, child_app[1].app_id, parent_app[1].app_id)
    if parent_node[1] and parent_app[1].node_id ~= parent_node[1].id then
-     --print(parent_app[1].node_id, parent_node[1].id, child_app[1].app_id, parent_app[1].app_id)
      Model.update("itvision_app_objects", {app_id = parent_app[1].app_id}, 
          "service_object_id = "..child_app[1].object_id.." and app_id = "..parent_node[1].app_id)
      App.insert_subnode_app_tree(child_app[1].app_id, parent_app[1].app_id)
