@@ -686,9 +686,10 @@ class Computer extends CommonDBTM {
       echo "<td>".'GeoTag'."&nbsp;:</td>";
       echo "<td>"; autocompletionTextField($this,'geotag'); echo "</td>";
       echo "</tr>";
+
 // -------------------------- daniel@itvision.com.br
 
-/* --------------- daniel@itvision.com.br - TRECHO RETIRADO DAQUI E RECOLOCAR (COPIADO) ABAIXO
+/* --------------- daniel@itvision.com.br - TRECHO RETIRADO DAQUI E RECOLOCADO (COPIADO) ABAIXO
       echo "<tr class='tab_bg_1'>";
       echo "<td colspan='2' class='center'>".$datestring.$date;
       if (!$template && !empty($this->fields['template_name'])) {
@@ -735,6 +736,17 @@ class Computer extends CommonDBTM {
 ------------------ daniel@itvision.com.br */
 
       echo "<tr class='tab_bg_1'>";
+      //echo "<td>".'Entidade'."&nbsp;:</td>";
+      //echo "<td>"; autocompletionTextField($this,'entity'); echo "</td>";
+      //echo "</tr>";
+
+      echo "<td>".$LANG['entity'][0]."&nbsp;:</td>";
+      echo "<td>";
+      Dropdown::show('Entity', array('value' => $this->fields["id"]));
+      //echo "</td></tr>\n";
+
+
+      //echo "<tr class='tab_bg_1'>";
       if (!empty($ID)
           && $this->fields["is_ocs_import"]
           && haveRight("view_ocsng","r")
@@ -857,6 +869,12 @@ class Computer extends CommonDBTM {
       $tab[159]['linkfield'] = '';
       $tab[159]['name']      = 'Alias';
       $tab[159]['datatype']  = 'text';
+
+      $tab[160]['table']     = 'glpi_entities';
+      $tab[160]['field']     = 'completename';
+      $tab[160]['linkfield'] = 'entity_id';
+      $tab[160]['name']      = $LANG['entity'][0];
+
 // -------------------------- daniel@itvision.com.br
 
 

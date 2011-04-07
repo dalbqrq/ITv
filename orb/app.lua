@@ -317,17 +317,14 @@ function render_list(web, A, root, msg, no_header)
    if no_header == nil then
       if permission == "w" then
          res[#res+1] = render_content_header(auth, strings.application, web:link("/add"), web:link("/list"))
-         --c_header[#c_header+1] = render_content_header(auth, strings.application, web:link("/add"), web:link("/list"))
       else
          res[#res+1] = render_content_header(auth, strings.application, nil, web:link("/list"))
-         --c_header[#c_header+1] = render_content_header(auth, strings.application, nil, web:link("/list"))
       end
       res[#res+1] = render_form_bar( render_filter(web), strings.search, web:link("/list"), web:link("/list") )
       if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ font{ color="red", msg } } end
    end
    res[#res+1] = render_table(row, header)
 
-   --return render_layout(c_header, res)
    return render_layout(res)
 end
 

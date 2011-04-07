@@ -34,7 +34,6 @@ ITvision:dispatch_get(list, "/", "/list")
 
 
 function show(web, id, no_header)
-   local auth = Auth.check(web)
    local app, app_name, obj_id
    local all_apps = apps:select_apps()
 
@@ -78,6 +77,7 @@ end
 
 
 function render_show(web, app, app_name, app_id, obj, rel, obj_id, no_header)
+   local auth = Auth.check(web)
    local res = {}
    local engene = "dot"
    local file_type = "png"
@@ -109,6 +109,10 @@ function render_show(web, app, app_name, app_id, obj, rel, obj_id, no_header)
       lnkedt = web:link("/list/"..app_id..":2") 
       web.prefix = "/orb"
    end
+   if auth then -- se nao estiver logado, valor de auth é "false" e não a arvore de autenticacao (mod Auth)
+      res[#res+1] = render_content_header(auth, strings.vision, nil, nil, nil)
+   end
+
    if no_header == nil then
       res[#res+1] = render_bar( { render_selector_bar(web, app, app_id, "/gviz/show"), 
          a{ href=lnkgeo,  "Mapa" } ,
@@ -117,7 +121,6 @@ function render_show(web, app, app_name, app_id, obj, rel, obj_id, no_header)
    else
       refresh_time = nil
    end
-   --res[#res+1] = render_content_header("", nil, nil, nil, lnkgeo)
    res[#res+1] = br()
    res[#res+1] = { imgmap }
    res[#res+1] = img{ 

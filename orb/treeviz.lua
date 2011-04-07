@@ -29,7 +29,6 @@ end
 
 
 function show(web, sep)
-   local auth = Auth.check(web)
    if sep then sep = tonumber(sep) else sep = 1 end
    local all_apps = apps:select_apps()
 
@@ -53,6 +52,7 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 
 
 function render_show(web, obj, rel, sep)
+   local auth = Auth.check(web)
    local res = {}
    local engene = "dot"
    local file_type = "png"
@@ -71,6 +71,7 @@ function render_show(web, obj, rel, sep)
    Graph.render(gv_name, file_type, engene, content)
    local imgmap = text_file_reader(mapfile)
 
+   res[#res+1] = render_content_header(auth, strings.vision, nil, nil, nil)
    res[#res+1] = render_bar( {
          a{ href=web:link("/show/0"),  "Unificada" } ,
          a{ href=web:link("/show/1"),  "Separada" } ,
