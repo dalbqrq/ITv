@@ -254,18 +254,20 @@ end
 
 
 ----------------------------------------------------------------------------------------------------------------------
-function select_parent (origin, app_id) -- Encontra noh pai
-   local root_id, root = {}
-   root_id, root = select_root_app_tree()
-   origin = origin or root_id
+function select_parent (app_id) -- Encontra noh pai - usado tipicamente para a inclusao de apps 
+    -- que representam entidades atraves de processo executado pelos scripts cron
    local content = {}
-
--- DANIEL - Continuar daqui....
 
    columns   = "parent.id, parent.instance_id, parent.lft, parent.rgt, parent.app_id"
    tablename = "itvision_app_trees AS node, itvision_app_trees AS parent"
-   cond      = "node.lft BETWEEN parent.lft AND parent.rgt AND node.id = " .. origin
+   cond      = "parent.lft < node.lft AND parent.rgt > node.rgt AND node.app_id = " .. app_id
    extra     = nil
+
+--[[
+   select parent.id, parent.instance_id, parent.lft, parent.rgt, parent.app_id
+   from itvision_app_trees AS node, itvision_app_trees AS parent
+   where parent.lft < node.lft AND parent.rgt > node.rgt AND node.app_id = 7
+]]
 
    content = query (tablename, cond, extra, columns)
 
@@ -346,7 +348,7 @@ function select_child_from_parent(app_child, app_parent) -- seleciona noh dado p
 end
 
 ----------------------------------------------------------------------------------------------------------------------
-function insert_node_app_tree(app_id, origin_, position_) -- Inclui novo noh
+function insert_node_app_tree(app_id, entity, origin_, position_) -- Inclui novo noh
    --[[   content_ deve conter o app_id a ser inserido na inclusao.
       Se origin_ for nulo, entao deve ser a primeira entrada na arvore.
       position pode ter os valores: 0 -> antes; 1 -> abaixo; 2 -> depois.
@@ -359,6 +361,7 @@ function insert_node_app_tree(app_id, origin_, position_) -- Inclui novo noh
    if origin_ then
       -- usuario deu a origem, entao verifica se ela existe
       content = query ("itvision_app_trees", "id = ".. origin_)
+      root = content[1]
    else
       -- usuario disse que é a primeira entrada. Isto eh verdade ou a arvore jah existe?
       root_id, root = select_root_app_tree()
@@ -397,8 +400,9 @@ function insert_node_app_tree(app_id, origin_, position_) -- Inclui novo noh
    end
 
    node.app_id = app_id
-   node.lft    = newLft
-   node.rgt    = newRgt
+   node.entity_id = entity
+   node.lft = newLft
+   node.rgt = newRgt
    node.instance_id = config.database.instance_id
 
    execute ( "LOCK TABLE itvision_app_trees WRITE" )
@@ -415,7 +419,7 @@ end
 
 ----------------------------------------------------------------------------------------------------------------------
 function insert_subnode_app_tree(app_child, app_parent) -- Adiciona nós filhos abaixo de todos os nos que possuiem app_id = app_parent
-                                    -- isso é feito tipicamente na inclusão de uma app como objeto de outra (subapp)
+                                  -- isso é feito tipicamente na inclusão de uma app como objeto de outra (subapp)
    local parents = query ("itvision_app_trees", "app_id = "..app_parent)
    local origin  = query("itvision_app_trees", "app_id = "..app_child, nil, "min(id) as id, app_id, lft, rgt, instance_id"); origin = origin[1]
    local subtree = select_full_path_app_tree(origin.id)

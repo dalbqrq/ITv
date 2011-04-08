@@ -163,7 +163,7 @@ function insert(web)
    apps:save()
 
    local app = apps:select(nil, "name = '"..web.input.name.."'")
-   App.insert_node_app_tree(app[1].id, nil, 1)
+   App.insert_node_app_tree(app[1].id, auth.entity_id, nil, 1)
    App.remake_apps_config_file()
 
    web.prefix = "/orb/app_tabs"

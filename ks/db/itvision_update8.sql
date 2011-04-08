@@ -1,6 +1,6 @@
 
-ALTER TABLE itvision.itvision_apps ADD COLUMN root_of_entity_id INT(11) NULL DEFAULT NULL AFTER entities_id;
+ALTER TABLE itvision.itvision_apps ADD COLUMN is_entity_root BOOLEAN NOT NULL DEFAULT false AFTER entities_id;
 
-UPDATE itvision.itvision_apps set root_of_entity_id = 0 where name = 'ROOT';
+--UPDATE itvision.itvision_apps set is_entity_root = true where name = 'ROOT';
 
 
