@@ -7,12 +7,12 @@ local entityfile = "/usr/local/itvision/scr/update_entity.queue"
 
 
 function add_entity(id)
-   print("add: "..id)
+   --print("add: "..id)
    local entity = Model.query("glpi_entities e", "e.id = "..id)
    local parent_app = Model.query("itvision_apps a, glpi_entities e", 
                "e.id = "..id.." and e.entities_id = a.entities_id and is_entity_root = true", 
                nil, "a.id as app_id")
-   print (parent_app[1].app_id, entity[1].name)
+   --print (parent_app[1].app_id, entity[1].name)
 
    new_app = {
       instance_id  = config.database.instance_id,
