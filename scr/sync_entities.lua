@@ -1,8 +1,11 @@
 --[[ 
 
-Este código deve ser executado por um serviço cron para sincronizaçao entre o glpi e o itvision.
+Este código deve ser executado diretamente do código php em "/servdesk/front/dropdown.common.form.php"
+como uma chamada externa incluida no referido arquivo php.
 
-Processa arquivo update_entity.queue criado através do "[glpi/servdesk]/front/dropdown.common.form.php
+Ele pode tambem ser executado por um serviço cron para sincronizaçao entre o glpi e o itvision.
+
+Desta forma, processa arquivo entity.queue criado através do "/servdesk/front/dropdown.common.form.php"
 que cria entradas a cada operacao executada com as entidades (através da tela de manipulacao de entidades
 do glpi). 
 
@@ -16,11 +19,11 @@ replace - reposiciona a aplicacao na árvore de aplicacoes.
 ]]
 require "Model"
 require "App"
-require "monitor_util"
 require "util"
+require "monitor_util"
 
 
-local entityfile = "/usr/local/itvision/scr/update_entity.queue"
+local entityfile = "/usr/local/itvision/scr/entity.queue"
 
 --[[ Adição de Entidade: 
 
@@ -31,7 +34,7 @@ local entityfile = "/usr/local/itvision/scr/update_entity.queue"
 - insere o novo nó na arvore atraves de metodo do pacote App
 
 ]]
-function add_entity(id)
+function entity_add(id)
    --print("add: "..id)
    local entity = Model.query("glpi_entities e", "e.id = "..id)
    local parent_app = Model.query("itvision_apps a, glpi_entities e", 
@@ -69,7 +72,7 @@ TODO: Caso o usuário mova um IC de uma entidade para outra e esta pertence a um
 - recria configuracao de nagios apps;
 
 ]]
-function delete_entity(id)
+function entity_delete(id)
    print("delete: "..id)
    local entity = Model.query("glpi_entities e", "e.id = "..id)
 
@@ -105,7 +108,7 @@ end
 - recria configuracao de nagios apps;
 
 ]]
-function replace_entity(id, id2)
+function entity_replace(id, id2)
    print("replace: "..id.." to "..id2)
    -- VERIFICAR O CAMPO entity_id DE itvision_app_trees que parece nao estar sento atualizado coretamente
    local node = Model.query("itvision_app_trees t, itvision_apps a" , 
@@ -142,7 +145,7 @@ end
   - remove a entrada agora velha;
 
 ]]
-function update_entity(id, id2)
+function entity_update(id, id2)
    print("update: "..id.." to "..id2)
    local entity = Model.query("glpi_entities e", "e.id = "..id)
    local child_app = Model.query("itvision_apps a, itvision_app_trees t", 
@@ -167,31 +170,18 @@ function update_entity(id, id2)
 end
 
 
-function processe_entity_queue()
-
+function sync_entities()
    local lines = line_reader(entityfile)
+   if not lines then return false end
+
    for _,l in ipairs(lines) do
-      local _, _, id, op, s, id2 = string.find(l, '(%d+) (%a+)( *)(%d*)')
-
-      if id2 then id2 = string.gsub(id2," ","") end
-
-      if op == "add" then
-         add_entity(id)
-      elseif op == "delete" then
-         delete_entity(id)
-      elseif op == "replace" then
-         replace_entity(id, id2)
-      elseif op == "update" then
-         update_entity(id, id2)
-      else
-         print("Unknown operation")
-      end
-
-      id, op, s, id2 = nil, nil, nil, nil
+      local _, _, op, arg1, s, arg2 = string.find(l, '(%a+) (%d+)( *)(%d*)')
+      if arg2 then arg2 = string.gsub(arg2," ","") end
+      execute_external_command(op, arg1, arg2)
+      op, arg1, s, arg2 = nil, nil, nil, nil
    end
 
-   --text_file_writer(entityfile, "") 
+   text_file_writer(entityfile, "") 
 end
 
 
-processe_entity_queue()

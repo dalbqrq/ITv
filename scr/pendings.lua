@@ -1,9 +1,13 @@
-require "update_apps"
-require "update_services"
-require "update_ip"
+require "sync_apps"
+require "sync_services"
+require "sync_ip"
+require "sync_entities"
 
 
-update_new_services()
-update_new_apps()
-update_ip()
+-- Pendings from Nagios
+sync_services()
+sync_apps()
 
+-- Externals from GLPI
+--sync_ip()
+--sync_entities()

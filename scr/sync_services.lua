@@ -2,7 +2,7 @@ require "Model"
 require "App"
 
 
-function update_new_services()
+function sync_services()
 
    local res = Model.query("itvision_monitors m, nagios_objects o", 
       "m.service_object_id = -1 and o.name1 = m.name1 and o.name2 = m.name2 and o.is_active = 1",
@@ -24,5 +24,4 @@ function update_new_services()
 
 end
 
---update_new_services()
 

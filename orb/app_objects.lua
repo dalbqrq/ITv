@@ -145,7 +145,7 @@ function delete_obj(web, app_id, obj_id)
      end
 
       if subapp[1] then
-         App.delete_child_from_parent(subapp[1].name2, app_id)
+         --App.delete_child_from_parent(subapp[1].name2, app_id)
       end
    end
 

@@ -453,7 +453,7 @@ function delete_child_from_parent(child_app, parent_app)  -- remove sub aplicaca
       insert_subnode_app_tree(child_app, root.app_id)
       local o = Model.query("nagios_objects", "name1 = '"..config.monitor.check_app.."' and name2 = "..child_app)
       Model.insert("itvision_app_objects", 
-            {app_id=parent_app, instance_id=config.database.instance_id, service_object_id=o[1].object_id, type="app"})
+         {app_id=parent_app, instance_id=config.database.instance_id, service_object_id=o[1].object_id, type="app"})
       delete_node_app_tree(child[1].id)
       return true
    elseif not is_last then
