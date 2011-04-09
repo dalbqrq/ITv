@@ -15,11 +15,13 @@ local apps = Model.itvision:model "apps"
 
 -- models ------------------------------------------------------------
 
-function apps:select_apps(id)
+function apps:select_apps(id, clause_)
    local clause = " is_active = 1 "
    if id then
-      clause = " id = "..id
+      clause = clause.." and  id = "..id
    end
+   if clause_ then clause = clause.." and "..clause_ end
+
    return Model.query("itvision_apps", clause, "order by id")
 end
 
@@ -34,30 +36,22 @@ ITvision:dispatch_get(list, "/", "/list")
 
 
 function show(web, id, no_header)
-   local app, app_name, obj_id
-   local all_apps = apps:select_apps()
+   local clause = " entities_id in "..Auth.make_entity_clause(Auth.check(web))
+   local all_apps = apps:select_apps(nil, clause)
 
    if id == "/show" then
       if all_apps[1] then 
          id = all_apps[1].id 
-         if config.database.instance_name == "VERTO" then
-           id = 48
-         end
       else
          return render_blank(web)
       end
    end
 
-   app = apps:select_apps(id)
-
-   -- para presentacao Verto
-   --if id == "/show" and app[1] then id = 31 end
-   --local app = apps:select_apps(id)
-   --local obj = Model.select_app_to_graph(id)
+   local app = apps:select_apps(id)
    local obj = Monitor.select_monitors_app_objs(id)
    local rel = App.select_app_relat_to_graph(id)
-   app_name = app[1].name
-   obj_id = app[1].service_object_id
+   local obj_id = app[1].service_object_id
+   local app_name = app[1].name
 
    return render_show(web, all_apps, app_name, id, obj, rel, obj_id, no_header)
 end

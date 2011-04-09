@@ -639,7 +639,7 @@ function make_query_10(a_id, clause)
       and a_.id in ( select distinct(app_id) from itvision_app_trees )
    ]]
 
-   if a_id then cond_ = cond_ .. " and a.id = " .. a_id end
+   if a_id then cond_ = cond_ .. " and a_.id = " .. a_id end
    if clause then cond_ = cond_ .. " and " .. clause end
 
    q = Model.query(tables_, cond_, nil, columns_)
@@ -673,7 +673,7 @@ function make_query_11(a_id, clause)
       and s_.service_object_id not in (select service_object_id from nagios_servicestatus)
    ]]
 
-   if a_id then cond_ = cond_ .. " and a.id = " .. a_id end
+   if a_id then cond_ = cond_ .. " and a_.id = " .. a_id end
    if clause then cond_ = cond_ .. " and " .. clause end
 
    columns_ = columns_..",\n"..zeros_

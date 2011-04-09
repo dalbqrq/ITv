@@ -273,12 +273,13 @@ end
 
 
 ----------------------------------------------------------------------------------------------------------------------
-function select_tree_relat_to_graph() -- Lista apps e seus filhos
+function select_tree_relat_to_graph(clause) -- Lista apps e seus filhos
    local content = {}
       columns   = [[ t.id as id, lft, rgt, app_id ]]
       tablename = [[ itvision_app_trees t, itvision_apps a ]]
       cond      = [[  a.id = t.app_id
          and a.is_active = 1 and a.service_object_id is not null ]]
+      if clause then cond = cond.." and "..clause end
    local nodes = query(tablename, cond, nil, columns)
 
    for i,v in ipairs(nodes) do
@@ -290,6 +291,8 @@ function select_tree_relat_to_graph() -- Lista apps e seus filhos
       cond      = [[ child.lft BETWEEN ]]..v.lft..[[+1 AND ]]..v.rgt..[[-1 AND
          ancestor.id IS NULL 
          AND child.app_id = a.id AND a.is_active = 1 ]]
+
+      if clause then cond = cond.." and "..clause end
 
       local child = query (tablename, cond, nil, columns)
       for j,w in ipairs(child) do
