@@ -187,9 +187,9 @@ function make_entity_clause(auth)
       if clause == "" then clause = "(" else clause = clause..", " end
       clause = clause..tonumber(v)
    end
-   clause = clause..")"
-   --text_file_writer("/tmp/prof.lua", table.dump(auth))
+   clause = clause..") "
 
+   --text_file_writer("/tmp/prof.lua", table.dump(auth))
    return clause
 end
 

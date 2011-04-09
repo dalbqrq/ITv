@@ -209,14 +209,7 @@ printf "html/gv\norb/config.lua\nbin/dbconf\nbin/lua_path\n" >> $itvhome/.git/in
 sed -i -e 's/ErrorLog \/var\/log\/apache2\/error.log/ErrorLog \/var\/log\/itvision\/apache2\/error.log/g' \
 	-e 's/CustomLog \/var\/log\/apache2\/other_vhosts_access.log/CustomLog \/var\/log\/itvision\/apache2\/other_vhosts_access.log/g' /etc/apache2/apache2.conf
 
-
-echo "INSERT INTO itvision.itvision_apps set instance_id = 1, entities_id = 0, name = 'ROOT';" | mysql -u root --password=$dbpass
-echo "INSERT INTO itvision.itvision_app_trees set instance_id = 1, app_id = (select id from itvision_apps where name = 'ROOT' and is_active = 0), lft = 1, rgt = 2;"  | mysql -u root --password=$dbpass $dbname
-echo "INSERT INTO itvision.itvision_app_relat_types VALUES (1,'roda em','logical'),(2,'conectado a','physical'),(3,'usa','logical'),(4,'faz backup em','logical');" | mysql -u root --password=$dbpass $dbname
-
-
-
-
+mysql -u root --password=$dbpass $dbname < $itvhome/ks/db/itvision_init.sql
 
 
 # --------------------------------------------------

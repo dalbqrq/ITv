@@ -67,14 +67,18 @@ end
 
 
 function add(web, id, msg)
-   local clause = " "
+   local clause
+   local auth = Auth.check(web)
+   local clause = " and p.entities_id in "..Auth.make_entity_clause(auth)
    local exclude = [[ o.object_id not in ( select service_object_id from itvision_app_objects where app_id = ]]..id..[[) 
                       and o.is_active = 1 ]]
    local extra   = [[ order by o.name1, o.name2 ]]
    local HST = Monitor.make_query_3(nil, nil, nil, exclude .. clause .. extra)
-   clause = [[ and o.name2 <> ']]..config.monitor.check_host..[[' ]]
+   clause = clause..[[ and o.name2 <> ']]..config.monitor.check_host..[[' ]]
    local SVC = Monitor.make_query_4(nil, nil, nil, nil, exclude .. clause .. extra)
-   local APP = App.select_app_service_object(nil, nil, nil, id)
+
+   local clause = " a.entities_id in "..Auth.make_entity_clause(auth)
+   local APP = App.select_app_service_object(clause, nil, nil, id)
    local APPOBJ = App.select_app_app_objects(id)
 
    return render_add(web, HST, SVC, APP, APPOBJ, id, msg)

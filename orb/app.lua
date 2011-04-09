@@ -100,8 +100,9 @@ end
 -- controllers ------------------------------------------------------------
 
 function list(web, msg)
-   local clause = nil
-   if web.input.app_name then clause = " name like '%"..web.input.app_name.."%' " end
+   local auth = Auth.check(web)
+   local clause = " entities_id in "..Auth.make_entity_clause(auth)
+   if web.input.app_name then clause = clause.." and name like '%"..web.input.app_name.."%' " end
 
    local A, root = apps:select(nil, clause)
    return render_list(web, A, root, msg)
@@ -111,7 +112,8 @@ ITvision:dispatch_post(list, "/list")
 
 
 function show(web, id)
-   local clause = "id = "..id
+   local auth = Auth.check(web)
+   local clause = "id = "..id.." and entities_id in "..Auth.make_entity_clause(auth)
    local A, root = apps:select(nil, clause)
    local no_header = true
    return render_list(web, A, root, nil, no_header)
