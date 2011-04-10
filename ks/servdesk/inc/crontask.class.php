@@ -1053,7 +1053,7 @@ class CronTask extends CommonDBTM{
       }
       // included by daniel@itvision.com.br
       $nc=0;
-      foreach (glob(GLPI_SESSION_DIR."/proc_*") as $filename) {
+      foreach (glob(GLPI_SESSION_DIR."/prof_*") as $filename) {
          if (filemtime($filename) + $maxlifetime < time()) {
             // Delete session file if not delete before
             if (@unlink($filename)) {

@@ -36,7 +36,9 @@ ITvision:dispatch_get(list, "/", "/list")
 
 
 function show(web, id, no_header)
-   local clause = " entities_id in "..Auth.make_entity_clause(Auth.check(web))
+   local auth = Auth.check(web)
+   local clause = nil
+   if auth then  clause = " entities_id in "..Auth.make_entity_clause(auth) end
    local all_apps = apps:select_apps(nil, clause)
 
    if id == "/show" then

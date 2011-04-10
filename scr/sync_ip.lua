@@ -13,7 +13,7 @@ function ip_update(id)
    local m = Model.query("itvision_monitors", "networkports_id = "..id)
 
    if m[1] then
-      --print ("name1 and name2: ", m[1].name1, m[1].name2, n[1].ip)
+      --DEBUG print ("name1 and name2: ", m[1].name1, m[1].name2, n[1].ip)
       insert_host_cfg_file (m[1].name1, m[1].name1, n[1].ip)
    end
 end
@@ -55,6 +55,9 @@ function ip_delete(id)
 end
 
 
+--[[ Esta funcao está caduca pois os comandos são repassados direamente do php para o external.sh 
+     que chama o código acima
+
 function sync_ip()
 
    local lines = line_reader(ipfile)
@@ -74,6 +77,8 @@ function sync_ip()
 
    text_file_writer(ipfile, "") 
 end
+
+]]--
 
 
 

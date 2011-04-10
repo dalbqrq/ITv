@@ -66,24 +66,29 @@ function update_apps()
 end
 
 
-function add(web, id, msg)
-   local clause
-   local auth = Auth.check(web)
-   local clause = " and p.entities_id in "..Auth.make_entity_clause(auth)
-   local exclude = [[ o.object_id not in ( select service_object_id from itvision_app_objects where app_id = ]]..id..[[) 
+function add(web, app_id, msg)
+   local clause = nil
+   local entity_auth = Auth.make_entity_clause(Auth.check(web))
+   if not App.is_visible(app_id, entity_auth) then
+      web.prefix = "/orb/no_permission"
+      return web:redirect(web:link("/"))
+   end
+
+   clause = " and p.entities_id in "..entity_auth
+   local exclude = [[ o.object_id not in ( select service_object_id from itvision_app_objects where app_id = ]]..app_id..[[) 
                       and o.is_active = 1 ]]
    local extra   = [[ order by o.name1, o.name2 ]]
    local HST = Monitor.make_query_3(nil, nil, nil, exclude .. clause .. extra)
    clause = clause..[[ and o.name2 <> ']]..config.monitor.check_host..[[' ]]
    local SVC = Monitor.make_query_4(nil, nil, nil, nil, exclude .. clause .. extra)
 
-   local clause = " a.entities_id in "..Auth.make_entity_clause(auth)
-   local APP = App.select_app_service_object(clause, nil, nil, id)
-   local APPOBJ = App.select_app_app_objects(id)
+   clause = " a.entities_id in "..entity_auth
+   local APP = App.select_app_service_object(clause, nil, nil, app_id)
+   local APPOBJ = App.select_app_app_objects(app_id)
 
-   return render_add(web, HST, SVC, APP, APPOBJ, id, msg)
+   return render_add(web, HST, SVC, APP, APPOBJ, app_id, msg)
 end
-ITvision:dispatch_get(add, "/add/", "/add/(%d+)", "/add/(%d+):(.+)")
+ITvision:dispatch_get(add, "/add/(%d+)", "/add/(%d+):(.+)")
 
 
 

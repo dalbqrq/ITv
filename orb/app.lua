@@ -162,6 +162,7 @@ function insert(web)
    apps.instance_id = Model.db.instance_id
    apps.is_entity_root = 0
    apps.entities_id = auth.session.glpiactive_entity
+   apps.app_type_id = 2 -- leva em conta que a inicializacao da tabela itvision_app_type colocou o tipo aplicacao com id=1
    apps.visibility = APP_VISIBILITY_PRIVATE
    apps:save()
 

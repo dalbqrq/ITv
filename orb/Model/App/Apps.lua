@@ -34,6 +34,7 @@ function select_app (cond_, extra_, columns_)
 end
 
 
+
 function insert_app (content_)
    local table_ = "itvision_apps"
    insert (table_, content_)
@@ -71,7 +72,7 @@ function remake_apps_config_file()
 end
 
 
------------------------------ APP LIST ----------------------------------
+----------------------------- APP OBJECTS ----------------------------------
 
 function select_app_object (cond_, extra_, columns_)
    local content = query ("itvision_app_objects", cond_, extra_, columns_)

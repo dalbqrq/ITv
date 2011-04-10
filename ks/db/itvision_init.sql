@@ -9,4 +9,6 @@ SET    instance_id = 1, app_id = (select id from itvision_apps where name = 'ROO
 INSERT INTO itvision.itvision_app_relat_types 
 VALUES (1,'roda em','logical'),(2,'conectado a','physical'),(3,'usa','logical'),(4,'faz backup em','logical');
 
+INSERT INTO itvision.itvision_app_type 
+VALUES (1,'Entidade'),(2,'Aplicação');
 

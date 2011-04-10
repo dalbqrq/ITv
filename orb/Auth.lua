@@ -1,6 +1,7 @@
 module("Auth", package.seeall)
 
 require "Glpi"
+require "App"
 
 -- COOKIES ------------------------------------------------------------------------------
 
@@ -64,8 +65,6 @@ function is_logged_at_glpi(web)
 
    local prof_filename = session_path.."/prof_"..glpi_cookie..".lua"
    text_file_writer(prof_filename, table.dump(prof_))
-   --[[
-   ]]
 
    --[[ 
        buscar em 'sess_filename' as strings abaixo 
@@ -120,6 +119,23 @@ function check_permission(web, field, redirect_if_not_write_perm)
    end
 end
 
+
+-- 'entity_list' deve ser o resultado da chamada do metodo 'Auth.make_entity_clause(Auth.check(web))'
+-- onde web é recebido pelo Orbit por um dos metodos do tipo controler.
+-- Este metodo é usado para dar autorizacao para a visualizacao de uma aplicacao.
+function check_entity_permission(web, app_id)
+   if app_id then
+
+      local entity_auth = make_entity_clause(check(web))
+      local cond_ = "id = "..app_id.." and entities_id in "..entity_auth
+      local app = App.select_app(cond_)
+
+      if app[1] then return true end
+   end
+
+   web.prefix = "/orb/no_permission"
+   return web:redirect(web:link("/"))
+end
 
 
 function get_phpuserid()

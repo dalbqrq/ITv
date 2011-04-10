@@ -1,0 +1,7 @@
+#!/usr/bin/env wsapi.cgi
+
+require "no_permission"
+
+return ITvision
+
+
