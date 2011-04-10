@@ -15,6 +15,7 @@ function find_node_id(app_id, conected_to_root)
 
 ----------------------------------------------------------------------------------------------------------------------
 function select_root_app_tree () 		-- Seleciona o noh raiz da arvore
+function select_root_name_app_tree ()		-- Seleciona o nome do noh raiz da arvore
 function select_full_path_app_tree (origin) 	-- Seleciona toda sub-arvore a patir de um noh de origem
 function select_leaf_nodes_app_tree () 		-- Seleciona todas as folhas da arvore
 function select_simple_path_app_tree (origin) 	-- Seleciona um unico caminho partindo de um noh 
@@ -116,6 +117,31 @@ function select_root_app_tree () -- Seleciona o noh raiz da arvore
    end
 end
 
+
+
+----------------------------------------------------------------------------------------------------------------------
+function select_root_entity_tree (entity_id) -- Seleciona o noh raiz de uma entidade
+   local root = query ("itvision_apps a, itvision_app_trees t", 
+             "a.id = t.app_id and is_entity_root = 1 and entities_id = "..entity_id, 
+              nil, "t.id, t.entity_id, t.lft, t.rgt" )
+   if root[1] then
+      return root[1].id, root[1]
+   else
+      return nil, nil
+   end
+end
+
+
+
+----------------------------------------------------------------------------------------------------------------------
+function select_root_name_app_tree () -- Seleciona o nome do noh raiz da arvore
+   local root = query ("itvision_app_trees t, itvision_apps a", "a.id = t.app_id and t.lft = 1", nil, "a.name, a.id, a.entities_id")
+   if root[1] then
+      return root[1].id, root[1]
+   else
+      return nil, nil
+   end
+end
 
 ----------------------------------------------------------------------------------------------------------------------
 function select_full_path_app_tree (origin) -- Seleciona toda sub-arvore a patir de um noh de origem
@@ -364,7 +390,8 @@ function insert_node_app_tree(app_id, entity, origin_, position_) -- Inclui novo
       root = content[1]
    else
       -- usuario disse que é a primeira entrada. Isto eh verdade ou a arvore jah existe?
-      root_id, root = select_root_app_tree()
+      --root_id, root = select_root_app_tree()
+      root_id, root = select_root_entity_tree(entity)
    end
 
    if not origin_ and not root_id then

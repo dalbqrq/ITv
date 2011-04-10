@@ -68,11 +68,8 @@ end
 
 function add(web, app_id, msg)
    local clause = nil
+   if app_id then Auth.check_entity_permission(web, app_id) end
    local entity_auth = Auth.make_entity_clause(Auth.check(web))
-   if not App.is_visible(app_id, entity_auth) then
-      web.prefix = "/orb/no_permission"
-      return web:redirect(web:link("/"))
-   end
 
    clause = " and p.entities_id in "..entity_auth
    local exclude = [[ o.object_id not in ( select service_object_id from itvision_app_objects where app_id = ]]..app_id..[[) 
@@ -82,7 +79,7 @@ function add(web, app_id, msg)
    clause = clause..[[ and o.name2 <> ']]..config.monitor.check_host..[[' ]]
    local SVC = Monitor.make_query_4(nil, nil, nil, nil, exclude .. clause .. extra)
 
-   clause = " a.entities_id in "..entity_auth
+   clause = " ( a.entities_id in "..entity_auth.." or a.visibility = 1 )"
    local APP = App.select_app_service_object(clause, nil, nil, app_id)
    local APPOBJ = App.select_app_app_objects(app_id)
 
@@ -194,7 +191,16 @@ function make_app_objects_table(web, A)
       elseif v.obj_type == "svc" then
          obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.ip..")", v.name)
       else
-         obj = v.name.." #"
+         local tag = ""
+         if v.app_type_id == "1" then
+            tag = " +"
+         elseif v.app_type_id == "2" then
+            tag = " #"
+         else
+            tag = " -"
+         end
+
+         obj = v.name..tag
          web.prefix = "/orb/app_tabs"
          obj = button_link(obj, web:link("/list/"..v.id..":"..tab_id), "negative")
          web.prefix = "/orb/app_objects"
@@ -212,7 +218,7 @@ function make_app_objects_table(web, A)
 
       row[#row + 1] = { 
          obj,
-         name_hst_svc_app(v.obj_type),
+         name_hst_svc_app(v.obj_type, v.is_entity_root),
          remove_button
       }
    end

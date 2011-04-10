@@ -125,22 +125,6 @@ CREATE TABLE `itvision_app_type` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `itvision_app_viewers`
---
-
-DROP TABLE IF EXISTS `itvision_app_viewers`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `itvision_app_viewers` (
-  `instance_id` smallint(6) NOT NULL,
-  `app_id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  KEY `fk_id4` (`app_id`),
-  CONSTRAINT `fk_id4` FOREIGN KEY (`app_id`) REFERENCES `itvision_apps` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
 -- Table structure for table `itvision_apps`
 --
 

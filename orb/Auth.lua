@@ -125,7 +125,6 @@ end
 -- Este metodo é usado para dar autorizacao para a visualizacao de uma aplicacao.
 function check_entity_permission(web, app_id)
    if app_id then
-
       local entity_auth = make_entity_clause(check(web))
       local cond_ = "id = "..app_id.." and entities_id in "..entity_auth
       local app = App.select_app(cond_)

@@ -35,27 +35,28 @@ end
 ITvision:dispatch_get(list, "/", "/list")
 
 
-function show(web, id, no_header)
+function show(web, app_id, no_header)
    local auth = Auth.check(web)
    local clause = nil
    if auth then  clause = " entities_id in "..Auth.make_entity_clause(auth) end
    local all_apps = apps:select_apps(nil, clause)
 
-   if id == "/show" then
+   if app_id == "/show" then
       if all_apps[1] then 
-         id = all_apps[1].id 
+         app_id = all_apps[1].id 
       else
          return render_blank(web)
       end
    end
+   if app_id then Auth.check_entity_permission(web, app_id) end
 
-   local app = apps:select_apps(id)
-   local obj = Monitor.select_monitors_app_objs(id)
-   local rel = App.select_app_relat_to_graph(id)
+   local app = apps:select_apps(app_id)
+   local obj = Monitor.select_monitors_app_objs(app_id)
+   local rel = App.select_app_relat_to_graph(app_id)
    local obj_id = app[1].service_object_id
    local app_name = app[1].name
 
-   return render_show(web, all_apps, app_name, id, obj, rel, obj_id, no_header)
+   return render_show(web, all_apps, app_name, app_id, obj, rel, obj_id, no_header)
 end
 ITvision:dispatch_get(show,"/show", "/show/(%d+)", "/show/(%d+):(%d+)")
 

@@ -33,7 +33,6 @@ function render_list(web, app_id, active_tab, msg)
       { title="Objetos", html="", href="/orb/app_objects/add/"..app_id..msg }, 
       { title="Relacionamentos", html="", href="/orb/app_relats/add/"..app_id }, 
       { title="Contatos", html="", href="/orb/app_contacts/add/"..app_id }, 
-      { title="Vizualizadores", html="", href="/orb/app_viewers/add/"..app_id }, 
       { title="Visão Gráfica", html="", href="/orb/gviz/show/"..app_id..":1" }, 
    }
 

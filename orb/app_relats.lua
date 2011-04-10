@@ -47,12 +47,13 @@ end
 -- controllers ------------------------------------------------------------
 
 
-function add(web, id, msg)
-   local APPOBJ = App.select_app_app_objects(id)
-   local AR = App.select_app_relat_object(id)
+function add(web, app_id, msg)
+   if app_id then Auth.check_entity_permission(web, app_id) end
+   local APPOBJ = App.select_app_app_objects(app_id)
+   local AR = App.select_app_relat_object(app_id)
    local RT = app_relat_types:select_app_relat_types()
 
-   return render_add(web, APPOBJ, AR, RT, id, msg)
+   return render_add(web, APPOBJ, AR, RT, app_id, msg)
 
 end
 ITvision:dispatch_get(add, "/add/", "/add/(%d+)", "/add/(%d+):(.+)")

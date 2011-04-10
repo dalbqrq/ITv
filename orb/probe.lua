@@ -138,6 +138,7 @@ end
 function list(web, msg)
    local auth = Auth.check(web)
    local clause = nil
+
    if web.input.hostname ~= "" and web.input.hostname ~= nil then clause = "c.name like '%"..web.input.hostname.."%' " end
    if web.input.inventory ~= "" and web.input.inventory ~= nil then 
       local a = ""

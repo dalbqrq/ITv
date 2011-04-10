@@ -486,6 +486,22 @@ function select_and_or(name, default)
 end
 
 
+-- PUBLIC or PRIVATE (usado na visibilidade das aplicacoes)
+PrivateOrPublic = {
+   { id = 0, name = strings.private },
+   { id = 1, name = strings.public },
+}
+
+function name_private_public(id)
+   return choose_name(PrivateOrPublic, id)
+end
+
+function select_private_public(name, default)
+   return select_option(name, PrivateOrPublic, "id", "name", default)
+end
+
+
+
 -- PHYSICAL or LOGICAL
 PhysicalOrLogical = {
    { id = "physical", name = strings.physical },
@@ -506,10 +522,12 @@ HostOrServiceOrApp = {
    { id = "hst", name = strings.host },
    { id = "svc", name = strings.service},
    { id = "app", name = strings.application},
+   { id = "ent", name = strings.entity},
 }
 
-function name_hst_svc_app(id)
-   return choose_name(HostOrServiceOrApp, id)
+function name_hst_svc_app(id, is_entity)
+   if is_entity then id = "ent" end
+   return choose_name(HostOrServiceOrApp, id, is_entity)
 end
 
 function select_hst_svc_app(name, default)
@@ -517,7 +535,7 @@ function select_hst_svc_app(name, default)
 end
 
 
-function choose_name(opts, id)
+function choose_name(opts, id, is_entity)
    for _, v in ipairs(opts) do
       if v.id == id then
          return v.name
