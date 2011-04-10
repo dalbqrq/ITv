@@ -1,0 +1,11 @@
+
+
+sed -i.orig -e "s/user                    nagios/user                    $user/" \
+        -e "s/group                   nagios/group                   $user/" \
+        -e "s/serviceextinfo          \/etc\/nagios3\/serviceextinfo.cfg/serviceextinfo          \/etc\/monitor\/conf.d\/serviceextinfo.cfg/" \
+        -e "s/serviceext_path         \/etc\/nagiosgrapher\/nagios3\/serviceext/serviceext_path         \/etc\/monitor\/services/" \
+        -e "s/\/var\/log\/nagiosgrapher\/ngraph.log/\/var\/log\/itvision\/nagiosgrapher\/ngraph.log/" \
+        -e "s/nagiosadmin/$user/" \
+        -e "s/nagios3/monitor/" /etc/nagiosgrapher/ngraph.ncfg
+
+
