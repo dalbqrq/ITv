@@ -520,7 +520,7 @@ class Computer extends CommonDBTM {
          $datestring = $LANG['computers'][14]." : ";
          $date       = convDateTime($_SESSION["glpi_currenttime"]);
       } else {
-         $datestring = $LANG['common'][26].": "; // daniel
+         $datestring = $LANG['common'][26].": "; // daniel@itvision.com.br
          $date       = convDateTime($this->fields["date_mod"]);
          $template   = false;
       }
@@ -686,9 +686,10 @@ class Computer extends CommonDBTM {
       echo "<td>".'GeoTag'."&nbsp;:</td>";
       echo "<td>"; autocompletionTextField($this,'geotag'); echo "</td>";
       echo "</tr>";
+
 // -------------------------- daniel@itvision.com.br
 
-/* --------------- daniel@itvision.com.br - TRECHO RETIRADO DAQUI E RECOLOCAR (COPIADO) ABAIXO
+/* --------------- daniel@itvision.com.br - TRECHO RETIRADO DAQUI E RECOLOCADO (COPIADO) ABAIXO
       echo "<tr class='tab_bg_1'>";
       echo "<td colspan='2' class='center'>".$datestring.$date;
       if (!$template && !empty($this->fields['template_name'])) {
@@ -754,7 +755,22 @@ class Computer extends CommonDBTM {
       echo "</td></tr>";
 
 // -------------------------- daniel@itvision.com.br - TRECHO RECOLOCADO NO FINAL 
+
+
       echo "<tr class='tab_bg_1'>";
+      // daniel@itvision.com.br - para alteracao de entidade
+      if ( haveRight("computer","w") ) {
+         echo "<td>".$LANG['entity'][0]."&nbsp;:</td>";
+         echo "<td>";
+         Dropdown::show('Entity', array('value' => $this->fields["entities_id"]));
+         //echo "</td></tr>";
+         echo "</td>";
+      } else {
+         echo "<td colspan=2></td>";
+      }
+      // daniel@itvision.com.br
+
+      //echo "<tr class='tab_bg_1'>";
       echo "<td colspan='2' class='center'>".$datestring.$date;
       if (!$template && !empty($this->fields['template_name'])) {
          echo "&nbsp;&nbsp;&nbsp;(".$LANG['common'][13]."&nbsp;: ".$this->fields['template_name'].")";
@@ -796,7 +812,7 @@ class Computer extends CommonDBTM {
             echo $LANG['common'][52]." ".OcsServer::getServerNameByID($ID);
          }
       }
-      echo "<td colspan=2></td>"; // -- ESTE LINHA TEVE QUE SER COLOCADA PARA COMPLETAR A TABELA.
+      //echo "<td colspan=2></td>"; // -- ESTE LINHA TEVE QUE SER COLOCADA PARA COMPLETAR A TABELA.
       echo "</td></tr>\n";
 // -------------------------- daniel@itvision.com.br
 
@@ -857,6 +873,7 @@ class Computer extends CommonDBTM {
       $tab[159]['linkfield'] = '';
       $tab[159]['name']      = 'Alias';
       $tab[159]['datatype']  = 'text';
+
 // -------------------------- daniel@itvision.com.br
 
 

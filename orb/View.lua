@@ -486,6 +486,22 @@ function select_and_or(name, default)
 end
 
 
+-- PUBLIC or PRIVATE (usado na visibilidade das aplicacoes)
+PrivateOrPublic = {
+   { id = 0, name = strings.private },
+   { id = 1, name = strings.public },
+}
+
+function name_private_public(id)
+   return choose_name(PrivateOrPublic, id)
+end
+
+function select_private_public(name, default)
+   return select_option(name, PrivateOrPublic, "id", "name", default)
+end
+
+
+
 -- PHYSICAL or LOGICAL
 PhysicalOrLogical = {
    { id = "physical", name = strings.physical },
@@ -506,10 +522,12 @@ HostOrServiceOrApp = {
    { id = "hst", name = strings.host },
    { id = "svc", name = strings.service},
    { id = "app", name = strings.application},
+   { id = "ent", name = strings.entity},
 }
 
-function name_hst_svc_app(id)
-   return choose_name(HostOrServiceOrApp, id)
+function name_hst_svc_app(id, is_entity)
+   if is_entity then id = "ent" end
+   return choose_name(HostOrServiceOrApp, id, is_entity)
 end
 
 function select_hst_svc_app(name, default)
@@ -517,7 +535,7 @@ function select_hst_svc_app(name, default)
 end
 
 
-function choose_name(opts, id)
+function choose_name(opts, id, is_entity)
    for _, v in ipairs(opts) do
       if v.id == id then
          return v.name
@@ -569,9 +587,8 @@ function render_content_header(auth, name, add, list, edit, geotag, back)
             title=auth.session.glpiactive_entity_shortname, class='entity_select', 
             id='global_entity_select', auth.session.glpiactive_entity_shortname } }
 
-      --myul[#myul+1] = li{ Auth.make_entity_clause(auth) }
+      --DEBUG myul[#myul+1] = li{ Auth.make_entity_clause(auth) }
    end
-
 
    return div{ id='menu_navigate', div { id='c_ssmenu2', ul{ myul } } }
 end
@@ -614,8 +631,8 @@ function render_tabs(t, active_tab)
       enableTabScroll: true, 
       resizeTabs: false, 
       plain: true, 
+      border: false, 
    ]]
-      --border: false, 
 
    obj[#obj+1] = "var tabpanel = new Ext.TabPanel({ "..tab_config.." items: ["
    for i,v in ipairs(t) do
@@ -646,7 +663,7 @@ function render_tabs(t, active_tab)
    res[#res+1] = div{ class='sep' }
    res[#res+1] = div{ id="tabspanel", class='center-h' }
    res[#res+1] = script{ type='text/javascript', obj }
-   res[#res+1] = div { id='tabcontent' }
+   --res[#res+1] = div { id='tabcontent' }
    --res[#res+1] = script{ type='text/javascript', "loadDefaultTab();" }
 
    return res

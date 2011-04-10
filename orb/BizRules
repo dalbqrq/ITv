@@ -9,7 +9,6 @@
 	excluir todos objetos de _app_objects
 	excluir todos relacionamentos de _app_relats
 	excluir todos contatos de _app_contacts
-	excluir todos vizualizadores de _app_viewers
 	excluir app de _apps
 	excluir nó de _app_trees
 	mover filhos de nó para o pai de nó em _app_trees

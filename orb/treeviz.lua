@@ -15,30 +15,31 @@ local apps = Model.itvision:model "apps"
 
 -- models ------------------------------------------------------------
 
-function apps:select_apps(id)
+function apps:select_apps(id, clause_)
    local clause = " is_active = 1 "
    if id then
-      clause = " id = "..id
+      clause = clause.." and  id = "..id
    end
+   if clause_ then clause = clause.." and "..clause_ end
+
    return Model.query("itvision_apps", clause, "order by id")
 end
-
 
 
 -- controllers ---------------------------------------------------------
 
 
 function show(web, sep)
-   local auth = Auth.check(web)
+   local clause = Auth.make_entity_clause(Auth.check(web))
    if sep then sep = tonumber(sep) else sep = 1 end
-   local all_apps = apps:select_apps()
+   local all_apps = apps:select_apps(nil, " entities_id in "..clause)
 
    if not all_apps[1] then 
       return render_blank(web)
    end
 
-   local obj = Monitor.select_monitors_app_objs_to_tree()
-   local rel = App.select_tree_relat_to_graph()
+   local obj = Monitor.select_monitors_app_objs_to_tree(nil, " a_.entities_id in "..clause)
+   local rel = App.select_tree_relat_to_graph(" a.entities_id in "..clause)
 
    return render_show(web, obj, rel, sep)
 end
@@ -53,6 +54,7 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 
 
 function render_show(web, obj, rel, sep)
+   local auth = Auth.check(web)
    local res = {}
    local engene = "dot"
    local file_type = "png"
@@ -71,6 +73,7 @@ function render_show(web, obj, rel, sep)
    Graph.render(gv_name, file_type, engene, content)
    local imgmap = text_file_reader(mapfile)
 
+   res[#res+1] = render_content_header(auth, strings.vision, nil, nil, nil)
    res[#res+1] = render_bar( {
          a{ href=web:link("/show/0"),  "Unificada" } ,
          a{ href=web:link("/show/1"),  "Separada" } ,

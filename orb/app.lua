@@ -34,7 +34,7 @@ function apps:select(id, clause_)
    extra  = " order by name "
 
    local content = Model.query("itvision_apps", clause, extra)
-   local root = App.select_root_app()
+   --UNUSED: local root = App.select_root_app()
 
    return content, root, count
 end
@@ -100,30 +100,36 @@ end
 -- controllers ------------------------------------------------------------
 
 function list(web, msg)
-   local clause = nil
-   if web.input.app_name then clause = " name like '%"..web.input.app_name.."%' " end
-
-   local A, root = apps:select(nil, clause)
+   local auth = Auth.check(web)
+   local clause = " entities_id in "..Auth.make_entity_clause(auth)
+   if web.input.app_name then clause = clause.." and name like '%"..web.input.app_name.."%' " end
+   --OLD: local A, root = apps:select(nil, clause)
+   local A = App.select_app(clause)
+   local root = App.select_root_app()
    return render_list(web, A, root, msg)
 end
 ITvision:dispatch_get(list, "/", "/list", "/list/(.+)")
 ITvision:dispatch_post(list, "/list")
 
 
-function show(web, id)
-   local clause = "id = "..id
-   local A, root = apps:select(nil, clause)
+function show(web, app_id)
+   if app_id then Auth.check_entity_permission(web, app_id) end
+   local auth = Auth.check(web)
+   local clause = "id = "..app_id.." and entities_id in "..Auth.make_entity_clause(auth)
+   --OLD: local A, root = apps:select(nil, clause)
+   local A = App.select_app(clause)
+   local root = App.select_root_app()
    local no_header = true
    return render_list(web, A, root, nil, no_header)
 end 
 ITvision:dispatch_get(show, "/show/(%d+)")
 
 
-function edit(web, id, nm, tp)
-   local edt = { id = id, name = nm, type = tp }
+function edit(web, id, nm, tp, vz)
+   local edt = { id = id, name = nm, type = tp, visibility = vz }
    return render_add(web, edt)
 end
-ITvision:dispatch_get(edit, "/edit/(%d+):(.+):(%a+)")
+ITvision:dispatch_get(edit, "/edit/(%d+):(.+):(%a+):(%d)")
 
 
 function update(web, id)
@@ -134,6 +140,7 @@ function update(web, id)
       A.name = web.input.name
       A.type = web.input.type
       --A.is_active = web.input.is_active
+      A.visibility = web.input.visibility
       A.service_object_id = web.input.service_object_id
       Model.update (tables, A, clause) 
    end
@@ -156,14 +163,16 @@ function insert(web)
    apps.name = web.input.name
    apps.type = web.input.type
    apps.is_active = web.input.is_active
-   --app.service_object_id = web.input.service_object_id
+   apps.service_object_id = nil
    apps.instance_id = Model.db.instance_id
+   apps.is_entity_root = 0
    apps.entities_id = auth.session.glpiactive_entity
-   apps.visibility = APP_VISIBILITY_PRIVATE
+   apps.app_type_id = 2 -- leva em conta que a inicializacao da tabela itvision_app_type colocou o tipo aplicacao com id=1
+   apps.visibility = web.input.visibility
    apps:save()
 
    local app = apps:select(nil, "name = '"..web.input.name.."'")
-   App.insert_node_app_tree(app[1].id, nil, 1)
+   App.insert_node_app_tree(app[1].id, auth.entity_id, nil, 1)
    App.remake_apps_config_file()
 
    web.prefix = "/orb/app_tabs"
@@ -193,7 +202,6 @@ function delete(web, id)
       Model.delete ("itvision_app_objects", "app_id = "..id) 
       Model.delete ("itvision_app_relats", "app_id = "..id) 
       Model.delete ("itvision_app_contacts", "app_id = "..id) 
-      Model.delete ("itvision_app_viewers", "app_id = "..id) 
       Model.delete ("itvision_apps", "id = "..id) 
    end
 
@@ -273,20 +281,21 @@ function render_list(web, A, root, msg, no_header)
    local row = {}
    local svc, stract
    local permission, auth = Auth.check_permission(web, "application")
+   local tag = ""
 
    for i, v in ipairs(A) do
       local button_remove, button_edit, button_active = "-", "-", "-"
+      local category = strings.entity
 
-      --web.prefix = "/orb/app_objects"
-      --local lnk = web:link("/list/"..v.id)
       web.prefix = "/orb/app_tabs"
       local lnk = web:link("/list/"..v.id..":1")
       web.prefix = "/orb/app"
 
-      if v.id ~= root then 
+      if v.is_entity_root == "0" then
+         category = strings.application
          button_remove = button_link(strings.remove, web:link("/remove/"..v.id), "negative")
+         button_edit   = button_link(strings.edit, web:link("/edit/"..v.id..":"..v.name..":"..v.type..":"..v.visibility))
       end
-      button_edit   = button_link(strings.edit, web:link("/edit/"..v.id..":"..v.name..":"..v.type))
 
       if v.is_active == "0" then
          stract = strings.activate
@@ -301,33 +310,41 @@ function render_list(web, A, root, msg, no_header)
          button_active = "-"
       end
 
+      -- leva em conta a inicializacao padrao da tabela itvision_app_type
+      if v.app_type_id == "1" then
+         tag = " +"
+      elseif v.app_type_id == "2" then
+         tag = " #"
+      else
+         tag = " -"
+      end
 
       row[#row+1] = {
-         a{ href=lnk, v.name.." #" },
+         a{ href=lnk, v.name..tag },
+         v.entity_completename,
+         category,
          strings["logical_"..v.type],
          NoOrYes[tonumber(v.is_active)+1].name,
+         PrivateOrPublic[tonumber(v.visibility)+1].name,
          button_remove,
          button_edit,
          button_active,
       }
    end
 
-   local header =  { strings.name, strings.type, strings.is_active, ".", ".", "." }
+   local header =  { strings.name, strings.entity, strings.type, strings.logic, strings.is_active, strings.visibility,".", ".", "." }
    local c_header = {}
    if no_header == nil then
       if permission == "w" then
          res[#res+1] = render_content_header(auth, strings.application, web:link("/add"), web:link("/list"))
-         --c_header[#c_header+1] = render_content_header(auth, strings.application, web:link("/add"), web:link("/list"))
       else
          res[#res+1] = render_content_header(auth, strings.application, nil, web:link("/list"))
-         --c_header[#c_header+1] = render_content_header(auth, strings.application, nil, web:link("/list"))
       end
       res[#res+1] = render_form_bar( render_filter(web), strings.search, web:link("/list"), web:link("/list") )
       if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ font{ color="red", msg } } end
    end
    res[#res+1] = render_table(row, header)
 
-   --return render_layout(c_header, res)
    return render_layout(res)
 end
 
@@ -346,12 +363,13 @@ function render_add(web, edit)
    else 
       strbar = strings.add 
       link = web:link("/insert")
-      edit = { id = 0, name = "", type = "" }
+      edit = { id = 0, name = "", type = "", visibility = "" }
    end
 
    local inc = {
       strings.name..": ", input{ type="text", name="name", value = edit.name }, " ",
-      strings.type..": ", select_and_or("type", edit.type ),  " ",
+      strings.logic..": ", select_and_or("type", edit.type ),  " ",
+      strings.visibility..": ", select_private_public("visibility", edit.visibility ),  " ",
       "<INPUT TYPE=HIDDEN NAME=\"is_active\" value=\"0\">",
    }
    

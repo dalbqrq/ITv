@@ -1,0 +1,16 @@
+
+APLICACOES E ENTIDADES
+
+- Com base vazia, somente com inicializacao do sistema, criar os ICs:
+    . localhost;
+    . software Apache, OpenSSH e MySQL e instala-los em localhost;
+    . outro computador qualquer;
+    . outros dois equipamentos de rede quaiquer;
+- Criar os checkcomands (checagens) de todos os ICs acima;
+- Criar a aplicacao ITvision colocando todos os objetos relacionados a localhost (hosts e services);
+- Ativar a aplicacao ITvision e depois a aplicacao ROOT;
+- Remover a aplicacao ROOT de dentro dela própria (BUG que aparece somente nesta inicializacao da arvore de apps);
+- Criar duas entidades (verificar se arvore foi criada corretamente da base de dados);
+- Mover o "outro computador" e um equipamento de rede para as entidades criadas pelo CMDB;
+- 
+

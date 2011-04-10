@@ -240,6 +240,7 @@ function line_reader(filename)
    return lines
 end
 
+
 function line_writer(filename, table_of_tables)
    -- Empty file
    local f = io.open(filename, 'w')
@@ -264,6 +265,13 @@ function text_file_reader(filename)
    end
 
    return text
+end
+
+
+function text_file_appender(filename, text)
+   local f = io.open(filename, 'a')
+   f:write(text)
+   f:close()
 end
 
 

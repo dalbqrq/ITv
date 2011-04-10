@@ -1,25 +1,25 @@
 require "Model"
 require "App"
-require "monitor_util"
 require "util"
+require "monitor_util"
 
 local ipfile = "/usr/local/itvision/scr/update_ip.queue"
 
 
-function update_ip_address(id)
+function ip_update(id)
    print("update: "..id)
 
    local n = Model.query("glpi_networkports", "id = "..id)
    local m = Model.query("itvision_monitors", "networkports_id = "..id)
 
    if m[1] then
-      --print ("name1 and name2: ", m[1].name1, m[1].name2, n[1].ip)
+      --DEBUG print ("name1 and name2: ", m[1].name1, m[1].name2, n[1].ip)
       insert_host_cfg_file (m[1].name1, m[1].name1, n[1].ip)
    end
 end
 
 
-function delete_ip_address(id)
+function ip_delete(id)
    print("delete: "..id)
    local m = Model.query("itvision_monitors", "networkports_id = "..id)
 
@@ -55,16 +55,21 @@ function delete_ip_address(id)
 end
 
 
-function update_ip()
+--[[ Esta funcao está caduca pois os comandos são repassados direamente do php para o external.sh 
+     que chama o código acima
+
+function sync_ip()
 
    local lines = line_reader(ipfile)
+   if not lines then return false end
+
    for _,l in ipairs(lines) do
       local _, _, n_id, op = string.find(l, '(%d+) (%a+)')
 
       if op == "update" then
-         update_ip_address(n_id)
+         ip_update(n_id)
       elseif op == "delete" then
-         delete_ip_address(n_id)
+         ip_delete(n_id)
       else
          print("Unknown operation")
       end
@@ -73,6 +78,7 @@ function update_ip()
    text_file_writer(ipfile, "") 
 end
 
+]]--
 
---update_ip()
+
 

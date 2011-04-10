@@ -52,10 +52,6 @@ if (isset($_POST["id"])) {
 if (isset($_POST["add"])) {
    $dropdown->check(-1,'w',$_POST);
 
-   if ($dropdown instanceof Entity) {
-   exec("echo ". $_POST["id"]." add >> /usr/local/itvision/scr/update_entity.queue");
-   }
-
    if ($newID=$dropdown->add($_POST)) {
       $dropdown->refreshParentInfos();
       if ($dropdown instanceof CommonDevice) {
@@ -65,6 +61,14 @@ if (isset($_POST["add"])) {
          Event::log($newID, get_class($dropdown), 4, "setup",$_SESSION["glpiname"]." added ".$_POST["name"].".");
       }
    }
+
+   // included by daniel@itvision.com.br
+   // Se a operacao for a inclusão de uma entidade, executa externals.sh
+   if ($dropdown instanceof Entity) {
+      exec("/usr/local/itvision/scr/externals.sh ENTITY_ADD ". $newID);
+      exec("echo ENTITY_ADD ". $newID." >> /usr/local/itvision/scr/entity.queue");
+   }
+
    glpi_header($_SERVER['HTTP_REFERER']);
 
 } else if (isset($_POST["delete"])) {
@@ -75,6 +79,13 @@ if (isset($_POST["add"])) {
       $dropdown->showDeleteConfirmForm($_SERVER['PHP_SELF']);
       commonFooter();
    } else {
+      // included by daniel@itvision.com.br
+      // Se a operacao for a delecao de uma entidade, executa externals.sh
+      if ($dropdown instanceof Entity) {
+         exec("/usr/local/itvision/scr/externals.sh ENTITY_DELETE ". $_POST["id"]);
+         exec("echo ENTITY_DELETE ". $_POST["id"]." >> /usr/local/itvision/scr/entity.queue");
+      }
+
       $dropdown->delete($_POST, 1);
       $dropdown->refreshParentInfos();
 
@@ -83,6 +94,13 @@ if (isset($_POST["add"])) {
    }
 
 } else if (isset($_POST["replace"])) {
+   // included by daniel@itvision.com.br
+   // Se a operacao for a replace de uma entidade, executa externals.sh
+   if ($dropdown instanceof Entity) {
+      exec("/usr/local/itvision/scr/externals.sh ENTITY_REPLACE ". $_POST["id"]." ". $_POST["_replace_by"]);
+      exec("echo ENTITY_REPLACE ". $_POST["id"]." ". $_POST["_replace_by"]." >> /usr/local/itvision/scr/entity.queue");
+   }
+
    $dropdown->check($_POST["id"],'w');
    $dropdown->delete($_POST, 1);
    $dropdown->refreshParentInfos();
@@ -94,6 +112,13 @@ if (isset($_POST["add"])) {
    $dropdown->check($_POST["id"],'w');
    $dropdown->update($_POST);
    $dropdown->refreshParentInfos();
+
+   // included by daniel@itvision.com.br
+   // Se a operacao for a update de uma entidade, executa externals.sh
+   if ($dropdown instanceof Entity) {
+      exec("/usr/local/itvision/scr/externals.sh ENTITY_UPDATE ". $_POST["id"]." ". $_POST["entities_id"]);
+      exec("echo ENTITY_UPDATE ". $_POST["id"]." ". $_POST["entities_id"]." >> /usr/local/itvision/scr/entity.queue");
+   }
 
    Event::log($_POST["id"], get_class($dropdown), 4, "setup", $_SESSION["glpiname"]." ".$LANG['log'][21]);
    glpi_header($_SERVER['HTTP_REFERER']);

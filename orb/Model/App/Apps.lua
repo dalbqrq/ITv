@@ -1,7 +1,6 @@
 
 APP_VISIBILITY_PRIVATE = 0
-APP_VISIBILITY_ANCESTOR_ONLY = 1
-APP_VISIBILITY_PUBLIC = 2
+APP_VISIBILITY_PUBLIC = 1
 
 ----------------------------- SERVICE APP ----------------------------------
 
@@ -28,10 +27,33 @@ end
 
 ----------------------------- APP ----------------------------------
 
-function select_app (cond_, extra_, columns_)
-   local content = query ("itvision_apps", cond_, extra_, columns_)
+-- Retorna as aplicacoes já com os nomes da entidades e os seus estados (nagios_servicestatus).
+-- POREM... por enquanto tenho que remover o status pois, depois que uma app é criada ela nao
+--   tem nagios_objects nem status. A solucao é parecida com as make_queries do modulo Monitor.
+function select_app (cond__, extra_, columns_)
+--   local tables_  = [[  itvision_apps a, nagios_servicestatus ss ,
+--                        (select a.entities_id as entity_id, a.name as entity_name, a.name as entity_completename 
+--                         from itvision_app_trees t, itvision_apps a 
+--                         where a.id = t.app_id and t.lft=1
+--                         union 
+--                         select id as entity_id, name as entity_name, completename asentity_completename 
+--                         from glpi_entities) as e ]]
+--   local cond_   = [[ a.entities_id = e.entity_id and a.service_object_id = ss.service_object_id ]]
+   local tables_  = [[  itvision_apps a,
+                        (select a.entities_id as entity_id, a.name as entity_name, a.name as entity_completename 
+                         from itvision_app_trees t, itvision_apps a 
+                         where a.id = t.app_id and t.lft=1
+                         union 
+                         select id as entity_id, name as entity_name, completename asentity_completename 
+                         from glpi_entities) as e ]]
+   local cond_   = [[ a.entities_id = e.entity_id ]]
+
+   if cond__ then cond_ = cond_.." and "..cond__ end
+   local content = query (tables_, cond_, extra_, columns_)
+
    return content
 end
+
 
 
 function insert_app (content_)
@@ -71,7 +93,7 @@ function remake_apps_config_file()
 end
 
 
------------------------------ APP LIST ----------------------------------
+----------------------------- APP OBJECTS ----------------------------------
 
 function select_app_object (cond_, extra_, columns_)
    local content = query ("itvision_app_objects", cond_, extra_, columns_)
@@ -119,7 +141,8 @@ function select_app_app_objects (id)
    local tables_ = [[ nagios_objects o, itvision_app_objects ao, itvision_apps a, itvision_apps ab ]]
    local columns_ = [[ o.object_id, o.objecttype_id, o.name1, o.name2, ao.type as obj_type, a.id as 
 	app_id, a.name as a_name, a.type as a_type, a.is_active, a.service_object_id as service_id, 
-        NULL as itemtype, NULL as items_id, o.name2 as name2, ab.name as name, ab.id as id ]]
+        NULL as itemtype, NULL as items_id, o.name2 as name2, ab.name as name, ab.id as id,
+        a.app_type_id, a.is_entity_root ]]
    local content2 = query (tables_, cond_, extra_, columns_)
 
    for _,v in ipairs(content2) do

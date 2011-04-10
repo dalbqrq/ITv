@@ -66,20 +66,26 @@ function update_apps()
 end
 
 
-function add(web, id, msg)
-   local clause = " "
-   local exclude = [[ o.object_id not in ( select service_object_id from itvision_app_objects where app_id = ]]..id..[[) 
+function add(web, app_id, msg)
+   local clause = nil
+   if app_id then Auth.check_entity_permission(web, app_id) end
+   local entity_auth = Auth.make_entity_clause(Auth.check(web))
+
+   clause = " and p.entities_id in "..entity_auth
+   local exclude = [[ o.object_id not in ( select service_object_id from itvision_app_objects where app_id = ]]..app_id..[[) 
                       and o.is_active = 1 ]]
    local extra   = [[ order by o.name1, o.name2 ]]
    local HST = Monitor.make_query_3(nil, nil, nil, exclude .. clause .. extra)
-   clause = [[ and o.name2 <> ']]..config.monitor.check_host..[[' ]]
+   clause = clause..[[ and o.name2 <> ']]..config.monitor.check_host..[[' ]]
    local SVC = Monitor.make_query_4(nil, nil, nil, nil, exclude .. clause .. extra)
-   local APP = App.select_app_service_object(nil, nil, nil, id)
-   local APPOBJ = App.select_app_app_objects(id)
 
-   return render_add(web, HST, SVC, APP, APPOBJ, id, msg)
+   clause = " ( a.entities_id in "..entity_auth.." or a.visibility = 1 )"
+   local APP = App.select_app_service_object(clause, nil, nil, app_id)
+   local APPOBJ = App.select_app_app_objects(app_id)
+
+   return render_add(web, HST, SVC, APP, APPOBJ, app_id, msg)
 end
-ITvision:dispatch_get(add, "/add/", "/add/(%d+)", "/add/(%d+):(.+)")
+ITvision:dispatch_get(add, "/add/(%d+)", "/add/(%d+):(.+)")
 
 
 
@@ -185,7 +191,16 @@ function make_app_objects_table(web, A)
       elseif v.obj_type == "svc" then
          obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.ip..")", v.name)
       else
-         obj = v.name.." #"
+         local tag = ""
+         if v.app_type_id == "1" then
+            tag = " +"
+         elseif v.app_type_id == "2" then
+            tag = " #"
+         else
+            tag = " -"
+         end
+
+         obj = v.name..tag
          web.prefix = "/orb/app_tabs"
          obj = button_link(obj, web:link("/list/"..v.id..":"..tab_id), "negative")
          web.prefix = "/orb/app_objects"
@@ -203,7 +218,7 @@ function make_app_objects_table(web, A)
 
       row[#row + 1] = { 
          obj,
-         name_hst_svc_app(v.obj_type),
+         name_hst_svc_app(v.obj_type, v.is_entity_root),
          remove_button
       }
    end

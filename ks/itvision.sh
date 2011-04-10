@@ -91,6 +91,7 @@ install_pack rrdtool # NEDI
 install_pack mbrola # Synthesizing Voice
 install_pack mrbrola-br3 # Synthesizing Voice
 install_pack festival # Synthesizing Voice
+install_pack jhead 
 
 
 # --------------------------------------------------
@@ -180,12 +181,15 @@ view = {
 
 path = {
         itvision = "$itvhome",
+	log = "/var/log/itvision",
 }
 
 language = "pt_BR"
 EOF
 chown -R $user.$user $itvhome/orb/config.lua
 
+mkdir /var/log/itvision
+chown -R $user.$user /var/log/itvision
 
 cd /home/$user
 ln -s $itvhome itv
@@ -205,13 +209,7 @@ printf "html/gv\norb/config.lua\nbin/dbconf\nbin/lua_path\n" >> $itvhome/.git/in
 sed -i -e 's/ErrorLog \/var\/log\/apache2\/error.log/ErrorLog \/var\/log\/itvision\/apache2\/error.log/g' \
 	-e 's/CustomLog \/var\/log\/apache2\/other_vhosts_access.log/CustomLog \/var\/log\/itvision\/apache2\/other_vhosts_access.log/g' /etc/apache2/apache2.conf
 
-
-echo "INSERT INTO itvision.itvision_apps set instance_id = 1, entities_id = 0, name = 'ROOT';" | mysql -u root --password=$dbpass
-echo "INSERT INTO itvision.itvision_app_trees set instance_id = 1, app_id = (select id from itvision_apps where name = 'ROOT' and is_active = 0), lft = 1, rgt = 2;"  | mysql -u root --password=$dbpass $dbname
-echo "INSERT INTO itvision.itvision_app_relat_types VALUES (1,'roda em','logical'),(2,'conectado a','physical'),(3,'usa','logical'),(4,'faz backup em','logical');" | mysql -u root --password=$dbpass $dbname
-
-
-
+mysql -u root --password=$dbpass $dbname < $itvhome/ks/db/itvision_init.sql
 
 
 # --------------------------------------------------
@@ -285,11 +283,11 @@ sed -i.orig2 -e "s/process_performance_data=0/process_performance_data=1/" \
 
 sed -i.orig -e "s/user                    nagios/user                    $user/" \
         -e "s/group                   nagios/group                   $user/" \
-	-e "s/serviceextinfo          \/etc\/nagios3\/serviceextinfo.cfg/serviceextinfo          \/etc\/nagios3\/conf.d\/serviceextinfo.cfg/" \
-	-e "s/serviceext_path         \/etc\/nagiosgrapher\/nagios3\/serviceext/serviceext_path         \/etc\/nagios3\/services/" \
+	-e "s/serviceextinfo          \/etc\/nagios3\/serviceextinfo.cfg/serviceextinfo          \/etc\/monitor\/conf.d\/serviceextinfo.cfg/" \
+	-e "s/serviceext_path         \/etc\/nagiosgrapher\/nagios3\/serviceext/serviceext_path         \/etc\/monitor\/services/" \
 	-e "s/\/var\/log\/nagiosgrapher\/ngraph.log/\/var\/log\/itvision\/nagiosgrapher\/ngraph.log/" \
-        -e "s/nagiosadmin/$user/" /etc/nagiosgrapher/ngraph.ncfg
-
+        -e "s/nagiosadmin/$user/" \
+	-e "s/nagios3/monitor/" /etc/nagiosgrapher/ngraph.ncfg
 
 chown -R $user.$user /var/lib/nagiosgrapher /etc/nagiosgrapher /var/run/nagiosgrapher /var/log/itvision/nagiosgrapher /var/cache/nagiosgrapher /usr/share/perl5/NagiosGrapher /usr/lib/nagiosgrapher /usr/sbin/nagiosgrapher
 cat /etc/nagiosgrapher/nagios3/commands.cfg >> /etc/nagios3/commands.cfg 
@@ -306,6 +304,21 @@ echo << EOF > /usr/share/nagios3/htdocs/grapher.html
 EOF
 
 sed -i.orig -e "s/NagiosGrapher by NETWAYS GMBH/ITvision/g" /usr/lib/cgi-bin/nagiosgrapher/rrd2-system.cgi
+
+cd /etc
+ln -s /etc/nagios3 monitor
+chown -R $user.$user monitor
+cd /usr/share
+ln -s /usr/share/nagios3 monitor
+chown -R $user.$user monitor
+cd /usr/lib/
+ln -s /usr/lib/nagios3 monitor
+chown -R $user.$user monitor
+cd /usr/lib/cgi-bin
+ln -s /usr/lib/cgi-bin/nagios3 monitor
+chown -R $user.$user monitor
+
+
 
 # --------------------------------------------------
 # NDO UTILS - Nagios
@@ -490,9 +503,29 @@ echo "Alias /nedi "/usr/local/nedi/html"
 
 ln -s /usr/local/nedi/nedi.conf /etc/nedi.conf
 
+cat << EOF > /usr/local/nedi/startnedi.sh
+start nedi from crontab. Creates logfiles
+opts="-Apovb"
+CMD="./nedi.pl $opts"
+LOGPATH="/var/log/itvision/nedi"
+LOGFILE="$LOGPATH/nedi.log"
+LASTRUN="$LOGPATH/lastrun.log"
+cd /opt/nedi
+now=`date +%Y%m%d:%H%M`
+echo "#$now start # $CMD" > $LASTRUN
+echo "#$now start" >> $LOGFILE
+$($CMD >> $LASTRUN)
+tail -8 $LASTRUN >> $LOGFILE
+now=`date +%Y%m%d:%H%M`
+echo "#$now stop" >> $LOGFILE
+echo "#$now stop" >> $LASTRUN'
+EOF
 
+chmod +x /usr/local/nedi/startnedi.sh
+sudo mkdir /var/log/itvision/nedi.log
+sudo chown -R $user:$user /var/log/itvision/nedi /usr/local/nedi
 
-
+echo "15 0,4,8,12,16,20 * * * /usr/local/nedi/startnedi.sh  # Discover and gather device configurations NEDI" >> /var/spool/cron/crontabs/$user
 
 # --------------------------------------------------
 # SMTP GMAIL APPS

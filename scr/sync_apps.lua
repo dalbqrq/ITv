@@ -2,7 +2,7 @@ require "Model"
 require "App"
 
 
-function update_new_apps()
+function sync_apps()
    --   local udt = [[ update itvision_apps a set service_object_id = 
    --         (select object_id from nagios_objects o where a.id = o.name2 and name1 = ']]..
    --         config.monitor.check_app..[[') where a.service_object_id is null ]]
@@ -22,5 +22,4 @@ function update_new_apps()
 
 end
 
---update_new_apps()
 

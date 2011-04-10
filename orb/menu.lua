@@ -39,14 +39,14 @@ function render_menu(web, item, subitem)
       if i == item then active = "current" end
       itens[#itens+1] = li{ a{ class=active, href=js, onClick="changeHead('/orb/menu/"..i..":1')", v.name } }
    end
-   itens[#itens+1] = li{ a{ class="logout", href=js, onClick="changePage('/orb/menu/0:0', '/orb/login/logout')", 
-                            "Logout: "..auth.user_name } }
+   itens[#itens+1] = li{ a{ class="logout", href=js, 
+                     onClick="changePage('/orb/menu/0:0', '/orb/login/logout')", "Logout: "..auth.user_name } }
 
    for i,v in ipairs(menu_itens[item].submenu) do
       local active = ""
       if i == subitem then active = "current" end
-      subitens[#subitens+1] = li{ a{ class=active, href=js, onClick="changePage('/orb/menu/"..item..":"..i.."','"..v.link.."')", 
-                                     v.name } }
+      subitens[#subitens+1] = li{ a{ class=active, href=js, 
+                              onClick="changePage('/orb/menu/"..item..":"..i.."','"..v.link.."')", v.name } }
    end
 
    return { ul{ id="tablist", itens }, ul{ id="subtablist", subitens } }

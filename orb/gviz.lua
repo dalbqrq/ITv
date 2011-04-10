@@ -15,11 +15,13 @@ local apps = Model.itvision:model "apps"
 
 -- models ------------------------------------------------------------
 
-function apps:select_apps(id)
+function apps:select_apps(id, clause_)
    local clause = " is_active = 1 "
    if id then
-      clause = " id = "..id
+      clause = clause.." and  id = "..id
    end
+   if clause_ then clause = clause.." and "..clause_ end
+
    return Model.query("itvision_apps", clause, "order by id")
 end
 
@@ -33,34 +35,28 @@ end
 ITvision:dispatch_get(list, "/", "/list")
 
 
-function show(web, id, no_header)
+function show(web, app_id, no_header)
    local auth = Auth.check(web)
-   local app, app_name, obj_id
-   local all_apps = apps:select_apps()
+   local clause = nil
+   if auth then  clause = " entities_id in "..Auth.make_entity_clause(auth) end
+   local all_apps = apps:select_apps(nil, clause)
 
-   if id == "/show" then
+   if app_id == "/show" then
       if all_apps[1] then 
-         id = all_apps[1].id 
-         if config.database.instance_name == "VERTO" then
-           id = 48
-         end
+         app_id = all_apps[1].id 
       else
          return render_blank(web)
       end
    end
+   if app_id then Auth.check_entity_permission(web, app_id) end
 
-   app = apps:select_apps(id)
+   local app = apps:select_apps(app_id)
+   local obj = Monitor.select_monitors_app_objs(app_id)
+   local rel = App.select_app_relat_to_graph(app_id)
+   local obj_id = app[1].service_object_id
+   local app_name = app[1].name
 
-   -- para presentacao Verto
-   --if id == "/show" and app[1] then id = 31 end
-   --local app = apps:select_apps(id)
-   --local obj = Model.select_app_to_graph(id)
-   local obj = Monitor.select_monitors_app_objs(id)
-   local rel = App.select_app_relat_to_graph(id)
-   app_name = app[1].name
-   obj_id = app[1].service_object_id
-
-   return render_show(web, all_apps, app_name, id, obj, rel, obj_id, no_header)
+   return render_show(web, all_apps, app_name, app_id, obj, rel, obj_id, no_header)
 end
 ITvision:dispatch_get(show,"/show", "/show/(%d+)", "/show/(%d+):(%d+)")
 
@@ -78,6 +74,7 @@ end
 
 
 function render_show(web, app, app_name, app_id, obj, rel, obj_id, no_header)
+   local auth = Auth.check(web)
    local res = {}
    local engene = "dot"
    local file_type = "png"
@@ -109,7 +106,12 @@ function render_show(web, app, app_name, app_id, obj, rel, obj_id, no_header)
       lnkedt = web:link("/list/"..app_id..":2") 
       web.prefix = "/orb"
    end
+
+
    if no_header == nil then
+      if auth then -- se nao estiver logado, valor de auth é "false" e não a arvore de autenticacao (mod Auth)
+         res[#res+1] = render_content_header(auth, strings.vision, nil, nil, nil)
+      end
       res[#res+1] = render_bar( { render_selector_bar(web, app, app_id, "/gviz/show"), 
          a{ href=lnkgeo,  "Mapa" } ,
          a{ href=lnkedt,  strings.edit } ,
@@ -117,7 +119,6 @@ function render_show(web, app, app_name, app_id, obj, rel, obj_id, no_header)
    else
       refresh_time = nil
    end
-   --res[#res+1] = render_content_header("", nil, nil, nil, lnkgeo)
    res[#res+1] = br()
    res[#res+1] = { imgmap }
    res[#res+1] = img{ 

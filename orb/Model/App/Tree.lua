@@ -15,12 +15,14 @@ function find_node_id(app_id, conected_to_root)
 
 ----------------------------------------------------------------------------------------------------------------------
 function select_root_app_tree () 		-- Seleciona o noh raiz da arvore
+function select_root_name_app_tree ()		-- Seleciona o nome do noh raiz da arvore
 function select_full_path_app_tree (origin) 	-- Seleciona toda sub-arvore a patir de um noh de origem
 function select_leaf_nodes_app_tree () 		-- Seleciona todas as folhas da arvore
 function select_simple_path_app_tree (origin) 	-- Seleciona um unico caminho partindo de um noh 
 function select_depth_app_tree (origin) 	-- Seleciona a profundidade de cada noh
 function select_depth_subtree_app_tree (origin) -- Seleciona a profundidade de cada noh a partir de um noh especifico
 function select_subordinates_app_tree (origin, app_id) 	-- Encontra o noh subordinado imediato
+function select_parent (app_id)                 -- Encontra noh pai 
 function select_tree_relat_to_graph() 		-- Lista apps e seus filhos
 function select_uniq_app_in_tree()  		-- seleciona app unico na árvore (usado p/ config do nagiosbp)
 function select_child_from_parent(app_child, app_parent) -- seleciona noh dado por pai e filho na arvore
@@ -115,6 +117,31 @@ function select_root_app_tree () -- Seleciona o noh raiz da arvore
    end
 end
 
+
+
+----------------------------------------------------------------------------------------------------------------------
+function select_root_entity_tree (entity_id) -- Seleciona o noh raiz de uma entidade
+   local root = query ("itvision_apps a, itvision_app_trees t", 
+             "a.id = t.app_id and is_entity_root = 1 and entities_id = "..entity_id, 
+              nil, "t.id, t.entity_id, t.lft, t.rgt" )
+   if root[1] then
+      return root[1].id, root[1]
+   else
+      return nil, nil
+   end
+end
+
+
+
+----------------------------------------------------------------------------------------------------------------------
+function select_root_name_app_tree () -- Seleciona o nome do noh raiz da arvore
+   local root = query ("itvision_app_trees t, itvision_apps a", "a.id = t.app_id and t.lft = 1", nil, "a.name, a.id, a.entities_id")
+   if root[1] then
+      return root[1].id, root[1]
+   else
+      return nil, nil
+   end
+end
 
 ----------------------------------------------------------------------------------------------------------------------
 function select_full_path_app_tree (origin) -- Seleciona toda sub-arvore a patir de um noh de origem
@@ -252,13 +279,33 @@ function select_subordinates_app_tree (origin, app_id) -- Encontra o noh subordi
 end
 
 
+
 ----------------------------------------------------------------------------------------------------------------------
-function select_tree_relat_to_graph() -- Lista apps e seus filhos
+function select_parent (app_id) -- Encontra noh pai - usado tipicamente para a inclusao de apps 
+                  -- que representam entidades atraves de processo executado pelos scripts cron
+
+   -- retorna as entradas em order inversa sendo as primeiras tupla os ascendentes mais proximos
+   local content = {}
+
+   columns   = "parent.id, parent.instance_id, parent.lft, parent.rgt, parent.app_id, parent.instance_id"
+   tablename = "itvision_app_trees AS node, itvision_app_trees AS parent"
+   cond      = "parent.lft < node.lft AND parent.rgt > node.rgt AND node.app_id = " .. app_id
+   extra     = "order by parent.lft desc"
+
+   content = query (tablename, cond, extra, columns)
+
+   return content
+end
+
+
+----------------------------------------------------------------------------------------------------------------------
+function select_tree_relat_to_graph(clause) -- Lista apps e seus filhos
    local content = {}
       columns   = [[ t.id as id, lft, rgt, app_id ]]
       tablename = [[ itvision_app_trees t, itvision_apps a ]]
       cond      = [[  a.id = t.app_id
          and a.is_active = 1 and a.service_object_id is not null ]]
+      if clause then cond = cond.." and "..clause end
    local nodes = query(tablename, cond, nil, columns)
 
    for i,v in ipairs(nodes) do
@@ -270,6 +317,8 @@ function select_tree_relat_to_graph() -- Lista apps e seus filhos
       cond      = [[ child.lft BETWEEN ]]..v.lft..[[+1 AND ]]..v.rgt..[[-1 AND
          ancestor.id IS NULL 
          AND child.app_id = a.id AND a.is_active = 1 ]]
+
+      if clause then cond = cond.." and "..clause end
 
       local child = query (tablename, cond, nil, columns)
       for j,w in ipairs(child) do
@@ -325,7 +374,7 @@ function select_child_from_parent(app_child, app_parent) -- seleciona noh dado p
 end
 
 ----------------------------------------------------------------------------------------------------------------------
-function insert_node_app_tree(app_id, origin_, position_) -- Inclui novo noh
+function insert_node_app_tree(app_id, entity, origin_, position_) -- Inclui novo noh
    --[[   content_ deve conter o app_id a ser inserido na inclusao.
       Se origin_ for nulo, entao deve ser a primeira entrada na arvore.
       position pode ter os valores: 0 -> antes; 1 -> abaixo; 2 -> depois.
@@ -338,9 +387,11 @@ function insert_node_app_tree(app_id, origin_, position_) -- Inclui novo noh
    if origin_ then
       -- usuario deu a origem, entao verifica se ela existe
       content = query ("itvision_app_trees", "id = ".. origin_)
+      root = content[1]
    else
       -- usuario disse que é a primeira entrada. Isto eh verdade ou a arvore jah existe?
-      root_id, root = select_root_app_tree()
+      --root_id, root = select_root_app_tree()
+      root_id, root = select_root_entity_tree(entity)
    end
 
    if not origin_ and not root_id then
@@ -376,8 +427,9 @@ function insert_node_app_tree(app_id, origin_, position_) -- Inclui novo noh
    end
 
    node.app_id = app_id
-   node.lft    = newLft
-   node.rgt    = newRgt
+   node.entity_id = entity
+   node.lft = newLft
+   node.rgt = newRgt
    node.instance_id = config.database.instance_id
 
    execute ( "LOCK TABLE itvision_app_trees WRITE" )
@@ -394,7 +446,7 @@ end
 
 ----------------------------------------------------------------------------------------------------------------------
 function insert_subnode_app_tree(app_child, app_parent) -- Adiciona nós filhos abaixo de todos os nos que possuiem app_id = app_parent
-                                    -- isso é feito tipicamente na inclusão de uma app como objeto de outra (subapp)
+                                  -- isso é feito tipicamente na inclusão de uma app como objeto de outra (subapp)
    local parents = query ("itvision_app_trees", "app_id = "..app_parent)
    local origin  = query("itvision_app_trees", "app_id = "..app_child, nil, "min(id) as id, app_id, lft, rgt, instance_id"); origin = origin[1]
    local subtree = select_full_path_app_tree(origin.id)
@@ -408,8 +460,8 @@ function insert_subnode_app_tree(app_child, app_parent) -- Adiciona nós filhos 
       for j,n in ipairs(subtree) do
          local lft = n.lft - origin.lft + p.rgt
          local rgt = n.rgt - origin.lft + p.rgt
-         local node = { app_id=n.app_id, lft=lft, rgt=rgt, instance_id=n.instance_id }
-text_file_writer("/tmp/newnode", n.lft .." - ".. origin.lft .." + ".. p.rgt.." \n "..n.rgt .." - ".. origin.lft .." + ".. p.rgt.."\n")
+         local node = { app_id=n.app_id, lft=lft, rgt=rgt, instance_id=n.instance_id, entity_id=n.entity_id }
+--text_file_writer("/tmp/newnode", n.lft .." - ".. origin.lft .." + ".. p.rgt.." \n "..n.rgt .." - ".. origin.lft .." + ".. p.rgt.."\n")
 
          insert  ( "itvision_app_trees", node)
       end
@@ -431,7 +483,7 @@ function delete_child_from_parent(child_app, parent_app)  -- remove sub aplicaca
       insert_subnode_app_tree(child_app, root.app_id)
       local o = Model.query("nagios_objects", "name1 = '"..config.monitor.check_app.."' and name2 = "..child_app)
       Model.insert("itvision_app_objects", 
-                    {app_id=parent_app, instance_id=config.database.instance_id, service_object_id=o[1].object_id, type="app"})
+         {app_id=parent_app, instance_id=config.database.instance_id, service_object_id=o[1].object_id, type="app"})
       delete_node_app_tree(child[1].id)
       return true
    elseif not is_last then
@@ -488,7 +540,7 @@ function delete_node_app(origin_) -- remove um noh dado por 'origin_' trazendo t
    execute ( "LOCK TABLE itvision_app_trees WRITE" )
    execute ( "delete from itvision_app_trees where lft = "..lft.." and rgt = "..rgt )
    execute ( "update itvision_app_trees set lft = lft - 1 where lft > "..lft )
-   execute ( "update itvision_app_trees set rgt = rgt - 1 where rgt > "..rgt )
+   execute ( "update itvision_app_trees set rgt = rgt - 2 where rgt > "..rgt )
    execute ( "UNLOCK TABLES" )
 
    return true

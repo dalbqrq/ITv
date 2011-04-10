@@ -136,7 +136,9 @@ end
 ------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------
 function list(web, msg)
+   local auth = Auth.check(web)
    local clause = nil
+
    if web.input.hostname ~= "" and web.input.hostname ~= nil then clause = "c.name like '%"..web.input.hostname.."%' " end
    if web.input.inventory ~= "" and web.input.inventory ~= nil then 
       local a = ""
@@ -148,6 +150,9 @@ function list(web, msg)
       if clause then a = " and " else clause = ""  end
       clause = clause..a.."c.serial like '%"..web.input.sn.."%' "
    end
+   local a = ""
+   if clause then a = " and " else clause = "" end
+   clause = clause..a.." p.entities_id in "..Auth.make_entity_clause(auth)
 
    local cmp = Monitor.select_monitors(clause)
    local chk = Checkcmds.select_checkcmds()
@@ -319,8 +324,9 @@ ITvision:dispatch_get(blank, "/blank")
 ITvision:dispatch_static("/css/%.css", "/script/%.js")
 
 
--- views ------------------------------------------------------------
 
+
+-- views ------------------------------------------------------------
 
 ------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------
@@ -347,7 +353,7 @@ function render_list(web, cmp, chk, msg)
 
    for i, v in ipairs(cmp) do
       local serv, ip, itemtype, id, hst_name, alias = "", "", "", "", nil, nil
-      if v.sw_name ~= "" then serv = v.sw_name.." / "..v.sv_name end
+      if v.sw_name ~= "" and v.sv_name ~= nil then serv = v.sw_name.." / "..v.sv_name end
 
 
       -- muitos dos ifs abaixo existem em funcao da direrenca entre as queries com Computer e as com Network

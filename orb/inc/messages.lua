@@ -55,6 +55,7 @@ strgs.pt_BR = {
 	location = "Localização",
 	physical = "Físico",
 	logical = "Lógico",	
+	logic = "Lógica",	
 	origin = "Origem",	
 	destiny = "Destino",	
 	category = "Categoria",	
@@ -72,6 +73,11 @@ strgs.pt_BR = {
 	test = "Testar",
 	wait = "Por favor aguarde...", 
 	fillall = "Por favor preencha todos os parametros.", 
+	vision = "Visão",
+	visibility = "Visibilidade",
+	entity = "Entidade",
+	private = "Privado",
+	public = "Publico",
 
 }
 
@@ -126,7 +132,8 @@ strgs.us = {
 	root = "Root",
 	location = "Location",
 	physical = "Physical",
-	logical = "Logiclo",	
+	logical = "Logical",	
+	logic = "Logic",	
 	origin = "Origin",
 	destiny = "Destiny",
 	category = "Category",
@@ -144,6 +151,11 @@ strgs.us = {
 	test = "Test",
 	wait = "Please wait...", 
 	fillall = "Please fill all parameters.", 
+	vision = "Vision",
+	visibility = "Visibility",
+	entity = "Entity",
+	private = "Private",
+	public = "Public",
 }
 
 

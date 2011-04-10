@@ -151,6 +151,8 @@ if (!file_exists(GLPI_CONFIG_DIR . "/config_db.php")) {
    echo "</div>"; // end contenu login
 */
 
+/*
+
    if (GLPI_DEMO_MODE) {
       echo "<div class='center'>";
       getCountLogin();
@@ -162,6 +164,7 @@ if (!file_exists(GLPI_CONFIG_DIR . "/config_db.php")) {
    echo 'GLPI version '.(isset($CFG_GLPI["version"])?$CFG_GLPI["version"]:"").
         ' Copyright (C) 2003-'.date("Y").' INDEPNET Development Team.';
    echo "</a></div>";
+*/
 
 }
 // call cron
