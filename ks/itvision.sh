@@ -283,11 +283,11 @@ sed -i.orig2 -e "s/process_performance_data=0/process_performance_data=1/" \
 
 sed -i.orig -e "s/user                    nagios/user                    $user/" \
         -e "s/group                   nagios/group                   $user/" \
-	-e "s/serviceextinfo          \/etc\/nagios3\/serviceextinfo.cfg/serviceextinfo          \/etc\/nagios3\/conf.d\/serviceextinfo.cfg/" \
-	-e "s/serviceext_path         \/etc\/nagiosgrapher\/nagios3\/serviceext/serviceext_path         \/etc\/nagios3\/services/" \
+	-e "s/serviceextinfo          \/etc\/nagios3\/serviceextinfo.cfg/serviceextinfo          \/etc\/monitor\/conf.d\/serviceextinfo.cfg/" \
+	-e "s/serviceext_path         \/etc\/nagiosgrapher\/nagios3\/serviceext/serviceext_path         \/etc\/monitor\/services/" \
 	-e "s/\/var\/log\/nagiosgrapher\/ngraph.log/\/var\/log\/itvision\/nagiosgrapher\/ngraph.log/" \
-        -e "s/nagiosadmin/$user/" /etc/nagiosgrapher/ngraph.ncfg
-
+        -e "s/nagiosadmin/$user/" \
+	-e "s/nagios3/monitor/" /etc/nagiosgrapher/ngraph.ncfg
 
 chown -R $user.$user /var/lib/nagiosgrapher /etc/nagiosgrapher /var/run/nagiosgrapher /var/log/itvision/nagiosgrapher /var/cache/nagiosgrapher /usr/share/perl5/NagiosGrapher /usr/lib/nagiosgrapher /usr/sbin/nagiosgrapher
 cat /etc/nagiosgrapher/nagios3/commands.cfg >> /etc/nagios3/commands.cfg 
@@ -304,6 +304,21 @@ echo << EOF > /usr/share/nagios3/htdocs/grapher.html
 EOF
 
 sed -i.orig -e "s/NagiosGrapher by NETWAYS GMBH/ITvision/g" /usr/lib/cgi-bin/nagiosgrapher/rrd2-system.cgi
+
+cd /etc
+ln -s /etc/nagios3 monitor
+chown -R $user.$user monitor
+cd /usr/share
+ln -s /usr/share/nagios3 monitor
+chown -R $user.$user monitor
+cd /usr/lib/
+ln -s /usr/lib/nagios3 monitor
+chown -R $user.$user monitor
+cd /usr/lib/cgi-bin
+ln -s /usr/lib/cgi-bin/nagios3 monitor
+chown -R $user.$user monitor
+
+
 
 # --------------------------------------------------
 # NDO UTILS - Nagios
@@ -488,9 +503,29 @@ echo "Alias /nedi "/usr/local/nedi/html"
 
 ln -s /usr/local/nedi/nedi.conf /etc/nedi.conf
 
+cat << EOF > /usr/local/nedi/startnedi.sh
+start nedi from crontab. Creates logfiles
+opts="-Apovb"
+CMD="./nedi.pl $opts"
+LOGPATH="/var/log/itvision/nedi"
+LOGFILE="$LOGPATH/nedi.log"
+LASTRUN="$LOGPATH/lastrun.log"
+cd /opt/nedi
+now=`date +%Y%m%d:%H%M`
+echo "#$now start # $CMD" > $LASTRUN
+echo "#$now start" >> $LOGFILE
+$($CMD >> $LASTRUN)
+tail -8 $LASTRUN >> $LOGFILE
+now=`date +%Y%m%d:%H%M`
+echo "#$now stop" >> $LOGFILE
+echo "#$now stop" >> $LASTRUN'
+EOF
 
+chmod +x /usr/local/nedi/startnedi.sh
+sudo mkdir /var/log/itvision/nedi.log
+sudo chown -R $user:$user /var/log/itvision/nedi /usr/local/nedi
 
-
+echo "15 0,4,8,12,16,20 * * * /usr/local/nedi/startnedi.sh  # Discover and gather device configurations NEDI" >> /var/spool/cron/crontabs/$user
 
 # --------------------------------------------------
 # SMTP GMAIL APPS
