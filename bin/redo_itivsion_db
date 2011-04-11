@@ -1,0 +1,21 @@
+#!/bin/bash
+
+
+
+if [ `pwd` != "/usr/local/itvision/ks/db" ]; then
+   echo "LUGAR ERRADO!"
+   exit 0;
+fi
+
+
+mysql -u root --password=itv itvision < itvision.sql
+mysql -u root --password=itv itvision < itvision_init.sql
+
+cd ../../scr
+
+lua update_checkcmds.lua
+
+cd /etc/nagios3
+\rm -f apps/* services/* hosts/*
+
+renagios

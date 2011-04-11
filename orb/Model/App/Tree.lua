@@ -462,7 +462,6 @@ function insert_subnode_app_tree(app_child, app_parent) -- Adiciona nós filhos 
          local lft = n.lft - origin.lft + p.rgt
          local rgt = n.rgt - origin.lft + p.rgt
          local node = { app_id=n.app_id, lft=lft, rgt=rgt, instance_id=n.instance_id, entity_id=n.entity_id }
---text_file_writer("/tmp/newnode", n.lft .." - ".. origin.lft .." + ".. p.rgt.." \n "..n.rgt .." - ".. origin.lft .." + ".. p.rgt.."\n")
 
          insert  ( "itvision_app_trees", node)
       end
@@ -541,7 +540,8 @@ function delete_node_app(origin_) -- remove um noh dado por 'origin_' trazendo t
    execute ( "LOCK TABLE itvision_app_trees WRITE" )
    execute ( "delete from itvision_app_trees where lft = "..lft.." and rgt = "..rgt )
    execute ( "update itvision_app_trees set lft = lft - 1 where lft > "..lft )
-   execute ( "update itvision_app_trees set rgt = rgt - 2 where rgt > "..rgt )
+   execute ( "update itvision_app_trees set lft = lft - 1 where rgt > "..rgt )
+   execute ( "update itvision_app_trees set rgt = rgt - 2 where rgt > "..lft )
    execute ( "UNLOCK TABLES" )
 
    return true

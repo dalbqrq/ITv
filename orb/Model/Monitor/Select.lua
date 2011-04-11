@@ -701,9 +701,9 @@ function select_monitors(clause)
    local q3 = make_query_3(nil, nil, nil, clause)
    local q4 = make_query_4(nil, nil, nil, nil, clause)
    local q6 = make_query_6(nil, nil, clause)
-   local q7 = make_query_7(nil, nil, clause)
+   local q7 = make_query_7(nil, nil, nil, clause)
    local q8 = make_query_8(nil, nil, clause)
-   local q9 = make_query_9(nil, nil, clause)
+   local q9 = make_query_9(nil, nil, nil, clause)
 
    for _,v in ipairs(q1) do table.insert(q, v) end
    for _,v in ipairs(q2) do table.insert(q, v) end
@@ -852,7 +852,7 @@ function how_to_use()
 ]]
 
    --a = tree(8)
-   a = make_query_5()
+   a = make_query_7()
    --a = select_monitors()
 
 --[[
@@ -864,5 +864,4 @@ function how_to_use()
 
 end
 
-if DEBUG then how_to_use() end
-
+--if DEBUG then how_to_use() end

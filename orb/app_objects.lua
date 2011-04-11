@@ -77,12 +77,12 @@ function add(web, app_id, msg)
    if app_id then Auth.check_entity_permission(web, app_id) end
    local entity_auth = Auth.make_entity_clause(Auth.check(web))
 
-   clause = " and p.entities_id in "..entity_auth
    local exclude = [[ o.object_id not in ( select service_object_id from itvision_app_objects where app_id = ]]..app_id..[[) 
                       and o.is_active = 1 ]]
+         clause  = [[ and p.entities_id in ]]..entity_auth
    local extra   = [[ order by o.name1, o.name2 ]]
    local HST = Monitor.make_query_3(nil, nil, nil, exclude .. clause .. extra)
-   clause = clause..[[ and o.name2 <> ']]..config.monitor.check_host..[[' ]]
+      clause = clause..[[ and o.name2 <> ']]..config.monitor.check_host..[[' ]]
    local SVC = Monitor.make_query_4(nil, nil, nil, nil, exclude .. clause .. extra)
 
    clause = " ( a.entities_id in "..entity_auth.." or a.visibility = 1 )"
@@ -219,10 +219,6 @@ function make_app_objects_table(web, A)
       else
          remove_button = { "-" }
       end
---[[
-         remove_button = button_link(strings.remove, web:link("/delete_obj/"..v.app_id..":"..v.object_id), "negative")
-]]
-
 
       row[#row + 1] = { 
          obj,

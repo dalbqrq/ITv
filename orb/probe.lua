@@ -88,8 +88,7 @@ end
 function objects:select_checks(cmd)
    local clause = ""
    if cmd then
-      clause = " object_id = '"..cmd.."' "
-      clause = clause .. " and objecttype_id = 12 and is_active = 1"
+      clause = " object_id = '"..cmd.."'  and objecttype_id = 12 and is_active = 1"
    end
 
    return Model.query("nagios_objects", clause)
@@ -156,10 +155,10 @@ function list(web, msg)
    if clause then a = " and " else clause = "" end
    clause = clause..a.." p.entities_id in "..Auth.make_entity_clause(auth)
 
-   local cmp = Monitor.select_monitors(clause)
+   local ics = Monitor.select_monitors(clause)
    local chk = Checkcmds.select_checkcmds()
 
-   return render_list(web, cmp, chk, msg)
+   return render_list(web, ics, chk, msg)
 end
 ITvision:dispatch_get(list, "/", "/list", "/list/(.+)")
 ITvision:dispatch_post(list, "/list", "/list/(.+)")
@@ -179,18 +178,18 @@ function add(web, query, c_id, p_id, sv_id, default)
    local chk_params = nil
 
    local chk = Checkcmds.select_checkcmds(nil, true)
-   local cmp = {}
+   local ics = {}
 
    query = tonumber(query)
 
    if query == 1 then
-      cmp = Monitor.make_query_1(c_id, p_id)
+      ics = Monitor.make_query_1(c_id, p_id)
    elseif query == 2 then
-      cmp = Monitor.make_query_2(c_id, p_id, sv_id)
+      ics = Monitor.make_query_2(c_id, p_id, sv_id)
    elseif query == 3 then
-      cmp = Monitor.make_query_3(c_id, p_id)
+      ics = Monitor.make_query_3(c_id, p_id)
    elseif query == 4 then
-      cmp = Monitor.make_query_4(c_id, p_id, sv_id)
+      ics = Monitor.make_query_4(c_id, p_id, sv_id)
    end
 
    local params = { query=query, c_id=c_id, p_id=p_id, sv_id=sv_id, default=default }
@@ -203,7 +202,7 @@ function add(web, query, c_id, p_id, sv_id, default)
       end
    end
 
-   return render_add(web, cmp, chk, params, chk_params, monitor_name)
+   return render_add(web, ics, chk, params, chk_params, monitor_name)
 end
 ITvision:dispatch_get(add, "/add/(%d+):(%d+):(%d+):(%d+)", "/add/(%d+):(%d+):(%d+):(%d+):(%d+)")
 ITvision:dispatch_post(add, "/add/(%d+):(%d+):(%d+):(%d+)", "/add/(%d+):(%d+):(%d+):(%d+):(%d+)")
@@ -250,7 +249,7 @@ function insert_host(web, p_id, sv_id, c_id, n_id, c_name, ip)
       msg = msg.."Check do HOST: "..c_name.." já existe! "
    end   
 
-   os.sleep(1)
+   --os.sleep(1)
    os.reset_monitor()
    if web then
       return web:redirect(web:link("/list/"..msg..""))
@@ -305,7 +304,7 @@ function insert_service(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, 
    msg = "Check de SERVIÇO: "..monitor_name.." - HOST: ".. c_name.." - COMANDO: "..chk_name.." criado."
 
    if web then
-      os.sleep(1)
+      --os.sleep(1)
       return web:redirect(web:link("/list/"..msg..""))
    else
       return msg --para criacao de probes em massa
@@ -347,30 +346,31 @@ end
 
 
 
-------------------------------------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------------------------------------
-function render_list(web, cmp, chk, msg)
+---------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------
+function render_list(web, ics, chk, msg)
    local permission, auth = Auth.check_permission(web, "checkcmds")
    local row, res, link, url = {}, {}, {}, ""
+   --[[ com nome do comando 'chk' -  ver abaixo nesta funcao o problema!
    local header = {
       strings.alias.."/"..strings.name, "IP", "Software / Versão", strings.type, strings.command, strings.alias, "."
+   } ]]
+   local header = { -- sem o nome do comando 'chk'. Só que agora o alias aparece como o 'Comando' na tabela
+      strings.alias.."/"..strings.name, "IP", "Software / Versão", strings.type, strings.command, "."
    }
 
-   for i, v in ipairs(cmp) do
+   for i, v in ipairs(ics) do
       local serv, ip, itemtype, id, hst_name, alias = "", "", "", "", nil, nil
       if v.sw_name ~= "" and v.sv_name ~= nil then serv = v.sw_name.." / "..v.sv_name end
-
 
       -- muitos dos ifs abaixo existem em funcao da direrenca entre as queries com Computer e as com Network
       v.c_id = v.c_id or 0 v.n_id = v.n_id or 0 v.p_id = v.p_id or 0 v.sv_id = v.sv_id or 0
       hst_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
       alias = v.m_name
 
-
       if v.p_itemtype then itemtype = v.p_itemtype else itemtype = "NetworkEquipment" end
       if v.p_ip then ip = v.p_ip else ip = v.n_ip end
       if v.c_id ~= 0 then c_id = v.c_id else c_id = v.n_id end
-
 
       if v.s_check_command_object_id == nil then 
          chk = ""
@@ -388,10 +388,15 @@ function render_list(web, cmp, chk, msg)
          end
       else
          content = objects:select_checks(v.s_check_command_object_id)
-         chk = content[1].name1
+         if content[1] then
+            chk = content[1].name1
+         else
+            chk = "Ainda Desconhecido" -- TODO: Este é um caso particular ainda nao totalmente entendido      
+                                       -- Deve estar relacionado a demora do ndo2db
+                                       -- Por isso estou tirando esta entrada da tabela na tela de checagem!
+         end
          link = "-"
       end
-
 
       web.prefix = "/servdesk"
       if itemtype == "Computer" then
@@ -409,7 +414,8 @@ function render_list(web, cmp, chk, msg)
       else
          name = hst_name
       end
-      row[#row + 1] = { name, ip, serv, itemtype, chk, alias, link }
+      --row[#row + 1] = { name, ip, serv, itemtype, chk, alias, link } -- com nome do comando 'chk'
+      row[#row + 1] = { name, ip, serv, itemtype, alias, link } -- sem nome do comando 'chk'
    end
 
    res[#res+1] = render_content_header(auth, "Checagem", nil, web:link("/list"))
@@ -509,9 +515,9 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------
-function render_add(web, cmp, chk, params, chk_params, monitor_name)
+function render_add(web, ics, chk, params, chk_params, monitor_name)
    local auth = Auth.check(web)
-   local v = cmp[1]
+   local v = ics[1]
    local row = {}
    local res = {}
    local serv, ip, itemtype, id, hst_name = "", "", "", "", nil

@@ -40,11 +40,12 @@ function select_app (cond__, extra_, columns_)
 --                         from glpi_entities) as e ]]
 --   local cond_   = [[ a.entities_id = e.entity_id and a.service_object_id = ss.service_object_id ]]
    local tables_  = [[  itvision_apps a,
-                        (select a.entities_id as entity_id, a.name as entity_name, a.name as entity_completename 
+                        (select a.entities_id as entity_id, a.name as entity_name, 
+                            a.name as entity_completename 
                          from itvision_app_trees t, itvision_apps a 
                          where a.id = t.app_id and t.lft=1
                          union 
-                         select id as entity_id, name as entity_name, completename asentity_completename 
+                         select id as entity_id, name as entity_name, completename as entity_completename 
                          from glpi_entities) as e ]]
    local cond_   = [[ a.entities_id = e.entity_id ]]
 
