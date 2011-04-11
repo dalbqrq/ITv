@@ -61,6 +61,7 @@ function is_logged_at_glpi(web)
 
    local sess_filename = session_path.."/sess_"..glpi_cookie
    local sess_ = text_file_reader(sess_filename)
+   if not sess_ then return false end
    local prof_ = get_profile(sess_)
 
    local prof_filename = session_path.."/prof_"..glpi_cookie..".lua"
@@ -82,7 +83,8 @@ function is_logged_at_glpi(web)
    local profile 
    if profile_id then profile = Glpi.select_profile(profile_id) end
 
-   if user_id ~= nil then
+   if user_id then
+      text_file_writer("/tmp/uid", type(user_id))
       return { is_logged=true, user_id=user_id, user_name=user_name, profile_id=profile_id,
                entity_id=entity_id, cookie=glpi_cookie, profile=profile, session=session_profile }
    else
@@ -125,15 +127,19 @@ end
 -- Este metodo é usado para dar autorizacao para a visualizacao de uma aplicacao.
 function check_entity_permission(web, app_id)
    if app_id then
-      local entity_auth = make_entity_clause(check(web))
-      local cond_ = "id = "..app_id.." and entities_id in "..entity_auth
-      local app = App.select_app(cond_)
+      --local entity_auth = make_entity_clause(check(web))
+      local auth = check(web)
+      if auth then
+         local entity_auth = make_entity_clause(auth)
+         local cond_ = "id = "..app_id.." and entities_id in "..entity_auth
+         local app = App.select_app(cond_)
 
-      if app[1] then return true end
+         if app[1] then return true end
+     end
+   else
+     web.prefix = "/orb/no_permission"
+     return web:redirect(web:link("/"))
    end
-
-   web.prefix = "/orb/no_permission"
-   return web:redirect(web:link("/"))
 end
 
 

@@ -33,14 +33,14 @@ function make_logo(instance_name)
    if instance_name == "IMPA" then
       return {
          { src="/pics/transparent.png", width='700px', height='40' },
-         { src="/pics/logo_impa.png", height='45px'  },
+         { src="/pics/logo_impa.png", height='40px'  },
       }
    
    elseif instance_name == "PRODERJ" then
       return {
          { src="/pics/transparent.png", width='540px', height='40px' },
          { src="/pics/logo_verto.jpg", height='35px' },
-         { src="/pics/transparent.png", width='40px', height='44px' },
+         { src="/pics/transparent.png", width='40px', height='40px' },
          { src="/pics/logo_proderj.jpg", height='35px' },
       }
 
