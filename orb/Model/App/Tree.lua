@@ -391,6 +391,7 @@ function insert_node_app_tree(app_id, entity, origin_, position_) -- Inclui novo
    else
       -- usuario disse que é a primeira entrada. Isto eh verdade ou a arvore jah existe?
       --root_id, root = select_root_app_tree()
+      if not entity then entity = 0 end
       root_id, root = select_root_entity_tree(entity)
    end
 
