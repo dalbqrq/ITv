@@ -137,6 +137,8 @@ end
 ------------------------------------------------------------------------------------------------------------------------------
 function list(web, msg)
    local auth = Auth.check(web)
+   if not auth then return Auth.redirect(web) end
+
    local clause = nil
 
    if web.input.hostname ~= "" and web.input.hostname ~= nil then clause = "c.name like '%"..web.input.hostname.."%' " end
@@ -167,6 +169,9 @@ ITvision:dispatch_post(list, "/list", "/list/(.+)")
 ------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------
 function add(web, query, c_id, p_id, sv_id, default)
+   local auth = Auth.check(web)
+   if not auth then return Auth.redirect(web) end
+
    local count = web.input.count
    local chk_id = web.input.chk_id
    local chk_name = web.input.chk_name

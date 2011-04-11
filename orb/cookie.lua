@@ -11,6 +11,9 @@ module(Model.name, package.seeall,orbit.new)
 -- controllers ------------------------------------------------------------
 
 function list(web)
+   local auth = Auth.check(web)
+   if not auth then return Auth.redirect(web) end
+
    return render_list(web)
 end
 ITvision:dispatch_get(list, "/")

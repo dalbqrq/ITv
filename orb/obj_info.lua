@@ -27,6 +27,9 @@ end
 -- controllers ------------------------------------------------------------
 
 function show_hst(web, obj_id)
+   local auth = Auth.check(web)
+   if not auth then return Auth.redirect(web) end
+
    local A = Monitor.make_query_3(nil, nil, nil, "m.service_object_id = "..obj_id)
    return render_hst(web, obj_id, A)
 end
@@ -34,6 +37,9 @@ ITvision:dispatch_get(show_hst, "/hst/(%d+)")
 
 
 function show_svc(web, obj_id)
+   local auth = Auth.check(web)
+   if not auth then return Auth.redirect(web) end
+
    local A = Monitor.make_query_4(nil, nil, nil, nil, "m.service_object_id = "..obj_id)
    return render_svc(web, obj_id, A)
 end
@@ -41,6 +47,9 @@ ITvision:dispatch_get(show_svc, "/svc/(%d+)")
 
 
 function show_app(web, obj_id)
+   local auth = Auth.check(web)
+   if not auth then return Auth.redirect(web) end
+
    local A = apps:select(nil, obj_id)
    return render_app(web, obj_id, A)
 end

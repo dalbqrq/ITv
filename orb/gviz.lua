@@ -29,6 +29,9 @@ end
 -- controllers ---------------------------------------------------------
 
 function list(web)
+   local auth = Auth.check(web)
+   if not auth then return Auth.redirect(web) end
+
    local A = apps:select_apps()
    return render_list(web, A)
 end
@@ -37,6 +40,8 @@ ITvision:dispatch_get(list, "/", "/list")
 
 function show(web, app_id, no_header)
    local auth = Auth.check(web)
+   if not auth then return Auth.redirect(web) end
+
    local clause = nil
    if auth then clause = " entities_id in "..Auth.make_entity_clause(auth) end
    local all_apps = apps:select_apps(nil, clause)

@@ -47,6 +47,9 @@ end
 
 
 function add(web, id, msg)
+   local auth = Auth.check(web)
+   if not auth then return Auth.redirect(web) end
+
    local clause = " "
    local extra   = [[ order by o.name1, o.name2 ]]
 
@@ -61,6 +64,9 @@ ITvision:dispatch_get(add, "/add", "/add/(%d+)", "/add/(%d+):(.+)")
 
 
 function update_contact(user_id)
+   local auth = Auth.check(web)
+   if not auth then return Auth.redirect(web) end
+
    local apps = Glpi.select_app_by_contact(user_id)
    local a = apps[1]
 
@@ -76,6 +82,9 @@ end
 
 
 function insert(web, app_id, user_id)
+   local auth = Auth.check(web)
+   if not auth then return Auth.redirect(web) end
+
    app_contacts:new()
    app_contacts.instance_id = Model.db.instance_id
    app_contacts.app_id = app_id
@@ -91,6 +100,9 @@ ITvision:dispatch_get(insert, "/insert/(%d+):(%d+)")
 
 
 function delete(web, app_id, user_id)
+   local auth = Auth.check(web)
+   if not auth then return Auth.redirect(web) end
+
    if app_id and user_id then
       local clause = "app_id = "..app_id.." and user_id = "..user_id
       local tables = "itvision_app_contacts"

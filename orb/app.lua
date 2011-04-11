@@ -101,6 +101,8 @@ end
 
 function list(web, msg)
    local auth = Auth.check(web)
+   if not auth then return Auth.redirect(web) end
+
    local clause = " entities_id in "..Auth.make_entity_clause(auth)
    if web.input.app_name then clause = clause.." and name like '%"..web.input.app_name.."%' " end
    --OLD: local A, root = apps:select(nil, clause)
@@ -113,8 +115,13 @@ ITvision:dispatch_post(list, "/list")
 
 
 function show(web, app_id)
+   local auth = Auth.check(web)
+   if not auth then return Auth.redirect(web) end
+
    if app_id then Auth.check_entity_permission(web, app_id) end
    local auth = Auth.check(web)
+   if not auth then return Auth.redirect(web) end
+
    local clause = "id = "..app_id.." and entities_id in "..Auth.make_entity_clause(auth)
    --OLD: local A, root = apps:select(nil, clause)
    local A = App.select_app(clause)
@@ -126,6 +133,9 @@ ITvision:dispatch_get(show, "/show/(%d+)")
 
 
 function edit(web, id, nm, tp, vz)
+   local auth = Auth.check(web)
+   if not auth then return Auth.redirect(web) end
+
    local edt = { id = id, name = nm, type = tp, visibility = vz }
    return render_add(web, edt)
 end
@@ -152,6 +162,9 @@ ITvision:dispatch_post(update, "/update/(%d+)")
 
 
 function add(web)
+   local auth = Auth.check(web)
+   if not auth then return Auth.redirect(web) end
+
    return render_add(web)
 end
 ITvision:dispatch_get(add, "/add")
@@ -159,6 +172,8 @@ ITvision:dispatch_get(add, "/add")
 
 function insert(web)
    local auth = Auth.check(web)
+   if not auth then return Auth.redirect(web) end
+
    apps:new()
    apps.name = web.input.name
    apps.type = web.input.type
@@ -182,6 +197,9 @@ ITvision:dispatch_post(insert, "/insert")
 
 
 function remove(web, id)
+   local auth = Auth.check(web)
+   if not auth then return Auth.redirect(web) end
+
    local A = apps:select(id)
    return render_remove(web, A)
 end

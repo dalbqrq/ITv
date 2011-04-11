@@ -15,6 +15,9 @@ module(Model.name, package.seeall,orbit.new)
 -- controllers ------------------------------------------------------------
 
 function list(web, app_id, active_tab, msg)
+   local auth = Auth.check(web)
+   if not auth then return Auth.redirect(web) end
+
    return render_list(web, app_id, active_tab, msg)
 end
 ITvision:dispatch_get(list, "/(%d+):(%d+)", "/list/(%d+):(%d+)", "/list/(%d+):(%d+):(.+)")

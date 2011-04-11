@@ -30,8 +30,11 @@ end
 
 
 function show(web, sep)
-   local clause = Auth.make_entity_clause(Auth.check(web))
+   local auth = Auth.check(web)
+   if not auth then return Auth.redirect(web) end
+
    if sep then sep = tonumber(sep) else sep = 1 end
+   local clause = Auth.make_entity_clause(auth)
    local all_apps = apps:select_apps(nil, " entities_id in "..clause)
 
    if not all_apps[1] then 

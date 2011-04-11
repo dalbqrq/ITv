@@ -60,6 +60,9 @@ end
 -- controllers ------------------------------------------------------------
 
 function update_apps()
+   local auth = Auth.check(web)
+   if not auth then return Auth.redirect(web) end
+
    local APPS = App.select_uniq_app_in_tree()
    make_all_apps_config(APPS)
    os.sleep(1) -- CLUDGE Espera um pouco pois as queries das caixas de insercao estao retornando vazias!
@@ -67,6 +70,9 @@ end
 
 
 function add(web, app_id, msg)
+   local auth = Auth.check(web)
+   if not auth then return Auth.redirect(web) end
+
    local clause = nil
    if app_id then Auth.check_entity_permission(web, app_id) end
    local entity_auth = Auth.make_entity_clause(Auth.check(web))
@@ -90,7 +96,6 @@ ITvision:dispatch_get(add, "/add/(%d+)", "/add/(%d+):(.+)")
 
 
 function insert_obj(web)
-
    app_objects:new()
    -- inclusão de multiplos itens. deve-se acionar a selecao de multiplos itens na interface. bug abaixo
    if type(web.input.item) == "table" then
@@ -129,6 +134,9 @@ ITvision:dispatch_post(insert_obj, "/insert_obj")
 
 
 function delete_obj(web, app_id, obj_id)
+   local auth = Auth.check(web)
+   if not auth then return Auth.redirect(web) end
+
    local msg = ""
 
    if app_id and obj_id then

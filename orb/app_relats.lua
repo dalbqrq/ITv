@@ -48,6 +48,12 @@ end
 
 
 function add(web, app_id, msg)
+   local auth = Auth.check(web)
+   if not auth then return Auth.redirect(web) end
+
+   local auth = Auth.check(web)
+   if not auth then return Auth.redirect(web) end
+
    if app_id then Auth.check_entity_permission(web, app_id) end
    local APPOBJ = App.select_app_app_objects(app_id)
    local AR = App.select_app_relat_object(app_id)
@@ -61,6 +67,9 @@ ITvision:dispatch_get(add, "/add/", "/add/(%d+)", "/add/(%d+):(.+)")
 
 
 function insert_relat(web)
+   local auth = Auth.check(web)
+   if not auth then return Auth.redirect(web) end
+
    local msg = ""
    local from, to
 
@@ -95,6 +104,9 @@ ITvision:dispatch_post(insert_relat, "/insert_relat")
 
 
 function delete_relat(web, app_id, from, to)
+   local auth = Auth.check(web)
+   if not auth then return Auth.redirect(web) end
+
    app_relats:delete_app_relat(app_id, from, to)
    --return web:redirect(web:link("/add/"..app_id))
    web.prefix = "/orb/app_tabs"

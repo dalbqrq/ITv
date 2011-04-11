@@ -25,6 +25,9 @@ end
 -- controllers ------------------------------------------------------------
 
 function list(web)
+   local auth = Auth.check(web)
+   if not auth then return Auth.redirect(web) end
+
    local A = sysconfig:select_sysconfig()
    return render_list(web, A)
 end
@@ -32,12 +35,18 @@ ITvision:dispatch_get(list, "/", "/list")
 
 
 function show(web, id)
+   local auth = Auth.check(web)
+   if not auth then return Auth.redirect(web) end
+
    local A = sysconfig:select_sysconfig(id)
    return render_show(web, A)
 end ITvision:dispatch_get(show, "/show/(%d+)")
 
 
 function edit(web, id)
+   local auth = Auth.check(web)
+   if not auth then return Auth.redirect(web) end
+
    local A = sysconfig:select_sysconfig(id)
    return render_add(web, A)
 end
@@ -45,6 +54,9 @@ ITvision:dispatch_get(edit, "/edit/(%d+)")
 
 
 function update(web, id)
+   local auth = Auth.check(web)
+   if not auth then return Auth.redirect(web) end
+
    local sysconfig = {}
    if id then
       local tables = "itvision_sysconfig"
@@ -66,6 +78,9 @@ ITvision:dispatch_post(update, "/update/(%d+)")
 
 
 function add(web)
+   local auth = Auth.check(web)
+   if not auth then return Auth.redirect(web) end
+
    return render_add(web)
 end
 ITvision:dispatch_get(add, "/add")
@@ -88,6 +103,9 @@ ITvision:dispatch_post(insert, "/insert")
 
 
 function remove(web, id)
+   local auth = Auth.check(web)
+   if not auth then return Auth.redirect(web) end
+
    local A = sysconfig:select_sysconfig(id)
    return render_remove(web, A)
 end

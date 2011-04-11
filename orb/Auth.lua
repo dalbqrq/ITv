@@ -96,13 +96,17 @@ end
 function check(web)
    local auth = is_logged_at_glpi(web)
 
-   if auth ~= false then
+   if auth then
       return auth
    else
-      web.prefix = "/orb"
-      web:redirect(web:link("/login"))
       return false
    end
+end
+
+
+function redirect(web)
+   web.prefix = "/orb"
+   return false, web:redirect(web:link("/login"))
 end
 
 
@@ -209,7 +213,6 @@ function make_entity_clause(auth)
    end
    clause = clause..") "
 
-   --text_file_writer("/tmp/prof.lua", table.dump(auth))
    return clause
 end
 
