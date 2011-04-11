@@ -84,7 +84,6 @@ function is_logged_at_glpi(web)
    if profile_id then profile = Glpi.select_profile(profile_id) end
 
    if user_id then
-      text_file_writer("/tmp/uid", type(user_id))
       return { is_logged=true, user_id=user_id, user_name=user_name, profile_id=profile_id,
                entity_id=entity_id, cookie=glpi_cookie, profile=profile, session=session_profile }
    else
