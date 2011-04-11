@@ -333,9 +333,9 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 function render_filter(web)
    local res = {}
 
-   res[#res+1] = {strings.name..": ", input{ type="text", name="hostname", value = "" }, " "}
-   res[#res+1] = {strings.inventory..": ", input{ type="text", name="inventory", value = "" }, " "}
-   res[#res+1] = {strings.sn..": ", input{ type="text", name="sn", value = "" }, " "}
+   res[#res+1] = {strings.name..": ", input{ type="text", name="hostname", value = web.input.hostname }, " "}
+   res[#res+1] = {strings.inventory..": ", input{ type="text", name="inventory", value = web.input.inventory }, " "}
+   res[#res+1] = {strings.sn..": ", input{ type="text", name="sn", value = web.input.sn }, " "}
 
    return res
 end

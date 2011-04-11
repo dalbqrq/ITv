@@ -14,6 +14,21 @@ local node, edge, subgraph, cluster, digraph, strictdigraph =
       gr.node, gr.edge, gr.subgraph, gr.cluster, gr.digraph, gr.strictdigraph
 
 
+local node_def = {
+   height = .8,
+   width = .8,
+   fixedsize = false,
+   fontsize = 9.,
+   fontname = "Helvetica",
+   fontstyle = "bold,filled,solid",
+   fontcolor = "black",
+   style = "bold,filled,solid",
+   color = "black",
+   penwidth = 2,
+   target = "_self",
+}
+
+
 function set_color(state, obj_type)
    local color
    state = tonumber(state)
@@ -95,9 +110,27 @@ function make_content(obj, rel)
          end
 
          color = set_color(v.ss_current_state, v.ao_type)
-         table.insert(content, node{name, shape=shape, height=1.2, width=1, fontsize=12., fixedsize=true,
-                      fontname="Helvetica", label=label, color="black", fillcolor=color ,URL=url ,target="_self",
-                      nodesep=0.05, style="bold,filled,solid", penwidth=2})
+         table.insert(content, 
+            node {
+               name, 
+               label = label,
+               shape  =shape,
+               fillcolor = color,
+               URL = url,
+               height = node_def.height,
+               width = node_def.width,
+               fixedsize = node_def.fixedsize,
+               fontsize = node_def.fontsize,
+               fontname = node_def.fontname,
+               fontstyle = node_def.fontstyle,
+               fontcolor = node_def.fontcolor,
+               style = node_def.style,
+               color = node_def.color,
+               penwidth = node_def.penwidth,
+               target = node_def.target,
+               nodesep = node_def.nodesep,
+            }
+         )
       end
    end
 
@@ -179,9 +212,28 @@ function make_tree_content(obj, rel, sep)
          end
 
          color = set_color(v.ss_current_state, "app")
-         table.insert(content, node{name, shape=shape, height=1.2, width=1, fontsize=12., fixedsize=true,
-                      fontname="Helvetica", label=label, color="black", fillcolor=color ,URL=url ,target="_self",
-                      nodesep=0.05, style="bold,filled,solid", penwidth=2})
+         table.insert(content, 
+            node {
+               name, 
+               label = label,
+               shape  =shape,
+               fillcolor = color,
+               URL = url,
+               height = node_def.height,
+               width = node_def.width,
+               fixedsize = node_def.fixedsize,
+               fontsize = node_def.fontsize,
+               fontname = node_def.fontname,
+               fontstyle = node_def.fontstyle,
+               fontcolor = node_def.fontcolor,
+               style = node_def.style,
+               color = node_def.color,
+               penwidth = node_def.penwidth,
+               target = node_def.target,
+               nodesep = node_def.nodesep,
+            }
+         )
+
       end
    end
 
@@ -224,8 +276,8 @@ function render(app_name, file_type, engene, content)
    local imgfile, imglink, lnkfile, maplink, dotfile = make_gv_filename(app_name, file_type)
 
    local g = digraph{"G",
-      size="10.0,10.0",
-      node = { label=app_name, nodesep=.5, style="rounded" },
+      size="15.0,15.0",
+      node = { label=app_name },
       --label = "\\n"..app_name,
       unpack(content),
    }

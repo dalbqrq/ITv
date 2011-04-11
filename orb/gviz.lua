@@ -38,7 +38,7 @@ ITvision:dispatch_get(list, "/", "/list")
 function show(web, app_id, no_header)
    local auth = Auth.check(web)
    local clause = nil
-   if auth then  clause = " entities_id in "..Auth.make_entity_clause(auth) end
+   if auth then clause = " entities_id in "..Auth.make_entity_clause(auth) end
    local all_apps = apps:select_apps(nil, clause)
 
    if app_id == "/show" then
@@ -123,7 +123,7 @@ function render_show(web, app, app_name, app_id, obj, rel, obj_id, no_header)
    res[#res+1] = { imgmap }
    res[#res+1] = img{ 
       src=imglink,
-      alt="Realistic ITvision",
+      alt="ITvision",
       border=0,
       class="figs",
       USEMAP="#G",

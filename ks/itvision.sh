@@ -188,7 +188,7 @@ language = "pt_BR"
 EOF
 chown -R $user.$user $itvhome/orb/config.lua
 
-mkdir /var/log/itvision
+mkdir -p /var/log/itvision
 chown -R $user.$user /var/log/itvision
 
 cd /home/$user
@@ -240,7 +240,7 @@ sed -i.orig -e "s/chown nagios:nagios/chown $user:root/" /etc/init.d/nagios3
 sed -i.orig -e "s/chown nagios/chown $user/" /etc/init.d/nagios-nrpe-server
 sed -i.orig -e "s/\/cgi-bin\/nagios3/\/cgi-bin\/monitor/" \
 	-e "s/\/nagios3\/cgi-bin/\/monitor\/cgi-bin/" \
-	-e "s/\/nagios3\/stylesheets/\/monitor\/stylesheets/"
+	-e "s/\/nagios3\/stylesheets/\/monitor\/stylesheets/" \
 	-e "s/\/nagios3/\/monitor/" /etc/nagios3/apache2.conf
 
 
@@ -265,11 +265,16 @@ sed -i.orig -e "s/check_pop -H/check_pop -p 100 -H/g" $dir/mail.cfg
 sed -i.orig -e "s/check_imap -H/check_imap -p 143 -H/g" $dir/mail.cfg
 cp $itvhome/ks/files/plugin.d/* $dir
 
-ln -s /usr/lib/cgi-bin/nagios3 monitor; chown -R netadm.netadm /usr/lib/cgi-bin/monitor
-ln -s /etc/nagios3 monitor ;chown -R netadm.netadm /etc/monitor
-ln -s /usr/share/nagios3 monitor ; chown -R netadm.netadm /usr/share/monitor
+ln -s /usr/lib/cgi-bin/nagios3 /usr/lib/cgi-bin/monitor; chown -R $user.$user /usr/lib/cgi-bin/monitor
+ln -s /etc/nagios3 /etc/monitor ;chown -R $user.$user /etc/monitor
+ln -s /usr/share/nagios3 /usr/share/monitor ; chown -R $user.$user /usr/share/monitor
 
 /usr/local/itvision/ks/pacth/patch-01.sh
+
+cd /etc;		ln -s /etc/nagios3 monitor;		chown -R $user.$user monitor
+cd /usr/share;		ln -s /usr/share/nagios3 monitor;	chown -R $user.$user monitor
+cd /usr/lib/;		ln -s /usr/lib/nagios3 monitor;		chown -R $user.$user monitor
+cd /usr/lib/cgi-bin;	ln -s /usr/lib/cgi-bin/nagios3 monitor; chown -R $user.$user monitor
 
 
 # --------------------------------------------------
@@ -292,31 +297,18 @@ sed -i.orig -e "s/user                    nagios/user                    $user/"
 chown -R $user.$user /var/lib/nagiosgrapher /etc/nagiosgrapher /var/run/nagiosgrapher /var/log/itvision/nagiosgrapher /var/cache/nagiosgrapher /usr/share/perl5/NagiosGrapher /usr/lib/nagiosgrapher /usr/sbin/nagiosgrapher
 cat /etc/nagiosgrapher/nagios3/commands.cfg >> /etc/nagios3/commands.cfg 
 rm -f /etc/nagiosgrapher/nagios3/commands.cfg
-echo '<HTML><HEAD><META http-equiv="REFRESH" content="0;url=/nagios3/cgi-bin/graphs.cgi"></HEAD></HTML>'  > /usr/share/nagios3/htdocs/graphs.html
+echo '<HTML><HEAD><META http-equiv="REFRESH" content="0;url=/monitor/cgi-bin/graphs.cgi"></HEAD></HTML>'  > /usr/share/nagios3/htdocs/graphs.html
 mkdir -p /etc/nagiosgrapher/ngraph.d/itvision
 cp /etc/nagiosgrapher/ngraph.d/standard/check_ping.ncfg /etc/nagiosgrapher/ngraph.d/standard/check_host_alive.ncfg
 sed -i "s/PING/HOST_ALIVE/g" /etc/nagiosgrapher/ngraph.d/standard/check_host_alive.ncfg
 
 echo << EOF > /usr/share/nagios3/htdocs/grapher.html
 <html><head>
-<meta http-equiv="REFRESH" content="0;url=/nagios3/cgi-bin/graphs.cgi">
+<meta http-equiv="REFRESH" content="0;url=/monitor/cgi-bin/graphs.cgi">
 </HEAD></HTML>
 EOF
 
 sed -i.orig -e "s/NagiosGrapher by NETWAYS GMBH/ITvision/g" /usr/lib/cgi-bin/nagiosgrapher/rrd2-system.cgi
-
-cd /etc
-ln -s /etc/nagios3 monitor
-chown -R $user.$user monitor
-cd /usr/share
-ln -s /usr/share/nagios3 monitor
-chown -R $user.$user monitor
-cd /usr/lib/
-ln -s /usr/lib/nagios3 monitor
-chown -R $user.$user monitor
-cd /usr/lib/cgi-bin
-ln -s /usr/lib/cgi-bin/nagios3 monitor
-chown -R $user.$user monitor
 
 
 

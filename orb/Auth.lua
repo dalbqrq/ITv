@@ -61,6 +61,7 @@ function is_logged_at_glpi(web)
 
    local sess_filename = session_path.."/sess_"..glpi_cookie
    local sess_ = text_file_reader(sess_filename)
+   if not sess_ then return false end
    local prof_ = get_profile(sess_)
 
    local prof_filename = session_path.."/prof_"..glpi_cookie..".lua"
@@ -82,7 +83,7 @@ function is_logged_at_glpi(web)
    local profile 
    if profile_id then profile = Glpi.select_profile(profile_id) end
 
-   if user_id ~= nil then
+   if user_id then
       return { is_logged=true, user_id=user_id, user_name=user_name, profile_id=profile_id,
                entity_id=entity_id, cookie=glpi_cookie, profile=profile, session=session_profile }
    else
@@ -125,15 +126,19 @@ end
 -- Este metodo é usado para dar autorizacao para a visualizacao de uma aplicacao.
 function check_entity_permission(web, app_id)
    if app_id then
-      local entity_auth = make_entity_clause(check(web))
-      local cond_ = "id = "..app_id.." and entities_id in "..entity_auth
-      local app = App.select_app(cond_)
+      --local entity_auth = make_entity_clause(check(web))
+      local auth = check(web)
+      if auth then
+         local entity_auth = make_entity_clause(auth)
+         local cond_ = "id = "..app_id.." and entities_id in "..entity_auth
+         local app = App.select_app(cond_)
 
-      if app[1] then return true end
+         if app[1] then return true end
+     end
+   else
+     web.prefix = "/orb/no_permission"
+     return web:redirect(web:link("/"))
    end
-
-   web.prefix = "/orb/no_permission"
-   return web:redirect(web:link("/"))
 end
 
 
@@ -144,36 +149,36 @@ end
 
 
 -- Extrai as conficuracoes da string no arquivo de sessao criado pelo glpi
-function string.strip(s,tab)
+function string.strip(s,is_array)
    local res = {}
    local cnt = 0
    local l, t, v, b
 
    while true do
       if not s then break end
-      if not tab then 
+      if not is_array then 
          _, _, l, t, v = string.find(s, "glpi([_%w]+)|(%a):(.+)")
       else
          _, _, t, v = string.find(s, "(%a)[:;](.+)")
       end
 
-      if t == "N" then
+      if t == "N" then -- nil
          _, _, v, s = string.find(v,";(.+)")
-         v = t
-      elseif t == "s" then
-         _, _, _, v, s = string.find(v,"(%d+):\"([^;.*]*)\";(.+)")
-      elseif t == "a" then
+         v = nil
+      elseif t == "s" then -- string
+         _, _, _, v, s = string.find(v,"(%d+):\"([^;]+)\";(.+)")
+      elseif t == "a" then -- array
           _, _, _, v, s = string.find(v,"(%d+):(%b{})(.*)")
          v = string.strip(v,true)
-      elseif t == "i" then
+      elseif t == "i" then -- inteiro
          _, _, v, s = string.find(v,"(%d*);(.+)")
-      elseif t == "b" then
+      elseif t == "b" then -- boolean
          _, _, v, s = string.find(v,"(%d);(.+)")
       else
          break
       end
-
-      if not tab then 
+ 
+      if not is_array then 
          res["glpi"..l] = v
       else
          if cnt == 0 then
@@ -337,8 +342,8 @@ end
 menu_itens = {
    { name="Monitor", link="#",
       submenu = {
-      { name="Visão", field="application", link="/orb/gviz/show" },
       { name="Árvore", field="application", link="/orb/treeviz/show" },
+      { name="Visão", field="application", link="/orb/gviz/show" },
       { name="Aplicações", field="application", link="/orb/app" },
       { name="Checagem", field="checkcmds", link="/orb/probe" },
       { name="Tipo de Relacionamento", field="app_relat_type", link="/orb/app_relat_types" },
