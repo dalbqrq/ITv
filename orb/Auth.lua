@@ -149,36 +149,36 @@ end
 
 
 -- Extrai as conficuracoes da string no arquivo de sessao criado pelo glpi
-function string.strip(s,tab)
+function string.strip(s,is_array)
    local res = {}
    local cnt = 0
    local l, t, v, b
 
    while true do
       if not s then break end
-      if not tab then 
+      if not is_array then 
          _, _, l, t, v = string.find(s, "glpi([_%w]+)|(%a):(.+)")
       else
          _, _, t, v = string.find(s, "(%a)[:;](.+)")
       end
 
-      if t == "N" then
+      if t == "N" then -- nil
          _, _, v, s = string.find(v,";(.+)")
-         v = t
-      elseif t == "s" then
-         _, _, _, v, s = string.find(v,"(%d+):\"([^;.*]*)\";(.+)")
-      elseif t == "a" then
+         v = nil
+      elseif t == "s" then -- string
+         _, _, _, v, s = string.find(v,"(%d+):\"([^;]+)\";(.+)")
+      elseif t == "a" then -- array
           _, _, _, v, s = string.find(v,"(%d+):(%b{})(.*)")
          v = string.strip(v,true)
-      elseif t == "i" then
+      elseif t == "i" then -- inteiro
          _, _, v, s = string.find(v,"(%d*);(.+)")
-      elseif t == "b" then
+      elseif t == "b" then -- boolean
          _, _, v, s = string.find(v,"(%d);(.+)")
       else
          break
       end
-
-      if not tab then 
+ 
+      if not is_array then 
          res["glpi"..l] = v
       else
          if cnt == 0 then
@@ -342,8 +342,8 @@ end
 menu_itens = {
    { name="Monitor", link="#",
       submenu = {
-      { name="Visão", field="application", link="/orb/gviz/show" },
       { name="Árvore", field="application", link="/orb/treeviz/show" },
+      { name="Visão", field="application", link="/orb/gviz/show" },
       { name="Aplicações", field="application", link="/orb/app" },
       { name="Checagem", field="checkcmds", link="/orb/probe" },
       { name="Tipo de Relacionamento", field="app_relat_type", link="/orb/app_relat_types" },

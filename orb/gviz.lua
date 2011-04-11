@@ -123,7 +123,7 @@ function render_show(web, app, app_name, app_id, obj, rel, obj_id, no_header)
    res[#res+1] = { imgmap }
    res[#res+1] = img{ 
       src=imglink,
-      alt="Realistic ITvision",
+      alt="ITvision",
       border=0,
       class="figs",
       USEMAP="#G",
