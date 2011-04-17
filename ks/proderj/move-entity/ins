@@ -1,0 +1,46 @@
+#!/bin/bash
+
+
+for ic in `cat seeduc`; do
+   MACH=`echo "select id from glpi_computers where ALIAS = '$ic' or NAME = '$ic';" | mysql -u root --password=itv proderj | grep -v id`
+
+   if [ "$MACH" == "" ]; then
+      MACH=`echo "select id from glpi_networkequipments where ALIAS = '$ic' or NAME = '$ic';" | mysql -u root --password=itv proderj | grep -v id`
+      if [ "$MACH" == "" ]; then
+         #echo -n " ##### $ic : NO FOUND ##### "; echo -n
+         echo $ic
+      else
+         #echo -n "NETW $ic ----> $MACH :: "
+         echo -n
+      fi
+   else
+      #echo -n "COMP $ic ----> $MACH :: "
+      echo -n
+   fi
+
+
+      #IP=`echo "select ip from itvision_ics_backup where ALIAS = '$ic' or HOST_NAME = '$ic';" | mysql -u root --password=itv proderj | grep -v ip`
+      #echo IP = $IP; echo
+
+#   if [ "$MACH" == "" ]; then
+#      IP=`echo "select * from itvision_ics_backup where ALIAS = '$ic' or HOST_NAME = '$ic';" | mysql -u root --password=itv proderj | grep -v COUNT_UPDATE `
+#      echo IP = $IP; echo
+#   fi
+
+
+   #echo "select ip from itvision_ics_backup where ALIAS = '$ic';" 
+
+   # (locations_id, computermodels_id, computertypes_id, manufacturers_id) VALUES (1, 5, 0, 39)
+
+   # insert into glpi_computers 
+   # set (itv_key, alias, name, entities_id, states_id )
+   # select chave, alias, host_name, 0, 1 from itvision_ics_backup where chave = '$ic';
+
+
+   #echo "select id from glpi_computers where alias = '$ic';" | mysql -u root --password=itv proderj
+   #echo "select id from glpi_computers where alias = '$ic';"
+
+   # insert into glpi_networkports (items_id, itemtype, entities_id) values select id, "Computer", 0 
+   # from glpi_computers where computertypes_id = 5;
+
+done

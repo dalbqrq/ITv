@@ -78,6 +78,7 @@ strgs.pt_BR = {
 	entity = "Entidade",
 	private = "Privado",
 	public = "Publico",
+	tree = "Árvore",
 
 }
 
@@ -156,6 +157,7 @@ strgs.us = {
 	entity = "Entity",
 	private = "Private",
 	public = "Public",
+	tree = "Tree",
 }
 
 

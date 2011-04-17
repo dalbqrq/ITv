@@ -76,7 +76,7 @@ function render_show(web, obj, rel, sep)
    Graph.render(gv_name, file_type, engene, content)
    local imgmap = text_file_reader(mapfile)
 
-   res[#res+1] = render_content_header(auth, strings.vision, nil, nil, nil)
+   res[#res+1] = render_content_header(auth, strings.tree, nil, nil, nil)
    res[#res+1] = render_bar( {
          a{ href=web:link("/show/0"),  "Unificada" } ,
          a{ href=web:link("/show/1"),  "Separada" } ,
