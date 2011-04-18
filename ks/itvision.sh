@@ -313,6 +313,13 @@ chown -R $user.$user monitor
 cd /usr/share
 ln -s /usr/share/nagios3 monitor
 chown -R $user.$user monitor
+cd /usr/lib/
+ln -s /usr/lib/nagios3 monitor
+chown -R $user.$user monitor
+cd /usr/lib/cgi-bin
+ln -s /usr/lib/cgi-bin/nagios3 monitor
+chown -R $user.$user monitor
+
 
 
 # --------------------------------------------------
