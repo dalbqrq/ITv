@@ -1,0 +1,12 @@
+#!/bin/bach
+
+
+ic="Alcatraz Andorinha Azulona Barulhento CABURE Cotinga Foguinho Gaturamo See_Srv01 Tiziu VIDEO_CONFERENCIA SEPLAG SWBLADEPROD"
+
+
+for i in $ic; do
+   cut -d";" -f1,2,3,4,5,6 ics.csv |grep -i $i
+   echo 
+done
+
+

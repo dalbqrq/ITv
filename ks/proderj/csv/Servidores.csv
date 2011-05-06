@@ -1,0 +1,137 @@
+HWSER038;;Acrobata;Acrobata;;10.10.8.4;;;;;;HARDWARE;SERVIDOR;;DataCenter;;;;;;;;;;DocFinder;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+HWSER039;;Acurana;Acurana;;10.10.8.58;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor Web;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+HWSER041;;Aguia;Aguia;;200.20.28.2 ;;;;;;HARDWARE;SERVIDOR;;UERJ;UERJ;;;;;;;;;Servidor de Gravação de arquivos em fita para a SEF (sistema de IPVA);;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+HWSER042;;Albatroz;Albatroz;;10.12.44.26;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor Logwatch – Analisador de log´s;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+HWSER043;;Amandina;Amandina;;10.10.8.60;;;;;;HARDWARE;SERVIDOR;;DataCenter;GSI;;;;;;;;;Servidor Hospedeiro Linux;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+HWSER045;;Anumara ;Anumara ;;10.10.10.130;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+HWSER047;;Araçari;Araçari;;10.10.10.132 ;;;;;;HARDWARE;SERVIDOR;;Collocation;;;;;;;;;;Servidor Webcasting / IIS - Collocation SEE;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+HWSER048;;Aracuan;Aracuan;;10.4.55.99;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor de Proxy - Linux;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+HWSER049;;Arapacu;Arapacu;;10.14.0.30;;;;;;HARDWARE;SERVIDOR;;DataCenter;GSI;;;;;;;;;Servidor Aplicação – Intranet Produção
+HWSER053;;Ararinha_Cluster;Ararinha_Cluster;;200.156.33.41;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor Web
+HWSER054;;Ararinha_DTC;Ararinha_DTC;;200.156.33.42;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;
+HWSER055;;Ararinha_Portal;Ararinha_Portal;;200.156.33.43;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor Web
+HWSER056;;Ariramba;Ariramba;;10.10.10.131;;;;;;HARDWARE;SERVIDOR;;Collocation;;;;;;;;;;Servidor Webcasting / Banco - Collocation SEE
+HWSER057;;Asa Branca;Asa Branca;;10.14.0.5;;;;;;HARDWARE;SERVIDOR;;DataCenter;GTI;;;;;;;;;Servidor Desenvolvimento - MySQL
+HWSER058;;Aurora;Aurora;;10.10.8.61;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor Web Produção - ICOX
+HWSER059;;Autotrac;Autotrac;;200.20.29.30;;;;;;HARDWARE;SERVIDOR;;UERJ;UERJ;;;;;;;;;Servidor de Interface com sistema de roubos e furtos
+HWSER060;;Azulão;Azulão;;200.156.33.3;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor Banco de Dados Oracle 8.1.7 - Produção
+HWSER061;;Bacalhau;Bacalhau;;18.12.18.25;;;;;;HARDWARE;SERVIDOR;;Collocation;;;;;;;;;;Servidor de Backup
+HWSER062;;Bacurau;Bacurau;;200.20.28.58;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor Web Produção - Faetec
+HWSER063;;Bagageiro;Bagageiro;;10.10.0.100;;;;;;HARDWARE;SERVIDOR;;DataCenter;GSL;;;;;;;;;Servidor Thin Client
+HWSER064;;Bandeirinha;Bandeirinha;;200.156.33.45;;;;;;HARDWARE;SERVIDOR;;DataCenter;GTI;;;;;;;;;Servidor de Homologação Banco de Dados MySQL
+HWSER065;;Bandoleta;Bandoleta;;10.12.44.11;;;;;;HARDWARE;SERVIDOR;;;GTI;;;;;;;;;IPS
+HWSER066;;Bavet;Bavet;;10.10.8.63;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor Web Produção - Cacic
+HWSER067;;Beija-flor;Beija-flor;;10.12.44.3;;;;;;HARDWARE;SERVIDOR;;;Firewall;;;;;;;;;Servidor Firewall Checkpoint – Muro corporativo - Saída Internet
+HWSER068;;Bicolor;Bicolor;;10.10.8.30;;;;;;HARDWARE;SERVIDOR;;DataCenter;GSI;;;;;;;;;Servidor Web – Casa Civil Diário Oficial
+HWSER069;;BICUDO;BICUDO;;10.10.1.64;;;;;;HARDWARE;SERVIDOR;;DataCenter;;;;;;;;;;Servidor de Impressão do 22a
+HWSER071;;Bkp - Carcara;Bkp - Carcara;;;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor Bkp Firewall Checkpoint – Muro corporativo Maracanã
+HWSER072;;Brejal;Brejal;;10.4.55.27;;;;;;HARDWARE;SERVIDOR;;DataCenter;GSI;;;;;;;;;Servidor Web Produção Balanceado
+HWSER073;;Bugun;Bugun;;200.20.29.9;;;;;;HARDWARE;SERVIDOR;;URRJ;UERJ;;;;;;;;;Servidor Nagios - MARACANÃ - SISMAC
+HWSER074;;Caburé;Caburé;;10.10.8.20 ;;;;;;HARDWARE;SERVIDOR;;DataCenter;GRT;;;;;;;;;Servidor DNS - Primário
+HWSER076;;Cairina;Cairina;;10.10.8.78;;;;;;HARDWARE;SERVIDOR;;DataCenter;;;;;;;;;;Servidor de Aplicação BI-Projeto SIGA
+HWSER079;;Calafate;Calafate;;10.10.2.95;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor Thin Client
+HWSER080;;Calcio;Calcio;;200.156.51.8;;;;;;HARDWARE;SERVIDOR;;;Firewall Rio Simples;;;;;;;;;Servidor Firewall Checkpoint – RioSimples
+HWSER081;;Calopsita;Calopsita;;10.14.0.23;;;;;;HARDWARE;SERVIDOR;;DataCenter;GSI;;;;;;;;;Servidor Web Desenvolvimento – Sites do Proderj
+HWSER082;;Camao;Camao;;10.10.0.248;;;;;;HARDWARE;SERVIDOR;;DataCenter;;;;;;;;;;Portal Intragov - Servidor de Limpeza de dados
+HWSER084;;Caninde;Caninde;;10.10.255.5;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor de prova de conceito do Proderj Builder e MS EPM
+HWSER085;;Carcara;Carcara;;;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor Firewall Checkpoint – Muro corporativo Maracanã
+HWSER086;;Cardeal;Cardeal;;200.156.33.4;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor Banco de Dados SQL Server 2000 - Produção
+HWSER087;;Casuar;Casuar;;10.10.8.37;;;;;;HARDWARE;SERVIDOR;;DataCenter;GRT;;;;;;;;;Hospedeiro
+HWSER088;;Caure;Caure;;10.4.55.19;;;;;;HARDWARE;SERVIDOR;;DataCenter;;;;;;;;;;Servidor Web Produção Balanceado - Sites do Governo 
+HWSER089;;Cegonha;Cegonha;;10.12.49.6;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Gerente Blade Sun
+HWSER090;;Chibante;Chibante;;10.12.44.22;;;;;;HARDWARE;SERVIDOR;;DataCenter;GSI;;;;;;;;;Servidor Check-up Tool
+HWSER092;;Cocota ( VOIP GSL );Cocota ( VOIP GSL );;10.10.0.106;;;;;;HARDWARE;SERVIDOR;;DataCenter;GSL;;;;;;;;;Serviço de telefonia (Voip-Livre)
+HWSER097;;Coleiro;Coleiro;;10.10.7.35;;;;;;HARDWARE;SERVIDOR;;;UERJ;;;;;;;;;Servidor de  Impressão
+HWSER099;;Corruíra;Corruíra;;10.4.54.42;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor Correio Webmail 1
+HWSER101;;Cotovia;Cotovia;;10.12.255.18;;;;;;HARDWARE;SERVIDOR;;;GSI;;;;;;;;;Certificadora
+HWSER102;;Cotovia-bkp;Cotovia-bkp;;10.12.255.19;;;;;;HARDWARE;SERVIDOR;;;GSI;;;;;;;;;Certificadora
+HWSER103;;Cravina;Cravina;;10.4.55.83;;;;;;HARDWARE;SERVIDOR;;DataCenter;GSI;;;;;;;;;Servidor Web Produção LINUX
+HWSER104;;Crejoa;Crejoa;;10.10.8.64;;;;;;HARDWARE;SERVIDOR;;DataCenter;GSI;;;;;;;;;Servidor de FTP da Imprensa Oficial - Linux
+HWSER105;;Curica;Curica;;200.20.28.135;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor Onbase Produção
+HWSER106;;Ema;Ema;;10.10.8.55;;;;;;HARDWARE;SERVIDOR;;;GSI;;;;;;;;;Servidor Hospedeiro Linux
+HWSER107;;Falcão;Falcão;;200.20.29.4;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor MAINFRAME - Produção
+HWSER108;;Feitor;Feitor;;10.4.55.148;;;;;;HARDWARE;SERVIDOR;;DataCenter;;;;;;;;;;Servidor Web - Projeto SIGA
+HWSER109;;Flamingo;Flamingo;;200.156.33.25;;;;;;HARDWARE;SERVIDOR;;DataCenter;;;;;;;;;;Servidor Banco de Dados SQL Server 2000 - Data Minning - OLAP
+HWSER113;;Ganso;Ganso;;10.10.0.192;;;;;;HARDWARE;SERVIDOR;;DataCenter;GSI;;;;;;;;;Servidor Antivírus
+HWSER114;;Garibaldi;Garibaldi;;10.10.8.7;;;;;;HARDWARE;SERVIDOR;;DataCenter;GSI ;;;;;;;;;Servidor de WEB – Linux  -  Cadastro da FIRJAN
+HWSER115;;Garibaldi;Garibaldi;;10.10.8.67;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor de WEB – Linux 
+HWSER116;;Gaviao;Gaviao;;200.20.57.9;;;;;;HARDWARE;SERVIDOR;;DataCenter;GSI;;;;;;;;;Servidor Web Produção – Intranet Proderj
+HWSER117;;Gonga;Gonga;;10.4.55.149;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor Web - Projeto SIGA
+HWSER118;;Governadoria 01;Governadoria 01;;10.3.250.254;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor AD - Governadora
+HWSER120;;Grou;Grou;;10.10.8.9;;;;;;HARDWARE;SERVIDOR;;DataCenter;GSI;;;;;;;;;Servidor Homologação Debian
+HWSER121;;Guará;Guará;;10.4.54.43;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor Correio – Webmail  2
+HWSER122;;Gurá;Gurá;;Não Localizado;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;
+HWSER123;;Gurandi;Gurandi;;10.12.44.21;;;;;;HARDWARE;SERVIDOR;;DataCenter;GLP;;;;;;;;;Servidor utilizado para rodar os Softwares de Monitoramento do Storage
+HWSER124;;Harpia;Harpia;;10.4.55.50;;;;;;HARDWARE;SERVIDOR;;DataCenter;GSI;;;;;;;;;Servidor Web Produção – Projeto Matrícula e Call Center
+HWSER126;;Internet Comunitária;Internet Comunitária;;200.20.28.30;;;;;;HARDWARE;SERVIDOR;;UERJ;UERJ;;;;;;;;;Servidor do CIC da UERJ
+HWSER127;;Irauna;Irauna;;10.4.55.51;;;;;;HARDWARE;SERVIDOR;;DataCenter;;;;;;;;;;Servidor Web Produção - Matrícula Internet
+HWSER128;;Irerê;Irerê;;10.4.54.53;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor Correio Controle
+HWSER131;;Jacu;Jacu;;200.20.29.5;;;;;;HARDWARE;SERVIDOR;;UERJ;UERJ;;;;;;;;;Servidor MAINFRAME - Suporte e Teste
+HWSER133;;Jandaia;Jandaia;;10.12.44.4;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor Firewall Checkpoint – Muro corporativo - Entrada Internet
+HWSER134;;JoaodeBarro;JoaodeBarro;;10.10.8.62;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor Web Produção - Repositório Livre RJ
+HWSER136;;Juriti;Juriti;;10.10.1.77;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor Thin Client
+HWSER137;;Juruviara;Juruviara;;200.156.33.36;;;;;;HARDWARE;SERVIDOR;;;GSI;;;;;;;;;Servidor Banco de Dados Mysql
+HWSER138;;LORIS;LORIS;;200.156.33.15;;;;;;HARDWARE;SERVIDOR;;DataCenter;GTI;;;;;;;;;Servidor de contingência do BD Sql-Server 
+HWSER139;;Lugia;Lugia;;10.10.1.78;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Máquina Virtual – Relay para CRM e Servidor de Impressão 
+HWSER140;;Malin;Malin;;;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;
+HWSER141;;Mandarim;Mandarim;;10.14.0.52;;;;;;HARDWARE;SERVIDOR;;DataCenter;;;;;;;;;;Servidor Banco de Dados SQL Server 2000 - Desenvolvimento
+HWSER142;;Manon;Manon;;10.14.0.25;;;;;;HARDWARE;SERVIDOR;;DataCenter;GTI;;;;;;;;;Servidor APPLINX, Desenvolvimento, Natural Web, Ixpress, Servidor de Conexões, Servidor OLAP  de Desenvolvimento
+HWSER143;;Marianinha;Marianinha;;10.10.8.2;;;;;;HARDWARE;SERVIDOR;;DataCenter;;;;;;;;;;Applinx de Produção
+HWSER144;;Maritaca;Maritaca;;10.10.8.51;;;;;;HARDWARE;SERVIDOR;;DataCenter;GSI;;;;;;;;;Servidor Web de Produção - Sites do Governo
+HWSER145;;Martim_Pescador;Martim_Pescador;;10.4.55.18;;;;;;HARDWARE;SERVIDOR;;DataCenter;;;;;;;;;;Servidor Web Produção Balanceado – Sites do Governo
+HWSER146;;mineirinho;mineirinho;;10.10.8.29 ;;;;;;HARDWARE;SERVIDOR;;DataCenter;;;;;;;;;;Portal Intragov - Web
+HWSER148;;Narceja;Narceja;;10.10.1.74;;;;;;HARDWARE;SERVIDOR;;DataCenter ;;;;;;;;;;Servidor Laboratório Virtual
+HWSER151;;Papagaio;Papagaio;;10.10.0.90;;;;;;HARDWARE;SERVIDOR;;;SEDUC;;;;;;;;;Servidor Web Produção EAD
+HWSER152;;Paru;Paru;;;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;
+HWSER153;;Patativa;Patativa;;10.14.0.90;;;;;;HARDWARE;SERVIDOR;;DataCenter;GTI;;;;;;;;;Rede produção 
+HWSER154;;Pato;Pato;;200.156.33.30;;;;;;HARDWARE;SERVIDOR;;DataCenter;GTI;;;;;;;;;Servidor Oracle / Stand-by do Marreco - Matrícula
+HWSER155;;Perdiz;Perdiz;;10.10.8.65;;;;;;HARDWARE;SERVIDOR;;DataCenter ;GSI;;;;;;;;;Servidor Web - Java - Jbass
+HWSER156;;Periquito;Periquito;;10.14.0.51;;;;;;HARDWARE;SERVIDOR;;DataCenter;GTI;;;;;;;;;Servidor Banco de Dados Oracle - Desenvolvimento
+HWSER157;;Phoenix;Phoenix;;10.12.44.9;;;;;;HARDWARE;SERVIDOR;;Datacenter;GSI;;;;;;;;;Servidor de NTP e WSUS
+HWSER158;;Picapau;Picapau;;10.10.2.200;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;
+HWSER159;;Pinguim;Pinguim;;10.4.55.82;;;;;;HARDWARE;SERVIDOR;;DataCenter;GSI;;;;;;;;;Servidor Web de LINUX
+HWSER160;;Pintagol;Pintagol;;10.10.8.31;;;;;;HARDWARE;SERVIDOR;;DataCenter;GSI;;;;;;;;;Servidor de AD – Domínio intragov – produção 
+HWSER161;;Pintassilgo;Pintassilgo;;10.10.8.5;;;;;;HARDWARE;SERVIDOR;;DataCenter;GSS;;;;;;;;;Servidor Web Produção / Homologação - Sites do Governo
+HWSER162;;Pisco;Pisco;;10.10.1.90;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor Nagios - CIC
+HWSER163;;Quetzal;Quetzal;;200.156.33.10;;;;;;HARDWARE;SERVIDOR;;DataCenter;;;;;;;;;;Servidor Banco de Dados SQL Server 2000 - Produção – CRM
+HWSER164;;Quivi;Quivi;;200.20.57.20;;;;;;HARDWARE;SERVIDOR;;DataCenter;GSI;;;;;;;;;Servidor Aplicação - CRM (CallCenter) 
+HWSER165;;Rosella;Rosella;;10.14.0.89;;;;;;HARDWARE;SERVIDOR;;DataCenter;GTI;;;;;;;;;Servidor Business Objects
+HWSER166;;Rouxinol;Rouxinol;;10.14.0.22;;;;;;HARDWARE;SERVIDOR;;DataCenter;GSI;;;;;;;;;Servidor Web Desenvolvimento
+HWSER167;;Sabia;Sabia;;10.10.8.68;;;;;;HARDWARE;SERVIDOR;;DataCenter;GTI;;;;;;;;;Serv. IXPRESS Produção, Serv. Conexões Natural Web
+HWSER168;;Sai;Sai;;10.10.8.57;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;sec M. Ambiente
+HWSER169;;Saira;Saira;;10.12.255.20;;;;;;HARDWARE;SERVIDOR;;DataCenter;GSI;;;;;;;;;CA
+HWSER170;;Saira-bkp;Saira-bkp;;10.12.255.21;;;;;;HARDWARE;SERVIDOR;;DataCenter;GSI;;;;;;;;;CA
+HWSER171;;Savacu;Savacu;;10.14.0.10;;;;;;HARDWARE;SERVIDOR;;DataCenter;GSI;;;;;;;;;Servidor de Subversion Proderj
+HWSER172;;Secretário;Secretário;;10.12.44.28;;;;;;HARDWARE;SERVIDOR;;DataCenter;GRT;;;;;;;;;Servidor Homologação de video conferencia
+HWSER173;;See – Est 01;See – Est 01;;200.20.28.53;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor de Sistema de escolas extintas
+HWSER174;;See – Est 03 ;See – Est 03 ;;200.20.28.51 ;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor de Sistema Reinventando a Escola
+HWSER175;;See – Srv 01;See – Srv 01;;200.20.28.52;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor de Sistema Reinventando a Escola
+HWSER176;;see_est01;see_est01;;10.50.14.100;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Gerente
+HWSER177;;see_est01;see_est01;;10.50.14.103;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor
+HWSER178;;see_est02;see_est02;;10.50.14.102;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Gerente
+HWSER179;;see_est03;see_est03;;10.50.14.101;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Gerente
+HWSER180;;Sef;Sef;;200.20.29.130;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor de Sistemas da unidade funcional fazenda - Collocation
+HWSER181;;Seriema;Seriema;;10.18.0.2 ;;;;;;HARDWARE;SERVIDOR;;;UERJ;;;;;;;;;Servidor Backup UERJ - LEGATO
+HWSER182;;Server - BD;Server - BD;;10.12.15.3 ;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;
+HWSER183;;Soldado;Soldado;;200.156.33.23;;;;;;HARDWARE;SERVIDOR;;;GTI;;;;;;;;;Banco de Dados SQL 2000
+HWSER184;;Suiriri;Suiriri;;10.10.8.48;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor Aplicação para Sistema de Atualização Cadastral e Servidor contigência Sabia
+HWSER185;;Sururina;Sururina;;200.20.28.131;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor Impressão HP
+HWSER186;;Tangara;Tangara;;200.20.28.136;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor Onbase Produção
+HWSER189;;Tesourinha;Tesourinha;;10.10.8.66;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;icox
+HWSER190;;Tie;Tie;;10.12.44.16;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor Firewall Checkpoint - Gerente
+HWSER191;;Tiesangue;Tiesangue;;10.10.8.43;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor Web de Estatísticas de sites
+HWSER192;;Tiesangue 2;Tiesangue 2;;10.10.8.22;;;;;;HARDWARE;SERVIDOR;;;GSI;;;;;;;;;Servidor Web Produção
+HWSER193;;Tietinga;Tietinga;;10.10.8.50;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor Web Produção - Casa Civil
+HWSER194;;Tiriba ;Tiriba ;;200.156.3.18;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Banco de dados
+HWSER195;;Tiziu;Tiziu;;10.10.8.23;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor Web Produção - (Hardware FESP)
+HWSER196;;Topazio;Topazio;;200.156.33.46;;;;;;HARDWARE;SERVIDOR;;;GSI;;;;;;;;;Servidor de Homologação SQL Server
+HWSER198;;Trincaferro;Trincaferro;;10.10.8.19;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor de Certificação Digital
+HWSER199;;Tuin;Tuin;;200.156.33.26;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor Banco de Dados Mysql 4.1.11 – produção
+HWSER200;;Tuipara;Tuipara;;10.10.8.49;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor Web M-Clipping
+HWSER201;;Tuiuiu;Tuiuiu;;10.10.1.26;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor Base de Consulta - Access e Notes
+HWSER202;;Uirapuru;Uirapuru;;10.14.0.8;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor Web de Desenvolvimento .NET
+HWSER204;;Urutau;Urutau;;10.10.8.36;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor Web Produção – Upload de Informações
+HWSER207;;Wiki;Wiki;;;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Máquina Virtual – Projetos e Portal da GSL
+HWSER208;;Xexeu;Xexeu;;10.14.0.24;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Servidor Desenvolvimento Aplicação Script Case
+HWSER211;;Zorro;Zorro;;200.156.33.38;;;;;;HARDWARE;SERVIDOR;;;;;;;;;;;;Banco de Dados
+
