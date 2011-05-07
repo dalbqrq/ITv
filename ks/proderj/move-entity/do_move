@@ -1,0 +1,9 @@
+#!/bin/bash
+
+
+for ic in `cat $1`; do
+  #echo $ic
+  echo "update glpi_computers set entities_id = 0 where name = '$ic';" >> do_move.sql
+  echo "update glpi_networkports set entities_id = 0 where items_id = (select id from glpi_computers where name = '$ic') and itemtype = 'Computer';" >> do_move.sql
+done
+

@@ -1,0 +1,15 @@
+#!/bin/bash
+
+echo "LOCK TABLES \`itvision_ics_backup\` WRITE;"
+echo "INSERT INTO \`itvision_ics_backup\` VALUES "
+
+i=0
+for ic in $(cat ics2.csv); do
+   i=$((i+1))
+   echo "("$i, 0, $ic"), "
+done
+
+echo ";"
+
+
+echo "UNLOCK TABLES;"
