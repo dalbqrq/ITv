@@ -2,20 +2,21 @@
 
 
 for ic in `cat seeduc`; do
-   MACH=`echo "select id from glpi_computers where ALIAS = '$ic' or NAME = '$ic';" | mysql -u root --password=itv proderj | grep -v id`
+   MACH=`echo "select id,entities_id from glpi_computers where entities_id = 1 and (ALIAS = '$ic' or NAME = '$ic');" | mysql -u root --password=itv proderj | grep -v id`
 
    if [ "$MACH" == "" ]; then
-      MACH=`echo "select id from glpi_networkequipments where ALIAS = '$ic' or NAME = '$ic';" | mysql -u root --password=itv proderj | grep -v id`
+      MACH=`echo "select id,entities_id from glpi_networkequipments where entities_id = 1 and (ALIAS = '$ic' or NAME = '$ic');" | mysql -u root --password=itv proderj | grep -v id`
       if [ "$MACH" == "" ]; then
          #echo -n " ##### $ic : NO FOUND ##### "; echo -n
          echo $ic
       else
-         #echo -n "NETW $ic ----> $MACH :: "
-         echo -n
+         echo -n "NETW $ic ----> $MACH :: "
+         echo
+         #echo $ic
       fi
    else
-      #echo -n "COMP $ic ----> $MACH :: "
-      echo -n
+      echo -n "COMP $ic ----> $MACH :: "
+      echo
    fi
 
 
