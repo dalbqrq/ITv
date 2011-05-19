@@ -59,7 +59,7 @@ end
 
 -- controllers ------------------------------------------------------------
 
-function update_apps()
+function update_apps(web)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
 
@@ -163,7 +163,7 @@ function delete_obj(web, app_id, obj_id)
       end
    end
 
-   update_apps()
+   update_apps(web)
 
    web.prefix = "/orb/app_tabs"
    return web:redirect(web:link("/list/"..app_id..":"..tab_id..msg))

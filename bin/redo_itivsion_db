@@ -1,15 +1,17 @@
 #!/bin/bash
 
 
-
 if [ `pwd` != "/usr/local/itvision/ks/db" ]; then
    echo "LUGAR ERRADO!"
    exit 0;
 fi
 
+progdir=$(dirname $(readlink -f $0))
+. $progdir/dbconf
 
-mysql -u root --password=itv itvision < itvision.sql
-mysql -u root --password=itv itvision < itvision_init.sql
+
+mysql -u $dbuser --password=$dbpass $dbname < itvision.sql
+mysql -u $dbuser --password=$dbpass $dbname < itvision_init.sql
 
 cd ../../scr
 

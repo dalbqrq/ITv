@@ -185,5 +185,10 @@ function sync_entities()
    text_file_writer(entityfile, "") 
 end
 
-]]
+entity_add(1)
+entity_add(2)
+entity_add(3)
+entity_add(4)
+entity_add(5)
 
+]]

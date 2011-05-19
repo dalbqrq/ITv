@@ -26,7 +26,8 @@ CREATE TABLE `itvision_app_contacts` (
   `instance_id` smallint(6) NOT NULL,
   `app_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
-  KEY `fk_id6` (`app_id`)
+  KEY `fk_id6` (`app_id`),
+  CONSTRAINT `fk_id6` FOREIGN KEY (`app_id`) REFERENCES `itvision_apps` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -44,7 +45,9 @@ CREATE TABLE `itvision_app_objects` (
   `type` enum('app','hst','svc') CHARACTER SET latin1 NOT NULL,
   KEY `fk_app_id4` (`app_id`),
   KEY `fk_object_id3` (`service_object_id`),
-  KEY `fk_instance_id11` (`instance_id`)
+  KEY `fk_instance_id11` (`instance_id`),
+  CONSTRAINT `fk_app_id6` FOREIGN KEY (`app_id`) REFERENCES `itvision_apps` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_object_id3` FOREIGN KEY (`service_object_id`) REFERENCES `nagios_objects` (`object_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -80,7 +83,9 @@ CREATE TABLE `itvision_app_relats` (
   KEY `fk_id2` (`app_id`),
   KEY `fk_instance_id12` (`instance_id`),
   KEY `fk_object_id7` (`from_object_id`),
-  KEY `fk_object_id8` (`to_object_id`)
+  KEY `fk_object_id8` (`to_object_id`),
+  CONSTRAINT `fk_id1` FOREIGN KEY (`app_relat_type_id`) REFERENCES `itvision_app_relat_types` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `fk_id2` FOREIGN KEY (`app_id`) REFERENCES `itvision_apps` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -100,7 +105,8 @@ CREATE TABLE `itvision_app_trees` (
   `rgt` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_app_id5` (`app_id`),
-  KEY `fk_instance_id16` (`instance_id`)
+  KEY `fk_instance_id16` (`instance_id`),
+  CONSTRAINT `fk_app_id5` FOREIGN KEY (`app_id`) REFERENCES `itvision_apps` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -139,7 +145,10 @@ CREATE TABLE `itvision_apps` (
   `app_type_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_instance_id10` (`instance_id`),
-  KEY `fk_object_id6` (`service_object_id`)
+  KEY `fk_object_id6` (`service_object_id`),
+  CONSTRAINT `fk_instance_id20` FOREIGN KEY (`instance_id`) REFERENCES `nagios_instances` (`instance_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `fk_instance_id27` FOREIGN KEY (`instance_id`) REFERENCES `nagios_instances` (`instance_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `fk_object_id26` FOREIGN KEY (`service_object_id`) REFERENCES `nagios_objects` (`object_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -255,7 +264,8 @@ CREATE TABLE `itvision_sysconfig` (
   `monitor_dir` varchar(45) CHARACTER SET latin1 NOT NULL,
   `monitor_bp_dir` varchar(45) CHARACTER SET latin1 NOT NULL,
   PRIMARY KEY (`id`,`instance_id`),
-  KEY `fk_instance_id7` (`instance_id`)
+  KEY `fk_instance_id7` (`instance_id`),
+  CONSTRAINT `fk_instance_id7` FOREIGN KEY (`instance_id`) REFERENCES `nagios_instances` (`instance_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='ITvision system configuration';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -275,7 +285,9 @@ CREATE TABLE `itvision_user` (
   `user_prefs_id` int(11) NOT NULL,
   PRIMARY KEY (`user_id`,`user_group_id`,`user_prefs_id`,`instance_id`),
   KEY `fk_user_group_id1` (`user_group_id`),
-  KEY `fk_user_prefs_id1` (`user_prefs_id`,`instance_id`)
+  KEY `fk_user_prefs_id1` (`user_prefs_id`,`instance_id`),
+  CONSTRAINT `fk_user_group_id1` FOREIGN KEY (`user_group_id`) REFERENCES `itvision_user_groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_user_prefs_id1` FOREIGN KEY (`user_prefs_id`) REFERENCES `itvision_user_prefs` (`user_prefs_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -308,7 +320,8 @@ CREATE TABLE `itvision_user_prefs` (
   `root_app` int(11) DEFAULT NULL,
   `instance_id` smallint(6) NOT NULL,
   PRIMARY KEY (`user_prefs_id`,`instance_id`),
-  KEY `fk_instance_id9` (`instance_id`)
+  KEY `fk_instance_id9` (`instance_id`),
+  CONSTRAINT `fk_instance_id9` FOREIGN KEY (`instance_id`) REFERENCES `nagios_instances` (`instance_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
