@@ -37,7 +37,7 @@ Alias /monitor /usr/share/nagios3/htdocs
         Order Allow,Deny
         Allow From All
 
-        AuthName "Nagios Access"
+        AuthName "ITvision Access"
         AuthType Basic
         AuthUserFile /etc/nagios3/htpasswd.users
         # nagios 1.x:
