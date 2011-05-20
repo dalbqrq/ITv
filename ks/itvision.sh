@@ -265,17 +265,13 @@ sed -i.orig -e "s/check_pop -H/check_pop -p 100 -H/g" $dir/mail.cfg
 sed -i.orig -e "s/check_imap -H/check_imap -p 143 -H/g" $dir/mail.cfg
 cp $itvhome/ks/files/plugin.d/* $dir
 
-ln -s /usr/lib/cgi-bin/nagios3 /usr/lib/cgi-bin/monitor; chown -R $user.$user /usr/lib/cgi-bin/monitor
-ln -s /etc/nagios3 /etc/monitor ;chown -R $user.$user /etc/monitor
-ln -s /usr/share/nagios3 /usr/share/monitor ; chown -R $user.$user /usr/share/monitor
-
-/usr/local/itvision/ks/pacth/patch-01.sh
 
 cd /etc;		ln -s /etc/nagios3 monitor;		chown -R $user.$user monitor
 cd /usr/share;		ln -s /usr/share/nagios3 monitor;	chown -R $user.$user monitor
 cd /usr/lib/;		ln -s /usr/lib/nagios3 monitor;		chown -R $user.$user monitor
 cd /usr/lib/cgi-bin;	ln -s /usr/lib/cgi-bin/nagios3 monitor; chown -R $user.$user monitor
 
+/usr/local/itvision/ks/pacth/patch-01.sh
 
 # --------------------------------------------------
 # NAGIOSGRAPHER

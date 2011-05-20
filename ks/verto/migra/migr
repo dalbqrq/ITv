@@ -1,0 +1,25 @@
+#!/bin/bash
+
+
+for t in `cat to_add`; do
+   #v=`echo "select count(*) as COUNT from $t" | mysql -u root --password=itv verto | grep -v COUNT`
+
+   e=""
+   e=`echo "desc $t" | mysql -u root --password=itv verto | grep entities_id`
+   if [ "$e" != "" ]; then
+      echo "$t : possui entities_id"
+   fi
+
+
+   #id=`echo "desc $t" | mysql -u root --password=itv verto | grep -v "^| id"`
+   idg=`echo "select max(id) from  $t" | mysql -u root --password=itv glpi78 | grep -v "id"`
+   idv=`echo "select max(id) from  $t" | mysql -u root --password=itv verto | grep -v "id"`
+   echo "$t : id = $idg e $idv"
+
+   #"insert into verto.$t" 
+   echo "select * from glpi78.$t where glpi78.$t.id > $idv"
+
+   
+
+done
+

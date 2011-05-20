@@ -1,0 +1,24 @@
+#!/bin/bash
+
+
+\rm -f to_add
+echo TABLENAME : GLPI - VERTO = DIFF
+for t in `cat table_list`; do
+
+   g=`echo "select count(*) as COUNT from $t" | mysql -u root --password=itv glpi78 | grep -v COUNT`
+   v=`echo "select count(*) as COUNT from $t" | mysql -u root --password=itv verto | grep -v COUNT`
+
+   d=$(($g - $v))
+   if [ $d -ne 0 ]; then
+      if [ $d -lt 0 ]; then
+         echo -n "- "
+      else
+         echo -n "+ "
+         echo $t >> to_add
+      fi
+      echo "$t : $g - $v = $d"
+   fi
+
+
+done
+
