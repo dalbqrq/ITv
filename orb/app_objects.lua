@@ -122,7 +122,7 @@ function insert_obj(web)
       _, root = App.select_root_app_tree()
       Model.delete("itvision_app_objects", "app_id = "..root.app_id.." and service_object_id = "..web.input.item)
 ]]
-      update_apps()
+      update_apps(web)
    end
 
 
