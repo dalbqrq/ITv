@@ -7,6 +7,14 @@ APPLIC_UNKNOWN                   = 3
 APPLIC_PENDING                   = 4     -- Only for IT Vision
 APPLIC_DISABLE                   = 5     -- Only for IT Vision
 
+APPLIC_TEXT = {
+  [APPLIC_OK]       = "OK",
+  [APPLIC_WARNING]  = "WARNING",
+  [APPLIC_CRITICAL] = "CRITICAL",
+  [APPLIC_UNKNOWN]  = "UNKNOWN",
+  [APPLIC_PENDING]  = "PENDING",
+  [APPLIC_DISABLE]  = "DISABLE",
+}
 --------------------- HOST STATUS --------------------
 
 HOST_UP				= 0

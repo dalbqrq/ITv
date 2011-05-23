@@ -1,7 +1,7 @@
 require "Model"
 
-local DEBUG = false
 local DEBUG = true
+local DEBUG = false
 
 --[[
         +------------+    +-------------------------+    +-----------------+      +----------+
@@ -852,7 +852,7 @@ function how_to_use()
 ]]
 
    --a = tree(8)
-   a = make_query_7()
+   a = make_query_5(1)
    --a = select_monitors()
 
 --[[

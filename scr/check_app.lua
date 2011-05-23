@@ -8,16 +8,20 @@ require "monitor_inc"
 
 
 function check_app(app_id)
-   local state
-   local logic
-   local app_object_states = Model.query("itvision_apps a, itvision_app_objects ao, nagios_servicestatus ss", 
-          "a.id = ao.app_id and ao.service_object_id = ss.service_object_id and ao.app_id = "..app_id, nil, "a.type, ss.current_state" )
+   local state, logic, name
+   local app_object_states = Model.query("itvision_apps a, itvision_app_objects ao, nagios_objects o, nagios_servicestatus ss", 
+          [[a.id = ao.app_id and ao.service_object_id = ss.service_object_id and o.is_active = 1 and 
+            o.object_id = ss.service_object_id 
+             and o.is_active = 1 and ao.app_id = ]].. app_id, nil, 
+           "a.type, ao.service_object_id, ss.current_state, a.name" )
 
+--o.instance_id = ]]..config.database.instance_id..[[
 
    if app_object_states[1] == nil then
-      return APPLIC_PENDING
+      return APPLIC_UNKNOWN
    else
       logic = app_object_states[1].type
+      name = app_object_states[1].name
    end
 
    if logic == "and" then
@@ -27,10 +31,10 @@ function check_app(app_id)
    else
       return APPLIC_UNKNOWN
    end
-   print(logic)
+   --DEBUG: print(logic)
 
    for i, v in ipairs(app_object_states) do
-     print(v.current_state)
+     --DEBUG: print(v.service_object_id, v.current_state)
      current_state = tonumber(v.current_state)
      if logic == "and" then
         if current_state > state then
@@ -43,11 +47,15 @@ function check_app(app_id)
      end
    end
 
-   return state
+   return state, name
 end
 
-local res = check_app(arg[1])
+local res, nom = check_app(arg[1])
+local info = ""
+if nom then
+   info = "The state of the application "..nom.." is "..APPLIC_TEXT[res]..". | "..res
+end
 
-print("ITvision App ",res)
+print("ITvisionAPP "..APPLIC_TEXT[res]..": "..info)
 
-return res
+os.exit(res)

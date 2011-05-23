@@ -3,7 +3,7 @@ module("config", package.seeall)
 app_name = "ITvision"
 
 database = {
-        instance_id = 1,
+        instance_id = 2,
         instance_name = "DEVEL",
         dbname = "proderj",
         dbuser = "root",

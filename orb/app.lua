@@ -384,10 +384,19 @@ function render_add(web, edit)
       edit = { id = 0, name = "", type = "", visibility = "" }
    end
 
+--dniel
+   local entities = {}
+   table.insert(entities, { i=1, name="---" })
+   for i,v in ipairs(auth.session.glpiactiveentities) do
+      table.insert(entities, { i=i+1, name=v })
+   end
+
    local inc = {
       strings.name..": ", input{ type="text", name="name", value = edit.name }, " ",
       strings.logic..": ", select_and_or("type", edit.type ),  " ",
       strings.visibility..": ", select_private_public("visibility", edit.visibility ),  " ",
+--daniel
+      strings.entity..": ", select_option("entity", entities, "i", "name", 1 ),  " ",
       "<INPUT TYPE=HIDDEN NAME=\"is_active\" value=\"0\">",
    }
    
