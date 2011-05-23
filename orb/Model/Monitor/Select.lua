@@ -1,7 +1,7 @@
 require "Model"
 
-local DEBUG = true
 local DEBUG = false
+local DEBUG = true
 
 --[[
         +------------+    +-------------------------+    +-----------------+      +----------+
@@ -43,15 +43,15 @@ local tables = {
    O valor dos 'aliases' é a resposta da pergunta: Qual é o campo da tabela 'name' que será usado para ligar com a tabela a 'alias'?
    Ou seja, é a chave estrangeira.
 ]]
-   a =   { name="itvision_apps",                   ao="id", at="id" } ,
-   at =  { name="itvision_app_trees",              a="app_id" } ,
-   ao =  { name="itvision_app_objects",            a="app_id", o="service_object_id" } ,
-   m =   { name="itvision_monitors",               o="service_object_id", s="service_object_id", ss="service_object_id", 
+   a =   { name="itvision_apps",                   ao="id", at="id" },
+   at =  { name="itvision_app_trees",              a="app_id" },
+   ao =  { name="itvision_app_objects",            a="app_id", o="service_object_id" },
+   m =   { name="itvision_monitors",               o="service_object_id", s="service_object_id", ss="service_object_id",
                                                       n="networkequipments_id", p="networkports_id", sv="softwareversions_id" },
-   o =   { name="nagios_objects",                  ao="object_id", m="object_id", s="object_id", ss="object_id", ax="object_id" }, 
-   s =   { name="nagios_services",                 ao="service_object_id", m="service_object_id", o="service_object_id", 
+   o =   { name="nagios_objects",                  ao="object_id", m="object_id", s="object_id", ss="object_id", ax="object_id" },
+   s =   { name="nagios_services",                 ao="service_object_id", m="service_object_id", o="service_object_id",
                                                       ss="service_object_id" },
-   ss =  { name="nagios_servicestatus",            ao="service_object_id", m="service_object_id", o="service_object_id", 
+   ss =  { name="nagios_servicestatus",            ao="service_object_id", m="service_object_id", o="service_object_id",
                                                       s="service_object_id" },
    c =   { name="glpi_computers",                  p="id", csv="id" },
    n =   { name="glpi_networkequipments",          p="id", csv="id" },
