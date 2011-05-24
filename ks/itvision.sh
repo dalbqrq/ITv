@@ -104,7 +104,7 @@ install_pack jhead
 /usr/sbin/invoke-rc.d nagiosgrapher stop
 rm -rf /var/cache/nagios3/ndo.sock
 
-exit
+#exit
 
 # --------------------------------------------------
 # ITVISION
@@ -271,7 +271,7 @@ cd /usr/share;		ln -s /usr/share/nagios3 monitor;	chown -R $user.$user monitor
 cd /usr/lib/;		ln -s /usr/lib/nagios3 monitor;		chown -R $user.$user monitor
 cd /usr/lib/cgi-bin;	ln -s /usr/lib/cgi-bin/nagios3 monitor; chown -R $user.$user monitor
 
-/usr/local/itvision/ks/pacth/patch-01.sh
+/usr/local/itvision/ks/patch/patch-01.sh
 
 # --------------------------------------------------
 # NAGIOSGRAPHER
@@ -305,6 +305,8 @@ echo << EOF > /usr/share/nagios3/htdocs/grapher.html
 EOF
 
 sed -i.orig -e "s/NagiosGrapher by NETWAYS GMBH/ITvision/g" /usr/lib/cgi-bin/nagiosgrapher/rrd2-system.cgi
+sed -i.orig -e "s/nagios3/monitor/" /usr/share/nagios3/htdocs/graphs.html
+
 
 
 
@@ -332,7 +334,7 @@ mysql -u root --password=$dbpass $dbname < /tmp/ndoutils.sql
 echo "DROP DATABASE ndoutils;" | mysql -u root --password=$dbpass
 
 chown -R $user.$user /var/log/itvision/nagios3 /etc/init.d/nagios-nrpe-server /etc/init.d/nagios3 /etc/nagios3 /etc/nagios /etc/nagios-plugins /var/run/nagios /var/run/nagios3 /usr/lib/nagios /usr/sbin/log2ndo /usr/lib/nagios3 /etc/apache2 /var/cache/nagios3 /var/lib/nagios /var/lib/nagios3 /usr/share/nagios3/ /usr/lib/cgi-bin/nagios3 
-chown root.netadm /usr/lib/nagios/plugins/check_dhcp
+chown root.$user /usr/lib/nagios/plugins/check_dhcp
 chmod 4750 /usr/lib/nagios/plugins/check_dhcp
 
 
@@ -424,12 +426,12 @@ echo "Alias /glpi "/usr/local/glpi"
     Allow from all
 </Directory>"  >> /etc/apache2/conf.d/glpi.conf
 
-if [ -z "$migra_glpi" ]; then
-    cp -a /usr/local/servdesk/config/config_db.php /usr/local/glpi/config/config_db.php
-    cp $itvhome/ks/db/glpi.sql.gz /tmp
-    gunzip /tmp/glpi.sql.gz
-    mysql -u $dbuser --password=$dbpass $dbname < /tmp/glpi.sql
-fi     
+#if [ -z "$migra_glpi" ]; then
+#    cp -a /usr/local/servdesk/config/config_db.php /usr/local/glpi/config/config_db.php
+#    cp $itvhome/ks/db/glpi.sql.gz /tmp
+#    gunzip /tmp/glpi.sql.gz
+#    mysql -u $dbuser --password=$dbpass $dbname < /tmp/glpi.sql
+#fi     
 
 cd $itvhome/ks/servdesk
 tar cf - * | ( cd /usr/local/servdesk; tar xfp -)
@@ -494,19 +496,19 @@ ln -s /usr/local/nedi/nedi.conf /etc/nedi.conf
 cat << EOF > /usr/local/nedi/startnedi.sh
 start nedi from crontab. Creates logfiles
 opts="-Apovb"
-CMD="./nedi.pl $opts"
+CMD="./nedi.pl \$opts"
 LOGPATH="/var/log/itvision/nedi"
-LOGFILE="$LOGPATH/nedi.log"
-LASTRUN="$LOGPATH/lastrun.log"
+LOGFILE="\$LOGPATH/nedi.log"
+LASTRUN="\$LOGPATH/lastrun.log"
 cd /opt/nedi
-now=`date +%Y%m%d:%H%M`
-echo "#$now start # $CMD" > $LASTRUN
-echo "#$now start" >> $LOGFILE
-$($CMD >> $LASTRUN)
-tail -8 $LASTRUN >> $LOGFILE
-now=`date +%Y%m%d:%H%M`
-echo "#$now stop" >> $LOGFILE
-echo "#$now stop" >> $LASTRUN'
+now=\`date +%Y%m%d:%H%M\`
+echo "#\$now start # \$CMD" > \$LASTRUN
+echo "#\$now start" >> \$LOGFILE
+\$(\$CMD >> \$LASTRUN)
+tail -8 \$LASTRUN >> \$LOGFILE
+now=\`date +%Y%m%d:%H%M\`
+echo "#\$now stop" >> \$LOGFILE
+echo "#\$now stop" >> \$LASTRUN'
 EOF
 
 chmod +x /usr/local/nedi/startnedi.sh
@@ -704,12 +706,15 @@ source /home/$user/.bashrc
 /usr/bin/lua /usr/local/itvision/scr/update_checkcmds.lua
 
 # Cron setup
-sudo -u $user crontab -l > /tmp/crontab
-sudo -u $user cat << EOF >> /tmp/crontab
+sudo crontab -u $user -l > /tmp/crontab
+sudo cat << EOF >> /tmp/crontab
+#
+# ITvision Pendings
+#
 LUA_PATH="$LUA_PATH"
 * * * * * /usr/bin/lua $itvhome/scr/pendings.lua
 EOF
-sudo -u $user crontab /tmp/crontab
+sudo crontab -u $user /tmp/crontab
 rm -f /tmp/crontab
 
 # Algumas permissoes
