@@ -62,10 +62,10 @@ function is_logged_at_glpi(web)
    local sess_filename = session_path.."/sess_"..glpi_cookie
    local sess_ = text_file_reader(sess_filename)
    if not sess_ then return false end
-   local prof_ = get_profile(sess_)
+   local session_prof_ = get_profile(sess_)
 
    local prof_filename = session_path.."/prof_"..glpi_cookie..".lua"
-   text_file_writer(prof_filename, table.dump(prof_))
+   text_file_writer(prof_filename, table.dump(session_prof_))
 
    --[[ 
        buscar em 'sess_filename' as strings abaixo 
@@ -79,13 +79,12 @@ function is_logged_at_glpi(web)
    local _, _, _, entity_id = string.find(sess_, 'glpiactive_entity|s:(%d+):"(%d+)";')
    local _, _, _, _, _, profile_id = string.find(sess_, 'glpiactiveprofile|a:(%d+):{s:(%d+):"id";s:(%d+):"(%d+)";')
 
-   local session_profile = prof_
    local profile 
    if profile_id then profile = Glpi.select_profile(profile_id) end
 
    if user_id then
       return { is_logged=true, user_id=user_id, user_name=user_name, profile_id=profile_id,
-               entity_id=entity_id, cookie=glpi_cookie, profile=profile, session=session_profile }
+               entity_id=entity_id, cookie=glpi_cookie, profile=profile, session=session_prof_, entities=session_prof_.glpiactiveentities }
    else
       return false
    end
@@ -187,7 +186,8 @@ function string.strip(s,is_array)
       else
          if cnt == 0 then
             cnt = cnt + 1
-            if tonumber(v) then b = "["..v.."]" else b = v end
+            --if tonumber(v) then b = "["..v.."]" else b = v end
+            b = v
          else
             cnt = 0
             res[b] = v
