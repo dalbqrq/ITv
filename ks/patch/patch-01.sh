@@ -47,7 +47,6 @@ Alias /monitor /usr/share/nagios3/htdocs
 EOF
 
 sed -i.bkp.$data -e "s/\/cgi-bin\/nagios3/\/cgi-bin\/monitor/" /usr/share/nagios3/htdocs/config.inc.php
-sed -i.bkp.$data -e 's/nagios3/monitor/' /usr/share/nagios3/htdocs/graphs.html
 
-/etc/init.d/nagios3 restart
-sudo /etc/init.d/apache2 restart
+#/etc/init.d/nagios3 restart
+#sudo /etc/init.d/apache2 restart
