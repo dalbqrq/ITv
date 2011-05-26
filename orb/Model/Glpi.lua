@@ -1,5 +1,6 @@
 module("Glpi", package.seeall)
 
+require "Auth"
 require "util"
 
 ----------------------------- PROFILES ----------------------------------
@@ -225,4 +226,25 @@ function select_app_by_contact (user_id)
 end
 
 
+--function select_active_entities(clause, root_entity)
+function select_active_entities(auth)
+   -- se nao houver "glpiactive_entity" no session profile, quer dizer que se trata da entidade
+   -- raiz e que esta deve ser incluida na lista de entidades. Por isso, extrai só o nome dessa
+   -- entidade (que deve vir da string colocada em servdesk/locale/pt_BR.php - 
+   local root_entity = nil
+   if auth.session.glpiactive_entity == nil then
+      _, _, root_entity = string.find(auth.session.glpiactive_entity_shortname, "([%a%s%d]+) %(Árvore%)")
+   end
+   local clause = Auth.make_entity_clause(auth)
 
+   local cond_ = "id in "..clause
+   local tables_ = "glpi_entities"
+   local columns_ = "id, name, completename"
+   local extra_ = "order by completename"
+   if root_entity ~= nil then
+     extra_ = "union select 0 as id, '"..root_entity.."' as name, '"..root_entity.."' as completename "..extra_
+   end
+
+   local content = query(tables_, cond_, extra_, columns_)
+   return content
+end

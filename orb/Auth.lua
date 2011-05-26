@@ -217,7 +217,6 @@ function make_entity_clause(auth)
 end
 
 
-
 -- ITvision ------------------------------------------------------------------------------
 local itvision_cookie_name = "ITvision"
 

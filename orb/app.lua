@@ -5,6 +5,7 @@ require "Model"
 require "App"
 require "Auth"
 require "View"
+require "Glpi"
 require "util"
 require "monitor_util"
 
@@ -181,7 +182,8 @@ function insert(web)
    apps.service_object_id = nil
    apps.instance_id = Model.db.instance_id
    apps.is_entity_root = 0
-   apps.entities_id = auth.session.glpiactive_entity
+   --apps.entities_id = auth.session.glpiactive_entity
+   apps.entities_id = web.input.entity
    apps.app_type_id = 2 -- leva em conta que a inicializacao da tabela itvision_app_type colocou o tipo aplicacao com id=1
    apps.visibility = web.input.visibility
    apps:save()
@@ -373,7 +375,7 @@ function render_add(web, edit)
    local add_link = web:link("/add")
    local res = {}
    local permission, auth = Auth.check_permission(web, "application", true)
-   local auth = Auth.check(web)
+   --local auth = Auth.check(web)
 
    if edit then 
       strbar = strings.update 
@@ -384,19 +386,15 @@ function render_add(web, edit)
       edit = { id = 0, name = "", type = "", visibility = "" }
    end
 
---dniel
-   local entities = {}
-   table.insert(entities, { i=1, name="---"..#auth.session.glpiactiveentities.." "..#auth.entities } )
-   for i,v in ipairs(auth.entities) do
-      table.insert(entities, { i=i+1, name=v })
-   end
+   -- recupera entidades da tabela glpi_entities baseado nas entidades ativas de auth
+   local entities = Glpi.select_active_entities(auth)
 
+   -- cria conteudo do formulario em barra
    local inc = {
       strings.name..": ", input{ type="text", name="name", value = edit.name }, " ",
       strings.logic..": ", select_and_or("type", edit.type ),  " ",
       strings.visibility..": ", select_private_public("visibility", edit.visibility ),  " ",
---daniel
-      strings.entity..": ", select_option("entity", entities, "i", "name", 1 ),  " ",
+      strings.entity..": ", select_option("entity", entities, "id", "completename", auth.session.glpidefault_entity ),  " ",
       "<INPUT TYPE=HIDDEN NAME=\"is_active\" value=\"0\">",
    }
    
