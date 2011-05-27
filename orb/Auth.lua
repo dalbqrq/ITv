@@ -347,6 +347,7 @@ menu_itens = {
       { name="Árvore", field="application", link="/orb/treeviz/show" },
       { name="Visão", field="application", link="/orb/gviz/show" },
       { name="Aplicações", field="application", link="/orb/app" },
+      { name="Monitoração", field="checkcmds", link="/orb/app_monitor" },
       { name="Checagem", field="checkcmds", link="/orb/probe" },
       { name="Tipo de Relacionamento", field="app_relat_type", link="/orb/app_relat_types" },
       },

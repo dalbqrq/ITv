@@ -8,16 +8,25 @@ color = {
 	red =    "#d90000",	-- red color used by down hosts and critical services
 	gray =   "#999999",	-- gray color used by all non problem status
 	purple = "#9900CC",	-- unused
+
+        lightblue = "#AFEEEE",
+	--lightgreen = "#90EE90",
+	lightgreen = nil,
+	lightyellow = "#F5F5DC",
+	lightorange = "#FFD700",
+	lightred = "#FA8072",
+	lightgray = "#D3D3D3",
+	lightpurple = "#BA55D3",
 }
 
 
 applic_alert = {   
-	[APPLIC_OK]       = { name= "NORMAL",		status = APPLIC_OK,		color = color.green,	color_name = "green" },
-	[APPLIC_WARNING]  = { name= "ANORMAL",	 	status = APPLIC_WARNING,	color = color.yellow,	color_name = "yellow" },
-	[APPLIC_CRITICAL] = { name= "CRITICO", 		status = APPLIC_CRITICAL,	color = color.red,	color_name = "red" },
-	[APPLIC_UNKNOWN]  = { name= "DESCONHECIDO",	status = APPLIC_UNKNOWN,	color = color.gray,	color_name = "gray" },
-	[APPLIC_PENDING]  = { name= "PENDENTE",		status = APPLIC_PENDING,	color = color.blue,	color_name = "blue" },
-	[APPLIC_DISABLE]  = { name= "DESABILITADO",	status = APPLIC_DISABLE,	color = color.orange,	color_name = "orange" }
+	[APPLIC_OK]       = { name= "NORMAL",		status = APPLIC_OK,		color = color.green,	lightcolor = color.lightgreen,	color_name = "green" },
+	[APPLIC_WARNING]  = { name= "ANORMAL",	 	status = APPLIC_WARNING,	color = color.yellow,	lightcolor = color.lightyellow,	color_name = "yellow" },
+	[APPLIC_CRITICAL] = { name= "CRITICO", 		status = APPLIC_CRITICAL,	color = color.red,	lightcolor = color.lightred,	color_name = "red" },
+	[APPLIC_UNKNOWN]  = { name= "DESCONHECIDO",	status = APPLIC_UNKNOWN,	color = color.gray,	lightcolor = color.lightgray,	color_name = "gray" },
+	[APPLIC_PENDING]  = { name= "PENDENTE",		status = APPLIC_PENDING,	color = color.blue,	lightcolor = color.lightblue,	color_name = "blue" },
+	[APPLIC_DISABLE]  = { name= "DESABILITADO",	status = APPLIC_DISABLE,	color = color.orange,	lightcolor = color.lightorange,	color_name = "orange" }
 }
 
 

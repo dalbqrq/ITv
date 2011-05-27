@@ -34,7 +34,8 @@ local DEBUG = false
         QUERY 8 - computador com porta sem software e com monitor e service state pendente
         QUERY 9 - computador com porta com software e com monitor e service state pendente
         QUERY 10 - aplicacao com monitor para grafico de arvore 
-
+	QUERY 11 - aplicacao com monitor para grafico de arvore com ss pendente
+        
 ]]
 
 
@@ -229,6 +230,7 @@ end
         QUERY 8 - computador com porta sem software e com monitor e service state pendente
         QUERY 9 - computador com porta com software e com monitor e service state pendente
         QUERY 10 - aplicacao com monitor para grafico de arvore 
+        
 ]]
 
 local g_excludes = [[ and c.is_deleted = 0 and c.is_template = 0 and c.states_id = 1 ]]
@@ -414,7 +416,10 @@ end
 ----------------------------------------------------------------------
 --  QUERY 5 - aplicacao com monitor - monitoracao de service 
 ----------------------------------------------------------------------
-function make_query_5(a_id, clause)
+--TODO: VER ONDE ISSO É USADO E SE clause É NECESSARIO!!
+--      ISSO FOI RETIRADO POIS DAVA PROBLEMA NA CHAMADA DO orb/app_monitor/list
+--function make_query_5(a_id, clause)
+function make_query_5(a_id)
    local q, t = {}, {}
    t = { "o", "s", "ss", "a", "ao", "ax" }
    n = { "c", "p", "m", "csv", "sv", "sw" }

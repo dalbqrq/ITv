@@ -9,6 +9,7 @@
 require "Model"
 require "Auth"
 require "messages"
+require "state"
 
 module(Model.name, package.seeall, orbit.new)
 
@@ -223,29 +224,23 @@ end
 
 
 --[[
-   render_table() recebe como parametros:
+   render_table() original. A substitura está logo abaixo.
 
-   t -> tabela lua a ser renderizada em uma tabela html. pode ou não possuir cabeçalho (ver parametro h)
-   h -> cabecalho da tabela. 
-         Se "nil" então não possui header
-         Se tabela vazia ("{}") entao o header estah dentro da tabela t
-         Se tabela com lista de strings, estao este eh o header a ser utilizado
-
-]]
 function render_table(t, h)
    local row = {}
    local col = {}
    local hea = {}
    local i, j, v, w
+   local bgclass = "tab_bg_1"
+   local span = 1
 
    if h ~= nil and table.getn(h) > 0 then -- h contendo o header
       for c, w in ipairs(h) do
          hea[#hea+1] = th{ align="center", w }
       end
-      hea = tr{ class="tab_bg_1", hea }
+      hea = tr{ class=bgclass, hea }
    end
 
-   local span = 1
    for r, v in ipairs(t) do
       for c, w in pairs(v) do
          if c == "colspan" then 
@@ -260,15 +255,85 @@ function render_table(t, h)
          end
       end
 
+      if bgclass == "tab_bg_1" then bgclass = "tab_bg_2" else bgclass = "tab_bg_1" end -- intercala bg
       if r == 1 and h ~= nil and table.getn(h) == 0 then  -- h vazio ({}) e header dentro de t
-         hea = tr{ class="tab_bg_1", hea }
+         hea = tr{ class=bgclass, hea }
       else 
-         row[#row+1] = tr{ class='tab_bg_1', col }
+         row[#row+1] = tr{ class=bgclass, col }
       end
       col = {}
    end
 
-   --return H("table") { border="0", class="tab_cadrehov", thead{ hea }, tbody{ row } }
+   return H("table") { border="0", class="tab_cadre_fixe", thead{ hea }, tbody{ row } }
+end
+]]
+
+
+--[[
+   render_table() recebe como parametros:
+
+   t -> tabela lua a ser renderizada em uma tabela html. pode ou não possuir cabeçalho (ver parametro h)
+         Se dentro desta tabela existir uma tabela de nome "status" esta será usada para "pintar" a linha
+         com cores fortes e fracas conforme definido na tabela status.applic_alert{}. Isto deverá ser usado
+         essencialmente para entradas de status de itens de monitoracao.
+   h -> cabecalho da tabela. 
+         Se "nil" então não possui header
+         Se tabela vazia ("{}") entao o header estah dentro da tabela t
+         Se tabela com lista de strings, estao este eh o header a ser utilizado
+
+]]
+function render_table(t, h)
+   local row = {}
+   local col = {}
+   local hea = {}
+   local i, j, v, w
+   local bgclass = "tab_bg_1"
+   local span = 1
+
+   if h ~= nil and table.getn(h) > 0 then -- h contendo o header
+      for c, w in ipairs(h) do
+         hea[#hea+1] = th{ align="center", w }
+      end
+      hea = tr{ class=bgclass, hea }
+   end
+
+   for r, v in ipairs(t) do
+      local color, lightcolor, colnumber
+
+      if v.status then
+          color = applic_alert[tonumber(v.status.state)].color
+          lightcolor = applic_alert[tonumber(v.status.state)].lightcolor
+          colnumber = tonumber(v.status.colnumber)
+      end
+
+      for c, w in pairs(v) do
+         --if c == "state" or c == "colnumber" then 
+         if c == "status" then 
+            --color = applic_alert[tonumber(v.state)].color
+            --lightcolor = applic_alert[tonumber(v.state)].lightcolor
+         elseif c == "colspan" then 
+            span = w
+         else 
+            if r == 1 and h ~= nil and table.getn(h) == 0 then -- h vazio ({}) e header dentro de t
+               hea[#hea+1] = th{ align="center", w }
+            else                                               -- nao possui header, tudo eh linha
+               local bgcolor = nil
+               if c == colnumber then bgcolor = color else bgcolor = lightcolor end
+               col[#col+1] = td{ colspan=span, bgcolor=bgcolor, w }
+            end
+            span = 1
+         end
+      end
+
+      if bgclass == "tab_bg_1" then bgclass = "tab_bg_2" else bgclass = "tab_bg_1" end -- intercala bg
+      if r == 1 and h ~= nil and table.getn(h) == 0 then  -- h vazio ({}) e header dentro de t
+         hea = tr{ class=bgclass, hea }
+      else 
+         row[#row+1] = tr{ class=bgclass, col }
+      end
+      col = {}
+   end
+
    return H("table") { border="0", class="tab_cadre_fixe", thead{ hea }, tbody{ row } }
 end
 

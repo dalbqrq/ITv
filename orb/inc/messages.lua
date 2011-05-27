@@ -79,6 +79,7 @@ strgs.pt_BR = {
 	private = "Privado",
 	public = "Publico",
 	tree = "Árvore",
+	status = "Status",
 
 }
 
@@ -158,6 +159,7 @@ strgs.us = {
 	private = "Private",
 	public = "Public",
 	tree = "Tree",
+	status = "Status",
 }
 
 

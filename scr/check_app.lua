@@ -4,7 +4,8 @@ require "Model"
 require "App"
 require "util"
 require "monitor_util"
-require "monitor_inc"
+--require "monitor_inc"
+require "state"
 
 
 function check_app(app_id)
@@ -53,9 +54,9 @@ end
 local res, nom = check_app(arg[1])
 local info = ""
 if nom then
-   info = "The state of the application "..nom.." is "..APPLIC_TEXT[res]..". | "..res
+   info = "The state of the application "..nom.." is "..applic_alert[res].name..". | "..res
 end
 
-print("ITvisionAPP "..APPLIC_TEXT[res]..": "..info)
+print("ITvisionAPP "..applic_alert[res].name..": "..info)
 
 os.exit(res)
