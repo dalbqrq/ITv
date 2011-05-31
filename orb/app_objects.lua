@@ -116,7 +116,7 @@ function insert_obj(web)
 
    if web.input.type == 'app' then 
       local app_child = apps:select(nil,"service_object_id = "..web.input.item)
-      App.insert_subnode_app_tree(app_child[1].id, web.input.app_id)
+      --App.insert_subnode_app_tree(app_child[1].id, web.input.app_id)
 --[[ nao apaga mais noh ligado a root
       App.delete_node_app_conected_to_root(app_child[1].id)
       _, root = App.select_root_app_tree()

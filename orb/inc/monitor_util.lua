@@ -167,7 +167,7 @@ end
 
 
 
---[[
+--[[ ESTE PROCEDIMENTO ESTAh SENDO SUBSTITUIDO PELO METODO ABAIXO CHAMADO 'make_app_config_scr()'
   Cria arquivo de conf do business process para uma unica aplicacao. 
 
   display 0 - significa usar o template de service "generic-bp-detail-service" que possiu 
@@ -208,24 +208,43 @@ end
 
 
 --[[
+  Este é o novo metodo para criacao do arquivo nagios de configuracao para as aplicacoes.
+  Ele se usa da nova devinicao do comando BUSPROC_SERVICE que eh definido no script lua
+  itv/scr/check_app.lua e eh chamado pelo seu script shell associado.
+]]
+function make_app_config_scr(app, obj, flag)
+
+   local text = [[
+define service{
+	use]].."\t\t\t"..[[BUSPROC_SERVICE
+	service_description]].."\t"..app.id..[[ 
+	check_command]].."\t\t"..[[BUSPROC_STATUS!]]..app.id..[[  
+	}  
+ 
+]]
+
+   return text
+
+end
+
+--[[
   Cria aquivo de conf para todas a aplicacoes
 ]]
 function make_all_apps_config(apps)
    local s = ""
-   local op
-   local file_name = config.monitor.bp_dir.."/etc/nagios-bp.conf"
+   local file_name = config.monitor.dir.."/apps/apps.cfg"
 
    for i, v  in ipairs(apps) do
       local objs = App.select_app_app_objects(v.id)
-      if objs[1] then s = s .. make_app_config(v, objs, v.is_active) end
+      --if objs[1] then s = s .. make_app_config(v, objs, v.is_active) end
+      if objs[1] then s = s .. make_app_config_scr(v, objs, v.is_active) end
    end
 
    text_file_writer(file_name, s)
-   insert_bp_cfg_file()
-
+   --insert_bp_cfg_file()
    insert_contactgroup_cfg_file(apps)
 
-   os.sleep(1)
+   --os.sleep(1)
    os.reset_monitor()
 end
 

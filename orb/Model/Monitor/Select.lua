@@ -44,12 +44,12 @@ local tables = {
    O valor dos 'aliases' é a resposta da pergunta: Qual é o campo da tabela 'name' que será usado para ligar com a tabela a 'alias'?
    Ou seja, é a chave estrangeira.
 ]]
-   a =   { name="itvision_apps",                   ao="id", at="id" },
+   a =   { name="itvision_apps",                   ao="id", at="id", o="service_object_id" },
    at =  { name="itvision_app_trees",              a="app_id" },
    ao =  { name="itvision_app_objects",            a="app_id", o="service_object_id" },
    m =   { name="itvision_monitors",               o="service_object_id", s="service_object_id", ss="service_object_id",
                                                       n="networkequipments_id", p="networkports_id", sv="softwareversions_id" },
-   o =   { name="nagios_objects",                  ao="object_id", m="object_id", s="object_id", ss="object_id", ax="object_id" },
+   o =   { name="nagios_objects",                  a="object_id", ao="object_id", m="object_id", s="object_id", ss="object_id", ax="object_id" },
    s =   { name="nagios_services",                 ao="service_object_id", m="service_object_id", o="service_object_id",
                                                       ss="service_object_id" },
    ss =  { name="nagios_servicestatus",            ao="service_object_id", m="service_object_id", o="service_object_id",
@@ -436,6 +436,7 @@ function make_query_5(a_id, clause)
 
    cond_ = cond_ .. [[ 
       and o.name1 = ']]..config.monitor.check_app..[[' 
+      and o.is_active = 1
    ]]
 
    if a_id then cond_ = cond_ .. " and a.id = " .. a_id end
