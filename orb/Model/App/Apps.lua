@@ -18,7 +18,7 @@ end
 function select_root_app()
    local root = Model.query("itvision_apps", "entities_id = 0 and is_entity_root = 1", nil, nil)
    if root[1] then
-      return root[1].app_id
+      return root[1].id
    else
       return nil
    end
@@ -146,7 +146,7 @@ function select_app_app_objects (id)
    local columns_ = [[ o.object_id, o.objecttype_id, o.name1, o.name2, ao.type as obj_type, a.id as 
 	app_id, a.name as a_name, a.type as a_type, a.is_active, a.service_object_id as service_id, 
         NULL as itemtype, NULL as items_id, o.name2 as name2, ab.name as name, ab.id as id,
-        a.app_type_id, a.is_entity_root ]]
+        ab.app_type_id, a.is_entity_root ]]
    local content2 = query (tables_, cond_, extra_, columns_)
 
    for _,v in ipairs(content2) do

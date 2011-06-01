@@ -1,4 +1,5 @@
 require "Model"
+require "App"
 require "util"
 
 local DEBUG = true
@@ -417,8 +418,6 @@ end
 ----------------------------------------------------------------------
 --  QUERY 5 - aplicacao com monitor - monitoracao de service 
 ----------------------------------------------------------------------
---TODO: VER ONDE ISSO É USADO E SE clause É NECESSARIO!!
---      ISSO FOI RETIRADO POIS DAVA PROBLEMA NA CHAMADA DO orb/app_monitor/list
 function make_query_5(a_id, clause)
    local q, t = {}, {}
    if a_id then
@@ -647,10 +646,10 @@ function make_query_10(a_id, clause)
    columns_ = string.gsub(columns_, "__", "_") 
 
    cond_ = cond_ .. [[ 
-      and a_.id in ( select distinct(app_id) from itvision_app_trees )    
-      and a_.is_active = 1
+      and a_.is_active = 1   
       and o_.name1 = ']]..config.monitor.check_app..[[' 
    ]]
+      --and a_.id in ( select distinct(id) from itvision_apps )        
 
    if a_id then cond_ = cond_ .. " and a_.id = " .. a_id end
    if clause then cond_ = cond_ .. " and " .. clause end
@@ -684,8 +683,8 @@ function make_query_11(a_id, clause)
       and o_.name1 = ']]..config.monitor.check_app..[[' 
       and a_.is_active = 1
       and s_.service_object_id not in (select service_object_id from nagios_servicestatus)
-      and a_.id in ( select distinct(app_id) from itvision_app_trees )
    ]]
+      --and a_.id in ( select distinct(app_id) from itvision_app_trees )
 
    if a_id then cond_ = cond_ .. " and a_.id = " .. a_id end
    if clause then cond_ = cond_ .. " and " .. clause end
@@ -790,6 +789,16 @@ function select_monitors_app_objs_to_tree(app_id, clause)
 end
 
 
+function select_monitors_relat_objs_to_tree(app_id, clause)
+   local q = {}
+   local q10 = make_query_10(app_id, clause)
+
+   for _,v in ipairs(q10) do table.insert(q, v) end
+
+   return q
+end
+
+
 function tree(app_id, show_svc)
    local q = {}
    local clause = nil
@@ -811,6 +820,28 @@ function tree(app_id, show_svc)
    end
 
    return q
+end
+
+
+-- NAO ESTAh FUNCIONAND - DEVERIA SER CHAMADO POR treeviz.lua
+function tree2(app_id, clause)
+   local q, r = {}, {}
+
+   if app_id == nil then
+      app_id = App.select_root_app()
+   end
+
+   text_file_writer("/tmp/tt", app_id)
+
+   local q5 = make_query_5(app_id, clause)
+   for _,v in ipairs(q5) do 
+      local content = Model.query("itvision_apps", "service_object_id = "..v.ao_service_object_id)
+      local q_ = tree(content[1].id, clause)
+      for _,v_ in ipairs(q_) do table.insert(q, v_) end
+      for _,v_ in ipairs(q_) do table.insert(r, { parente_app_id=v.a_id, child_app_id = v_.a_id }) end
+   end
+
+   return q, r
 end
 
 
@@ -855,7 +886,7 @@ function how_to_use()
    --a = make_query_5()
    --a = select_monitors()
 
-   a = make_query_10()
+   a = make_query_5(1)
 
 --[[
    for i,v in ipairs(a) do

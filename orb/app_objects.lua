@@ -63,9 +63,12 @@ function update_apps(web)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
 
+--[[ CODIGO VELHO COM ARVORE
    local APPS = App.select_uniq_app_in_tree()
    make_all_apps_config(APPS)
    os.sleep(1) -- CLUDGE Espera um pouco pois as queries das caixas de insercao estao retornando vazias!
+]]
+   App.remake_apps_config_file()
 end
 
 
@@ -140,27 +143,15 @@ function delete_obj(web, app_id, obj_id)
    local msg = ""
 
    if app_id and obj_id then
-      local is_last = false
       local subapp = objects:select_app(obj_id)
-      if subapp[1] then
-         is_last = App.is_last_subapp(subapp[1].name2, true)
-      end
 
-      if is_last == false then
-         local clause = "app_id = "..app_id.." and service_object_id = "..obj_id
-         local tables = "itvision_app_objects"
-         Model.delete (tables, clause) 
+      local clause = "app_id = "..app_id.." and service_object_id = "..obj_id
+      local tables = "itvision_app_objects"
+      Model.delete (tables, clause) 
  
-         -- apaga tambem todos os relacionamentos 
-         app_relats:delete_app_relat(app_id, obj_id, nil)
-         app_relats:delete_app_relat(app_id, nil, obj_id)
-     else
-        msg = ":Aplicação não pode ser removida da RAIZ."
-     end
-
-      if subapp[1] then
-         App.delete_child_from_parent(subapp[1].name2, app_id)
-      end
+      -- apaga tambem todos os relacionamentos 
+      app_relats:delete_app_relat(app_id, obj_id, nil)
+      app_relats:delete_app_relat(app_id, nil, obj_id)
    end
 
    update_apps(web)
@@ -196,6 +187,16 @@ function make_app_objects_table(web, A)
 
       if v.obj_type == "hst" then
          obj = find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.ip..")"
+
+         web.prefix = "/servdesk"
+         if v.itemtype == "Computer" then
+            url = web:link("/front/computer.form.php?id="..ic.id)
+         elseif v.itemtype == "NetworkEquipment" then
+            url = web:link("/front/networkequipment.form.php?id="..ic.id)
+         end
+
+         obj = button_link(obj, url, "negative")
+
       elseif v.obj_type == "svc" then
          obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.ip..")", v.name)
       else
@@ -211,16 +212,16 @@ function make_app_objects_table(web, A)
          obj = v.name..tag
          web.prefix = "/orb/app_tabs"
          obj = button_link(obj, web:link("/list/"..v.id..":"..tab_id), "negative")
-         web.prefix = "/orb/app_objects"
       end
+      web.prefix = "/orb/app_objects"
 
-      if permission == "w" then
+      if permission == "w" and v.app_type_id ~= "1" then
          remove_button = button_link(strings.remove, web:link("/delete_obj/"..v.app_id..":"..v.object_id), "negative")
       else
          remove_button = { "-" }
       end
 
-      row[#row + 1] = { 
+      row[#row+1] = { 
          obj,
          name_hst_svc_app(v.obj_type, v.is_entity_root),
          remove_button

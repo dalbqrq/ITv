@@ -81,9 +81,14 @@ function make_content(obj, rel)
 
    if obj[1] then
       for _,v in ipairs(obj) do
-
          local name, shape = "", ""
          local hst_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
+
+         -- remove acentos por problemas no lua_graph!
+         hst_name = remove_control_caracter(hst_name)
+         v.m_name = remove_control_caracter(v.m_name)
+	 v.ax_name = remove_control_caracter(v.ax_name)
+         v.o_name2 = remove_control_caracter(v.o_name2)
 
          if v.ao_type == 'hst' then
             label = hst_name
@@ -198,6 +203,9 @@ function make_tree_content(obj, rel, sep)
       for _,v in ipairs(obj) do
          local label, name, url, shape
 
+         -- remove acentos por problemas no lua_graph!
+         v.a_name = remove_control_caracter(v.a_name)
+
          label = v.a_name  -- DEBUG .." : "..v.a_is_entity_root  -- DEBUG ..":"..v.a_id
          name  = v.a_id
          if sep == 1 then name = name..v.t_id end
@@ -216,7 +224,7 @@ function make_tree_content(obj, rel, sep)
             node {
                name, 
                label = label,
-               shape  =shape,
+               shape = shape,
                fillcolor = color,
                URL = url,
                height = node_def.height,
@@ -256,6 +264,7 @@ function make_tree_content(obj, rel, sep)
          table.insert(content, edge{ from_name, to_name, label=relat_label } )
       end
    end
+
 
    return content
 end

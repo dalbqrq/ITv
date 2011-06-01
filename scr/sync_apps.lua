@@ -23,16 +23,18 @@ function sync_apps()
       local parent_app = Model.query( "itvision_apps a, glpi_entities e, itvision_apps p", 
         "a.entities_id = e.id and e.entities_id = p.entities_id and a.id = "..v.app_id, nil, "p.id as id" ) 
 
-      if parent_app[1] then 
-         p_id = parent_app[1].id 
-      else 
-         p_id = App.select_root_app ()
-      end
+      -- Se a aplicacao for uma entidade, entao já cria a respeciva entrada me itvision_app_objects
+      if v.app_type_id then
+         if parent_app[1] then 
+            p_id = parent_app[1].id 
+         else 
+            p_id = App.select_root_app ()
+         end
 
-      --print(table.dump(ao).."\n")
-      local ao = { app_id = p_id, instance_id = config.database.instance_id, 
-                   service_object_id = v.object_id, type = 'app' }
-      Model.insert("itvision_app_objects", ao)
+         local ao = { app_id = p_id, instance_id = config.database.instance_id, 
+                      service_object_id = v.object_id, type = 'app' }
+         Model.insert("itvision_app_objects", ao)
+      end
    end
 
    if app[1] then

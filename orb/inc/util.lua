@@ -208,6 +208,14 @@ end
 
 ----------------------------- FILE ----------------------------------
 
+function remove_control_caracter(str)
+   local res, i = str, nil
+   res, i = string.gsub(res,"%c", "_")
+   res, i = string.gsub(res,"[^%a%s]", "")
+   return res
+end
+
+
 -- Return a table where each entry is a line
 function line_reader(filename)
 

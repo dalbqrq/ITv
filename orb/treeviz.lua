@@ -56,8 +56,13 @@ function show(web, sep)
    end
 
    local obj = Monitor.select_monitors_app_objs_to_tree(nil, " a_.entities_id in "..clause)
+--[[
    --local rel = App.select_tree_relat_to_graph(" a.entities_id in "..clause)
-   local rel = apps.select_tree_relat_to_graph(" a.entities_id in "..clause)
+   --local rel = apps.select_tree_relat_to_graph(" a.entities_id in "..clause)
+]]
+   local rel = Model.query("itvision_apps a, itvision_app_objects ao, itvision_apps c",
+               "a.id = ao.app_id and ao.service_object_id = c.service_object_id and a.entities_id in "..clause, nil,
+               "a.id as parent_app, c.id as child_app" )
 
    return render_show(web, obj, rel, sep)
 end
@@ -83,9 +88,17 @@ function render_show(web, obj, rel, sep)
    engene = "dot"
    engene = "neato"
    engene = "twopi"
-   engene = "fdp"
-   engene = "circo"
    engene = "dot"
+   engene = "circo"
+   engene = "fdp"
+
+   if DEBUG then
+      local s = ""
+      for i,v in ipairs(obj) do
+         s = s..v.a_name.." \n"
+      end
+      text_file_writer("/tmp/apps_to_graph", s)
+   end
 
    local content = Graph.make_tree_content(obj, rel, sep)
    Graph.render(gv_name, file_type, engene, content)
@@ -94,7 +107,7 @@ function render_show(web, obj, rel, sep)
    res[#res+1] = render_content_header(auth, strings.tree, nil, nil, nil)
    res[#res+1] = render_bar( {
          a{ href=web:link("/show/0"),  "Unificada" } ,
-         a{ href=web:link("/show/1"),  "Separada" } ,
+         --a{ href=web:link("/show/1"),  "Separada" } ,     -- VISAO EM SAPARADO DESABILITADO. Com ERRO EM GRAPH.LUA
    } )
    res[#res+1] = br()
    res[#res+1] = { imgmap }

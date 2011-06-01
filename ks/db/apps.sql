@@ -86,17 +86,17 @@ CREATE TABLE `itvision_apps` (
   `instance_id` smallint(6) NOT NULL,
   `entities_id` int(11) NOT NULL DEFAULT '0',
   `is_entity_root` tinyint(1) NOT NULL DEFAULT '0',
-  `name` varchar(45) COLLATE utf8_unicode_ci NOT NULL,
-  `type` enum('and','or') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'and',
+  `name` varchar(45) COLLATE latin1_general_ci  NOT NULL,
+  `type` enum('and','or') COLLATE latin1_general_ci  NOT NULL DEFAULT 'and',
   `is_active` tinyint(4) NOT NULL DEFAULT '0',
   `visibility` int(1) NOT NULL DEFAULT '0',
   `service_object_id` int(11) DEFAULT NULL,
-  `notes` longtext COLLATE utf8_unicode_ci,
+  `notes` longtext COLLATE latin1_general_ci ,
   `app_type_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_instance_id10` (`instance_id`),
   KEY `fk_object_id6` (`service_object_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 

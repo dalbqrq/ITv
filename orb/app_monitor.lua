@@ -117,7 +117,8 @@ function render_list(web, ics, msg)
       -- muitos dos ifs abaixo existem em funcao da direrenca entre as queries com Computer e as com Network
       v.c_id = v.c_id or 0 v.n_id = v.n_id or 0 v.p_id = v.p_id or 0 v.sv_id = v.sv_id or 0
       hst_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
-      if hst_name == nil then hst_name = v.a_name.." ["..v.a_id..":"..v.o_object_id.."]" end
+      -- DEBUG: if hst_name == nil then hst_name = v.a_name.." ["..v.a_id..":"..v.o_object_id.."]" end
+      if hst_name == nil then hst_name = v.a_name end
       alias = v.m_name
 
       if v.p_itemtype then itemtype = v.p_itemtype else itemtype = strings.application end
@@ -163,7 +164,7 @@ function render_list(web, ics, msg)
 
       local state = tonumber(v.ss_current_state)
       local statename = applic_alert[state].name
-      row[#row + 1] = { status={state=state, colnumber=2}, name, statename, ip, serv, itemtype, v.o_name1 }
+      row[#row + 1] = { status={state=state, colnumber=2}, name, statename, ip, serv, itemtype, v.ss_output }
    end
 
    res[#res+1] = render_content_header(auth, "Monitoração", nil, web:link("/list"))

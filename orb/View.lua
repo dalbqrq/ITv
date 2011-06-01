@@ -78,6 +78,7 @@ function render_menu_frame(inner_html)
       head{
          title("ITvision"),
          meta{ ["http-equiv"] = "Content-Type",  content = "text/html; charset=utf-8" },
+         meta{ ["http-equiv"] = "Content-Language",  content = "pt-BR" },
          meta{ name="author", content="ATMA (http://www.itvision.com.br)" },
          meta{ name="description", content="IT monitoring" },
          link{ href="/pics/favicon.ico", rel="shortcut icon" },
@@ -139,6 +140,7 @@ function render_layout(inner_html, refresh_time)
       head{ 
          title("ITvision"), {"\n"},
          meta{ ["http-equiv"] = "Content-Type", content = "text/html; charset=utf-8" }, {"\n"},
+         meta{ ["http-equiv"] = "Content-Language", content = "pt-BR" }, {"\n"},
          meta{ ["http-equiv"] = "Pragma",        content = "No-Cache" }, {"\n"},
          meta{ ["http-equiv"] = "Cache-Control", content = "No-Cache" }, {"\n"},
          refresh, {"\n"},
