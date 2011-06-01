@@ -355,6 +355,7 @@ menu_itens = {
    { name="ServiceDesk", link="#",
       submenu = {
       { name="Central", field=nil, link="/servdesk/front/central.php" },
+      --{ name="Acompanhamento", field=nil, link="/servdesk/front/tracking.php" },
       { name="Ticket", field=nil, link="/servdesk/front/ticket.php" },
       { name="Estatística", field=nil, link="/servdesk/front/stat.php" },
       },

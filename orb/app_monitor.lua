@@ -105,6 +105,7 @@ end
 function render_list(web, ics, msg)
    local permission, auth = Auth.check_permission(web, "checkcmds")
    local row, res, link, url = {}, {}, {}, ""
+   local refresh_time = 60
 
    local header = { 
       strings.alias.."/"..strings.name, strings.status, "IP", "Software / Versão", strings.type, "."
@@ -118,10 +119,18 @@ function render_list(web, ics, msg)
       v.c_id = v.c_id or 0 v.n_id = v.n_id or 0 v.p_id = v.p_id or 0 v.sv_id = v.sv_id or 0
       hst_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
       -- DEBUG: if hst_name == nil then hst_name = v.a_name.." ["..v.a_id..":"..v.o_object_id.."]" end
-      if hst_name == nil then hst_name = v.a_name end
+      if hst_name == nil then hst_name = v.ax_name end
       alias = v.m_name
 
-      if v.p_itemtype then itemtype = v.p_itemtype else itemtype = strings.application end
+      if v.p_itemtype then 
+         itemtype = v.p_itemtype 
+      else 
+         if v.a_app_type_id == "1" then 
+            itemtype = strings.entity 
+         else 
+            itemtype = strings.application 
+         end
+      end
       if v.p_ip then ip = v.p_ip else ip = v.n_ip end
       if v.c_id ~= 0 then c_id = v.c_id else c_id = v.n_id end
 
@@ -149,7 +158,7 @@ function render_list(web, ics, msg)
          url = web:link("/front/networkequipment.form.php?id="..c_id)
       else 
          web.prefix = "/orb/app_tabs"
-         url = web:link("/list/"..v.a_id..":2")
+         url = web:link("/list/"..v.ax_id..":2")
       end
 
       if v.sw_name ~= "" then itemtype = "Service" end
@@ -172,7 +181,7 @@ function render_list(web, ics, msg)
    res[#res+1] = render_form_bar( render_filter(web), strings.search, web:link("/list"), web:link("/list") )
    res[#res+1] = render_table(row, header)
 
-   return render_layout(res)
+   return render_layout(res, refresh_time)
 end
 
 

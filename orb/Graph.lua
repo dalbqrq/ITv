@@ -85,10 +85,12 @@ function make_content(obj, rel)
          local hst_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
 
          -- remove acentos por problemas no lua_graph!
+--[[
          hst_name = remove_control_caracter(hst_name)
          v.m_name = remove_control_caracter(v.m_name)
 	 v.ax_name = remove_control_caracter(v.ax_name)
          v.o_name2 = remove_control_caracter(v.o_name2)
+]]
 
          if v.ao_type == 'hst' then
             label = hst_name

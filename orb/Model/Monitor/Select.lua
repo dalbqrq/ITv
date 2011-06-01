@@ -46,7 +46,8 @@ local tables = {
    O valor dos 'aliases' é a resposta da pergunta: Qual é o campo da tabela 'name' que será usado para ligar com a tabela a 'alias'?
    Ou seja, é a chave estrangeira.
 ]]
-   a =   { name="itvision_apps",                   ao="id", at="id", o="service_object_id" },
+   --a =   { name="itvision_apps",                   ao="id", at="id", o="service_object_id" },
+   a =   { name="itvision_apps",                   ao="id", at="id" },
    at =  { name="itvision_app_trees",              a="app_id" },
    ao =  { name="itvision_app_objects",            a="app_id", o="service_object_id" },
    m =   { name="itvision_monitors",               o="service_object_id", s="service_object_id", ss="service_object_id",
@@ -64,7 +65,7 @@ local tables = {
    sw =  { name="glpi_softwares",                  sv="id" },
 
 
--- Definicoes especiais para query_5
+-- Definicoes especiais para query_[3,4,5]
    ax =   { name="itvision_apps",                  o="service_object_id" } ,
 
 -- Definicoes especiais para esta query que é usada somente para a criacao da arvore de apps
@@ -371,7 +372,7 @@ function make_query_3(c_id, p_id, a_id, clause)
       for _,v in ipairs(r) do table.insert(v, 1, 3) end
       for _,v in ipairs(r) do table.insert(q, v) end
 
-      --if DEBUG then print ("\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
+      if DEBUG then print ("\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
    end
 
    return q
@@ -384,7 +385,7 @@ end
 function make_query_4(c_id, p_id, sv_id, a_id, clause)
    local q, t = {}, {}
    if a_id then
-       t = { "c", "p", "csv", "sv", "sw", "o", "s", "m", "ss", "a", "ao" }
+       t = { "c", "p", "csv", "sv", "sw", "o", "s", "m", "ss", "ax", "ao" }
    else
        t = { "c", "p", "csv", "sv", "sw", "o", "s", "m", "ss" }
    end
@@ -401,7 +402,7 @@ function make_query_4(c_id, p_id, sv_id, a_id, clause)
    if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
    if p_id  then cond_ = cond_ .. " and p.id = "  .. p_id  end
    if sv_id then cond_ = cond_ .. " and sv.id = " .. sv_id end
-   if a_id then cond_ = cond_ .. " and a.id = " .. a_id end
+   if a_id then cond_ = cond_ .. " and ax.id = " .. a_id end
    if clause  then cond_ = cond_ .. " and " .. clause end
 
    q = Model.query(tables_, cond_, nil, columns_)
@@ -423,7 +424,7 @@ function make_query_5(a_id, clause)
    if a_id then
       t = { "o", "s", "ss", "a", "ao", "ax" }
    else
-      t = { "o", "s", "ss", "a" }
+      t = { "o", "s", "ss", "ax" }
    end
    n = { "c", "p", "m", "csv", "sv", "sw" }
 
@@ -432,7 +433,7 @@ function make_query_5(a_id, clause)
    local tables_  = make_tables(t)
    local cond_    = make_where(t)
 
-   if clause then clause = string.gsub(clause, "p.entities_id", "a.entities_id") end
+   if clause then clause = string.gsub(clause, "p.entities_id", "ax.entities_id") end
 
    cond_ = cond_ .. [[ 
       and o.name1 = ']]..config.monitor.check_app..[[' 
@@ -445,7 +446,7 @@ function make_query_5(a_id, clause)
    q = Model.query(tables_, cond_, nil, columns_)
    for _,v in ipairs(q) do table.insert(v, 1, 5) end
 
-   if DEBUG then print( "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
+   --if DEBUG then print( "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
 
    return q
 end
@@ -751,7 +752,6 @@ end
 
 function select_monitors_app_objs(app_id, clause)
    local q = {}
-
    local q3 = make_query_3(nil, nil, app_id, clause)
    local q4 = make_query_4(nil, nil, nil, app_id, clause)
    local q5 = make_query_5(app_id, clause)
@@ -886,7 +886,7 @@ function how_to_use()
    --a = make_query_5()
    --a = select_monitors()
 
-   a = make_query_5(1)
+   a = make_query_3(nil, nil, 15)
 
 --[[
    for i,v in ipairs(a) do

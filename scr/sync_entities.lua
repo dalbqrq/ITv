@@ -57,7 +57,7 @@ function entity_add(id)
    App.insert_node_app_tree(child_app[1].id, id, parent_node[1].origin, 1)
 ]]
 
-   --App.remake_apps_config_file()
+   App.remake_apps_config_file()
 end
 
 

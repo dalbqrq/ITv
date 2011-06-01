@@ -13,7 +13,7 @@ function sync_apps()
 
    local app = Model.query("itvision_apps a, nagios_objects o",  
        "o.is_active = 1 and a.service_object_id is null and a.id = o.name2 and name1 = '"..config.monitor.check_app.."'" ,
-       nil, "a.id as app_id, o.object_id as object_id")
+       nil, "a.id as app_id, o.object_id as object_id, a.app_type_id as app_type_id")
 
    for i,v in ipairs(app) do
       local p_id
@@ -24,7 +24,7 @@ function sync_apps()
         "a.entities_id = e.id and e.entities_id = p.entities_id and a.id = "..v.app_id, nil, "p.id as id" ) 
 
       -- Se a aplicacao for uma entidade, entao já cria a respeciva entrada me itvision_app_objects
-      if v.app_type_id then
+      if v.app_type_id == "1" then
          if parent_app[1] then 
             p_id = parent_app[1].id 
          else 

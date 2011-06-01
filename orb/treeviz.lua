@@ -85,14 +85,13 @@ function render_show(web, obj, rel, sep)
    local gv_name = "TREE"
    local imgfile, imglink, mapfile, maplink, dotfile = Graph.make_gv_filename(gv_name, file_type)
 
-   engene = "dot"
    engene = "neato"
-   engene = "twopi"
-   engene = "dot"
    engene = "circo"
    engene = "fdp"
+   engene = "twopi"
+   engene = "dot"
 
-   if DEBUG then
+   if DEBUG == true then
       local s = ""
       for i,v in ipairs(obj) do
          s = s..v.a_name.." \n"

@@ -11,15 +11,24 @@ require "orbit"
 module(Model.name, package.seeall,orbit.new)
 
 local apps = Model.itvision:model "apps"
+local entities = Model.glpi:model "entities"
 
 
 -- models ------------------------------------------------------------
 
 function apps:select_apps(id, clause_)
-   local clause = " is_active = 1 "
-   if id then
-      clause = clause.." and  id = "..id
-   end
+   --local clause = " is_active = 1 and app_type_id > 1" -- tentativa de colocar selecao por entidades
+   local clause = " is_active = 1"
+   if id then clause = clause.." and  id = "..id end
+   if clause_ then clause = clause.." and "..clause_ end
+
+   return Model.query("itvision_apps", clause, "order by id")
+end
+
+
+function entities:select_entities(id, clause_)
+   local clause = "id > 0 " -- dummy
+   if id then clause = clause.." and  id = "..id end
    if clause_ then clause = clause.." and "..clause_ end
 
    return Model.query("itvision_apps", clause, "order by id")
@@ -42,10 +51,13 @@ function show(web, app_id, no_header)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
 
+text_file_writer("/tmp/1", app_id)
    local clause = nil
    if auth then clause = " entities_id in "..Auth.make_entity_clause(auth) end
    local all_apps = apps:select_apps(nil, clause)
+   local all_entities = entities:select_entities(nil, clause)
 
+text_file_writer("/tmp/2", app_id)
    if app_id == "/show" then
       if all_apps[1] then 
          app_id = all_apps[1].id 
@@ -54,6 +66,7 @@ function show(web, app_id, no_header)
       end
    end
    if app_id then Auth.check_entity_permission(web, app_id) end
+text_file_writer("/tmp/3", app_id)
 
    local app = apps:select_apps(app_id)
    local obj = Monitor.select_monitors_app_objs(app_id)
@@ -61,7 +74,9 @@ function show(web, app_id, no_header)
    local obj_id = app[1].service_object_id
    local app_name = app[1].name
 
-   return render_show(web, all_apps, app_name, app_id, obj, rel, obj_id, no_header)
+text_file_writer("/tmp/4", app_id)
+
+   return render_show(web, all_apps, all_entities, app_name, app_id, obj, rel, obj_id, no_header)
 end
 ITvision:dispatch_get(show,"/show", "/show/(%d+)", "/show/(%d+):(%d+)")
 
@@ -78,7 +93,7 @@ function render_list(web, A)
 end
 
 
-function render_show(web, app, app_name, app_id, obj, rel, obj_id, no_header)
+function render_show(web, app, entities, app_name, app_id, obj, rel, obj_id, no_header)
    local auth = Auth.check(web)
    local res = {}
    local engene = "dot"
@@ -117,10 +132,12 @@ function render_show(web, app, app_name, app_id, obj, rel, obj_id, no_header)
       if auth then -- se nao estiver logado, valor de auth é "false" e não a arvore de autenticacao (mod Auth)
          res[#res+1] = render_content_header(auth, strings.vision, nil, nil, nil)
       end
-      res[#res+1] = render_bar( { render_selector_bar(web, app, app_id, "/gviz/show"), 
-         a{ href=lnkgeo,  "Mapa" } ,
-         a{ href=lnkedt,  strings.edit } ,
-      } )
+      res[#res+1] = render_bar( 
+         { render_selector_bar(web, app, app_id, "/gviz/show"), 
+           --render_selector_bar(web, entities, app_id, "/gviz/show"),  -- tentativa de colocar selecao por entidades
+           a{ href=lnkgeo,  "Mapa" } ,
+           a{ href=lnkedt,  strings.edit } ,
+         } )
    else
       refresh_time = nil
    end
