@@ -8,6 +8,7 @@ require "Checkcmds"
 require "View"
 require "util"
 require "monitor_util"
+require "sync_services"
 
 module(Model.name, package.seeall,orbit.new)
 
@@ -218,6 +219,13 @@ end
 ITvision:dispatch_get(add, "/add/(%d+):(%d+):(%d+):(%d+)", "/add/(%d+):(%d+):(%d+):(%d+):(%d+)")
 ITvision:dispatch_post(add, "/add/(%d+):(%d+):(%d+):(%d+)", "/add/(%d+):(%d+):(%d+):(%d+):(%d+)")
 
+
+function pend(web)
+   os.reset_monitor()
+   sync_services()
+   return web:redirect(web:link("/list"))
+end
+ITvision:dispatch_get(pend, "/pend/")
 
 
 ------------------------------------------------------------------------------------------------------------------------------
@@ -431,8 +439,11 @@ function render_list(web, ics, chk, msg)
 
    res[#res+1] = render_content_header(auth, "Checagem", nil, web:link("/list"))
    if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ font{ color="red", msg } } end
+   local bar = {}
    res[#res+1] = render_form_bar( render_filter(web), strings.search, web:link("/list"), web:link("/list") )
    res[#res+1] = render_table(row, header)
+   res[#res+1] = render_bar( button_link("Forçar Pendências", web:link("/pend/"), "calendrier") )
+   res[#res+1] = { br(), br(), br(), br() }
 
    return render_layout(res)
 end

@@ -180,6 +180,7 @@ function render_list(web, ics, msg)
    if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ font{ color="red", msg } } end
    res[#res+1] = render_form_bar( render_filter(web), strings.search, web:link("/list"), web:link("/list") )
    res[#res+1] = render_table(row, header)
+   res[#res+1] = { br(), br(), br(), br() }
 
    return render_layout(res, refresh_time)
 end

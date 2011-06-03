@@ -241,10 +241,12 @@ ITvision:dispatch_get(remove, "/remove/(%d+)")
 
 function delete(web, id)
    if id then
+      --[[ nao existe mais arvore: itvision_app_tree
       local tree_id = App.find_node_id(id)
       for _,v in ipairs(tree_id) do
          App.delete_node_app_tree(v.id)
       end
+      ]]
 
       local o = objects:select_app(id)
       if o[1] then

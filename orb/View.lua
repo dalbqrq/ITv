@@ -30,6 +30,13 @@ function button_form(label, btype, class, div)
 end
 
 
+function button_link(label, link, class)
+   class = class or "none"
+   return [[<div class="buttons"> <a href="]]..link..
+          [[" class="]]..class..[[">]]..label..[[ </a> </div>]]
+end
+
+
 function make_logo(instance_name) 
    if instance_name == "IMPA" then
       return {
@@ -353,7 +360,8 @@ function render_form_bar(form_content, button_name, url_post, url_reset)
 
    end
    return form{ name = "input", method = "post", action = url_post,
-      H('table') { class='tab_cadrehov', tr{ class='tab_bg_1', 
+      --H('table') { class='tab_cadrehov', tr{ class='tab_bg_1', 
+      H('table') { class='tab_cadre_fixe', tr{ class='tab_bg_1', 
          td{ 
             H('table') { tr{ td{ class='left', form_content } } }
          }, 
@@ -734,13 +742,5 @@ function render_tabs(t, active_tab)
    --res[#res+1] = script{ type='text/javascript', "loadDefaultTab();" }
 
    return res
-end
-
-
-
-function button_link(label, link, class)
-   class = class or "none"
-   return [[<div class="buttons"> <a href="]]..link..
-          [[" class="]]..class..[[">]]..label..[[ </a> </div>]]
 end
 
