@@ -95,6 +95,17 @@ function objects:select_checks(cmd)
 end
 
 
+function monitors:select_monitors(name1, name2)
+   local clause = "name1 = '"..name1.."'"
+   if name2 then
+      clause = clause.." and name2 = '"..name2.."'"
+   else
+      clause = clause.." and name2 = '"..config.monitor.check_host.."' "
+   end
+
+   return Model.query("itvision_monitors", clause)
+end
+
 function monitors:insert_monitor(networkport, softwareversion, service_object, name, name1, name2, state, type_)
    if tonumber(networkport)      == 0 then networkport      = nil end         
    if tonumber(softwareversion)  == 0 then softwareversion  = nil end         
@@ -231,7 +242,7 @@ function insert_host(web, p_id, sv_id, c_id, n_id, c_name, ip)
    local msg = ""
    local hst_name = c_id.."_"..p_id
 
-   h = objects:select_host(hst_name)
+   h = monitors:select_monitors(hst_name)
 
    ------------------------------------------------------
    -- cria check host e service ping caso nao exista

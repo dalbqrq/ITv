@@ -207,13 +207,13 @@ if arg[1] and arg[2]  then
    if cmd == "ADD" then
       entity_add(e_id)
    elseif cmd == "UPDATE" then
-      entity_update(e_id)
+--      entity_update(e_id)
    elseif cmd == "DELETE" then
       if not e_id then print("e_id2 must not be nil"); return; end
-      entity_delete(e_id)
+--      entity_delete(e_id)
    elseif cmd == "REPLACE" then
       if not e_id then print("e_id must not be nil"); return; end
-      entity_replace(e_id)
+--      entity_replace(e_id)
    else
       print("Unknown command: "..cmd)
    end

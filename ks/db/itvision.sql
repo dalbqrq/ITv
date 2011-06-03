@@ -25,8 +25,7 @@ DROP TABLE IF EXISTS `itvision_app_contacts`;
 CREATE TABLE `itvision_app_contacts` (
   `instance_id` smallint(6) NOT NULL,
   `app_id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  KEY `fk_id6` (`app_id`)
+  `user_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -41,10 +40,7 @@ CREATE TABLE `itvision_app_objects` (
   `app_id` int(11) NOT NULL,
   `instance_id` smallint(6) NOT NULL,
   `service_object_id` int(11) NOT NULL,
-  `type` enum('app','hst','svc') CHARACTER SET latin1 NOT NULL,
-  KEY `fk_app_id4` (`app_id`),
-  KEY `fk_object_id3` (`service_object_id`),
-  KEY `fk_instance_id11` (`instance_id`)
+  `type` enum('app','hst','svc') CHARACTER SET latin1 NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -75,12 +71,7 @@ CREATE TABLE `itvision_app_relats` (
   `app_relat_type_id` int(11) NOT NULL,
   `app_id` int(11) NOT NULL,
   `from_object_id` int(11) NOT NULL,
-  `to_object_id` int(11) NOT NULL,
-  KEY `fk_id1` (`app_relat_type_id`),
-  KEY `fk_id2` (`app_id`),
-  KEY `fk_instance_id12` (`instance_id`),
-  KEY `fk_object_id7` (`from_object_id`),
-  KEY `fk_object_id8` (`to_object_id`)
+  `to_object_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -98,9 +89,7 @@ CREATE TABLE `itvision_app_trees` (
   `app_id` int(11) NOT NULL,
   `lft` int(11) NOT NULL,
   `rgt` int(11) NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `fk_app_id5` (`app_id`),
-  KEY `fk_instance_id16` (`instance_id`)
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -137,9 +126,7 @@ CREATE TABLE `itvision_apps` (
   `service_object_id` int(11) DEFAULT NULL,
   `notes` longtext COLLATE utf8_unicode_ci,
   `app_type_id` int(11) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `fk_instance_id10` (`instance_id`),
-  KEY `fk_object_id6` (`service_object_id`)
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -232,9 +219,7 @@ CREATE TABLE `itvision_site_trees` (
   `rgt` int(11) NOT NULL,
   `location_tree_id` int(11) NOT NULL,
   `service_object_id` int(11) NOT NULL,
-  PRIMARY KEY (`site_tree_id`,`instance_id`),
-  KEY `fk_instance_id1` (`instance_id`),
-  KEY `fk_object_id1` (`service_object_id`)
+  PRIMARY KEY (`site_tree_id`,`instance_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Tree to organize ITvision instances';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -273,9 +258,7 @@ CREATE TABLE `itvision_user` (
   `password` varchar(45) CHARACTER SET latin1 NOT NULL,
   `user_group_id` int(11) NOT NULL,
   `user_prefs_id` int(11) NOT NULL,
-  PRIMARY KEY (`user_id`,`user_group_id`,`user_prefs_id`,`instance_id`),
-  KEY `fk_user_group_id1` (`user_group_id`),
-  KEY `fk_user_prefs_id1` (`user_prefs_id`,`instance_id`)
+  PRIMARY KEY (`user_id`,`user_group_id`,`user_prefs_id`,`instance_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -291,8 +274,7 @@ CREATE TABLE `itvision_user_groups` (
   `name` varchar(45) CHARACTER SET latin1 NOT NULL,
   `root_app` int(11) DEFAULT NULL,
   `instance_id` smallint(6) NOT NULL,
-  PRIMARY KEY (`id`,`instance_id`),
-  KEY `fk_instance_id6` (`instance_id`)
+  PRIMARY KEY (`id`,`instance_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -307,8 +289,7 @@ CREATE TABLE `itvision_user_prefs` (
   `user_prefs_id` int(11) NOT NULL,
   `root_app` int(11) DEFAULT NULL,
   `instance_id` smallint(6) NOT NULL,
-  PRIMARY KEY (`user_prefs_id`,`instance_id`),
-  KEY `fk_instance_id9` (`instance_id`)
+  PRIMARY KEY (`user_prefs_id`,`instance_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

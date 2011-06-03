@@ -211,7 +211,7 @@ end
 function remove_control_caracter(str)
    local res, i = str, nil
    res, i = string.gsub(res,"%c", "_")
-   res, i = string.gsub(res,"[^%a%s]", "")
+   --res, i = string.gsub(res,"[^%a%s]", "")
    return res
 end
 

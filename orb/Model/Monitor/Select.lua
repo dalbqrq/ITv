@@ -648,6 +648,7 @@ function make_query_10(a_id, clause)
 
    cond_ = cond_ .. [[ 
       and a_.is_active = 1   
+      and a_.is_entity_root = 1   
       and o_.name1 = ']]..config.monitor.check_app..[[' 
    ]]
       --and a_.id in ( select distinct(id) from itvision_apps )        
@@ -681,8 +682,9 @@ function make_query_11(a_id, clause)
    columns_ = string.gsub(columns_, "__", "_") 
 
    cond_ = cond_ .. [[ 
-      and o_.name1 = ']]..config.monitor.check_app..[[' 
       and a_.is_active = 1
+      and a_.is_entity_root = 1   
+      and o_.name1 = ']]..config.monitor.check_app..[[' 
       and s_.service_object_id not in (select service_object_id from nagios_servicestatus)
    ]]
       --and a_.id in ( select distinct(app_id) from itvision_app_trees )

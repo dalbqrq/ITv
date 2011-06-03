@@ -55,14 +55,21 @@ function show(web, sep)
       return render_blank(web)
    end
 
+   --[[ para que as aplicacoes (nao entidades) aparecam, comente as condicoes:
+           'and a_.is_entity_root = 1'
+        nos metodos make_query_10() e make_query_11 de Model/Monitor/Select.lua
+        bem como a linha: 
+           'and c.is_entity_root = 1 and a.is_entity_root = 1'
+        na query de relacionamentos abaixo
+   ]]
+   -- seleciona objetos
    local obj = Monitor.select_monitors_app_objs_to_tree(nil, " a_.entities_id in "..clause)
---[[
-   --local rel = App.select_tree_relat_to_graph(" a.entities_id in "..clause)
-   --local rel = apps.select_tree_relat_to_graph(" a.entities_id in "..clause)
-]]
-   local rel = Model.query("itvision_apps a, itvision_app_objects ao, itvision_apps c",
-               "a.id = ao.app_id and ao.service_object_id = c.service_object_id and a.entities_id in "..clause, nil,
-               "a.id as parent_app, c.id as child_app" )
+   -- seleciona relacionamentos
+   local rel = Model.query([[ itvision_apps a, itvision_app_objects ao, itvision_apps c]],
+               [[ a.id = ao.app_id and ao.service_object_id = c.service_object_id 
+                  and c.is_entity_root = 1 and a.is_entity_root = 1 
+                  and a.entities_id in ]]..clause, nil,
+               [[ a.id as parent_app, c.id as child_app]] )
 
    return render_show(web, obj, rel, sep)
 end
