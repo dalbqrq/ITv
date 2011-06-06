@@ -1,0 +1,14 @@
+O campo Status da tabela glpi_tickets pode assumir os seguintes valores:
+
+new 		-> Novo
+assign 		-> Processando (atribuido)
+plan 		-> Processando (planejado)
+waiting 	-> Pendente
+solved 		-> Solucionado
+closed 		-> Fechado
+notold 		-> Não solucionado
+notclosed 	-> Não fechado
+process 	-> Processando
+old 		-> Solucionado + Fechado
+all 		-> Todos
+

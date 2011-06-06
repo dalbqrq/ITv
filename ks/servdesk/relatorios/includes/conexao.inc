@@ -1,6 +1,6 @@
 <?php
 
-$conexao=mysql_connect("localhost","root","V#rt018!");
-mysql_select_db("glpi"); 
+$conexao=mysql_connect("localhost","itvision","mttp0c0s");
+mysql_select_db("itvision"); 
 
 ?>
