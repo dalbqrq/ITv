@@ -375,12 +375,12 @@ menu_itens = {
       submenu = {
       { name="Relatórios", field="reports", link="/servdesk/front/report.php" },
       { name="Notas", field="notes", link="/servdesk/front/reminder.php" },
+      { name="Documentos", field="document", link="/servdesk/front/document.php" },
       { name="Base de Conhecimento", field="knowbase", link="/servdesk/front/knowbaseitem.php" },
       { name="Contatos", field="contract", link="/servdesk/front/contact.php" },
       { name="Fornecedores", field="contact_enterprise", link="/servdesk/front/supplier.php" },
       { name="Contratos", field="contact_enterprise", link="/servdesk/front/contract.php" },
       { name="Orçamentos", field="budget", link="/servdesk/front/budget.php" },
-      { name="Documentos", field="documents", link="/servdesk/front/document.php" },
       { name="Empréstimos", field="reservation_helpdesk", link="/servdesk/front/reservationitem.php" },
       { name="OCS-NG", field="ocsng", link="/servdesk/front/ocsng.php?ocsservers_id=1" },
       },

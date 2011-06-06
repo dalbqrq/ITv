@@ -118,18 +118,9 @@ function insert_obj(web)
    end
 
    if web.input.type == 'app' then 
---[[ nao precisa mais inserir nas arvores
-      local app_child = apps:select(nil,"service_object_id = "..web.input.item)
-      App.insert_subnode_app_tree(app_child[1].id, web.input.app_id)
-]]
---[[ nao apaga mais noh ligado a root
-      App.delete_node_app_conected_to_root(app_child[1].id)
-      _, root = App.select_root_app_tree()
-      Model.delete("itvision_app_objects", "app_id = "..root.app_id.." and service_object_id = "..web.input.item)
-]]
       update_apps(web)
+      os.sleep(1)
    end
-
 
    web.prefix = "/orb/app_tabs"
    return web:redirect(web:link("/list/"..app_objects.app_id..":"..tab_id))
@@ -204,14 +195,14 @@ function make_app_objects_table(web, A)
       else
          local tag = ""
          if v.app_type_id == "1" then
-            tag = " +"
+            tag = "+ "
          elseif v.app_type_id == "2" then
-            tag = " #"
+            tag = "# "
          else
-            tag = " -"
+            tag = "- "
          end
 
-         obj = v.name..tag
+         obj = tag..v.name
          web.prefix = "/orb/app_tabs"
          obj = button_link(obj, web:link("/list/"..v.id..":"..tab_id), "negative")
       end
@@ -284,7 +275,7 @@ function render_add(web, HST, SVC, APP, APPOBJ, app_id, msg)
       -- LISTA DE APPLIC PARA SEREM INCLUIDAS ---------------------------------
       local opt_app = {}
       for i,v in ipairs(APP) do
-         opt_app[#opt_app+1] = option{ value=v.object_id, v.name.." #" }
+         opt_app[#opt_app+1] = option{ value=v.object_id, "# "..v.name }
       end
       local app = { render_form(web:link(url_app), web:link("/add/"..app_id),
                   { H("select") { size=list_size, style="width: 100%;", name="item", opt_app }, br(),
@@ -295,7 +286,7 @@ function render_add(web, HST, SVC, APP, APPOBJ, app_id, msg)
       header = { strings.host, strings.service, strings.application }
       res[#res+1] = render_table({ {hst, svc, app} }, header)
 
-      res[#res+1] = br()
+      res[#res+1] = { br(), br(), br(), br() }
    end
 
    return render_layout(res)

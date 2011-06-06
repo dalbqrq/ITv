@@ -142,8 +142,8 @@ function make_app_relat_table(web, AR)
          from = find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.from_ip..")"
       elseif v.from_type == "svc" then
          from = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.from_ip..")", v.from_name)
-      else
-         from = v.from_name.." #"
+      elseif v.from_type == "app" then
+         from = "# "..v.from_name
       end
 
       if v.to_itemtype == "Computer" then
@@ -160,7 +160,7 @@ function make_app_relat_table(web, AR)
       elseif v.to_type == "svc" then
          to = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.to_ip..")", v.to_name)
       else
-         to = v.to_name.." #"
+         to = "# "..v.to_name
       end
 
       if permission == "w" then
@@ -224,7 +224,7 @@ function render_add(web, APPOBJ, AR, RT, app_id, msg)
             elseif v.obj_type == "svc" then
                obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.ip..")", v.name)
             else
-               obj = v.name.." #"
+               obj = "# "..v.name
             end
             opt_from[#opt_from+1] = option{ value=v.object_id, obj }
          end
@@ -256,7 +256,7 @@ function render_add(web, APPOBJ, AR, RT, app_id, msg)
             elseif v.obj_type == "svc" then
                obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.ip..")", v.name)
             else
-               obj = v.name.." #"
+               obj = "# "..v.name
             end
             opt_to[#opt_to+1] = option{ value=v.object_id, obj }
          end

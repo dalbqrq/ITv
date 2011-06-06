@@ -97,18 +97,11 @@ function render_show(web, app, entities, app_name, app_id, obj, rel, obj_id, no_
    local refresh_time = 15
    local imgfile, imglink, mapfile, maplink, dotfile = Graph.make_gv_filename(app_name, file_type)
 
---[[ if string.find(app_name, "Av Brasil") then ]]
-
-   if tonumber(app_id) == 48 then
-      engene = "dot"
-      engene = "neato"
-      engene = "twopi"
-      engene = "fdp"
-      engene = "circo"
-   else
-      engene = "circo"
-      engene = "dot"
-   end
+   engene = "dot"
+   engene = "neato"
+   engene = "twopi"
+   engene = "fdp"
+   engene = "circo"
 
    local content = Graph.make_content(obj, rel)
    Graph.render(app_name, file_type, engene, content)
