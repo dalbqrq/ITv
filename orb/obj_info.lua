@@ -59,7 +59,7 @@ ITvision:dispatch_get(show_app, "/app/(%d+)")
 -- esta funcao deverah servir para colocar o mapa em um ou mais iframes para 
 --  que ele nao ocupe toda a tela
 function map_frame(web, objtype, obj_id)
-   return render_map_frame(web, obj_id, objtype)
+   return render_map_frame(web, objtype, obj_id)
 end
 ITvision:dispatch_get(map_frame, "/map_frame/(%a+):(%d+)")
 
@@ -68,14 +68,12 @@ function geotag(web, objtype, obj_id)
    local q, A, B, app = {}, {}, {}, {}
    if objtype == "app" then
       app = apps:select(nil, obj_id) 
-
       A = Monitor.tree(app[1].id)
-
    elseif objtype == "hst" then
       A = Monitor.make_query_3(nil, nil, nil, "m.service_object_id = "..obj_id)
    end
 
-   return render_geotag(web, obj_id, objtype, A)
+   return render_geotag(web, objtype, obj_id, A)
 end
 ITvision:dispatch_get(geotag, "/geotag/(%a+):(%d+)")
 
@@ -104,8 +102,10 @@ function render_hst(web, obj_id, A)
       }
    end
 
-   res[#res+1] = render_content_header(auth, A[1].c_name, nil, nil, lnkedt , lnkgeo)
-   res[#res+1] = render_table(row, nil)
+   --res[#res+1] = render_content_header(auth, A[1].c_name, nil, nil, lnkedt , lnkgeo)
+   res[#res+1] = render_content_header(auth, A[1].c_name, nil, nil, nil , nil)
+   --res[#res+1] = render_table(row, nil)
+   res[#res+1] = render_grid({ {render_table(row, nil, ""), render_map_frame(web, "hst", obj_id)} } )
 
    return render_layout(res)
 end
@@ -193,7 +193,7 @@ function render_app(web, obj_id, A)
 end
 
 
-function render_geotag(web, obj_id, objtype, A)
+function render_geotag(web, objtype, obj_id, A)
    -- Este render deverá ficar aberto para o funcionamento do google map sem licenca
    --local permission = Auth.check_permission(web, "application")
    local res = {obj_id, objtype}
@@ -260,9 +260,9 @@ end
 -- Ver codigo fonte da pagina http://code.google.com/apis/maps/documentation/javascript/basics.html
 -- que possui dois mapas lado a lado.
 function render_map_frame(web, objtype, obj_id)
-
-   render_layout( iframe{ style="width:400px;height:400px", src=web:link("/"..objtype":"..obj_id) }  )
-
+   web.prefix = "/orb/obj_info/geotag"
+   --render_layout( iframe{ style="width:400px;height:400px", src=web:link("/"..objtype..":"..obj_id) }  )
+   return render_layout( iframe{ width="400px", height="400px", src=web:link("/"..objtype..":"..obj_id) }  )
 end
 
 
