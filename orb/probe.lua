@@ -415,6 +415,7 @@ function render_list(web, ics, chk, msg)
                                        -- Por isso estou tirando esta entrada da tabela na tela de checagem!
          end
          link = "-"
+         link2 = a{ href= web:link("/add/"..v[1]..":"..c_id..":"..v.p_id..":0"), strings.add }
       end
 
       web.prefix = "/servdesk"
@@ -433,8 +434,11 @@ function render_list(web, ics, chk, msg)
       else
          name = hst_name
       end
-      --row[#row + 1] = { name, ip, serv, itemtype, chk, alias, link } -- com nome do comando 'chk'
       row[#row + 1] = { name, ip, serv, itemtype, alias, link } -- sem nome do comando 'chk'
+      --if ( alias == config.monitor.chek_host or alias == '-' ) then
+      if ( alias == config.monitor.check_host ) then
+         row[#row + 1] = { name, ip, "-", "-", "-", link2 } -- sem nome do comando 'chk'
+      end
    end
 
    res[#res+1] = render_content_header(auth, "Checagem", nil, web:link("/list"))
@@ -470,6 +474,11 @@ function render_checkcmd(web, chk_id, hst_name, ip, url_test, url_insert, chk_pa
    local params, params_hidden, args = {}, {} , ""
    local path = "/usr/lib/nagios/plugins"
    local count = 0
+
+   if chk_id == 0 then
+      res[#res+1] = { br(), "Selecione um comando de checagem!", br() }
+      return res
+   end
 
    local c, p = Checkcmds.get_check_params(chk_id, false, false)
    if chk_params then p = chk_params end
@@ -546,17 +555,19 @@ function render_add(web, ics, chk, params, chk_params, monitor_name)
    local s, r, url_test, url_insert, chk_id
 
    -- ESTE RENDER SOh SERVE PARA SERVICES.
-   if params.default then chk_id = params.default else chk_id = chk[1].object_id end
+   --if params.default then chk_id = params.default else chk_id = chk[1].object_id end
+   if params.default then chk_id = params.default else chk_id = 0 end
    local header = { strings.alias.."/"..strings.name, "IP", "SW / Versão", strings.type, strings.command }
 
    if v then
-      serv = v.sw_name.." / "..v.sv_name
+      --serv = v.sw_name.." / "..v.sv_name
       v.c_id = v.c_id or 0; v.n_id = v.n_id or 0; v.p_id = v.p_id or 0; v.sv_id = v.sv_id or 0;
       --if v.p_itemtype then itemtype = v.p_itemtype else itemtype = "NetworkEquipment" end
 
       hst_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
-      url_insert = "/insert_service/"..v.p_id..":"..v.sv_id..":"..v.c_id..":"..v.n_id..":"..hst_name..":"..v.sw_name
-                    ..":"..v.sv_name..":"..v.p_ip
+ --     url_insert = "/insert_service/"..v.p_id..":"..v.sv_id..":"..v.c_id..":"..v.n_id..":"..hst_name..":"..v.sw_name
+ --                   ..":"..v.sv_name..":"..v.p_ip
+      url_insert = "/insert_service/"..v.p_id..":"..v.sv_id..":"..v.c_id..":"..v.n_id..":"..hst_name..":nana:nono:"..v.p_ip
 
       url_test="/add/"..params.query..":"..params.c_id
       if params.p_id    then url_test = url_test..":"..params.p_id    end
