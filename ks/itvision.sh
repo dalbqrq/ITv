@@ -570,8 +570,8 @@ notifempty' /etc/logrotate.d/mysql-server
 sed -i -e '/compress/ i\
 notifempty' /etc/logrotate.d/ocsinventory-server
 
-cat << EOF > /etc/cron.d/logdate 
-00 03 * * * root /usr/sbin/logdate
+cat << EOF > /etc/cron.d/logrotate 
+00 03 * * * root /usr/sbin/logrotate
 EOF
 
 # Gera perfil para apparmor ("SElinux do Ubuntu") habilitar o mysqld escrever em outro arquivo

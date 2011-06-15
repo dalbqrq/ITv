@@ -71,7 +71,6 @@ function show(web, app_id, no_header)
    local obj_id = app[1].service_object_id
    local app_name = app[1].name
 
-
    return render_show(web, all_apps, all_entities, app_name, app_id, obj, rel, obj_id, no_header)
 end
 ITvision:dispatch_get(show,"/show", "/show/(%d+)", "/show/(%d+):(%d+)")

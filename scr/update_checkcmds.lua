@@ -6,6 +6,7 @@ function update_checkcmd_params()
    Model.delete("itvision_checkcmds")
    Model.delete("itvision_checkcmd_default_params")
    for i, v in pairs(cmds) do
+--if v.label == 'HTTPS' then
       print(i)
       q = Model.query("nagios_objects", "name1 = '"..i.."'")
       if q[1] then id = q[1].object_id else id='NULL' end
@@ -24,6 +25,7 @@ function update_checkcmd_params()
       end
 
       print()
+--end
    end
 end
 

@@ -173,7 +173,12 @@ function render_list(web, ics, msg)
          name = hst_name
       end
 
-      local state = tonumber(v.ss_current_state)
+      local state
+      if tonumber(v.ss_has_been_checked) == 1 then
+         state = tonumber(v.ss_current_state)
+      else
+         state = 4
+      end
       local statename = applic_alert[state].name
       row[#row + 1] = { status={state=state, colnumber=2}, name, statename, ip, probe, itemtype, v.ss_output }
    end

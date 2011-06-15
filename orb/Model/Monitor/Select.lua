@@ -603,10 +603,10 @@ function make_query_7(c_id, p_id, clause)
          it = "'Computer'"
       end 
 
---         and p.itemtype = ]]..it..[[
       cond_ = cond_ .. [[ 
          and m.service_object_id = -1
          and m.name <> ']]..config.monitor.check_host..[['
+         and p.itemtype = ]]..it..[[
       ]] .. excludes
 
       columns_ = columns_..",\n"..nulls_
