@@ -386,6 +386,12 @@ end
 ----------------------------------------------------------------------
 --  QUERY 4 - computador com porta sem software e com monitor - monitoracao de service 
 ----------------------------------------------------------------------
+--[[
+
+   Esta implementacao está sendo trocada pois nao é mais preciso que se tenha um software
+   associado à um computador para se criar uma monitoracao de servico. Agora todo computador ou 
+   equipamento de rede pode ter uma monitoracao de servico associada.
+
 function make_query_4(c_id, p_id, sv_id, a_id, clause)
    local q, t = {}, {}
    if a_id then
@@ -399,14 +405,11 @@ function make_query_4(c_id, p_id, sv_id, a_id, clause)
    local tables_  = make_tables(t)
    local cond_    = make_where(t)
 
-   cond_ = cond_ .. [[ 
-      and p.itemtype in ( "Computer", "NetworkEquipment" )
-   ]] .. g_excludes
-
+   cond_ = cond_ .. and p.itemtype in ( "Computer", "NetworkEquipment" ) .. g_excludes
 
    if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
    if p_id  then cond_ = cond_ .. " and p.id = "  .. p_id  end
-   --if sv_id then cond_ = cond_ .. " and sv.id = " .. sv_id end
+   if sv_id then cond_ = cond_ .. " and sv.id = " .. sv_id end
    if a_id then cond_ = cond_ .. " and a.id = " .. a_id end
    if clause  then cond_ = cond_ .. " and " .. clause end
 
@@ -414,6 +417,58 @@ function make_query_4(c_id, p_id, sv_id, a_id, clause)
    for _,v in ipairs(q) do table.insert(v, 1, 4) end
 
    if DEBUG then print( "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
+
+   return q
+end
+]]
+
+function make_query_4(c_id, p_id, a_id, clause)
+   local q, t = {}, {}
+   local ictype, it = { "c", "n" }, ""
+
+   for _,ic in ipairs(ictype) do
+      local r = {}
+      if a_id then
+          t = { ic, "p", "o", "s", "m", "ss", "a", "ao" }
+      else
+          t = { ic, "p", "o", "s", "m", "ss" }
+      end
+      local n = { "csv", "sv", "sw" }
+
+      local columns_ = make_columns(t)
+      local _,nulls_ = make_columns(n)
+      local tables_  = make_tables(t)
+      local cond_    = make_where(t)
+
+      -- os nomes dos campos tanto de computers como os de networkequipment comecam com c_
+      if ic == "n" then 
+         columns_ = string.gsub(columns_, "as n_", "as c_") 
+         excludes = string.gsub(g_excludes, "c%.", "n.")
+         if clause then clause = string.gsub(clause, "c%.", "n.") end
+         it = "'NetworkEquipment'"
+      else 
+         excludes = g_excludes
+         it = "'Computer'"
+      end 
+
+      cond_ = cond_ .. [[ 
+         and p.itemtype = ]]..it..[[
+         and m.name <> ']]..config.monitor.check_host..[['
+      ]] .. excludes
+
+      columns_ = columns_..",\n"..nulls_
+
+      if c_id  then cond_ = cond_ .. " and "..ic..".id = "  .. c_id  end
+      if p_id  then cond_ = cond_ .. " and p.id = "  .. p_id  end
+      if a_id then cond_ = cond_ .. " and a.id = " .. a_id end
+      if clause  then cond_ = cond_ .. " and " .. clause end
+
+      r = Model.query(tables_, cond_, nil, columns_)
+      for _,v in ipairs(r) do table.insert(v, 1, 3) end
+      for _,v in ipairs(r) do table.insert(q, v) end
+
+      if DEBUG then print ("\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
+   end
 
    return q
 end
@@ -745,18 +800,18 @@ function select_monitors(clause)
       a.c_name    = a.c_name    or ""
       a.c_itv_key = a.c_itv_key or ""
       a.p_ip      = a.p_ip      or ""
+      a.m_name    = a.m_name    or ""
       a.sw_name   = a.sw_name   or ""
       a.sv_name   = a.sv_name   or ""
-      a.m_name    = a.m_name    or ""
       b.c_alias   = b.c_alias   or ""
       b.c_name    = b.c_name    or ""
       b.c_itv_key = b.c_itv_key or ""
       b.p_ip      = b.p_ip      or ""
+      b.m_name    = b.m_name    or ""
       b.sw_name   = b.sw_name   or ""
       b.sv_name   = b.sv_name   or ""
-      b.m_name    = b.m_name    or ""
-      return a.c_alias..a.c_name..a.c_itv_key..a.p_ip..a.sw_name..a.sv_name < 
-             b.c_alias..b.c_name..b.c_itv_key..b.p_ip..b.sw_name..b.sv_name end )
+      return a.c_alias..a.c_name..a.c_itv_key..a.p_ip..a.m_name..a.m_name < 
+             b.c_alias..b.c_name..b.c_itv_key..b.p_ip..b.m_name..b.m_name end )
 
    return q
 end

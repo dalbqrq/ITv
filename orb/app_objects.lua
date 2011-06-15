@@ -87,8 +87,7 @@ function add(web, app_id, msg)
    local HST = Monitor.make_query_3(nil, nil, nil, exclude .. clause .. extra)
    --   clause = clause..[[ and o.name2 <> ']]..config.monitor.check_host..[[' ]]
    --local SVC = Monitor.make_query_4(nil, nil, nil, nil, exclude .. clause .. extra)
-   clause = clause..[[ and m.name <> ']]..config.monitor.check_host..[[' ]]
-   local SVC = Monitor.make_query_3(nil, nil, nil, exclude .. clause .. extra)
+   local SVC = Monitor.make_query_4(nil, nil, nil, exclude .. clause .. extra)
 
    clause = " ( a.entities_id in "..entity_auth.." or a.visibility = 1 )"
    local APP = App.select_app_service_object(clause, nil, nil, app_id)
