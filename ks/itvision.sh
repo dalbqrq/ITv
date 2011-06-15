@@ -263,6 +263,7 @@ done
 
 sed -i.orig -e "s/check_pop -H/check_pop -p 100 -H/g" $dir/mail.cfg
 sed -i.orig -e "s/check_imap -H/check_imap -p 143 -H/g" $dir/mail.cfg
+sed -i.orig -e "s/www.google.com/'\$ARG1\$'/g" $dir/dns.cfg
 cp $itvhome/ks/files/plugin.d/* $dir
 
 

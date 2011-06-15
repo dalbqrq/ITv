@@ -39,7 +39,7 @@ cmds = {
       label = "DNS",
       command = "check_dns",
       args = {
-         { sequence=1, flag="-H",  variable="$HOSTANAME$", default_value=nil, description="Hostname" },
+         { sequence=1, flag="-H",  variable="$ARG1$", default_value=nil, description="Hostname" },
          { sequence=nil, flag="-s",  variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP" },
       },
    },
