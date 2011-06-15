@@ -21,7 +21,7 @@ function execute_external_command(op, arg1, arg2, arg3)
       entity_update(arg1, arg2)
 
 
-   -- Operacoes com networkports chamadas por ...
+   -- Operacoes com networkports chamadas por servdesk/front/networkport.form.php
    elseif op == "IP_UPDATE" then
       ip_update(arg1)
 
