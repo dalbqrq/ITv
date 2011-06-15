@@ -31,14 +31,14 @@ local DEBUG = false
 
 
         QUERY 1 - computador/networkequip com porta sem software e sem monitor
-        XXX removido XXX QUERY 2 - computador              com porta com software e sem monitor
+        XXX nao faz mais sentido XXX QUERY 2 - computador              com porta com software e sem monitor
         QUERY 3 - computador/networkequip com porta sem software e com monitor - monitoracao de host onde o service eh ping
-        QUERY 4 - computador              com porta sem software e com monitor - monitoracao de service 
+        QUERY 4 - computador/networkequip com porta sem software e com monitor - monitoracao de service 
 	QUERY 5 - aplicacao com monitor - monitoracao de service 
 	QUERY 6 - computador com porta sem software e com monitor pendente
-	XXX removido XXX QUERY 7 - computador com porta com software e com monitor pendente
+	QUERY 7 - computador/networkequip com porta sem software e com monitor pendente
         QUERY 8 - computador com porta sem software e com monitor e service state pendente
-        XXX removido XXX QUERY 9 - computador com porta com software e com monitor e service state pendente
+        XXX nao faz mais sentido XXX QUERY 9 - computador com porta com software e com monitor e service state pendente
         QUERY 10 - aplicacao com monitor para grafico de arvore 
 	QUERY 11 - aplicacao com monitor para grafico de arvore com ss pendente
         
@@ -69,15 +69,17 @@ local tables = {
    sw =  { name="glpi_softwares",                  sv="id" },
 
 
--- Definicoes especiais para query_[3,4,5]
-   ax =   { name="itvision_apps",                  o="service_object_id", ao="id" } ,
+-- Definicoes especiais para query_5]
+   --ax =   { name="itvision_apps",                  ao="id" } ,
+   --ax =   { name="itvision_apps",                  o="service_object_id", ao="id" } ,
+   ax =   { name="itvision_apps",                  o="service_object_id" } ,
 
 -- Definicoes especiais para esta query que é usada somente para a criacao da arvore de apps
-   a_ =   { name="itvision_apps",                   o_="service_object_id", t_="id" } ,
-   t_ =   { name="itvision_app_trees",              a_="app_id" },
-   o_ =   { name="nagios_objects",                  a_="object_id", s_="object_id" }, 
-   s_ =   { name="nagios_services",                 o_="service_object_id", ss_="service_object_id" },
-   ss_ =  { name="nagios_servicestatus",            s_="service_object_id" },
+   a_ =   { name="itvision_apps",                  o_="service_object_id", t_="id" } ,
+   t_ =   { name="itvision_app_trees",             a_="app_id" },
+   o_ =   { name="nagios_objects",                 a_="object_id", s_="object_id" }, 
+   s_ =   { name="nagios_services",                o_="service_object_id", ss_="service_object_id" },
+   ss_ =  { name="nagios_servicestatus",           s_="service_object_id" },
 
 }
 
@@ -230,10 +232,10 @@ end
         QUERY 1 - computador/networkequip com porta sem software e sem monitor
         QUERY 2 - computador              com porta com software e sem monitor
         QUERY 3 - computador/networkequip com porta sem software e com monitor - monitoracao de host onde o service eh ping
-        QUERY 4 - computador              com porta com software e com monitor - monitoracao de service 
+        QUERY 4 - computador/networkequip com porta sem software e com monitor - monitoracao de service 
 	QUERY 5 - aplicacao com monitor - monitoracao de service 
 	QUERY 6 - computador com porta sem software e com monitor pendente
-	QUERY 7 - computador com porta com software e com monitor pendente
+	QUERY 7 - computador/networkequip com porta sem software e com monitor pendente
         QUERY 8 - computador com porta sem software e com monitor e service state pendente
         QUERY 9 - computador com porta com software e com monitor e service state pendente
         QUERY 10 - aplicacao com monitor para grafico de arvore 
@@ -363,6 +365,7 @@ function make_query_3(c_id, p_id, a_id, clause)
       cond_ = cond_ .. [[ 
          and p.itemtype = ]]..it..[[
          and m.softwareversions_id is null
+         and m.name = ']]..config.monitor.check_host..[['
       ]] .. excludes
 
       columns_ = columns_..",\n"..nulls_
@@ -384,9 +387,11 @@ end
 
 
 ----------------------------------------------------------------------
---  QUERY 4 - computador com porta sem software e com monitor - monitoracao de service 
+--  QUERY 4 - computador/networkequip com porta sem software e com monitor - monitoracao de service 
 ----------------------------------------------------------------------
 --[[
+
+--  Definicao antiga: QUERY 4 - computador com porta sem software e com monitor - monitoracao de service 
 
    Esta implementacao está sendo trocada pois nao é mais preciso que se tenha um software
    associado à um computador para se criar uma monitoracao de servico. Agora todo computador ou 
@@ -454,6 +459,7 @@ function make_query_4(c_id, p_id, a_id, clause)
       cond_ = cond_ .. [[ 
          and p.itemtype = ]]..it..[[
          and m.name <> ']]..config.monitor.check_host..[['
+         and m.service_object_id <> -1
       ]] .. excludes
 
       columns_ = columns_..",\n"..nulls_
@@ -464,7 +470,7 @@ function make_query_4(c_id, p_id, a_id, clause)
       if clause  then cond_ = cond_ .. " and " .. clause end
 
       r = Model.query(tables_, cond_, nil, columns_)
-      for _,v in ipairs(r) do table.insert(v, 1, 3) end
+      for _,v in ipairs(r) do table.insert(v, 1, 4) end
       for _,v in ipairs(r) do table.insert(q, v) end
 
       if DEBUG then print ("\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
@@ -511,7 +517,7 @@ function make_query_5(a_id, clause)
    q = Model.query(tables_, cond_, nil, columns_)
    for _,v in ipairs(q) do table.insert(v, 1, 5) end
 
-   --if DEBUG then print( "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
+   if DEBUG then print( "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
 
    return q
 end
@@ -570,39 +576,55 @@ end
 
 
 ----------------------------------------------------------------------
---  QUERY 7 - computador com porta com software e com monitor pendente
+--  QUERY 7 - computador/networkequip com porta sem software e com monitor pendente
 ----------------------------------------------------------------------
-function make_query_7(c_id, p_id, sv_id, clause)
+function make_query_7(c_id, p_id, clause)
    local q = {}
-   t = { "c", "p", "csv", "sv", "sw", "m" }
-   n = { "o", "s", "ss" }
+   local ictype, it = { "c", "n" }, ""
 
-   local columns_ = make_columns(t)
-   local _,nulls_ = make_columns(n)
-   local tables_  = make_tables(t)
-   local cond_    = make_where(t)
+   for _,ic in ipairs(ictype) do
+      local r = {}
+      local t = { ic, "p", "m" }
+      local n = { "csv", "sv", "sw", "s", "ss", "o" }
 
-   cond_ = cond_ .. [[ 
-      and p.itemtype = "Computer" 
-      and m.name is not null
-      and m.service_object_id = -1
-   ]] .. g_excludes
-      --and not exists (select 1 from itvision_monitors m2 where m2.networkports_id = p.id and m2.softwareversions_id = sv.id)
+      local columns_ = make_columns(t)
+      local _,nulls_ = make_columns(n)
+      local tables_  = make_tables(t)
+      local cond_    = make_where(t)
 
-   columns_ = columns_..",\n"..nulls_
+      -- os nomes dos campos tanto de computers como os de networkequipment comecam com c_
+      if ic == "n" then 
+         columns_ = string.gsub(columns_, "as n_", "as c_") 
+         excludes = string.gsub(g_excludes, "c%.", "n.")
+         if clause then clause = string.gsub(clause, "c%.", "n.") end
+         it = "'NetworkEquipment'"
+      else 
+         excludes = g_excludes
+         it = "'Computer'"
+      end 
 
-   if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
-   if p_id  then cond_ = cond_ .. " and p.id = "  .. p_id  end
-   if sv_id then cond_ = cond_ .. " and sv.id = " .. sv_id end
-   if clause  then cond_ = cond_ .. " and " .. clause end
+--         and p.itemtype = ]]..it..[[
+      cond_ = cond_ .. [[ 
+         and m.service_object_id = -1
+         and m.name <> ']]..config.monitor.check_host..[['
+      ]] .. excludes
 
-   q = Model.query(tables_, cond_, nil, columns_)
-   for _,v in ipairs(q) do table.insert(v, 1, 7) end
+      columns_ = columns_..",\n"..nulls_
 
-   --if DEBUG then print( "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
+      if c_id  then cond_ = cond_ .. " and "..ic..".id = "  .. c_id  end
+      if p_id  then cond_ = cond_ .. " and p.id = "  .. p_id  end
+      if clause  then cond_ = cond_ .. " and " .. clause end
+
+      r = Model.query(tables_, cond_, nil, columns_)
+      for _,v in ipairs(r) do table.insert(v, 1, 7) end
+      for _,v in ipairs(r) do table.insert(q, v) end
+
+      if DEBUG then print ("\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
+   end
 
    return q
 end
+
 
 
 
@@ -820,7 +842,7 @@ end
 function select_monitors_app_objs(app_id, clause)
    local q = {}
    local q3 = make_query_3(nil, nil, app_id, clause)
-   local q4 = make_query_4(nil, nil, nil, app_id, clause)
+   local q4 = make_query_4(nil, nil, app_id, clause)
    --local q5 = make_query_5(app_id, nil) -- o parametro clause foi retirado pois conflitava com os campos das queries acima.
    local q5 = make_query_5(app_id, clause)
 
@@ -952,10 +974,9 @@ function how_to_use()
 ]]
 
    --a = tree(8)
-   --a = make_query_5()
+   a = make_query_5(2)
    --a = select_monitors()
 
-   a = make_query_4(nil, nil, nil, nil)
 
 --[[
    for i,v in ipairs(a) do

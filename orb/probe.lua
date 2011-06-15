@@ -196,8 +196,9 @@ function add(web, query, c_id, p_id, sv_id, default)
 
    if query == 1 then
       ics = Monitor.make_query_1(c_id, p_id)
-   elseif query == 2 then
-      ics = Monitor.make_query_2(c_id, p_id, sv_id)
+   -- A query_2 nao faz mais sentido pois probe de servico nao depende mais de software
+   --elseif query == 2 then
+   --   ics = Monitor.make_query_2(c_id, p_id, sv_id)
    elseif query == 3 then
       ics = Monitor.make_query_3(c_id, p_id)
    elseif query == 4 then
@@ -375,7 +376,7 @@ function render_list(web, ics, chk, msg)
       strings.alias.."/"..strings.name, "IP", "Software / Versão", strings.type, strings.command, strings.alias, "."
    } ]]
    local header = { -- sem o nome do comando 'chk'. Só que agora o alias aparece como o 'Comando' na tabela
-      strings.alias.."/"..strings.name, "IP", "Software / Versão", strings.type, strings.command, "."
+      strings.alias.."/"..strings.name, "IP", strings.type, strings.command, "."
    }
 
    for i, v in ipairs(ics) do
@@ -400,10 +401,10 @@ function render_list(web, ics, chk, msg)
                link = a{ href= web:link("/add/"..v[1]..":"..c_id..":"..v.p_id..":"..v.sv_id), strings.add }
             else
                link = a{ href= web:link("/insert_host/"..v.p_id..":"..v.sv_id..":"..v.c_id..":"..v.n_id..":"
-                                         ..hst_name..":"..ip), strings.add.." host" }
+                                         ..hst_name..":"..ip), strings.add.." [HOST]" }
             end
          else
-            link = "-"
+            link = "-" -- DEBUG: ..v[1]
          end
       else
          content = objects:select_checks(v.s_check_command_object_id)
@@ -414,7 +415,7 @@ function render_list(web, ics, chk, msg)
                                        -- Deve estar relacionado a demora do ndo2db
                                        -- Por isso estou tirando esta entrada da tabela na tela de checagem!
          end
-         link = "-"
+         link = "-" -- DEBUG: ..v[1]
          link2 = a{ href= web:link("/add/"..v[1]..":"..c_id..":"..v.p_id..":0"), strings.add }
       end
 
@@ -434,10 +435,10 @@ function render_list(web, ics, chk, msg)
       else
          name = hst_name
       end
-      row[#row + 1] = { name, ip, serv, itemtype, alias, link } -- sem nome do comando 'chk'
+      row[#row + 1] = { name, ip, itemtype, alias, link } -- sem nome do comando 'chk'
       --if ( alias == config.monitor.chek_host or alias == '-' ) then
       if ( alias == config.monitor.check_host ) then
-         row[#row + 1] = { name, ip, "-", "-", "-", link2 } -- sem nome do comando 'chk'
+         row[#row + 1] = { name, ip, "-", "-", link2 } -- sem nome do comando 'chk'
       end
    end
 
