@@ -63,7 +63,7 @@ end
 ITvision:dispatch_get(add, "/add", "/add/(%d+)", "/add/(%d+):(.+)")
 
 
-function update_contact(user_id)
+function update_contact(web, user_id)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
 
@@ -72,7 +72,7 @@ function update_contact(user_id)
 
    if a == nil then
       local user = users:select_user(user_id)
-      remove_contact_cfg_file(user[1].name)
+      remove_contact_cfg_file(user_id)
    else
       a.firstname = a.firstname or ""
       a.realname  = a.realname or ""
@@ -91,7 +91,7 @@ function insert(web, app_id, user_id)
    app_contacts.user_id = user_id
    app_contacts:save()
 
-   update_contact(user_id)
+   update_contact(web, user_id)
 
    web.prefix = "/orb/app_tabs"
    return web:redirect(web:link("/list/"..app_id..":"..tab_id))
@@ -109,7 +109,7 @@ function delete(web, app_id, user_id)
       Model.delete (tables, clause) 
    end
 
-   update_contact(user_id)
+   update_contact(web, user_id)
 
    web.prefix = "/orb/app_tabs"
    return web:redirect(web:link("/list/"..app_id..":"..tab_id))

@@ -429,6 +429,7 @@ function render_list(web, ics, chk, msg)
                                        -- Por isso estou tirando esta entrada da tabela na tela de checagem!
          end
          link = "-" -- DEBUG: ..v[1]
+         link = a{ href= web:link("/edit/"..v[1]..":"..c_id..":"..v.p_id..":"..v.sv_id), strings.edit }
          link2 = a{ href= web:link("/add/"..v[1]..":"..c_id..":"..v.p_id..":0"), strings.add }
       end
 

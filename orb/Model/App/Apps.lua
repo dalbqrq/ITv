@@ -363,6 +363,7 @@ function select_app_relat_to_graph (id)
                     "glpi_networkports n1, glpi_networkports n2, "..
                     "itvision_monitors m1, itvision_monitors m2"
    local columns_ = "a.name as a_name, art.name as art_name, o1.name1 as o1_name1, o1.name2 as o1_name2, "..
+                    "o1.object_id as o1_object_id, o2.object_id as o2_object_id, "..
                     "o2.name1 as o2_name1, o2.name2 as o2_name2, "..
                     "n1.itemtype as from_itemtype, n1.items_id as from_items_id, "..
                     "n2.itemtype as to_itemtype, n2.items_id as to_items_id, "..
@@ -385,6 +386,7 @@ function select_app_relat_to_graph (id)
                     "glpi_networkports n1, "..
                     "itvision_monitors m1 "
    local columns_ = "a.name as a_name, art.name as art_name, "..
+                    "o1.object_id as o1_object_id, o2.object_id as o2_object_id, "..
                     "o1.name1 as o1_name1, o1.name2 as o1_name2, "..
                     "o2.name1 as o2_name1, o2.name2 as o2_name2, "..
                     "n1.itemtype as from_itemtype, n1.items_id as from_items_id, "..
@@ -408,6 +410,7 @@ function select_app_relat_to_graph (id)
                     "glpi_networkports n2, "..
                     "itvision_monitors m2 "
    local columns_ = "a.name as a_name, art.name as art_name, "..
+                    "o1.object_id as o1_object_id, o2.object_id as o2_object_id, "..
                     "o1.name1 as o1_name1, o1.name2 as o1_name2, "..
                     "o2.name1 as o2_name1, o2.name2 as o2_name2, "..
                     "'app' as from_itemtype, NULL as from_items_id, "..
@@ -430,6 +433,7 @@ function select_app_relat_to_graph (id)
    local tables_  = "itvision_apps a, itvision_app_relats ar, itvision_app_relat_types art, "..
                     "nagios_objects o1, nagios_objects o2 "
    local columns_ = "a.name as a_name, art.name as art_name, "..
+                    "o1.object_id as o1_object_id, o2.object_id as o2_object_id, "..
                     "o1.name1 as o1_name1, o1.name2 as o1_name2, "..
                     "o2.name1 as o2_name1, o2.name2 as o2_name2, "..
                     "'app' as from_itemtype, NULL as from_items_id, "..
