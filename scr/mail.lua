@@ -2,6 +2,8 @@ require "Model"
 require "Monitor"
 
 --[[
+ clear; echo "service_object_idcurrent_statehas_been_checkedcurrent_check_attemptmax_check_attemptscheck_typestate_typeproblem_has_been_acknowledgedacknowledgement_type"; while [ 1 ]; do echo "select service_object_id, current_state, has_been_checked, current_check_attempt, max_check_attempts, check_type, state_type, problem_has_been_acknowledged, acknowledgement_type from nagios_servicestatus where service_object_id = 370;" | mysql -u itv --password=itv itvision |grep -v service_object_id ; sleep 10; done
+
 
 ]]
 
