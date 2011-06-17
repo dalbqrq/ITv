@@ -40,7 +40,7 @@ function check_app(app_id)
    --DEBUG: print(logic)
 
    for i, v in ipairs(app_object_states) do
-     --DEBUG: print(v.service_object_id, v.current_state)
+     --DEBUG: print(i,v.current_state, v.name, v.service_object_id)
      current_state = tonumber(v.current_state)
      if logic == "and" then
         if current_state > state then
