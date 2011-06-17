@@ -62,7 +62,7 @@ if (!file_exists(GLPI_CONFIG_DIR . "/config_db.php")) {
    echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" '.
          '"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">'."\n";
    echo '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">';
-   echo '<head><title>GLPI - '.$LANG['login'][10].'</title>'."\n";
+   echo '<head><title>ITvision - '.$LANG['login'][10].'</title>'."\n";
    echo '<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>'."\n";
    echo '<meta http-equiv="Content-Script-Type" content="text/javascript"/>'."\n";
    echo '<meta http-equiv="REFRESH" content="0;url=/orb/login"></HEAD>'."\n"; // daniel@itvision.com.br
