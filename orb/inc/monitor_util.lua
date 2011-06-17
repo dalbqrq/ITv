@@ -128,9 +128,9 @@ define contact{
         service_notification_period	24x7
         host_notification_period	24x7
         service_notification_options	w,u,c,r
-        host_notification_options	d,r
+        host_notification_options	n
+        host_notification_commands	notify-host-by-email
         #service_notification_commands	notify-service-by-email
-        #host_notification_commands	notify-host-by-email
         service_notification_commands	notify-aplication-by-email
         }
 ]]
