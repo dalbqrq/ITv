@@ -1,0 +1,12 @@
+
+
+# usando o fdisk, criar uma nova paricao tipo lvm com o disco disponivel.
+# no exemplo abaixo a particao criada será a /dev/sdb2
+
+partprobe /dev/sdb		# re-escreve as partições no disco - para nao ter que reboot depois do fdisk
+pvscan				# lista os grupos de volumes
+pvcreate /dev/sdb2		# cria o volume físico
+pvdisplay			# lista as particoes virtuais lvm
+vgcreate vg1 /dev/sdb2		# criao o grupo de volume chamado 'vg1' - é possivel listas várias particoes para serem agrupadas
+lvcreate -l 100%FREE -n lv0 vg1	# cria o volume logico 'lv0' no grupo de volume 'vg1'
+lvdisplay			# lista os volumes logicos
