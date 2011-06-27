@@ -211,6 +211,8 @@ define service{
 	use]].."\t\t\t"..[[BUSPROC_SERVICE
 	service_description]].."\t"..app.id..[[ 
 	check_command]].."\t\t"..[[BUSPROC_STATUS!]]..app.id..[[  
+	contact_groups]].."\t\t"..app.id..[[
+
 	}  
  
 ]]
