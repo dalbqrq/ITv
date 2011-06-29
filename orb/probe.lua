@@ -232,7 +232,7 @@ function update(web, query, c_id, p_id, m_service_object_id)
    local chk_params = nil
 
    local chk = Checkcmds.select_checkcmds(m_service_object_id)
-   local chk = Checkcmds.select_checkcmds(nil, true)
+   --local chk = Checkcmds.select_checkcmds(nil, true)
    local ics = {}
 
    chk_id = chk[1].id
@@ -301,16 +301,17 @@ function insert_host(web, p_id, sv_id, c_id, n_id, c_name, ip)
    local extras_ = [[order by p.sequence]]
    local p = Model.query(tables_, cond_, extras_)
 
-   for i,v in ipairs(p) do
-      check_args = check_args.."!"..v.default_value
-      insert_params( hst_name, config.monitor.check_host, v.object_id, i, v.default_value )
-   end
-
    ------------------------------------------------------
    -- cria check host e service ping caso nao exista
    ------------------------------------------------------
    if h[1] == nil then
       chk_id = objects:select_check_host()
+
+      -- cria lista de parametros do comando HOST_ALIVE
+      for i,v in ipairs(p) do
+         check_args = check_args.."!"..v.default_value
+         insert_params( hst_name, config.monitor.check_host, v.object_id, i, v.default_value )
+      end
 
       -- cria monitor sem a referencia do servico check_alive associado.
       insert_host_cfg_file (hst_name, hst_name, ip)
@@ -423,43 +424,37 @@ end
 ---------------------------------------------------------------------------------------------------------------------
 function render_list(web, ics, chk, msg)
    local permission, auth = Auth.check_permission(web, "checkcmds")
-   local row, res, link, url = {}, {}, {}, ""
-   --[[ com nome do comando 'chk' -  ver abaixo nesta funcao o problema!
-   local header = {
-      strings.alias.."/"..strings.name, "IP", "Software / Versão", strings.type, strings.command, strings.alias, "."
-   } ]]
+   local row, res, link_add_host, link_add_serv, url = {}, {}, "", "", ""
    local header = { -- sem o nome do comando 'chk'. Só que agora o alias aparece como o 'Comando' na tabela
       strings.alias.."/"..strings.name, "IP", strings.type, strings.command, "."
    }
 
    for i, v in ipairs(ics) do
-      local serv, ip, itemtype, id, hst_name, alias = "", "", "", "", nil, nil
-      if v.sw_name ~= "" and v.sv_name ~= nil then serv = v.sw_name.." / "..v.sv_name end
+      local ip, itemtype, id, hst_name, m_name = "", "", "", nil, nil
 
-      -- muitos dos ifs abaixo existem em funcao da direrenca entre as queries com Computer e as com Network
       v.c_id = v.c_id or 0 v.n_id = v.n_id or 0 v.p_id = v.p_id or 0 v.sv_id = v.sv_id or 0
       hst_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
-      alias = v.m_name
+      m_name = v.m_name -- nome do comando de checagem
 
+      link_add_host = "-"
+      link_add_serv = "-"
+
+      -- os ifs abaixo existem em funcao da direrenca entre as queries com Computer e as com Network
       if v.p_itemtype then itemtype = v.p_itemtype else itemtype = "NetworkEquipment" end
       if v.p_ip then ip = v.p_ip else ip = v.n_ip end
       if v.c_id ~= 0 then c_id = v.c_id else c_id = v.n_id end
 
-      if v.s_check_command_object_id == nil then 
+      if v.s_check_command_object_id == nil then -- se o ic não possuir um comando de check associado entao...
          chk = ""
          if permission == "w" then
-            if tonumber(v.m_service_object_id) == -1 then
-               link = font{ color="orange", "Pendente" }
-            elseif serv ~= "" then
-               link = a{ href= web:link("/add/"..v[1]..":"..c_id..":"..v.p_id..":"..v.sv_id), strings.add }
+            if tonumber(v.m_service_object_id) == -1 then -- se check cmd pendente...
+               link_add_host = font{ color="orange", "Pendente" }
             else
-               link = a{ href= web:link("/insert_host/"..v.p_id..":"..v.sv_id..":"..v.c_id..":"..v.n_id..":"
-                                         ..hst_name..":"..ip), strings.add.." [HOST]" }
+               link_add_host = a{ href= web:link("/insert_host/"..v.p_id..":"..v.sv_id..":"..v.c_id..":"..v.n_id..":"
+                                         ..hst_name..":"..ip), strings.add.." "..strings.host }
             end
-         else
-            link = "-" -- DEBUG: ..v[1]
          end
-      else
+      else -- caso o ic possua um comando de check associado...
          content = objects:select_checks(v.s_check_command_object_id)
          if content[1] then
             chk = content[1].name1
@@ -468,9 +463,8 @@ function render_list(web, ics, chk, msg)
                                        -- Deve estar relacionado a demora do ndo2db
                                        -- Por isso estou tirando esta entrada da tabela na tela de checagem!
          end
-         link = "-" -- DEBUG: ..v[1]
-         --link = a{ href= web:link("/update/"..v[1]..":"..c_id..":"..v.p_id..":"..v.m_service_object_id), strings.edit }
-         link2 = a{ href= web:link("/add/"..v[1]..":"..c_id..":"..v.p_id..":0"), strings.add }
+         link_add_host = a{ href= web:link("/update/"..v[1]..":"..c_id..":"..v.p_id..":"..v.m_service_object_id), strings.edit }
+         link_add_serv = a{ href= web:link("/add/"..v[1]..":"..c_id..":"..v.p_id..":0"), strings.add.." "..strings.service }
       end
 
       web.prefix = "/servdesk"
@@ -489,10 +483,12 @@ function render_list(web, ics, chk, msg)
       else
          name = hst_name
       end
-      row[#row + 1] = { name, ip, itemtype, alias, link } -- sem nome do comando 'chk'
-      --if ( alias == config.monitor.chek_host or alias == '-' ) then
-      if ( alias == config.monitor.check_host ) then
-         row[#row + 1] = { name, ip, "-", "-", link2 } -- sem nome do comando 'chk'
+
+      row[#row + 1] = { name, ip, itemtype, m_name, link_add_host } -- com nome do comando de checagem
+
+      if ( m_name == config.monitor.check_host ) then -- se o nome do comando é o HOST_ALICE, deve-se abrir a opcao para
+                                                      -- a criacao de mais um servico
+         row[#row + 1] = { name, ip, "-", "-", link_add_serv } -- sem nome do comando de checagem
       end
    end
 
