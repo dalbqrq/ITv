@@ -14,6 +14,7 @@ module(Model.name, package.seeall,orbit.new)
 
 local objects  = Model.nagios:model "objects"
 local monitors = Model.itvision:model "monitors"
+local checkcmds = Model.itvision:model "checkcmds"
 
 local no_software_code = "_no_software_code_"
 
@@ -107,7 +108,15 @@ function monitors:select_monitors(name1, name2)
    return Model.query("itvision_monitors", clause)
 end
 
-function monitors:insert_monitor(networkport, softwareversion, service_object, name, name1, name2, state, type_)
+
+function monitors:select_monitor_from_service(service_object_id)
+   clause = " service_object_id = "..service_object_id
+
+   return Model.query("itvision_monitors", clause)
+end
+
+
+function monitors:insert_monitor(networkport, softwareversion, service_object, cmd_object, name, name1, name2, state, type_)
    if tonumber(networkport)      == 0 then networkport      = nil end         
    if tonumber(softwareversion)  == 0 then softwareversion  = nil end         
 
@@ -115,6 +124,7 @@ function monitors:insert_monitor(networkport, softwareversion, service_object, n
       instance_id = Model.db.instance_id,
       entities_id = 0,
       service_object_id    = service_object,
+      cmd_object_id        = cmd_object,
       networkports_id      = networkport,
       softwareversions_id  = softwareversion,
       name  = name,
@@ -132,7 +142,7 @@ function insert_params( hst_name, service_desc, chk_id, seq, value )
    local param = { 
       name1 = hst_name,
       name2 = service_desc,
-      checkcmds_id = chk_id,
+      cmd_object_id = chk_id,
       sequence = seq,
       value = value,
    }
@@ -221,9 +231,11 @@ ITvision:dispatch_get(add, "/add/(%d+):(%d+):(%d+):(%d+)", "/add/(%d+):(%d+):(%d
 ITvision:dispatch_post(add, "/add/(%d+):(%d+):(%d+):(%d+)", "/add/(%d+):(%d+):(%d+):(%d+):(%d+)")
 
 
-function update(web, query, c_id, p_id, m_service_object_id)
+function update(web, query, c_id, p_id, service_object_id)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
+   local ics = {}
+   local chk = nil
 
    local count = web.input.count
    local chk_id = web.input.chk_id
@@ -231,11 +243,6 @@ function update(web, query, c_id, p_id, m_service_object_id)
    local monitor_name = web.input.monitor_name
    local chk_params = nil
 
-   local chk = Checkcmds.select_checkcmds(m_service_object_id)
-   --local chk = Checkcmds.select_checkcmds(nil, true)
-   local ics = {}
-
-   chk_id = chk[1].id
 
    query = tonumber(query)
 
@@ -245,15 +252,18 @@ function update(web, query, c_id, p_id, m_service_object_id)
       ics = Monitor.make_query_4(c_id, p_id)
    end
 
-   local params = { query=query, c_id=c_id, p_id=p_id, default=m_service_object_id }
 
-   if chk_id then
-      chk_params = Checkcmds.get_checkcmd_params(chk_id)
+   local monitor = monitors:select_monitor_from_service(service_object_id) 
+   local chk = Checkcmds.select_checkcmds(monitor[1].cmd_object_id)
+   if chk ~= nil then
+      chk_params = Checkcmds.get_checkcmd_params(chk[1].id)
       for i,v in ipairs(chk_params) do
          chk_params[i].flag = web.input["flag"..i]
          chk_params[i].default_value = web.input["opt"..i]
       end
    end
+
+   local params = { query=query, c_id=c_id, p_id=p_id, default=service_object_id }
 
    return render_add(web, ics, chk, params, chk_params, chk[1].name)
 end
@@ -305,7 +315,8 @@ function insert_host(web, p_id, sv_id, c_id, n_id, c_name, ip)
    -- cria check host e service ping caso nao exista
    ------------------------------------------------------
    if h[1] == nil then
-      chk_id = objects:select_check_host()
+      --chk_id = objects:select_check_host() desnecessario???
+      local cmd_object = p[1].object_id
 
       -- cria lista de parametros do comando HOST_ALIVE
       for i,v in ipairs(p) do
@@ -315,7 +326,7 @@ function insert_host(web, p_id, sv_id, c_id, n_id, c_name, ip)
 
       -- cria monitor sem a referencia do servico check_alive associado.
       insert_host_cfg_file (hst_name, hst_name, ip)
-      monitors:insert_monitor(p_id, nil, -1, config.monitor.check_host, hst_name, config.monitor.check_host, 0, "hst")
+      monitors:insert_monitor(p_id, nil, -1, cmd_object, config.monitor.check_host, hst_name, config.monitor.check_host, 0, "hst")
       insert_service_cfg_file (hst_name, config.monitor.check_host, config.monitor.check_host, check_args)
 
       msg = msg.."Check do HOST: "..c_name.." para o IP "..ip.." criado. "..error_message(11)
@@ -350,7 +361,7 @@ function insert_service(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, 
    local args = web.input.args
    local count = web.input.count
    local monitor_name = web.input.monitor_name
-   local chk_id = web.input.chk_id
+   local cmd_object = web.input.chk_id
    local chk_name = web.input.chk_name
    local check_args = ""
 
@@ -360,7 +371,7 @@ function insert_service(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, 
 
    for i = 1,count do
       check_args = check_args.."!"..web.input["opt"..i]
-      insert_params( hst_name, service_desc, chk_id, i, web.input["opt"..i] )
+      insert_params( hst_name, service_desc, cmd_object, i, web.input["opt"..i] )
    end
 
    ------------------------------------------------------
@@ -372,7 +383,7 @@ function insert_service(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, 
    -- cria o service check caso tenha sido requisitado
    -- e cria monitor sem a referencia do servico associado.
    ------------------------------------------------------
-   monitors:insert_monitor(p_id, sv_id, -1, monitor_name, hst_name, service_desc, 0, "svc")
+   monitors:insert_monitor(p_id, sv_id, -1, cmd_object, monitor_name, hst_name, service_desc, 0, "svc")
    insert_service_cfg_file (hst_name, service_desc, chk_name, check_args)
 
    msg = "Check de SERVIÇO: "..monitor_name.." - HOST: ".. c_name.." - COMANDO: "..chk_name.." criado."
@@ -634,6 +645,7 @@ function render_add(web, ics, chk, params, chk_params, monitor_name)
 
    res[#res+1] = render_content_header(auth, "Checagem", nil, web:link("/list"))
    res[#res+1] = render_table(row, header)
+--text_file_writer("/tmp/chk", chk_id.." : "..params.default)
    res[#res+1] = render_checkcmd(web, chk_id, hst_name, v.p_ip, url_test, url_insert, chk_params, monitor_name)
 
 

@@ -23,13 +23,9 @@ end
 
 
 function select_checkcmd_params(object_id)
-   local table_ = [[ nagios_objects o, itvision_checkcmds c, itvision_checkcmd_params p ]]
-   local cond_ = [[ objecttype_id = 12 and is_active = 1 and 
-      o.object_id = c.cmd_object_id and
-      c.id = p.checkcmds_id and
-      o.object_id = ]].. object_id
-
-   local extra_ = [[ order by p.sequence ]]
+   local table_ = [[ itvision_checkcmd_params  ]]
+   local cond_ =  [[ cmd_object_id = ]].. object_id
+   local extra_ = [[ order by sequence ]]
 
    return Model.query(table_, cond_, extra_)
 end
