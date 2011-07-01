@@ -27,11 +27,28 @@ end
 
 
 function select_checkcmd_params(service_object_id)
-   local table_ = [[ itvision_checkcmd_params  ]]
-   local cond_ =  [[ service_object_id = ]].. service_object_id
-   local extra_ = [[ order by sequence ]]
+   -- parametros variaveis (possuem sequencia e sao armazenados em itvision_checkcmd_params)
+   local table_ = [[ nagios_objects o, itvision_checkcmds c, itvision_checkcmd_default_params p, itvision_checkcmd_params pp ]]
+   local cond_ = [[ objecttype_id = 12 and is_active = 1 and 
+      o.object_id = c.cmd_object_id and
+      c.id = p.checkcmds_id and
+      c.cmd_object_id = pp.cmd_object_id and
+      pp.sequence = p.sequence and
+      pp.service_object_id = ]].. service_object_id
+   local extra_ = [[ order by pp.sequence ]]
+   local q1 = Model.query(table_, cond_, extra_)
 
-   return Model.query(table_, cond_, extra_)
+   -- parametros fixos (NÃO possuem sequencia e NÃO sao armazenados em itvision_checkcmd_params)
+   local table_ = [[ itvision_monitors m, itvision_checkcmds cmd, itvision_checkcmd_default_params dp ]]
+   local cond_ = [[ m.cmd_object_id = cmd.cmd_object_id and
+      cmd.id = dp.checkcmds_id and
+      dp.sequence is null and
+      m.service_object_id = ]]..service_object_id
+   local extra_ = [[]]
+   local q2 = Model.query(table_, cond_, extra_)
+
+   for _,v in ipairs(q1) do table.insert(q2, v) end
+   return q2
 end
 
 

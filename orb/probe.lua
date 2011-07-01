@@ -220,6 +220,7 @@ function add(web, query, c_id, p_id, sv_id, new_cmd, do_test)
          chk_params[i].flag = web.input["flag"..i]
          chk_params[i].default_value = web.input["opt"..i]
       end
+      text_file_writer("/tmp/ss", #chk_params.." "..chk_id.."\n")
    end
 
    return render_add(web, ics, chk, params, chk_params, monitor_name)
@@ -251,23 +252,25 @@ function update(web, query, c_id, p_id, sv_id, service_object_id, do_test)
    local chk = Checkcmds.select_checkcmds(nil, monitor[1].cmd_object_id)
    chk_id = chk[1].id
 
+local opts = ""
+
    if do_test ~= nil then
-   text_file_writer("/tmp/v", chk_id.." "..chk[1].id.." "..monitor[1].cmd_object_id.." "..service_object_id.."\n")
       _, chk_params = Checkcmds.get_checkcmd_default_params(monitor[1].cmd_object_id, false, false)
       for i,v in ipairs(chk_params) do
          chk_params[i].flag = web.input["flag"..i]
          chk_params[i].default_value = web.input["opt"..i]
       end
+      text_file_writer("/tmp/rr", #chk_params.." "..monitor[1].cmd_object_id.."\n")
    else
+      --text_file_writer("/tmp/v", chk_id.." INIT "..#chk_params.." "..chk[1].id.." "..monitor[1].cmd_object_id.." "..service_object_id.."\n")
       chk_params = Checkcmds.get_checkcmd_params(service_object_id)
-   text_file_writer("/tmp/v", chk_id.." INIT "..#chk_params.." "..chk[1].id.." "..monitor[1].cmd_object_id.." "..service_object_id.."\n")
       for i,v in ipairs(chk_params) do
-         chk_params[i].flag = "flag"..i
+         chk_params[i].flag = v.flag
          chk_params[i].default_value = v.value
       end
    end
 
-   text_file_writer("/tmp/h", chk_id.." INIT "..#chk_params.."\n")
+   --text_file_writer("/tmp/h", chk_id.." INIT "..#chk_params.."\n")
 
    if do_test ~= nil then do_test = true else do_test = false end
 
@@ -601,9 +604,12 @@ function render_checkcmd(web, chk_id, hst_name, ip, url_test, url_insert, chk_pa
    params_hidden = {hidden, br(), br(), render_table(display_show, nil), row_hidden}
    text = strings.parameter.."s do comando "..c[1].name1
 
+text_file_writer("/tmp/lnk", url_test.."\n"..url_insert.."\n")
+
    if permission == "w" then
       res[#res+1] = center{ render_form(web:link(url_test), nil, params, true, strings.test ) }
-      -- DEBUG: res[#res+1] = { br(), chk.." "..args, br(), br() }
+      -- DEBUG: 
+res[#res+1] = { br(), chk.." "..args, br(), br() }
       if do_test then
          res[#res+1] = { br(), os.capture(chk.." "..args, true) }
       end
