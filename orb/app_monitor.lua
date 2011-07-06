@@ -175,7 +175,12 @@ function render_list(web, ics, msg)
 
       local state
       if tonumber(v.ss_has_been_checked) == 1 then
-         state = tonumber(v.ss_current_state)
+         if tonumber(v.m_state) == 0 then
+            state = tonumber(APPLIC_DISABLE)
+         else
+            state = tonumber(v.ss_current_state)
+         end
+
       else
          state = 4
       end

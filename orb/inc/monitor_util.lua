@@ -69,8 +69,11 @@ end
 
 
 
-function insert_service_cfg_file (hostname, service_desc, check_cmd, check_args)
+-- o parametro enable deve receber nulo ou 1 para abilitar e 0 para desabilitar.
+function insert_service_cfg_file (hostname, service_desc, check_cmd, check_args, enable)
    local content, cmd, filename
+
+   if enable == 0 then enable = false else enable = true end
 
    if check_args == nil then
       return false
@@ -84,8 +87,17 @@ define service{
         host_name]].."\t\t"..hostname..[[ 
         service_description]].."\t"..service_desc..[[ 
         check_command]].."\t\t"..check_cmd..check_args..[[ 
+]]
+   if enable then
+      text = text..[[ 
         } 
 ]]
+   else
+      text = text..[[
+        active_checks_enabled	0 
+        }
+]]
+   end
 
    text_file_writer (filename, text)
    cmd = os.reset_monitor()

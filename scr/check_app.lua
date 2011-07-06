@@ -11,11 +11,11 @@ require "state"
 function check_app(app_id)
    local state, logic, name
    local app = Model.query("itvision_apps", "id = "..app_id)
-   local app_object_states = Model.query("itvision_apps a, itvision_app_objects ao, nagios_objects o, nagios_servicestatus ss", 
+   local app_object_states = Model.query("itvision_apps a, itvision_app_objects ao, nagios_objects o, nagios_servicestatus ss, itvision_monitors m", 
           [[a.id = ao.app_id and ao.service_object_id = ss.service_object_id and o.is_active = 1 and 
-            o.object_id = ss.service_object_id 
+            o.object_id = ss.service_object_id and ao.service_object_id = m.service_object_id 
              and o.is_active = 1 and ao.app_id = ]].. app_id, nil, 
-           "a.type, ao.service_object_id, ss.current_state, a.name" )
+           "a.type, ao.service_object_id, ss.current_state, a.name, m.state as monitor_state" )
 
 --o.instance_id = ]]..config.database.instance_id..[[
 
@@ -42,13 +42,16 @@ function check_app(app_id)
    for i, v in ipairs(app_object_states) do
      --DEBUG: print(i,v.current_state, v.name, v.service_object_id)
      current_state = tonumber(v.current_state)
-     if logic == "and" then
-        if current_state > state then
-           state = current_state
-        end
-     elseif logic == "or" then
-        if current_state < state then
-           state = current_state
+     monitor_state = tonumber(v.monitor_state)
+     if monitor_state ~= 0 then
+        if logic == "and" then
+           if current_state > state then
+              state = current_state
+           end
+        elseif logic == "or" then
+           if current_state < state then
+              state = current_state
+           end
         end
      end
    end

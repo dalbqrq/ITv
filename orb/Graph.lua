@@ -29,10 +29,14 @@ local node_def = {
 }
 
 
-function set_color(state, has_been_checked, obj_type)
+function set_color(state, has_been_checked, monitor_state, obj_type)
    local color
    if tonumber(has_been_checked) == 1 then
-      state = tonumber(state)
+      if tonumber(monitor_state) == 0 then -- monitor_state == o indica que o probe está desabilitado
+         state = tonumber(APPLIC_DISABLE)
+      else
+         state = tonumber(state)
+      end
    else
       state = 4
    end
@@ -122,7 +126,7 @@ function make_content(obj, rel)
 
          name = v.o_object_id
 
-         color = set_color(v.ss_current_state, v.ss_has_been_checked, v.ao_type)
+         color = set_color(v.ss_current_state, v.ss_has_been_checked, v.m_state, v.ao_type)
          table.insert(content, 
             node {
                name, 
@@ -232,7 +236,7 @@ function make_tree_content(obj, rel, sep)
             shape = "hexagon"
          end
 
-         color = set_color(v.ss_current_state, v.ss_has_been_checked, "app")
+         color = set_color(v.ss_current_state, v.ss_has_been_checked, v.m_state, "app")
          table.insert(content, 
             node {
                name, 

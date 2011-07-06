@@ -146,6 +146,15 @@ function monitors:update_monitor(service_object_id, monitor_name)
 end
 
 
+function monitors:enable_monitor(service_object_id, state)
+
+   local mon = { 
+      state  = state,
+   }
+   return Model.update("itvision_monitors", mon, "service_object_id = "..service_object_id)
+end
+
+
 function insert_params( hst_name, service_desc, chk_id, seq, value )
 
    local param = { 
@@ -240,7 +249,7 @@ function add(web, query, c_id, p_id, sv_id, new_cmd, do_test)
          chk_params[i].flag = web.input["flag"..i]
          chk_params[i].default_value = web.input["opt"..i]
       end
-      text_file_writer("/tmp/ss", #chk_params.." "..chk_id.."\n")
+      --text_file_writer("/tmp/ss", #chk_params.." "..chk_id.."\n")
    end
 
    return render_add(web, ics, chk, params, chk_params, monitor_name)
@@ -285,7 +294,7 @@ function update(web, query, c_id, p_id, sv_id, service_object_id, do_test)
    end
 
    if do_test ~= nil then do_test = true else do_test = false end
-   local params = { query=query, c_id=c_id, p_id=p_id, sv_id==nil,  origin="update", cmd=monitor[1].cmd_object_id, 
+   local params = { query=query, c_id=c_id, p_id=p_id, sv_id==nil,  origin="update", cmd=monitor[1].cmd_object_id, state=monitor[1].state,
       do_test=do_test, service_object_id=service_object_id }
 
    --return render_add(web, ics, chk, params, chk_params, chk[1].name)
@@ -415,7 +424,7 @@ function insert_service(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, 
    msg = "Check de SERVIÇO: "..monitor_name.." - HOST: ".. c_name.." - COMANDO: "..chk_name.." criado."
 
    if web then
-      os.sleep(1)
+      --os.sleep(1)
       return web:redirect(web:link("/list/"..msg..""))
    else
       return msg --para criacao de probes em massa
@@ -459,7 +468,7 @@ function update_service(web, service_object_id)
    msg = "Check de SERVIÇO: "..monitor_name.." atualizado."
 
    if web then
-      os.sleep(1)
+      --os.sleep(1)
       return web:redirect(web:link("/list/"..msg..""))
    else
       return msg --para criacao de probes em massa
@@ -468,6 +477,51 @@ function update_service(web, service_object_id)
 end
 ITvision:dispatch_get(update_service, "/update_service/(%d+)")
 ITvision:dispatch_post(update_service, "/update_service/(%d+)")
+
+
+------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------
+function desable_service(web, service_object_id, flag)
+   local msg = ""
+   local flags, opts = {}, {}
+   local chk, chk_id
+   flag = tonumber(flag)
+
+   local cmd = web.input.cmd
+   local args = web.input.args
+   local count = web.input.count
+   local monitor_name = web.input.monitor_name
+   local cmd_object = web.input.chk_id
+   local chk_name = web.input.chk_name
+   local check_args = ""
+
+   for i = 1,count do
+      check_args = check_args.."!"..web.input["opt"..i]
+      update_params( service_object_id, i, web.input["opt"..i] )
+   end
+
+   ------------------------------------------------------
+   -- atualiza o service check caso tenha sido requisitado
+   -- e cria monitor sem a referencia do servico associado.
+   ------------------------------------------------------
+   monitors:enable_monitor(service_object_id, flag)
+   local monitor = monitors:select_monitor_from_service(service_object_id) 
+   local host_name = monitor[1].name1
+   local service_desc = monitor[1].name2
+   insert_service_cfg_file (host_name, service_desc, chk_name, check_args, flag)
+
+   msg = "Check de SERVIÇO: desabilitado."
+
+   if web then
+      --os.sleep(1)
+      return web:redirect(web:link("/list/"..msg..""))
+   else
+      return msg --para criacao de probes em massa
+   end
+
+end
+ITvision:dispatch_get(desable_service, "/desable_service/(%d+):(%d+)")
+ITvision:dispatch_post(desable_service, "/desable_service/(%d+):(%d+)")
 
 
 
@@ -598,7 +652,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------
-function render_checkcmd(web, chk_id, hst_name, ip, url_test, url_insert, url_update, chk_params, monitor_name, do_test, origin)
+function render_checkcmd(web, chk_id, hst_name, ip, url_test, url_insert, url_update, url_desable, chk_params, monitor_name, do_test, origin, state)
    local permission = Auth.check_permission(web, "checkcmds")
    local row, row_hidden, cmd = {}, {}, ""
    local readonly, text = "", ""
@@ -607,6 +661,7 @@ function render_checkcmd(web, chk_id, hst_name, ip, url_test, url_insert, url_up
    local path = "/usr/lib/nagios/plugins"
    local count = 0
    local disabled = ""
+   state = tonumber(state)
 
    if chk_id == 0 then
       res[#res+1] = { br(), "Selecione um comando de checagem!", br() }
@@ -683,15 +738,34 @@ function render_checkcmd(web, chk_id, hst_name, ip, url_test, url_insert, url_up
 
 
    if permission == "w" then
-      res[#res+1] = center{ render_form(web:link(url_test), nil, params, true, strings.test ) }
-      -- DEBUG: res[#res+1] = { br(), chk.." "..args, br(), opts, br() }
+      if state == 1 then
+         res[#res+1] = center{ render_form(web:link(url_test), nil, params, true, strings.test ) }
+      end 
+
       if do_test then
-         res[#res+1] = { br(), os.capture(chk.." "..args, true) }
+         -- DEBUG: 
+         res[#res+1] = { br(), chk.." "..args, br() }
+         res[#res+1] = { br(), br(), os.capture(chk.." "..args, true) }
       end
       if origin == "add" then
          res[#res+1] = center{ render_form(web:link(url_insert), nil, params_hidden, true, "Criar checagem" ) }
       else
-         res[#res+1] = center{ render_form(web:link(url_update), nil, params_hidden, true, "Atualizar checagem" ) }
+         local b_name, flag
+         if state == 1 then
+            res[#res+1] = center{ render_form(web:link(url_update), nil, params_hidden, true, "Atualizar checagem" ) }
+            b_name = "Desabilitar checagem"
+            flag = ":0"
+         else
+            b_name = "Abilitar checagem"
+            flag = ":1"
+         end
+         res[#res+1] = center{ render_form(web:link(url_desable..flag), nil, { hidden, row_hidden } , true, b_name ) }
+         --res[#res+1] = center{ strings.entity..": ", select_ok_warning_critical_unknow("forced", 1) }
+--[[
+         local A = center{ render_form(web:link(url_update), nil, params_hidden, true, "Atualizar checagem" ) }
+         local D = center{ render_form(web:link(url_update), nil, params_hidden, true, "Desabilitar checagem" ) }
+         res[#res+1] = center{ render_form_bar ( {A, D, params_hidden} , "Forçar checagem", web:link(url_update), nil)  }
+]]
       end
    else
       res[#res+1] = params
@@ -710,7 +784,7 @@ function render_add(web, ics, chk, params, chk_params, monitor_name)
    local row = {}
    local res = {}
    local serv, ip, itemtype, id, hst_name = "", "", "", "", nil
-   local s, r, url_test, url_insert, url_update, chk_id
+   local s, r, url_test, url_insert, url_update, url_desable, chk_id
 
    -- ESTE RENDER SOh SERVE PARA SERVICES.
    --if params.cmd then chk_id = params.cmd else chk_id = chk[1].object_id end
@@ -724,6 +798,7 @@ function render_add(web, ics, chk, params, chk_params, monitor_name)
 
       url_insert = "/insert_service/"..v.p_id..":"..v.sv_id..":"..v.c_id..":"..v.n_id..":"..hst_name..":nana:nono:"..v.p_ip
       url_update = "/update_service/"..params.service_object_id
+      url_desable = "/desable_service/"..params.service_object_id
       url_test   = "/"..params.origin.."/"..params.query..":"..params.c_id
 
       if params.p_id  then url_test = url_test..":"..params.p_id  else url_test = url_test..":0" end
@@ -742,7 +817,7 @@ function render_add(web, ics, chk, params, chk_params, monitor_name)
 
    res[#res+1] = render_content_header(auth, "Checagem", nil, web:link("/list"))
    res[#res+1] = render_table(row, header)
-   res[#res+1] = render_checkcmd(web, chk_id, hst_name, v.p_ip, url_test, url_insert, url_update, chk_params, monitor_name, params.do_test, params.origin)
+   res[#res+1] = render_checkcmd(web, chk_id, hst_name, v.p_ip, url_test, url_insert, url_update, url_desable, chk_params, monitor_name, params.do_test, params.origin, params.state)
 
 
    return render_layout(res)

@@ -80,6 +80,10 @@ strgs.pt_BR = {
 	public = "Publico",
 	tree = "Árvore",
 	status = "Status",
+	ok = "Ok",
+	warning = "Anormal",
+	critial = "Crítico",
+	unknow = "Desconhecido",
 
 }
 
@@ -160,6 +164,10 @@ strgs.us = {
 	public = "Public",
 	tree = "Tree",
 	status = "Status",
+	ok = "Ok",
+	warning = "Warning",
+	critial = "Critical",
+	unknow = "Unknown",
 }
 
 

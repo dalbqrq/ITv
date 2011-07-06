@@ -380,14 +380,15 @@ function render_form_bar(form_content, button_name, url_post, url_reset)
                td{ class='center', 
                   input{ type='submit', value=button_name,  class='submit' }
                }, 
+--[[ remove o botao de reset (x) dos formularios em barra
                td{ 
                   a{ href=url_reset, img{ src='/pics/reset.png', class='calendrier' } }
                } 
+]]
             } }
 
    end
    return form{ name = "input", method = "post", action = url_post,
-      --H('table') { class='tab_cadrehov', tr{ class='tab_bg_1', 
       H('table') { class='tab_cadre_fixe', tr{ class='tab_bg_1', 
          td{ 
             H('table') { tr{ td{ class='left', form_content } } }
@@ -458,7 +459,9 @@ function render_form(url, url_reset, t, line, button_name, iframe_target)
       line,
       input{ type='submit', value=button_name,  class='submit' },
       " ",
+--[[ remove o botao de reset (x) dos formularios em barra
       a{ href=reset, img{ src='/pics/reset.png', class='calendrier' } },
+]]
    }
 end
 
@@ -634,6 +637,23 @@ end
 
 function select_hst_svc_app(name, default)
    return select_option(name, HostOrServiceOrApp, "id", "name", default)
+end
+
+
+-- OK or WARNING or CRITICAL or UNKNOWN
+OkOrWarningOrCritialOrUnknown = {
+   { id = "ok", name = strings.ok },
+   { id = "warning",  name = strings.warning},
+   { id = "critial",  name = strings.critical},
+   { id = "Unknown",  name = strings.unknow},
+}
+
+function name_ok_warning_critical_unknow(id)
+   return choose_name(OkOrWarningOrCritialOrUnknown, id)
+end
+
+function select_ok_warning_critical_unknow(name, default)
+   return select_option(name, OkOrWarningOrCritialOrUnknown, "id", "name", default)
 end
 
 
