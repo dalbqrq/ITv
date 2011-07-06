@@ -302,7 +302,7 @@ function render(app_name, file_type, engene, content)
    local imgfile, imglink, lnkfile, maplink, dotfile = make_gv_filename(app_name, file_type)
 
    local g = digraph{"G",
-      size="15.0,15.0",
+      size="25.0,25.0",
       node = { label=app_name },
       --label = "\\n"..app_name,
       unpack(content),

@@ -1,6 +1,8 @@
 
 update glpi_computers set name = ucase(name) where name not like 'www%';
 update glpi_networkequipments set name = ucase(name) where name not like 'www%';
+update glpi_computers set alias = ucase(alias) where alias not like 'www%';
+update glpi_networkequipments set alias = ucase(alias) where alias not like 'www%';
 
 select description, id from itvision_checkcmd_default_params;
 

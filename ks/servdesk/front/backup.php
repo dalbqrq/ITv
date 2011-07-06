@@ -97,7 +97,7 @@ function xmlnow(what4) {
 
 // les deux options qui suivent devraient etre incluses dans le fichier de config plutot non ?
 // 1 only with ZLib support, else change value to 0
-$compression = 0;
+$compression = 1;
 
 if ($compression == 1) {
    $filetype = "sql.gz";
@@ -117,13 +117,13 @@ function xmlbackup() {
    $i = 0;
    while ($line = $DB->fetch_array($result)) {
       // on se limite aux tables prefixees _glpi
-      if (strstr($line[0],"glpi_")) {
+      //if (strstr($line[0],"glpi_")) { // comentado pode daniel@itvision.com.br
          $table = $line[0];
 
          $query[$i] = "SELECT *
                        FROM `$table`";
          $i++;
-      }
+      //}
    }
 
    //le nom du fichier a generer...
@@ -347,10 +347,10 @@ function backupMySql($DB,$dumpFile, $duree,$rowlimit) {
    $numtab = 0;
    while ($t = $DB->fetch_array($result)) {
       // on se  limite aux tables prefixees _glpi
-      if (strstr($t[0],"glpi_")) {
+      //if (strstr($t[0],"glpi_")) { // comentado pode daniel@itvision.com.br
          $tables[$numtab] = $t[0];
          $numtab++;
-      }
+      //}
    }
 
    for ( ; $offsettable<$numtab ; $offsettable++) {
@@ -408,7 +408,8 @@ function backupMySql($DB,$dumpFile, $duree,$rowlimit) {
 if (isset($_GET["dump"]) && $_GET["dump"] != "") {
    $time_file = date("Y-m-d-H-i");
    $cur_time = date("Y-m-d H:i");
-   $filename = $path . "/glpi-".GLPI_VERSION."-$time_file.$filetype";
+   //$filename = $path . "/glpi-".GLPI_VERSION."-$time_file.$filetype"; // comentado por daniel@itvision.com.br
+   $filename = $path . "/itvision"."-$time_file.$filetype";
 
    if (!isset($_GET["duree"]) && is_file($filename)) {
       echo "<div class='center'>".$LANG['backup'][21]."</div>";
@@ -549,12 +550,14 @@ if (isset($_GET["delfile"]) && $_GET["delfile"] != "") {
    }
 }
 
+/* comentado por daniel@itvision.com.br
 if (haveRight("check_update","r")) {
    echo "<div class='center'><table class='tab_glpi'><tr><td>";
    echo "<tr class='tab_bg_1'><td colspan='4' class='center b'>";
    echo "<a href=\"backup.php?action=check_version\" class='icon_consol b'>".$LANG['setup'][300]."</a>";
    echo "</td></tr></table></div><br>";
 }
+*/
 
 // Title backup
 echo "<div class='center'><table class='tab_glpi'><tr><td>".

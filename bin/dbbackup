@@ -1,0 +1,22 @@
+#!/bin/bash
+
+progdir=$(dirname $(readlink -f $0))
+. $progdir/dbconf
+
+d=`date "+%m"`
+dir=/var/log/itvision/_dumps
+opt="--add-drop-table"
+
+mysqldump -u $dbuser --default-character-set=latin1 --password=$dbpass $opt $dbname | bzip2 > $dir/dbbackup"_"$d.sql.bz2
+
+#
+# Para encriptar deve-se criar uma chave provada com o comando: gpg --gen-key
+# Ver: http://www.madboa.com/geek/gpg-quickstart/
+#
+# para encriptar use: gpg -e -r ITvision foo.txt
+# para decriptar use: gpg -o foo.txt -d foo.txt.gpg
+
+if [ "$1" == "-d" ]; then
+   gpg -e -r ITvision $dir/dbbackup"_"$d.sql.bz2
+   rm -f $dir/dbbackup"_"$d.sql.bz2
+fi

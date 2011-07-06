@@ -9,7 +9,7 @@ require "monitor_inc"
 ]]
 
 state_name = {
-        [APPLIC_OK]       = "NORMAL",
+        [APPLIC_OK]       = "NORMALIZADO",
         [APPLIC_WARNING]  = "ANORMAL",
         [APPLIC_CRITICAL] = "CRÍTICO",
         [APPLIC_UNKNOWN]  = "DESCONHECIDO",
@@ -20,7 +20,7 @@ state_name = {
 
 
 
-function mail_body(app_id)
+function mail_body(app_id, current_state)
    local a, q
 
    local tm = os.date("*t", os.time())
@@ -34,7 +34,8 @@ function mail_body(app_id)
 
    a = App.select_app_state("a.id = "..app_id); a = a[1]
    print("Aplicação:\t".. a.name)
-   print("Funcionamento:\t".. state_name[tonumber(a.current_state)])
+   --print("Funcionamento:\t".. state_name[tonumber(a.current_state)])
+   print("Funcionamento:\t".. state_name[tonumber(current_state)])
    print("Data e hora:\t"..tm.day.."-"..tm.month.."-"..tm.year.." "..tm.hour..":"..tm.min)
 
    print("\nHardwares em estado CRÍTICO:")
@@ -64,4 +65,4 @@ function mail_body(app_id)
    print("\n--")
 end
 
-mail_body(arg[1])
+mail_body(arg[1], arg[2])
