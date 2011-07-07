@@ -53,7 +53,6 @@ end
 
 ---------------------------------------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------------------------------------
---[[
 function list(web, msg)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
@@ -70,44 +69,6 @@ function list(web, msg)
       local a = ""
       if clause then a = " and " else clause = ""  end
       clause = clause..a.."c.serial like '%"..web.input.sn.."%' "
-   end
-   if web.input.tipo ~= "" and web.input.sn ~= nil then 
-      local a = ""
-      if clause then a = " and " else clause = ""  end
-      clause = clause..a.."c.serial like '%"..web.input.sn.."%' "
-   end
-   local a = ""
-   if clause then a = " and " else clause = "" end
-   clause = clause..a.." p.entities_id in "..Auth.make_entity_clause(auth)
-
-   local ics = Monitor.select_monitors_app_objs(nil, clause)
-
-   return render_list(web, ics, msg)
-end
-ITvision:dispatch_get(list, "/", "/list", "/list/(.+)")
-ITvision:dispatch_post(list, "/list", "/list/(.+)")
-]]
-
-function list(web, msg)
---function list(web, hostname, tipo, msg)
-   local auth = Auth.check(web)
-   if not auth then return Auth.redirect(web) end
-
-   local clause = nil
-
-   if web.input.hostname ~= "" and web.input.hostname ~= nil then clause = " c.name like '%"..web.input.hostname.."%' " end
-   --if hostname ~= "" and hostname ~= nil then clause = " c.name like '%"..hostname.."%' " end
-   if web.input.tipo ~= "" and web.input.tipo ~= nil then 
-   --if tipo ~= "" and tipo ~= nil then 
-      local a = ""
-      if clause then a = " and " else clause = ""  end
-      if tipo == 'hst' then
-         clause = clause..a.."o.name2 = '"..config.monitor.check_host.."' and o.objecttype_id = 2"
-      elseif tipo == 'svc' then
-         clause = clause..a.."o.name2 <> '"..config.monitor.check_host.."' and o.name1 <> '"..config.monitor.check_app.."' and o.objecttype_id = 2"
-      else 
-         clause = clause..a.."o.name1 = '".. config.monitor.check_app.."' and o.objecttype_id = 2"
-      end
    end
    local a = ""
    if clause then a = " and " else clause = "" end
@@ -132,7 +93,6 @@ function render_filter(web)
    local res = {}
 
    res[#res+1] = {strings.name..": ", input{ type="text", name="hostname", value = web.input.hostname }, " "}
-   res[#res+1] = {strings.type..": ", select_hst_svc_app("tipo", web.input.tipo)}
    -- EXEMPLO res[#res+1] = {strings.inventory..": ", input{ type="text", name="inventory", value = web.input.inventory }, " "} 
 
    return res

@@ -1,0 +1,7 @@
+#!/usr/bin/env wsapi.cgi
+
+require "app_resume"
+
+return ITvision
+
+
