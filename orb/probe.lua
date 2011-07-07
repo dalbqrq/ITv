@@ -628,7 +628,7 @@ function render_list(web, ics, chk, msg)
       end
    end
 
-   res[#res+1] = render_counter()
+   res[#res+1] = render_resume(web)
    res[#res+1] = render_content_header(auth, "Checagem", nil, web:link("/list"))
    if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ font{ color="red", msg } } end
    local bar = {}

@@ -157,44 +157,7 @@ function count_entities()
 end
 
 
-function counter()
-   local bar = {}
-   local row = {}
-   local h = count_hosts()
-   local s = count_services()
-   local a = count_apps()
-   local e = count_entities()
---[[DEBUG: 
-   print_result(h)
-   print_result(s)
-   print_result(a)
-   print_result(e)
-  
-   table.insert(bar,h)
-   table.insert(bar,s)
-   table.insert(bar,a)
-   table.insert(bar,e)
-
-   bar['hst'] = h
-   bar['svc'] = s
-   bar['app'] = a
-   bar['ent'] = e
-
-   for i,v in pairs(bar) do
-      print("+++ "..i.." ++++++++++++++++")
-      for j = 0,3 do
-         print(j, v[j])
-      end
-   end
-]]
-
-   row = { strings.entity, e[0], e[1], e[2], e[3], strings.application, a[0], a[1], a[2], a[3], 
-           strings.host,   h[0], h[1], h[2], h[3], strings.service,     s[0], s[1], s[2], s[3]  }
-
-   return row
-end
-
-function render_counter(web)
+function render_resume(web)
    local row = {}
    local col = {}
    local hea = {}
