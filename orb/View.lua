@@ -661,13 +661,13 @@ end
 
 -- OK or WARNING or CRITICAL or UNKNOWN
 OkOrWarningOrCritialOrUnknown = {
-   { id = -1,               name = strings.all },
-   { id = APPLIC_OK,       name = strings.ok },
-   { id = APPLIC_WARNING,  name = strings.warning },
-   { id = APPLIC_CRITICAL, name = strings.critical },
-   { id = APPLIC_UNKNOWN,  name = strings.unknown },
-   { id = APPLIC_PENDING,  name = strings.pending },
-   { id = APPLIC_DISABLE,  name = strings.disable },
+   { id = -1,              name = strings.all },
+   { id = APPLIC_OK,       name = applic_alert[APPLIC_OK].name },
+   { id = APPLIC_WARNING,  name = applic_alert[APPLIC_WARNING].name },
+   { id = APPLIC_CRITICAL, name = applic_alert[APPLIC_CRITICAL].name },
+   { id = APPLIC_UNKNOWN,  name = applic_alert[APPLIC_UNKNOWN].name },
+   { id = APPLIC_PENDING,  name = applic_alert[APPLIC_PENDING].name },
+   { id = APPLIC_DISABLE,  name = applic_alert[APPLIC_DISABLE].name },
 }
 
 function name_ok_warning_critical_unknown(id)
