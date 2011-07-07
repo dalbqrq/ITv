@@ -116,7 +116,7 @@ function render_show(web, app, entities, app_name, app_id, obj, rel, obj_id, no_
    end
    web.prefix = "/orb"
 
-   res[#res+1] = render_table({render_counter()})
+   res[#res+1] = render_counter()
    if no_header == nil then
       if auth then -- se nao estiver logado, valor de auth é "false" e não a arvore de autenticacao (mod Auth)
          res[#res+1] = render_content_header(auth, strings.vision, nil, nil, nil)

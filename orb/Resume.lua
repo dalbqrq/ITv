@@ -157,7 +157,7 @@ function count_entities()
 end
 
 
-function render_counter()
+function counter()
    local bar = {}
    local row = {}
    local h = count_hosts()
@@ -194,6 +194,48 @@ function render_counter()
    return row
 end
 
+function render_counter(web)
+   local row = {}
+   local col = {}
+   local hea = {}
+   local span = 1
+   local bgclass = "tab_bg_1"
+   local class = "tab_cadre_fixe"
+   local counts = counter()
+
+   local h = count_hosts()
+   local s = count_services()
+   local a = count_apps()
+   local e = count_entities()
+   local white = "#FFFFFF"
+
+   web.prefix = "/orb/app_monitor"
+
+   col[#col+1] = td{ border="0", align="center", colspan=span, bgcolor=white, strings.entity..":" }
+   col[#col+1] = td{ border="0", align="center", colspan=span, bgcolor=applic_alert[0].color, H("a"){ href= web:link("/all:ent:0:0"), e[0] } }
+   col[#col+1] = td{ border="0", align="center", colspan=span, bgcolor=applic_alert[1].color, H("a"){ href= web:link("/all:ent:0:1"), e[1] } }
+   col[#col+1] = td{ border="0", align="center", colspan=span, bgcolor=applic_alert[2].color, H("a"){ href= web:link("/all:ent:0:2"), e[2] } }
+   col[#col+1] = td{ border="0", align="center", colspan=span, bgcolor=applic_alert[3].color, H("a"){ href= web:link("/all:ent:0:3"), e[3] } }
+   col[#col+1] = td{ border="0", align="center", colspan=span, bgcolor=white, strings.application..":" }
+   col[#col+1] = td{ border="0", align="center", colspan=span, bgcolor=applic_alert[0].color, H("a"){ href= web:link("/all:app:0:0"), a[0] } }
+   col[#col+1] = td{ border="0", align="center", colspan=span, bgcolor=applic_alert[1].color, H("a"){ href= web:link("/all:app:0:1"), a[1] } }
+   col[#col+1] = td{ border="0", align="center", colspan=span, bgcolor=applic_alert[2].color, H("a"){ href= web:link("/all:app:0:2"), a[2] } }
+   col[#col+1] = td{ border="0", align="center", colspan=span, bgcolor=applic_alert[3].color, H("a"){ href= web:link("/all:app:0:3"), a[3] } }
+   col[#col+1] = td{ border="0", align="center", colspan=span, bgcolor=white, strings.host..":" }
+   col[#col+1] = td{ border="0", align="center", colspan=span, bgcolor=applic_alert[0].color, H("a"){ href= web:link("/all:hst:0:0"), h[0] } }
+   col[#col+1] = td{ border="0", align="center", colspan=span, bgcolor=applic_alert[1].color, H("a"){ href= web:link("/all:hst:0:1"), h[1] } }
+   col[#col+1] = td{ border="0", align="center", colspan=span, bgcolor=applic_alert[2].color, H("a"){ href= web:link("/all:hst:0:2"), h[2] } }
+   col[#col+1] = td{ border="0", align="center", colspan=span, bgcolor=applic_alert[3].color, H("a"){ href= web:link("/all:hst:0:3"), h[3] } }
+   col[#col+1] = td{ border="0", align="center", colspan=span, bgcolor=white, strings.service..":" }
+   col[#col+1] = td{ border="0", align="center", colspan=span, bgcolor=applic_alert[0].color, H("a"){ href= web:link("/all:svc:0:0"), s[0] } }
+   col[#col+1] = td{ border="0", align="center", colspan=span, bgcolor=applic_alert[1].color, H("a"){ href= web:link("/all:svc:0:1"), s[1] } }
+   col[#col+1] = td{ border="0", align="center", colspan=span, bgcolor=applic_alert[2].color, H("a"){ href= web:link("/all:svc:0:2"), s[2] } }
+   col[#col+1] = td{ border="0", align="center", colspan=span, bgcolor=applic_alert[3].color, H("a"){ href= web:link("/all:svc:0:3"), s[3] } }
+
+   row[#row+1] = tr{ class=bgclass, col }
+
+   return H("table") { border="0", bordercolor="black", class=class, tbody{ row } }
+end
 
 --render_counter()
 
