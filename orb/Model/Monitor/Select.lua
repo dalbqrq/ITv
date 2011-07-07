@@ -756,7 +756,7 @@ function select_monitors_app_objs(app_id, clause)
    local q = {}
    local q3 = make_query_3(nil, nil, app_id, clause)
    local q4 = make_query_4(nil, nil, nil, app_id, clause)
-   local q5 = make_query_5(app_id, clause)
+   local q5 = make_query_5(app_id, nil) -- o parametro clause foi retirado pois conflitava com os campos das queries acima.
 
    for _,v in ipairs(q3) do table.insert(q, v) end
    for _,v in ipairs(q4) do table.insert(q, v) end

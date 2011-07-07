@@ -55,17 +55,25 @@ function render_login(web, login_error)
    web.prefix = "/servdesk"
    local url = web:link("/login.php")
 
+   res[#res + 1] = center{ img{ src="/pics/itv_logo.png", alt="ITVision", border=0 }, }
+
    res[#res + 1] = form{
       name = "input",
       method = "post",
       action = url,
 
-      strings.login..": ", input{ type="text", name="login_name", value = nil },br(),
-      strings.password..": ", input{ type="password", name="login_password", value = nil },br(),
-
-      p{ button_form(strings.send, "submit", "positive") },
-      p{ button_form(strings.reset, "reset", "negative") },
+      strings.login..": ", input{ type="text", name="login_name", value = nil }, " ", 
+      strings.password..": ", input{ type="password", name="login_password", value = nil }, " ", 
+      --button_form(strings.send, "submit", "positive"),
+      button_form(">", "submit", "positive"),
+      --button_form(strings.reset, "reset", "negative"),
    }
+
+--[[
+   res[#res + 1] = center{ 
+     p{ br(), br(), br(), img{ src="/pics/logo_verto.jpg", alt="Verto",  height=34, border=0 }, br(), br(), }
+   }
+]]
 
    if login_error then res[#res + 1] = p{ font{ color="red", error_message(13) }, br()  } end
 
