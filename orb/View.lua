@@ -308,15 +308,21 @@ function render_table(t, h, class)
       hea = tr{ class=bgclass, hea }
    end
 
+   -- Percorre as linhas (rows)
    for r, v in ipairs(t) do
       local color, lightcolor, colnumber
 
-      if v.status then
+      -- A coluna "status" não deve ser apresentada. Serve somente para trazer as informações de 
+      -- cores de determinada linha dada pelo status de um objeto
+      if v.status then 
           color = applic_alert[tonumber(v.status.state)].color
-          lightcolor = applic_alert[tonumber(v.status.state)].lightcolor
+          if v.status.nolightcolor ~= true then
+             lightcolor = applic_alert[tonumber(v.status.state)].lightcolor
+          end
           colnumber = tonumber(v.status.colnumber)
       end
 
+      -- Percorre as colunas (cols)
       for c, w in pairs(v) do
          --if c == "state" or c == "colnumber" then 
          if c == "status" then 
@@ -349,12 +355,13 @@ function render_table(t, h, class)
 end
 
 
-function render_grid(content)
+function render_grid(content, class)
    local row = {}
    local col = {}
    local i, j, v, w
-   local class = "tab_bg_1"
+   local rowclass = "tab_bg_1"
    local span = 1
+   class = class or "tab_cadre_grid"
 
    for r, v in ipairs(content) do
       for c, w in pairs(v) do
@@ -366,11 +373,11 @@ function render_grid(content)
          end
       end
 
-      row[#row+1] = tr{ class=class, col }
+      row[#row+1] = tr{ class=rowclass, col }
       col = {}
    end
 
-   return H("table") { border="0", class="tab_cadre_fixe", tbody{ row } }
+   return H("table") { border="0", class=class, tbody{ row } }
 
 end
 
@@ -569,7 +576,7 @@ NoOrYes = {
 }
 
 function name_yes_no(id)
-   return choose_name(NoOrYes, id)
+   return choose_name(NoOrYes, tonumber(id))
 end
 
 function select_yes_no(name, default)
@@ -599,7 +606,7 @@ PrivateOrPublic = {
 }
 
 function name_private_public(id)
-   return choose_name(PrivateOrPublic, id)
+   return choose_name(PrivateOrPublic, tonumber(id))
 end
 
 function select_private_public(name, default)
@@ -671,7 +678,7 @@ OkOrWarningOrCritialOrUnknown = {
 }
 
 function name_ok_warning_critical_unknown(id)
-   return choose_name(OkOrWarningOrCritialOrUnknown, id)
+   return choose_name(OkOrWarningOrCritialOrUnknown, tonumber(id))
 end
 
 function select_ok_warning_critical_unknown(name, default)

@@ -33,10 +33,22 @@ function show_hst(web, obj_id, active_tab)
 
    local A = Monitor.make_query_3(nil, nil, nil, "m.service_object_id = "..obj_id)
 
+   local url
+   web.prefix = "/servdesk"
+   if itemtype == "Computer" then
+         url = web:link("/front/computer.form.php?id="..c_id)
+   else --if itemtype == "NetworkEquipment" then
+         url = web:link("/front/computer.form.php?id=78")
+         --url = web:link("/front/networkequipment.form.php?id="..c_id)
+      end
+
+
    local t = { 
-      { title="Infos", html="", href="/orb/hst_info/1:"..obj_id },
+      { title="Host", html="", href="/orb/hst_info/1:"..obj_id },
       { title="Data", html="", href="/orb/hst_info/2:"..obj_id },
       { title="Graph", html="", href="/orb/hst_info/3:"..obj_id },
+      { title="CMDB", html="", href="/orb/hst_info/4:"..obj_id },
+      { title="CMDB2", html="", href=url },
    }
 
    local res = {}
@@ -57,7 +69,8 @@ function show_svc(web, obj_id)
    local A = Monitor.make_query_4(nil, nil, nil, "m.service_object_id = "..obj_id)
 
    local t = { 
-      { title="Infos", html="", href="/orb/svc_info/1:"..obj_id },
+      { title="Host", html="", href="/orb/hst_info/1:"..obj_id },
+      { title="Serviço", html="", href="/orb/svc_info/1:"..obj_id },
       { title="Data", html="", href="/orb/svc_info/2:"..obj_id },
       { title="Graph", html="", href="/orb/svc_info/3:"..obj_id },
    }
