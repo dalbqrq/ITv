@@ -1,0 +1,11 @@
+#!/bin/bash
+
+progdir=$(dirname $(readlink -f $0))
+. $progdir/dbconf
+
+d=`date "+%Y-%m-%d"`
+tmpfile="/tmp/tickets_"$d".csv"
+
+
+dbcon $progdir/ticket_relat.sql > $tmpfile
+sed -i -e 's/\r//g' -e 's/\\n/ /g' $tmpfile
