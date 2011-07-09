@@ -223,8 +223,9 @@ function render_resume(web)
    local span = 1
    --local bgclass = "tab_bg_1"
    local bgclass = "tab_bg_X"
-   local class = "tab_cadre_fixe"
-   local class = "tab_glpi"
+   --local class = "tab_cadre_fixe"
+   --local class = "tab_glpi"
+   local class = "tab_resume"
    local counts = counter()
 
    local h = count_hosts()
@@ -235,23 +236,23 @@ function render_resume(web)
 
    web.prefix = "/orb/app_monitor"
 
-   col[#col+1] = td{ align="right", width="40px", bgcolor=white, strings.entity..": " }
+   col[#col+1] = td{ align="right", width="40px", bgcolor=white, "Entidades: " }
    col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[0].color, H("a"){ href= web:link("/all:ent:0:0"), font{ color="black", e[0] } } }
    col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[1].color, H("a"){ href= web:link("/all:ent:0:1"), font{ color="black", e[1] } } }
    col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[2].color, H("a"){ href= web:link("/all:ent:0:2"), font{ color="white", e[2] } } }
    --col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[3].color, H("a"){ href= web:link("/all:ent:0:3"), font{ color="black", e[3] } } }
-   col[#col+1] = td{ align="right", width="40px", bgcolor=white, strings.application..": " }
+   col[#col+1] = td{ align="right", width="40px", bgcolor=white, "Aplicações: " }
    col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[0].color, H("a"){ href= web:link("/all:app:0:0"), font{ color="black", a[0] } } }
    col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[1].color, H("a"){ href= web:link("/all:app:0:1"), font{ color="black", a[1] } } }
    col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[2].color, H("a"){ href= web:link("/all:app:0:2"), font{ color="white", a[2] } } }
    --col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[3].color, H("a"){ href= web:link("/all:app:0:3"), font{ color="black", a[3] } } }
-   col[#col+1] = td{ align="right", width="40px", bgcolor=white, strings.host..": " }
+   col[#col+1] = td{ align="right", width="40px", bgcolor=white, "Dispositivos: " }
    col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[0].color, H("a"){ href= web:link("/all:hst:0:0"), font{ color="black", h[0] } } }
    col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[1].color, H("a"){ href= web:link("/all:hst:0:1"), font{ color="black", h[1] } } }
    col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[2].color, H("a"){ href= web:link("/all:hst:0:2"), font{ color="white", h[2] } } }
    --col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[3].color, H("a"){ href= web:link("/all:hst:0:3"), font{ color="black", h[3] } } }
    col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[5].color, H("a"){ href= web:link("/all:hst:0:5"), font{ color="white", h[5] } } }
-   col[#col+1] = td{ align="right", width="40px", bgcolor=white, strings.service..": " }
+   col[#col+1] = td{ align="right", width="40px", bgcolor=white, "Serviços: " }
    col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[0].color, H("a"){ href= web:link("/all:svc:0:0"), font{ color="black", s[0] } } }
    col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[1].color, H("a"){ href= web:link("/all:svc:0:1"), font{ color="black", s[1] } } }
    col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[2].color, H("a"){ href= web:link("/all:svc:0:2"), font{ color="white", s[2] } } }
@@ -260,7 +261,7 @@ function render_resume(web)
 
    row[#row+1] = tr{ class=bgclass, col }
 
-   return H("table") { class=class, width="800px", border="0", fontsize="20px", tbody{ row } }
+   return H("table") { class=class, tbody{ row } }
 end
 
 --render_counter()
