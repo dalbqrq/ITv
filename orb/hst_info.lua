@@ -89,7 +89,7 @@ function statehistory:select(id)
    local clause = ""
    local dash = {}; dash.state_time = false
    if id then clause = "object_id = "..id end
-   local res = self:find_all(clause)
+   local res = Model.query("nagios_statehistory", clause)
    if #res == 0 then return dash else return res[1] end
 end
 
@@ -106,7 +106,7 @@ function info(web, tab, obj_id)
    if tab == 1 then
       return render_info(web, obj_id, A)
    elseif tab == 2 then
-      --local H = statehistory:select(obj_id)
+      local H = statehistory:select(obj_id)
       return render_history(web, obj_id, A, H)
    elseif tab == 3 then
       return render_cmdb(web, obj_id, A)
@@ -202,6 +202,8 @@ function render_history(web, obj_id, A, H)
    local row = {}
 
    if H then
+      res[#res+1] = { "COUNT : " ..obj_id}
+      res[#res+1] = { "COUNT : "..#H }
       for i,v in ipairs(H) do
          row[#row+1] = { v.state_time, v.state_time_usec, v.state_change, v.state, v.state_type, v.last_state, v.last_hard_state }
       end
