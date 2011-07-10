@@ -87,10 +87,8 @@ end
 
 function statehistory:select(id)
    local clause = ""
-   local dash = {}; dash.state_time = false
    if id then clause = "object_id = "..id end
-   local res = Model.query("nagios_statehistory", clause)
-   if #res == 0 then return dash else return res[1] end
+   return Model.query("nagios_statehistory", clause, "order by state_time desc")
 end
 
 
@@ -205,7 +203,7 @@ function render_history(web, obj_id, A, H)
       res[#res+1] = { "COUNT : " ..obj_id}
       res[#res+1] = { "COUNT : "..#H }
       for i,v in ipairs(H) do
-         row[#row+1] = { v.state_time, v.state_time_usec, v.state_change, v.state, v.state_type, v.last_state, v.last_hard_state }
+         row[#row+1] = { v.state_time, v.state_time_usec, v.state_change, v.state, v.state_type, v.last_state, v.last_hard_state, v.output }
       end
    else
       res[#res+1] = { "HISTORY : "..obj_id }
