@@ -106,12 +106,12 @@ function list(web, hostname, tipo, app, status)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
    local filter = { hostname = hostname, tipo = tipo, app = app, status = status }
-   local clause, clause5 = nil, nil
-
+   local clause, clause34, clause5 = nil, "", ""
 
    -- Filtro de hostname
    if filter.hostname ~= "" and filter.hostname ~= nil and filter.hostname ~= "all" then 
-      clause = " c.name like '%"..filter.hostname.."%' "
+      clause34 = "and (c.name like '%"..filter.hostname.."%' or c.alias like '%"..filter.hostname.."%' or c.itv_key like '%"..filter.hostname.."%')"
+      clause5 = "and c.name like '%"..filter.hostname.."%' "
    end
    -- Filtro de tipo
    if filter.tipo ~= "" and filter.tipo ~= nil then 
@@ -127,12 +127,12 @@ function list(web, hostname, tipo, app, status)
          local a = ""
          if clause then a = " and " else clause = ""  end
          clause = clause..a.."o.name1 = '".. config.monitor.check_app.."' and o.objecttype_id = 2"  
-         clause5 = " and ax.is_entity_root = 0"
+         clause5 = clause5.." and ax.is_entity_root = 0"
       elseif filter.tipo == 'ent' then
          local a = ""
          if clause then a = " and " else clause = ""  end
          clause = clause..a.."o.name1 = '".. config.monitor.check_app.."' and o.objecttype_id = 2"  
-         clause5 = " and ax.is_entity_root = 1"
+         clause5 = clause5.." and ax.is_entity_root = 1"
       end
    end
    -- Filtro de app
@@ -156,7 +156,7 @@ function list(web, hostname, tipo, app, status)
    if clause then a = " and " else clause = "" end
    clause = clause..a.." p.entities_id in "..Auth.make_entity_clause(auth)
 
-   local ics = Monitor.select_monitors_app_objs(app, clause, clause5)
+   local ics = Monitor.select_monitors_app_objs(app, clause, clause34, clause5)
 
    return render_list(web, ics, filter)
 end

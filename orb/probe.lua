@@ -192,7 +192,9 @@ function list(web, msg)
 
    local clause = nil
 
-   if web.input.hostname ~= "" and web.input.hostname ~= nil then clause = "c.name like '%"..web.input.hostname.."%' " end
+   if web.input.hostname ~= "" and web.input.hostname ~= nil then 
+      clause = "(c.name like '%"..web.input.hostname.."%' or c.alias like '%"..web.input.hostname.."%' or c.itv_key like '%"..web.input.hostname.."%')"
+   end
    if web.input.inventory ~= "" and web.input.inventory ~= nil then 
       local a = ""
       if clause then a = " and " else clause = "" end
@@ -578,7 +580,7 @@ function render_list(web, ics, chk, msg)
    local permission, auth = Auth.check_permission(web, "checkcmds")
    local row, res, link_add_host, link_add_serv, url = {}, {}, "", "", ""
    local header = { -- sem o nome do comando 'chk'. Só que agora o alias aparece como o 'Comando' na tabela
-      strings.alias.."/"..strings.name, "IP", strings.type, strings.command, "."
+      strings.alias.."/"..strings.name, "IP", "Nann", strings.type, strings.command, "."
    }
 
    for i, v in ipairs(ics) do
@@ -636,11 +638,29 @@ function render_list(web, ics, chk, msg)
          name = hst_name
       end
 
-      row[#row + 1] = { name, ip, itemtype, m_name, link_add_host } -- com nome do comando de checagem
+      local state, statename, status
+      if tonumber(v.ss_has_been_checked) == 1 then
+         if tonumber(v.m_state) == 0 then
+            state = tonumber(APPLIC_DISABLE)
+            output = ""
+         else
+            state = tonumber(v.ss_current_state)
+            output = v.ss_output
+         end
+         statename = applic_alert[state].name
+         status={ state=state, colnumber=3 }
+      else
+         state = -1
+         statename = "-"
+         status=nil
+      end
+
+      --row[#row + 1] = { status={ state=state, colnumber=3 }, name, ip, statename, itemtype, m_name, link_add_host } -- com nome do comando de checagem
+      row[#row + 1] = { status=status, name, ip, statename, itemtype, m_name, link_add_host } -- com nome do comando de checagem
 
       if ( m_name == config.monitor.check_host ) then -- se o nome do comando é o HOST_ALIVE, deve-se abrir a opcao para
                                                       -- a criacao de mais um servico
-         row[#row + 1] = { name, ip, "-", "-", link_add_serv } -- sem nome do comando de checagem
+         row[#row + 1] = { name, ip, "-", "-", "-", link_add_serv } -- sem nome do comando de checagem
       end
    end
 
@@ -648,6 +668,7 @@ function render_list(web, ics, chk, msg)
    res[#res+1] = render_content_header(auth, "Checagem", nil, web:link("/list"))
    if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ font{ color="red", msg } } end
    local bar = {}
+   web.prefix = "/orb/probe"
    res[#res+1] = render_form_bar( render_filter(web), strings.search, web:link("/list"), web:link("/list") )
    res[#res+1] = render_table(row, header)
    res[#res+1] = render_bar( button_link("Forçar Pendências", web:link("/pend/"), "calendrier") )
