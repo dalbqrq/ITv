@@ -265,7 +265,6 @@ td { }
 .tab_glpi {
 	margin: 0 auto;
 }
-
 .tab_cadre{
 	margin: 0 auto;
 	-moz-border-radius: 4px;
@@ -287,6 +286,7 @@ td { }
 	width:950px;
 	/* background-color: #FFF4DF; */
 	background : url("../pics/fond-central.png") repeat-x top right ;
+	background-color: #ffffff;
 }
 
 
@@ -313,6 +313,34 @@ td { }
 }
 
 
+/* daniel@itvision.com.br */
+
+.tab_resume {
+	width: 900px;
+	margin: 10 auto;
+	border-spacing: 5px;
+
+/*
+	border: 2px solid #cccccc;
+*/
+}
+
+
+
+.tab_cadre_grid, .tab_cadre_gridhov{
+	margin: 0 auto;
+	-moz-border-radius: 0px;
+	border: 0px solid #FFFFFF;
+	z-index:1;
+	text-align: left;
+	vertical-align: top;
+	font-size: 11px;
+	width: 100%;
+	background-color: #ffffff;
+}
+
+/* até aqui - aniel@itvision.com.br */
+
 
 .tab_cadrehov, .tab_cadrehov_pointer{
 	margin: 0 auto;
@@ -334,22 +362,24 @@ td { }
 	font-size: 11px;
 	text-align: center;
 	width:90%;
+	background-color: #ffffff;
 }
 
-.tab_cadre th, .tab_cadre_fixe th, .tab_cadre_fixehov th, .tab_cadrehov th, .tab_cadrehov_pointer th , .tab_cadre_report th  {
+.tab_cadre th, .tab_cadre_fixe th, .tab_cadre_fixehov th, .tab_cadre_grid th, .tab_cadre_gridhov th, .tab_cadrehov th, .tab_cadrehov_pointer th , .tab_cadre_report th  {
 	font-size: 11px;
 	font-weight: bold;
 	background-color: #fccc6f;
 	text-align: center;
 	background:  url("../pics/fond_th.png") repeat-x; 
 	border-bottom:1px solid #cccccc;
+	background-color: #ffffff;
 }
 
-.tab_cadre td, .tab_cadre_fixe td, .tab_cadre_fixehov td, .tab_cadrehov td, .tab_cadrehov_pointer td , .tab_cadre_report td  {
-	padding-left: 5px;
+.tab_cadre td, .tab_cadre_fixe td, .tab_cadre_fixehov td, .tab_cadre_grid td, .tab_cadre_gridhov td, .tab_cadrehov td, .tab_cadrehov_pointer td , .tab_cadre_report td  {
+	padding-left: 2px;
 }
 
-.tab_cadrehov tr:hover, .tab_cadre_fixehov tr:hover {
+.tab_cadrehov tr:hover, .tab_cadre_fixehov tr:hover, .tab_cadre_gridhov tr:hover {
 
 	background-color: #FFF4DF;
 }

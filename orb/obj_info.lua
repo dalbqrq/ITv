@@ -11,6 +11,7 @@ require "state"
 module(Model.name, package.seeall,orbit.new)
 
 local apps = Model.itvision:model "apps"
+local objects = Model.nagios:model "objects"
 
 
 -- models ------------------------------------------------------------
@@ -23,6 +24,12 @@ function apps:select(id, obj_id)
    return Model.query("itvision_apps", clause)
 end
 
+
+function objects:select_host(name1)
+   local clause = ""
+   if name1 then clause = " name1 = '"..name1.."' and name2 = '"..config.monitor.check_host.."'" end
+   return Model.query("nagios_objects", clause)
+end
 
 -- controllers ------------------------------------------------------------
 
@@ -65,12 +72,13 @@ ITvision:dispatch_get(show_hst, "/hst/(%d+)")
 function show_svc(web, obj_id)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
-   active_tab = active_tab or 1
+   active_tab = active_tab or 2
 
    local A = Monitor.make_query_4(nil, nil, nil, "m.service_object_id = "..obj_id)
+   local H = objects:select_host(A[1].o_name1)
 
    local t = { 
-      { title="Host", html="", href="/orb/hst_info/1:"..obj_id },
+      { title="Host", html="", href="/orb/hst_info/1:"..H[1].object_id },
       { title="Serviço", html="", href="/orb/svc_info/1:"..obj_id },
       { title="Histórico", html="", href="/orb/svc_info/2:"..obj_id },
       { title="Raw Data", html="", href="/orb/svc_info/3:"..obj_id },

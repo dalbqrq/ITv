@@ -86,6 +86,8 @@ strgs.pt_BR = {
 	unknown = "Desconhecido",
 	pending = "Pendente",
 	disable = "Desabilitado",
+	computer = "Computador",
+	networkequipment = "Equipamento de rede",
 
 }
 
@@ -172,6 +174,8 @@ strgs.us = {
 	unknown = "Unknown",
 	pending = "Pending",
 	disable = "Disable",
+	computer = "Computer",
+	networkequipment = "Network Equipment",
 }
 
 

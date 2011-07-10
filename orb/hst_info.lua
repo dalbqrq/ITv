@@ -137,8 +137,6 @@ function render_info(web, obj_id, A)
    local lnkedt = web:link("/geotag/hst:"..obj_id)
    web.prefix="/hst_info"
 
-
-
    tab = {}
    tab[#tab+1] = { b{"Hostname: "}, h.c_name }
    tab[#tab+1] = { b{"Alias: "}, h.c_alias }
@@ -150,21 +148,22 @@ function render_info(web, obj_id, A)
    local types = {}
    if h.p_itemtype == "Computer" then
       types = computertypes:select(h.c_computertypes_id)
+      class = strings.computer
    else
       types = networkequipmenttypes:select(h.c_computertypes_id)
+      class = strings.networkequipment
    end
+   tab[#tab+1] = { b{"Classe: "}, class }
    tab[#tab+1] = { b{"Tipo: "}, types.name }
    local ent = entities:select(h.c_entities_id)
    tab[#tab+1] = { b{"Entidade: "}, ent.name }
    local resp = users:select(h.c_users_id_tech)
    tab[#tab+1] = { b{"Técnico responsável: "}, resp.name }
-   tab[#tab+1] = { ".", " " }
-   tab[#tab+1] = { ".", " " }
-   tab[#tab+1] = { ".", " " }
-   tab[#tab+1] = { ".", " " }
-   tab[#tab+1] = { ".", " " }
-   tab[#tab+1] = { ".", " " }
-   tab[#tab+1] = { ".", " " }
+   tab[#tab+1] = { "-", " " }
+   tab[#tab+1] = { "-", " " }
+   tab[#tab+1] = { "-", " " }
+   tab[#tab+1] = { "-", " " }
+   tab[#tab+1] = { "-", " " }
    lft[#lft+1] = render_table( tab, nil, "tab_cadre_grid" )
 
 
@@ -177,10 +176,10 @@ function render_info(web, obj_id, A)
    tab[#tab+1] = { b{"Ultima checagem: "}, h.ss_last_check }
    tab[#tab+1] = { b{"Próxima checagem: "}, h.ss_next_check }
    tab[#tab+1] = { b{"Última mudança de estado: "}, h.ss_last_state_change }
-   tab[#tab+1] = { b{"Última mudança de estado tipo Hard: "}, h.ss_last_hard_state_change }
+   tab[#tab+1] = { b{"Última mudança de estado tipo 'HARD': "}, h.ss_last_hard_state_change }
    if h.ss_is_flapping == 1 then state = 2 else state = h.ss_is_flapping end
    tab[#tab+1] = { status={ state=state, colnumber=2, nolightcolor=true}, b{"Está flapping: "}, name_yes_no(h.ss_is_flapping) }
-   tab[#tab+1] = { b{"Último status tipo Hard: "}, name_ok_warning_critical_unknown(h.ss_last_hard_state) }
+   tab[#tab+1] = { b{"Último status tipo 'HARD': "}, name_ok_warning_critical_unknown(h.ss_last_hard_state) }
    tab[#tab+1] = { b{"Tempo entre checagens: "}, h.ss_normal_check_interval.."min" }
    tab[#tab+1] = { b{"Tempo entre checagens após falha: "}, h.ss_retry_check_interval.."min" }
    tab[#tab+1] = { b{"Output completo: "}, h.ss_long_output }
@@ -202,10 +201,16 @@ function render_history(web, obj_id, A, H)
    local res = {}
    local row = {}
 
-   res[#res+1] = { "HISTORY" }
-   for i,v in ipairs(H) do
-      row[#row+1] = { v.state_time, v.state_time_usec, v.state_change, v.state, v.state_type, v.last_state, v.last_hard_state }
+   if H then
+      for i,v in ipairs(H) do
+         row[#row+1] = { v.state_time, v.state_time_usec, v.state_change, v.state, v.state_type, v.last_state, v.last_hard_state }
+      end
+   else
+      res[#res+1] = { "HISTORY : "..obj_id }
    end
+
+   res[#res+1] = render_table( row )
+   res[#res+1] = { br(), br(), br(), br() }
 
    return render_layout(res)
 end
