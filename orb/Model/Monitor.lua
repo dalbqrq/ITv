@@ -796,6 +796,34 @@ end
 ----------------------------------------------------------------------
 --  END of the QUERIES
 ----------------------------------------------------------------------
+--[[
+        +-------------+    +-------------------------+    +-----------------+      +----------+
+        | COMPUTER ou |----|COMPUTER_SOFTWAREVERSION |----| SOFTWAREVERSION |------| SOFTWARE |
+        | NET_EQUIPM. |    +-------------------------+    +-----------------+      +----------+
+        +-------------+                                         |
+              |                                                 |
+        +-------------+                                    +-----------+
+        | NETWORKPORT |------------------------------------| MONITOR   |
+        +-------------+                                    +-----------+
+                                                                |
+                                                           +---------------+
+        +-------------+         +-------------+            | OBJECTS  .or. |
+        | apps        |---------| app_objects |------------| SERVICES .or. |
+        +-------------+         +-------------+            | SERVICESTATUS |
+                                                           +---------------+
+        QUERY 1 - computador/networkequip com porta sem software e sem monitor
+        QUERY 2 - computador              com porta com software e sem monitor
+        QUERY 3 - computador/networkequip com porta sem software e com monitor - monitoracao de host onde o service eh ping
+        QUERY 4 - computador/networkequip com porta sem software e com monitor - monitoracao de service 
+	QUERY 5 - aplicacao com monitor - monitoracao de service 
+	QUERY 6 - computador com porta sem software e com monitor pendente
+	QUERY 7 - computador/networkequip com porta sem software e com monitor pendente
+        QUERY 8 - computador com porta sem software e com monitor e service state pendente
+        QUERY 9 - computador com porta com software e com monitor e service state pendente
+        QUERY 10 - aplicacao com monitor para grafico de arvore 
+        
+]]
+
 
 -- A FUNCAO ABAIXO JUNTA O RESULTADO DE TODAS AS QUERIES (1 à 6) EM UM UNICO RESULT SET
 
@@ -806,7 +834,7 @@ function select_monitors(clause)
    local q3 = make_query_3(nil, nil, nil, clause)
    local q4 = make_query_4(nil, nil, nil, clause)
    local q6 = make_query_6(nil, nil, clause)
-   local q7 = make_query_7(nil, nil, nil, clause)
+   local q7 = make_query_7(nil, nil, clause)
    local q8 = make_query_8(nil, nil, clause)
    local q9 = make_query_9(nil, nil, nil, clause)
 
@@ -818,6 +846,40 @@ function select_monitors(clause)
    for _,v in ipairs(q7) do table.insert(q, v) end
    for _,v in ipairs(q8) do table.insert(q, v) end
    for _,v in ipairs(q9) do table.insert(q, v) end
+
+   table.sort(q, function (a, b) 
+      a.c_alias   = a.c_alias   or ""
+      a.c_name    = a.c_name    or ""
+      a.c_itv_key = a.c_itv_key or ""
+      a.p_ip      = a.p_ip      or ""
+      a.m_name    = a.m_name    or ""
+      a.sw_name   = a.sw_name   or ""
+      a.sv_name   = a.sv_name   or ""
+      b.c_alias   = b.c_alias   or ""
+      b.c_name    = b.c_name    or ""
+      b.c_itv_key = b.c_itv_key or ""
+      b.p_ip      = b.p_ip      or ""
+      b.m_name    = b.m_name    or ""
+      b.sw_name   = b.sw_name   or ""
+      b.sv_name   = b.sv_name   or ""
+      return a.c_alias..a.c_name..a.c_itv_key..a.p_ip..a.m_name..a.m_name < 
+             b.c_alias..b.c_name..b.c_itv_key..b.p_ip..b.m_name..b.m_name end )
+
+   return q
+end
+
+
+function select_ics(clause)
+   local q = {}
+   local q3 = make_query_3(nil, nil, nil, clause)
+   local q4 = make_query_4(nil, nil, nil, clause)
+   local q6 = make_query_6(nil, nil, clause)
+   local q7 = make_query_7(nil, nil, clause)
+
+   for _,v in ipairs(q3) do table.insert(q, v) end
+   for _,v in ipairs(q4) do table.insert(q, v) end
+   for _,v in ipairs(q6) do table.insert(q, v) end
+   for _,v in ipairs(q7) do table.insert(q, v) end
 
    table.sort(q, function (a, b) 
       a.c_alias   = a.c_alias   or ""

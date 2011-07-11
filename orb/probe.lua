@@ -335,8 +335,14 @@ ITvision:dispatch_post(update,"/update/(%d+):(%d+):(%d+):(%d+)","/update/(%d+):(
 ------------------------------------------------------------------------------------------------------------------------------
 function remove(web, service_object_id)
 
-   local monitor = monitors:select_monitor_from_service(service_object_id) 
-   return render_remove(web, service_object_id, monitor)
+   --local monitor = monitors:select_monitor_from_service(service_object_id) 
+   local M = Monitor.select_ics("m.service_object_id = "..service_object_id)
+   --local S = Monitor.select_ics("m.name1 = '"..M[1].m_name1.."' and m.name2 <> '"..config.monitor.check_host.."'")
+   local S = Monitor.select_ics("m.name1 = '"..M[1].m_name1.."'")
+   local APPS = Monitor.make_query_5(nil,
+                      "ax.id in (select app_id from itvision_app_objects where service_object_id = "..service_object_id..")", true)
+
+   return render_remove(web, M, S, APPS)
 
 end
 ITvision:dispatch_get(remove, "/remove/(%d+)")
@@ -670,13 +676,21 @@ function render_list(web, ics, chk, msg)
          end
          link_add_host = a{ href= web:link("/update/"..v[1]..":"..c_id..":"..v.p_id..":0:"..v.m_service_object_id..":0:0"), strings.edit }
          link_del_host = a{ href= web:link("/remove/"..v.m_service_object_id), strings.remove }
+         link_add_host = link_add_host.." | "..link_del_host
+         link_del_host = nil
          link_add_serv = a{ href= web:link("/add/"..v[1]..":"..c_id..":"..v.p_id..":0"), strings.add.." "..strings.service }
       end
 
       web.prefix = "/orb/obj_info"
       if v.m_service_object_id == nil then
          name = hst_name
-         url = nil
+         --url = nil
+         web.prefix = "/servdesk"
+         if itemtype == "Computer" then
+            url = web:link("/front/computer.form.php?id="..c_id)
+         elseif itemtype == "NetworkEquipment" then
+            url = web:link("/front/networkequipment.form.php?id="..c_id)
+         end
       elseif m_name == config.monitor.check_host or m_name ==  "-" then
          url = web:link("/hst/"..v.m_service_object_id)
       else 
@@ -710,7 +724,7 @@ function render_list(web, ics, chk, msg)
       end
 
       -- com nome do comando de checagem
-      row[#row + 1] = { status=status, name, ip, statename, itemtype, m_name, link_add_host.." | "..link_del_host } 
+      row[#row + 1] = { status=status, name, ip, statename, itemtype, m_name, link_add_host } 
 
       -- se o nome do comando é o HOST_ALIVE, deve-se abrir a opcao para a criacao de mais um servico
       if ( m_name == config.monitor.check_host ) then 
@@ -920,18 +934,52 @@ function render_add(web, ics, chk, params, chk_params, monitor_name)
 end
 
 
-function render_remove(web, service_object_id, monitor)
-   local res = {}
-   local url = ""
+function render_remove(web, M, S, APPS)
+   M = M[1]
+   local res, row, url, tp = {}, {}, "" , ""
    --local permission, auth = Auth.check_permission(web, "probe", true)
 
+   if M.m_name2 == config.monitor.check_host then
+      tp = "DISPOSITIVO"
+      name = find_hostname(M.c_alias, M.c_name, M.c_itv_key)
+   else 
+      tp = "SERVIÇO"
+      name = find_hostname(M.c_alias, M.c_name, M.c_itv_key).."@"..M.m_name
+   end
+   res[#res+1] = { b{ "REMOÇÃO DO "..tp..": "..name } , br(), br() } 
+
+   -- APLICACOES
+   header = { "NOME", "STATUS ATUAL", "Última checagem", "Próxima checagem", "Última mudança de estado"  }
+   res[#res+1] = { b{ "APLICAÇÕES QUE POSSUEM ESTE "..tp }}
+   for i, v in ipairs(APPS) do
+      row[#row+1] = { v.ax_name, {value=name_ok_warning_critical_unknown(v.ss_current_state), state=v.ss_current_state},
+                      string.extract_datetime(v.ss_last_check),
+                      string.extract_datetime(v.ss_next_check), string.extract_datetime(v.ss_last_state_change), }
+   end
+   res[#res+1] = render_table( row, header )
+   res[#res+1] = { br(), br(), br() }
+
+   -- SERVIÇOS
+   row = {}
+   header = { "NOME", "STATUS ATUAL", "Última checagem", "Próxima checagem", "Última mudança de estado"  }
+   res[#res+1] = { b{ "SERVIÇOS QUE POSSUEM ESTE "..tp }}
+   if M.m_name2 == config.monitor.check_host then
+      row[#row+1] = { v.m_name, {value=name_ok_warning_critical_unknown(v.ss_current_state), state=v.ss_current_state},
+                      string.extract_datetime(v.ss_last_check),
+                      string.extract_datetime(v.ss_next_check), string.extract_datetime(v.ss_last_state_change), }
+   end
+   res[#res+1] = render_table( row, header )
+   res[#res+1] = { br(), br(), br() }
+
+
+   -- FORM de pergunta
    if service_object_id then
       web.prefix = "/orb/probe"
-      url_ok = web:link("/delete/"..service_object_id)
+      url_ok = web:link("/delete/"..M.m_service_object_id)
       url_cancel = web:link("/list")
 
       res[#res+1] = p{
-         strings.exclude_quest.." "..strings.checkcommand.." "..monitor[1].name2.."?",
+         b{ strings.exclude_quest.." "..strings.checkcommand.." "..M.m_name1.."?" }, 
          p{ button_link(strings.yes, url_ok) },
          p{ button_link(strings.cancel, url_cancel) },
       }

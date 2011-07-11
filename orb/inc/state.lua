@@ -10,11 +10,11 @@ color = {
 	purple = "#9900CC",	-- unused
 
         lightblue = "#AFEEEE",
-	--lightgreen = "#90EE90",
 	lightgreen = nil,
 	lightyellow = "#F5F5DC",
-	lightorange = "#FFD700",
+	lightorange = "#FFA500",
 	lightred = "#FA8072",
+	lightred = "#FFE4E1",
 	lightgray = "#D3D3D3",
 	lightpurple = "#BA55D3",
 }

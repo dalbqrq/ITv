@@ -61,7 +61,7 @@ function show_hst(web, obj_id, active_tab)
    }
 
    local res = {}
-   res[#res+1] = render_content_header(auth.session.glpiactive_entity_shortname, A[1].c_name, nil, nil)
+   res[#res+1] = render_content_header(auth.session.glpiactive_entity_shortname, "DISPOSITIVO: "..A[1].c_name, nil, nil)
    res[#res+1] = render_tabs(t, active_tab)
 
    return render_layout(res)
@@ -87,7 +87,7 @@ function show_svc(web, obj_id)
    }
 
    local res = {}
-   res[#res+1] = render_content_header(auth.session.glpiactive_entity_shortname, A[1].c_name.."::"..A[1].m_name, nil, nil)
+   res[#res+1] = render_content_header(auth.session.glpiactive_entity_shortname, "SERVIÇO: "..A[1].c_name.."@"..A[1].m_name, nil, nil)
    res[#res+1] = render_tabs(t, active_tab)
 
    return render_layout(res)

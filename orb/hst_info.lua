@@ -216,7 +216,6 @@ function render_info(web, obj_id, A, APPS)
                       string.extract_datetime(v.ss_next_check), string.extract_datetime(v.ss_last_state_change), }
    end
 
-   --res[#res+1] = { "APPS: "..obj_id.." : "..#APPS }
    res[#res+1] = render_table( row, header )
    res[#res+1] = { br(), br(), br() }
 
