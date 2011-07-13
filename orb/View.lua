@@ -600,7 +600,7 @@ HostOrServiceOrApp = {
 }
 
 function name_hst_svc_app(id, is_entity)
-   if is_entity then id = "ent" end
+   if is_entity == 1 then id = "ent" end
    return choose_name(HostOrServiceOrApp, id, is_entity)
 end
 
