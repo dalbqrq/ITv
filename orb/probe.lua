@@ -255,7 +255,15 @@ function add(web, query, c_id, p_id, sv_id, new_cmd, do_test)
       ics = Monitor.make_query_4(c_id, p_id)
    end
 
-   local params = { query=query, c_id=c_id, p_id=p_id, sv_id=sv_id, origin="add", cmd=new_cmd, do_test=do_test, service_object_id=0 }
+   local params = { query=query, c_id=c_id, p_id=p_id, sv_id=sv_id, origin="add", cmd=new_cmd, 
+                    state=nil, do_test=do_test, no_header="0", service_object_id=0,
+                    msg=msg }
+--[[
+   local params = { query=query, c_id=c_id, p_id=p_id, sv_id==nil, origin="update", cmd=monitor[1].cmd_object_id, 
+                    state=monitor[1].state, do_test=do_test, no_header=no_header, service_object_id=service_object_id,
+                    msg=msg }
+]]
+
 
    if chk_id then
       _, chk_params = Checkcmds.get_checkcmd_default_params(chk_id, false, false)
@@ -639,7 +647,7 @@ function render_list(web, ics, chk, msg)
    local row, res, link_add_host, link_del_host, link_add_serv, url = {}, {}, "", "", nil
 
    local header = { -- sem o nome do comando 'chk'. Só que agora o alias aparece como o 'Comando' na tabela
-      strings.alias.."/"..strings.name, "IP", "Nann", strings.type, strings.command, "."
+      "Dispositivo", "IP", "Nann", strings.type, strings.command, "."
    }
 
    for i, v in ipairs(ics) do
@@ -848,9 +856,11 @@ function render_checkcmd(web, chk_id, hst_name, ip, url_test, url_insert, url_up
       if state == 1 then
          res[#res+1] = center{ render_form(web:link(url_test), nil, params, true, strings.test ) }
       end 
+res[#res+1] = { br(), chk.." "..args, br() }; 
 
       if do_test then
-         -- DEBUG: res[#res+1] = { br(), chk.." "..args, br() }; 
+         -- DEBUG: 
+res[#res+1] = { br(), chk.." "..args, br() }; 
          res[#res+1] = { br(), br(), os.capture(chk.." "..args, true) }
       end
       if origin == "add" then
@@ -893,7 +903,8 @@ function render_add(web, ics, chk, params, chk_params, monitor_name)
    -- ESTE RENDER SOh SERVE PARA SERVICES.
    --if params.cmd then chk_id = params.cmd else chk_id = chk[1].object_id end
    if params.cmd then chk_id = params.cmd else chk_id = 0 end
-   local header = { strings.alias.."/"..strings.name, "IP", "SW / Versão", strings.type, strings.command }
+   --local header = { "Dispositivo", "IP", "Nome da Checagem", strings.type, strings.command }
+   local header = { "Dispositivo", "IP", "Nome da Checagem", strings.command }
 
    if v then
       v.c_id = v.c_id or 0; v.n_id = v.n_id or 0; v.p_id = v.p_id or 0; v.sv_id = v.sv_id or 0;
@@ -910,7 +921,7 @@ function render_add(web, ics, chk, params, chk_params, monitor_name)
       if params.sv_id then url_test = url_test..":"..params.sv_id else url_test = url_test..":0" end
 
       cmd = { select_option_onchange("check", chk, "object_id", "label", chk_id, web:link(url_test)), " " }
-      row[#row + 1] = { hst_name, v.p_ip, serv, itemtype, cmd, }
+      row[#row + 1] = { hst_name, v.p_ip, "", cmd, }
       
       if params.origin == "update" then
          url_test = url_test..":"..params.service_object_id..":1:"..params.no_header

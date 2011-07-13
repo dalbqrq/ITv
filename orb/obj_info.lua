@@ -57,7 +57,7 @@ function show_hst(web, obj_id, active_tab)
       { title="Histórico", html="", href="/orb/hst_info/2:"..obj_id },
       -- Sera? { title="CMDB", html="", href="/orb/hst_info/3:"..obj_id },
       -- Sera? { title="CMDB2", html="", href=url },
-      --{ title="Raw Data", html="", href="/orb/hst_info/4:"..obj_id },
+      { title="Raw Data", html="", href="/orb/hst_info/4:"..obj_id },
    }
 
    local res = {}
@@ -83,7 +83,7 @@ function show_svc(web, obj_id)
       { title="Serviço", html="", href="/orb/svc_info/1:"..obj_id },
       { title="Checagem", html="", href="/orb/svc_info/4:"..obj_id },
       { title="Histórico", html="", href="/orb/svc_info/2:"..obj_id },
-      --{ title="Raw Data", html="", href="/orb/svc_info/3:"..obj_id },
+      { title="Raw Data", html="", href="/orb/svc_info/3:"..obj_id },
    }
 
    local res = {}
