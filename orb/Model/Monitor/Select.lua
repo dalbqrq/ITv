@@ -434,6 +434,11 @@ function make_query_5(a_id, clause)
    local cond_    = make_where(t)
 
    if clause then clause = string.gsub(clause, "p.entities_id", "ax.entities_id") end
+   if a_id then
+      if clause then clause = string.gsub(clause, "c.name", "a.name") end
+   else 
+      if clause then clause = string.gsub(clause, "c.name", "ax.name") end
+   end
 
    cond_ = cond_ .. [[ 
       and o.name1 = ']]..config.monitor.check_app..[[' 
@@ -756,6 +761,7 @@ function select_monitors_app_objs(app_id, clause)
    local q = {}
    local q3 = make_query_3(nil, nil, app_id, clause)
    local q4 = make_query_4(nil, nil, nil, app_id, clause)
+   --local q5 = make_query_5(app_id, nil) -- o parametro clause foi retirado pois conflitava com os campos das queries acima.
    local q5 = make_query_5(app_id, clause)
 
    for _,v in ipairs(q3) do table.insert(q, v) end
@@ -763,6 +769,7 @@ function select_monitors_app_objs(app_id, clause)
    for _,v in ipairs(q5) do table.insert(q, v) end
 
    table.sort(q, function (a, b) 
+      a.c_alias = a.c_alias  or ""
       a.c_name  = a.c_name  or ""
       a.p_ip    = a.p_ip    or ""
       a.sw_name = a.sw_name or ""

@@ -76,10 +76,13 @@ function render_menu_frame(inner_html)
 
    local imgs = make_logo(config.database.instance_name)
    local logo = {}
+   local header_imgs = {}
 
    for _,v in ipairs(imgs) do
       logo[#logo+1] = img{ src=v.src, width=v.width, height=v.height }
    end
+
+   if #inner_html > 0 then header_imgs = { img{ src="/pics/logo_itv.png" }, logo } end
 
    return html{
       head{
@@ -95,11 +98,7 @@ function render_menu_frame(inner_html)
       },
 
       body{
-         div{ id="header", 
-            img{ src="/pics/logo_itv.png" },
-            logo,
-            inner_html
-         }
+         div{ id="header", header_imgs, inner_html }
       }
    }
 end
@@ -629,7 +628,7 @@ HostOrServiceOrApp = {
 }
 
 function name_hst_svc_app(id, is_entity)
-   if is_entity then id = "ent" end
+   if is_entity == 1 then id = "ent" end
    return choose_name(HostOrServiceOrApp, id, is_entity)
 end
 

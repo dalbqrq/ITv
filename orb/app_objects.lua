@@ -83,7 +83,7 @@ function add(web, app_id, msg)
    local exclude = [[ o.object_id not in ( select service_object_id from itvision_app_objects where app_id = ]]..app_id..[[) 
                       and o.is_active = 1 ]]
          clause  = [[ and p.entities_id in ]]..entity_auth
-   local extra   = [[ order by o.name1, o.name2 ]]
+   local extra   = [[ order by c.alias, c.name ]]
    local HST = Monitor.make_query_3(nil, nil, nil, exclude .. clause .. extra)
       clause = clause..[[ and o.name2 <> ']]..config.monitor.check_host..[[' ]]
    local SVC = Monitor.make_query_4(nil, nil, nil, nil, exclude .. clause .. extra)
@@ -119,7 +119,7 @@ function insert_obj(web)
 
    if web.input.type == 'app' then 
       update_apps(web)
-      os.sleep(1)
+      --os.sleep(1)
    end
 
    web.prefix = "/orb/app_tabs"
@@ -283,7 +283,7 @@ function render_add(web, HST, SVC, APP, APPOBJ, app_id, msg)
                     input{ type="hidden", name="type", value="app" } }, true, strings.add ) }
 
 
-      header = { strings.host, strings.service, strings.application }
+      header = { strings.alias.."/"..strings.name, strings.service, strings.application }
       res[#res+1] = render_table({ {hst, svc, app} }, header)
 
       res[#res+1] = { br(), br(), br(), br() }

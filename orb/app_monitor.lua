@@ -59,7 +59,7 @@ function list(web, msg)
 
    local clause = nil
 
-   if web.input.hostname ~= "" and web.input.hostname ~= nil then clause = "c.name like '%"..web.input.hostname.."%' " end
+   if web.input.hostname ~= "" and web.input.hostname ~= nil then clause = " c.name like '%"..web.input.hostname.."%' " end
    if web.input.inventory ~= "" and web.input.inventory ~= nil then 
       local a = ""
       if clause then a = " and " else clause = "" end
