@@ -1,7 +1,7 @@
 
 
 INSERT INTO itvision_apps 
-SET    instance_id = 1, entities_id = 0, is_entity_root = 1, name = 'ROOT';
+SET    instance_id = 1, entities_id = 0, is_entity_root = 1, name = 'ROOT', app_type_id = 1;
 
 INSERT INTO itvision_app_trees 
 SET    instance_id = 1, app_id = (select id from itvision_apps where name = 'ROOT' and is_active = 0), lft = 1, rgt = 2;

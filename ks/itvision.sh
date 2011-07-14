@@ -368,14 +368,23 @@ ndofs_basedir=/usr/local/ndo2fs/var
 ndofs_instance_name=default
 ndo_livestatus_socket=/usr/local/nagios/var/rw/live
 EOF
-mkdir /usr/local/$bp/etc/sample
-sed -i.orig -e "s/generic-bp-service/BUSPROC_SERVICE/g" -e "s/generic-bp-detail-service/BUSPROC_SERVICE_DESABLED/g" -e "s/check_bp_status/BUSPROC_STATUS/g" /usr/local/nagiosbp/bin/bp_cfg2service_cfg.pl
-cat << EOF > $itvhome/bin/bp2cfg
-#!/bin/bash
-/usr/local/$bp/bin/bp_cfg2service_cfg.pl -o /etc/nagios3/apps/apps.cfg
+#mkdir /usr/local/$bp/etc/sample
+#sed -i.orig -e "s/generic-bp-service/BUSPROC_SERVICE/g" -e "s/generic-bp-detail-service/BUSPROC_SERVICE_DESABLED/g" -e "s/check_bp_status/BUSPROC_STATUS/g" /usr/local/nagiosbp/bin/bp_cfg2service_cfg.pl
+#cat << EOF > $itvhome/bin/bp2cfg
+##!/bin/bash
+#/usr/local/$bp/bin/bp_cfg2service_cfg.pl -o /etc/nagios3/apps/apps.cfg
+#EOF
+#chmod 755 $itvhome/bin/bp2cfg
+#chown $user.$user /usr/local/$bp/etc/ndo.cfg $itvhome/bin/bp2cfg
+cat << EOF > /etc/nagios3/apps/apps.cfg
+
+define service{
+	use			BUSPROC_SERVICE
+	service_description	1 
+	check_command		BUSPROC_STATUS!1  
+	}  
+
 EOF
-chmod 755 $itvhome/bin/bp2cfg
-chown $user.$user /usr/local/$bp/etc/ndo.cfg $itvhome/bin/bp2cfg
 
 sed -i.orig -e "139a \\
   <tr> \\

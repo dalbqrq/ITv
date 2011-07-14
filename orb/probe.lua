@@ -118,7 +118,7 @@ function monitors:select_monitor_from_service(service_object_id)
 end
 
 
-function monitors:insert_monitor(networkport, softwareversion, service_object, cmd_object, name, name1, name2, state, type_)
+function monitors:insert_monitor(networkport, softwareversion, service_object, cmd_object, name, name1, name2, monitor_state, type_)
    if tonumber(networkport)      == 0 then networkport      = nil end         
    if tonumber(softwareversion)  == 0 then softwareversion  = nil end         
 
@@ -132,7 +132,7 @@ function monitors:insert_monitor(networkport, softwareversion, service_object, c
       name  = name,
       name1 = name1,
       name2 = name2,
-      state = state,
+      state = monitor_state,
       type  = type_,
    }
    return Model.insert("itvision_monitors", mon)
@@ -148,10 +148,10 @@ function monitors:update_monitor(service_object_id, monitor_name)
 end
 
 
-function monitors:enable_monitor(service_object_id, state)
+function monitors:enable_monitor(service_object_id, monitor_state)
 
    local mon = { 
-      state  = state,
+      state  = monitor_state,
    }
    return Model.update("itvision_monitors", mon, "service_object_id = "..service_object_id)
 end
@@ -263,7 +263,7 @@ function add(web, query, c_id, p_id, sv_id, do_test, new_cmd)
    end
 
    local params = { query=query, c_id=c_id, p_id=p_id, sv_id=sv_id, origin="add", cmd=new_cmd, 
-                    state=nil, do_test=do_test, no_header="0", service_object_id=0,
+                    monitor_state=1, do_test=do_test, no_header="0", service_object_id=0,
                     msg=msg }
 
    if chk_id then
@@ -282,7 +282,7 @@ ITvision:dispatch_post(add, "/add/(%d+):(%d+):(%d+):(%d+)","/add/(%d+):(%d+):(%d
 
 
 -- do_test e no_header devem receber 0 ou 1 para false ou true
-function update(web, query, c_id, p_id, sv_id, service_object_id, do_test, no_header, msg)
+function update(web, query, c_id, p_id, sv_id, do_test, service_object_id, no_header, msg)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
    local ics = {}
@@ -325,19 +325,13 @@ function update(web, query, c_id, p_id, sv_id, service_object_id, do_test, no_he
 
 
    local params = { query=query, c_id=c_id, p_id=p_id, sv_id==nil, origin="update", cmd=monitor[1].cmd_object_id, 
-                    state=monitor[1].state, do_test=do_test, no_header=no_header, service_object_id=service_object_id,
+                    monitor_state=monitor[1].state, do_test=do_test, no_header=no_header, service_object_id=service_object_id,
                     msg=msg }
 
    return render_add(web, ics, chk, params, chk_params, monitor[1].name)
 end
-ITvision:dispatch_get(update,"/update/(%d+):(%d+):(%d+):(%d+)","/update/(%d+):(%d+):(%d+):(%d+):(%d+)",
-      "/update/(%d+):(%d+):(%d+):(%d+):(%d+):(%d)",
-      "/update/(%d+):(%d+):(%d+):(%d+):(%d+):(%d):(%d)",
-      "/update/(%d+):(%d+):(%d+):(%d+):(%d+):(%d):(%d):(.+)")
-ITvision:dispatch_post(update,"/update/(%d+):(%d+):(%d+):(%d+)","/update/(%d+):(%d+):(%d+):(%d+):(%d+)",
-      "/update/(%d+):(%d+):(%d+):(%d+):(%d+):(%d)",
-      "/update/(%d+):(%d+):(%d+):(%d+):(%d+):(%d):(%d)",
-      "/update/(%d+):(%d+):(%d+):(%d+):(%d+):(%d):(%d):(.+)")
+ITvision:dispatch_get(update, "/update/(%d+):(%d+):(%d+):(%d+):(%d+):(%d+)", "/update/(%d+):(%d+):(%d+):(%d+):(%d+):(%d+):(%d+)", "/update/(%d+):(%d+):(%d+):(%d+):(%d+):(%d+):(%d+):(.+)")
+ITvision:dispatch_post(update, "/update/(%d+):(%d+):(%d+):(%d+):(%d+):(%d+)", "/update/(%d+):(%d+):(%d+):(%d+):(%d+):(%d+):(%d+)", "/update/(%d+):(%d+):(%d+):(%d+):(%d+):(%d+):(%d+):(.+)")
 
 
 ------------------------------------------------------------------------------------------------------------------------------
@@ -365,20 +359,20 @@ ITvision:dispatch_post(remove, "/remove/(%d+)")
 function delete(web, service_object_id)
    local msg = ""
    local monitor = monitors:select_monitor_from_service(service_object_id) 
-   local host_name = monitor[1].name1
+   local hostname = monitor[1].name1
    local service_desc = monitor[1].name2
 
-   monitors:delete(service_object_id)
-   app_objects:delete(service_object_id)
    remove_hst_cfg_file (hostname)
    remove_svc_cfg_file (hostname, service_desc)
+   app_objects:delete(service_object_id)
+   monitors:delete(service_object_id)
 
-   msg = "Check de SERVIÇO: "..monitor_name.." removido."
+   msg = "Check de SERVIÇO: "..monitor[1].name.." removido."
 
    os.reset_monitor()
    if web then
       --os.sleep(1)
-      return web:redirect(web:link("/list"))
+      return web:redirect(web:link("/list/"..msg))
    else
       return msg --para criacao de probes em massa
    end
@@ -542,7 +536,7 @@ function update_service(web, service_object_id, c_id, p_id, query, no_header)
 
    if web then
       --os.sleep(1)
-      return web:redirect(web:link("/update/"..query..":"..c_id..":"..p_id..":0:"..service_object_id..":0:"..no_header..":"..msg))
+      return web:redirect(web:link("/update/"..query..":"..c_id..":"..p_id..":0:0:"..service_object_id..":"..no_header..":"..msg))
    else
       return msg --para criacao de probes em massa
    end
@@ -592,7 +586,7 @@ function desable_service(web, service_object_id, c_id, p_id, query, no_header, f
 
    if web then
       --os.sleep(1)
-      return web:redirect(web:link("/update/"..query..":"..c_id..":"..p_id..":0:"..service_object_id..":0:"..no_header..":"..msg))
+      return web:redirect(web:link("/update/"..query..":"..c_id..":"..p_id..":0:0:"..service_object_id..":"..no_header..":"..msg))
    else
       return msg --para criacao de probes em massa
    end
@@ -680,7 +674,7 @@ function render_list(web, ics, chk, msg)
                                        -- Deve estar relacionado a demora do ndo2db
                                        -- Por isso estou tirando esta entrada da tabela na tela de checagem!
          end
-         link_add_host = a{ href= web:link("/update/"..v[1]..":"..c_id..":"..v.p_id..":0:"..v.m_service_object_id..":0:0"), strings.edit }
+         link_add_host = a{ href= web:link("/update/"..v[1]..":"..c_id..":"..v.p_id..":0:0:"..v.m_service_object_id..":0"), strings.edit }
          link_del_host = a{ href= web:link("/remove/"..v.m_service_object_id), strings.remove }
          link_add_host = link_add_host.." | "..link_del_host
          link_del_host = nil
@@ -765,7 +759,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------
-function render_checkcmd(web, chk_id, hst_name, ip, url_test, url_insert, url_update, url_desable, url_remove, chk_params, monitor_name, do_test, origin, state)
+function render_checkcmd(web, chk_id, hst_name, ip, url_test, url_insert, url_update, url_desable, url_remove, chk_params, monitor_name, do_test, origin, monitor_state)
    local permission = Auth.check_permission(web, "checkcmds")
    local row, row_hidden, cmd = {}, {}, ""
    local readonly, text = "", ""
@@ -774,14 +768,14 @@ function render_checkcmd(web, chk_id, hst_name, ip, url_test, url_insert, url_up
    local path = "/usr/lib/nagios/plugins"
    local count = 0
    local disabled = ""
-   state = tonumber(state)
+   monitor_state = tonumber(monitor_state)
 
    if chk_id == 0 then
       res[#res+1] = { br(), "Selecione um comando de checagem!", br() }
       return res
    end
 
-   text_file_writer("/tmp/cm", #chk_params.." "..chk_id.."\n")
+   text_file_writer("/tmp/cm", " "..chk_id.."\n")
    local c, p = Checkcmds.get_checkcmd_default_params(chk_id, nil, false)
    local chk = path.."/"..c[1].command
    monitor_name = monitor_name or c[1].label
@@ -803,28 +797,28 @@ function render_checkcmd(web, chk_id, hst_name, ip, url_test, url_insert, url_up
       if string.sub(v.variable,1,4) == "$ARG" then
          count = count + 1
          if chk_params and chk_params[i].flag then
-         row_hidden[#row_hidden + 1] = { 
-            { "<INPUT TYPE=HIDDEN NAME=\"flag"..count.."\" value=\""..chk_params[i].flag.."\">" ,
-              "<INPUT TYPE=HIDDEN NAME=\"opt"..count.."\" value=\""..chk_params[i].default_value.."\" "..readonly..">",
-              "<INPUT TYPE=HIDDEN NAME=\"seq\" value=\""..v.sequence.."\">" } }
+            row_hidden[#row_hidden + 1] = { 
+               { "<INPUT TYPE=HIDDEN NAME=\"flag"..count.."\" value=\""..chk_params[i].flag.."\">" ,
+                 "<INPUT TYPE=HIDDEN NAME=\"opt"..count.."\" value=\""..chk_params[i].default_value.."\" "..readonly..">",
+                 "<INPUT TYPE=HIDDEN NAME=\"seq\" value=\""..v.sequence.."\">" } }
 
-         row[#row + 1] = { count,
-            { "<INPUT TYPE=HIDDEN NAME=\"flag"..i.."\" value=\""..chk_params[i].flag.."\">" ,
-              "<INPUT TYPE=TEXT NAME=\"opt"..i.."\" value=\""..chk_params[i].default_value.."\" "..readonly..">" }, v.description }
+            row[#row + 1] = { count,
+               { "<INPUT TYPE=HIDDEN NAME=\"flag"..i.."\" value=\""..chk_params[i].flag.."\">" ,
+                 "<INPUT TYPE=TEXT NAME=\"opt"..i.."\" value=\""..chk_params[i].default_value.."\" "..readonly..">" }, v.description }
 
-         args = args.." "..chk_params[i].flag.." "..chk_params[i].default_value
+            args = args.." "..chk_params[i].flag.." "..chk_params[i].default_value
 
          else
-         row_hidden[#row_hidden + 1] = { 
-            { "<INPUT TYPE=HIDDEN NAME=\"flag"..count.."\" value=\""..v.flag.."\">" ,
-              "<INPUT TYPE=HIDDEN NAME=\"opt"..count.."\" value=\""..value.."\" "..readonly..">",
-              "<INPUT TYPE=HIDDEN NAME=\"seq\" value=\""..v.sequence.."\">" } }
+            row_hidden[#row_hidden + 1] = { 
+               { "<INPUT TYPE=HIDDEN NAME=\"flag"..count.."\" value=\""..v.flag.."\">" ,
+                 "<INPUT TYPE=HIDDEN NAME=\"opt"..count.."\" value=\""..value.."\" "..readonly..">",
+                 "<INPUT TYPE=HIDDEN NAME=\"seq\" value=\""..v.sequence.."\">" } }
 
-         row[#row + 1] = { count,
-            { "<INPUT TYPE=HIDDEN NAME=\"flag"..i.."\" value=\""..v.flag.."\">" ,
-              "<INPUT TYPE=TEXT NAME=\"opt"..i.."\" value=\""..value.."\" "..readonly..">" }, v.description }
+            row[#row + 1] = { count,
+               { "<INPUT TYPE=HIDDEN NAME=\"flag"..i.."\" value=\""..v.flag.."\">" ,
+                 "<INPUT TYPE=TEXT NAME=\"opt"..i.."\" value=\""..value.."\" "..readonly..">" }, v.description }
 
-         args = args.." "..v.flag.." "..value
+            args = args.." "..v.flag.." "..value
 
          end
       else
@@ -852,13 +846,12 @@ function render_checkcmd(web, chk_id, hst_name, ip, url_test, url_insert, url_up
 
 
    if permission == "w" then
-      if state == 1 then
+      if monitor_state == 1 then
          res[#res+1] = center{ render_form(web:link(url_test), nil, params, true, strings.test ) }
       end 
 
       if do_test then
-         -- DEBUG: 
-res[#res+1] = { br(), chk.." "..args, br() }; 
+         -- DEBUG: res[#res+1] = { br(), chk.." "..args, br() }; 
          res[#res+1] = { br(), br(), os.capture(chk.." "..args, true) }
       end
       if origin == "add" then
@@ -868,7 +861,7 @@ res[#res+1] = { br(), chk.." "..args, br() };
          if do_test then
             res[#res+1] = center{ render_form(web:link(url_update), nil, params_hidden, true, "Atualizar checagem" ) }
          end
-         if state == 1 then 
+         if monitor_state == 1 then 
             b_name = "Desabilitar checagem"
             flag = ":0"
          else
@@ -918,13 +911,19 @@ function render_add(web, ics, chk, params, chk_params, monitor_name)
       if params.p_id  then url_test = url_test..":"..params.p_id  else url_test = url_test..":0" end
       if params.sv_id then url_test = url_test..":"..params.sv_id else url_test = url_test..":0" end
 
-      cmd = { select_option_onchange("check", chk, "object_id", "label", chk_id, web:link(url_test..":1")), " " }
+      if params.origin == "update" then
+         url_test = url_test..":1" -- nao testar - parametro do_test
+      else
+         url_test = url_test..":0" -- testar - parametro do_test
+      end
+
+      cmd = { select_option_onchange("check", chk, "object_id", "label", chk_id, web:link(url_test)), " " }
       row[#row + 1] = { hst_name, v.p_ip, "-", cmd, }
       
       if params.origin == "update" then
-         url_test = url_test..":"..params.service_object_id..":1:"..params.no_header
+         url_test = url_test..":"..params.service_object_id..":"..params.no_header
       else
-         url_test = url_test..":"..chk_id..":1:"..params.no_header
+         url_test = url_test..":"..chk_id
       end
    end
 
@@ -936,7 +935,7 @@ function render_add(web, ics, chk, params, chk_params, monitor_name)
       res[#res + 1] = p{ font{ color="red", params.msg }, br()  }
    end
    res[#res+1] = render_table(row, header)
-   res[#res+1] = render_checkcmd(web, chk_id, hst_name, v.p_ip, url_test, url_insert, url_update, url_desable, url_remove, chk_params, monitor_name, params.do_test, params.origin, params.state)
+   res[#res+1] = render_checkcmd(web, chk_id, hst_name, v.p_ip, url_test, url_insert, url_update, url_desable, url_remove, chk_params, monitor_name, params.do_test, params.origin, params.monitor_state)
 
 
    return render_layout(res)
@@ -962,27 +961,33 @@ function render_remove(web, M, S, APPS)
    res[#res+1] = { b{ "REMOÇÃO DO "..tp..": "..name } , br(), br() } 
 
    -- APLICACOES
-   header = { "NOME", "STATUS ATUAL", "Última checagem", "Próxima checagem", "Última mudança de estado"  }
-   res[#res+1] = { b{ "APLICAÇÕES QUE POSSUEM ESTE "..tp }}
-   for i, v in ipairs(APPS) do
-      row[#row+1] = { v.ax_name, {value=name_ok_warning_critical_unknown(v.ss_current_state), state=v.ss_current_state},
-                      string.extract_datetime(v.ss_last_check),
-                      string.extract_datetime(v.ss_next_check), string.extract_datetime(v.ss_last_state_change), }
+   if #APPS > 0 then
+      header = { "NOME", "STATUS ATUAL", "Última checagem", "Próxima checagem", "Última mudança de estado"  }
+      res[#res+1] = { b{ "APLICAÇÕES QUE POSSUEM ESTE "..tp.." E QUE SERÃO ALTERADAS" }}
+      for i, v in ipairs(APPS) do
+         row[#row+1] = { v.ax_name, {value=name_ok_warning_critical_unknown(v.ss_current_state), state=v.ss_current_state}, 
+                      string.extract_datetime(v.ss_last_check), string.extract_datetime(v.ss_next_check), string.extract_datetime(v.ss_last_state_change), }
+      end
+      res[#res+1] = render_table( row, header )
+      res[#res+1] = { br(), br(), br() }
    end
-   res[#res+1] = render_table( row, header )
-   res[#res+1] = { br(), br(), br() }
 
    -- SERVIÇOS
-   row = {}
-   header = { "NOME", "STATUS ATUAL", "Última checagem", "Próxima checagem", "Última mudança de estado"  }
-   res[#res+1] = { b{ "SERVIÇOS QUE POSSUEM ESTE "..tp }}
-   if M.m_name2 == config.monitor.check_host then
-      row[#row+1] = { v.m_name, {value=name_ok_warning_critical_unknown(v.ss_current_state), state=v.ss_current_state},
-                      string.extract_datetime(v.ss_last_check),
-                      string.extract_datetime(v.ss_next_check), string.extract_datetime(v.ss_last_state_change), }
+   if #S > 0 then
+      if tp == "DISPOSITIVO" then
+         row = {}
+         header = { "NOME", "STATUS ATUAL", "Última checagem", "Próxima checagem", "Última mudança de estado"  }
+         res[#res+1] = { b{ "SERVIÇOS ASSOCIADOS A ESTE "..tp.." E QUE TAMBÉM SERÃO REMOVIDOS" }}
+         if M.m_name2 == config.monitor.check_host and v.m_name then
+            for i, v in ipairs(S) do
+               row[#row+1] = { v.m_name, {value=name_ok_warning_critical_unknown(v.ss_current_state), state=v.ss_current_state}, 
+                            string.extract_datetime(v.ss_last_check), string.extract_datetime(v.ss_next_check), string.extract_datetime(v.ss_last_state_change), }
+            end
+         end
+         res[#res+1] = render_table( row, header )
+         res[#res+1] = { br(), br(), br() }
+      end
    end
-   res[#res+1] = render_table( row, header )
-   res[#res+1] = { br(), br(), br() }
 
 
    -- FORM de pergunta
@@ -992,7 +997,7 @@ function render_remove(web, M, S, APPS)
       url_cancel = web:link("/list")
 
       res[#res+1] = p{
-         b{ strings.exclude_quest.." "..strings.checkcommand.." "..M.m_name1.."?" }, 
+         b{ strings.exclude_quest.." "..strings.checkcommand.." "..M.m_name.." para o dispositivo "..name.."?" }, 
          p{ button_link(strings.yes, url_ok) },
          p{ button_link(strings.cancel, url_cancel) },
       }

@@ -137,10 +137,10 @@ function count_services()
    group by ss.current_state;]]
 
    c = [[count(*) as count, ss.current_state as state]]
-   t = [[nagios_servicestatus ss, nagios_objects o]]
+   t = [[nagios_servicestatus ss, nagios_objects o, itvision_monitors m]]
    r = [[ss.service_object_id = o.object_id and ss.active_checks_enabled = 1
        and o.name2 <> ']]..config.monitor.check_host..[[' and o.name1 <> ']]..config.monitor.check_app..[[' and o.objecttype_id = 2
-       and o.is_active = 1 and o.name1 <> 'dummy']]
+       and o.is_active = 1 and o.name1 <> 'dummy' and m.service_object_id = ss.service_object_id]]
    e = [[group by ss.current_state]]
    q = Model.query(t, r, e, c)
 
@@ -153,10 +153,10 @@ function count_services()
        and o.is_active = 1 and o.name1 <> 'dummy']]
 
    c = [[count(*) as count, 5 as state]]
-   t = [[nagios_servicestatus ss, nagios_objects o]]
+   t = [[nagios_servicestatus ss, nagios_objects o, itvision_monitors m]]
    r = [[ss.service_object_id = o.object_id and ss.active_checks_enabled = 0
        and o.name2 <> ']]..config.monitor.check_host..[[' and o.name1 <> ']]..config.monitor.check_app..[[' and o.objecttype_id = 2
-       and o.is_active = 1 and o.name1 <> 'dummy']]
+       and o.is_active = 1 and o.name1 <> 'dummy' and m.service_object_id = ss.service_object_id]]
    e = nil
    q2 = Model.query(t, r, e, c)
 

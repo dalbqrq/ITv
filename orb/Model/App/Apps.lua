@@ -31,10 +31,8 @@ end
 -- Retorna as aplicacoes já com os nomes da entidades SEM os seus estados (nagios_servicestatus).
 function select_app (cond__, extra_, columns_)
    local tables_  = [[  itvision_apps a,
-                        (select a.entities_id as entity_id, a.name as entity_name, 
-                            a.name as entity_completename 
-                         from itvision_app_trees t, itvision_apps a 
-                         where a.id = t.app_id and t.lft=1
+                        (select a.entities_id as entity_id, a.name as entity_name, a.name as entity_completename 
+                         from itvision_apps a where a.entities_id = 0
                          union 
                          select id as entity_id, name as entity_name, completename as entity_completename 
                          from glpi_entities) as e ]]
@@ -52,8 +50,7 @@ end
 function select_app_state (cond__, extra_, columns_)
    local tables_  = [[  itvision_apps a, nagios_servicestatus ss ,
                         (select a.entities_id as entity_id, a.name as entity_name, a.name as entity_completename 
-                         from itvision_app_trees t, itvision_apps a 
-                         where a.id = t.app_id and t.lft=1
+                         from itvision_apps a where a.entities_id = 0
                          union 
                          select id as entity_id, name as entity_name, completename asentity_completename 
                          from glpi_entities) as e ]]

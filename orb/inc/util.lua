@@ -141,6 +141,13 @@ end
 string.extract_datetime = function(str, splited)
    local _, _, Y, m, d, H, M, S = string.find(str, "(%d+)-(%d+)-(%d+) (%d+):(%d+):(%d+)")
 
+   Y = Y or "0"
+   m = m or "0"
+   d = d or "0"
+   H = H or "00"
+   M = M or "00"
+   S = S or "00"
+
    if splited then
       return Y, m, d, H, M, S
    else
