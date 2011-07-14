@@ -60,6 +60,24 @@ function select_app_state (cond__, extra_, columns_)
    if cond__ then cond_ = cond_.." and "..cond__ end
    local content = query (tables_, cond_, extra_, columns_)
 
+
+   local tables_  = [[  itvision_apps a, 
+                        (select a.entities_id as entity_id, a.name as entity_name, a.name as entity_completename 
+                         from itvision_apps a where a.entities_id = 0
+                         union 
+                         select id as entity_id, name as entity_name, completename asentity_completename 
+                         from glpi_entities) as e ]]
+   local cond_   = [[ a.entities_id = e.entity_id and a.service_object_id is null ]]
+   local extra_  = [[ order by entity_completename ]]
+
+   if cond__ then cond_ = cond_.." and "..cond__ end
+   local content2 = query (tables_, cond_, extra_, columns_)
+
+
+   for _,v in ipairs(content2) do
+      table.insert(content,v)
+   end
+
    return content
 end
 

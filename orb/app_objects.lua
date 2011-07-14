@@ -170,8 +170,9 @@ function make_app_objects_table(web, A)
    web.prefix = "/orb/app_objects"
 
    for i, v in ipairs(A) do
+      local is_ent = 0
+
       if v.itemtype == "Computer" then
-         --ic = Model.query("glpi_computers c, glpi_networkports p", "id = "..v.items_id.." and networkequipments_id = p.id")
          ic = Model.query("glpi_computers", "id = "..v.items_id)
          ic = ic[1]
       elseif v.itemtype == "NetworkEquipment" then
@@ -197,6 +198,7 @@ function make_app_objects_table(web, A)
          local tag = ""
          if v.app_type_id == "1" then
             tag = "+ "
+            is_ent = 1
          elseif v.app_type_id == "2" then
             tag = "# "
          else
@@ -217,7 +219,7 @@ function make_app_objects_table(web, A)
 
       row[#row+1] = { 
          obj,
-         name_hst_svc_app(v.obj_type, v.is_entity_root),
+         name_hst_svc_app_ent(v.obj_type, is_ent),
          remove_button
       }
    end
