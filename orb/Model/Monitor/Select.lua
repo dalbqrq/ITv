@@ -718,7 +718,7 @@ end
 function select_monitors(clause)
    local q = {}
    local q1 = make_query_1(nil, nil, clause)
-   local q2 = make_query_2(nil, nil, nil, clause)
+   --local q2 = make_query_2(nil, nil, nil, clause)
    local q3 = make_query_3(nil, nil, nil, clause)
    local q4 = make_query_4(nil, nil, nil, nil, clause)
    local q6 = make_query_6(nil, nil, clause)
@@ -727,7 +727,7 @@ function select_monitors(clause)
    local q9 = make_query_9(nil, nil, nil, clause)
 
    for _,v in ipairs(q1) do table.insert(q, v) end
-   for _,v in ipairs(q2) do table.insert(q, v) end
+   --for _,v in ipairs(q2) do table.insert(q, v) end
    for _,v in ipairs(q3) do table.insert(q, v) end
    for _,v in ipairs(q4) do table.insert(q, v) end
    for _,v in ipairs(q6) do table.insert(q, v) end
