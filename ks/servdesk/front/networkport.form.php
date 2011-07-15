@@ -86,10 +86,12 @@ if (isset($_POST["add"])) {
    }
 
 } else if(isset($_POST["delete"])) {
-   // included by daniel@itvision.com.br
-   exec("echo ". $_POST["id"]." delete >> /usr/local/itvision/scr/update_ip.queue");
    $np->check($_POST['id'],'d');
    $np->delete($_POST);
+   // included by daniel@itvision.com.br
+   exec("/usr/local/itvision/scr/externals.sh IP_DELETE ". $_POST['id']);
+   exec("echo /usr/local/itvision/scr/externals.sh IP_DELETE ". $_POST['id'] ." >> /usr/local/itvision/scr/update_ip.queue");
+
    Event::log($_POST['id'], "networkport", 5, "inventory", $_SESSION["glpiname"]." ".$LANG['log'][73]);
    if (class_exists($np->fields['itemtype'])) {
       $item=new $np->fields['itemtype']();
@@ -102,9 +104,10 @@ if (isset($_POST["add"])) {
    if (isset($_POST["del_port"]) && count($_POST["del_port"])) {
       foreach ($_POST["del_port"] as $port_id => $val) {
          if ($np->can($port_id,'d')) {
-            // included by daniel@itvision.com.br
-            exec("echo ". $port_id ." delete >> /usr/local/itvision/scr/update_ip.queue");
             $np->delete(array("id" => $port_id));
+            // included by daniel@itvision.com.br
+            exec("/usr/local/itvision/scr/externals.sh IP_DELETE ". $_POST['id']);
+            exec("echo /usr/local/itvision/scr/externals.sh IP_DELETE ". $_POST['id'] ." >> /usr/local/itvision/scr/update_ip.queue");
          }
       }
    }
@@ -131,11 +134,12 @@ if (isset($_POST["add"])) {
    glpi_header($_SERVER['HTTP_REFERER']);
 
 }*/else if(isset($_POST["update"])) {
-   // included by daniel@itvision.com.br
-   exec("echo ". $_POST["id"]." update >> /usr/local/itvision/scr/update_ip.queue");
    $np->check($_POST['id'],'w');
-
    $np->update($_POST);
+   // included by daniel@itvision.com.br
+   exec("/usr/local/itvision/scr/externals.sh IP_UPDATE ". $_POST['id']);
+   exec("echo /usr/local/itvision/scr/externals.sh IP_UPDATE ". $_POST['id'] ." >> /usr/local/itvision/scr/update_ip.queue");
+
    Event::log($_POST["id"], "networkport", 4, "inventory", $_SESSION["glpiname"]." ".$LANG['log'][21]);
    glpi_header($_SERVER['HTTP_REFERER']);
 

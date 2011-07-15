@@ -3,6 +3,7 @@ require "sync_apps"
 require "sync_services"
 require "sync_entities"
 require "sync_ip"
+require "sync_ic"
 
 
 function execute_external_command(op, arg1, arg2, arg3)
@@ -29,10 +30,26 @@ function execute_external_command(op, arg1, arg2, arg3)
       ip_delete(arg1)
 
 
+   -- Operacoes com networkequipment chamadas por servdesk/front/networkequipment.form.php
+   elseif op == "NETWORKEQUIPMENT_UPDATE" then
+      ic_update(arg1, "NetworkEquipment")
+
+   elseif op == "NETWORKEQUIPMENT_DELETE" then
+      ic_delete(arg1, "NetworkEquipment")
+
+
+   -- Operacoes com computer chamadas por servdesk/front/computer.form.php
+   elseif op == "COMPUTER_UPDATE" then
+      ic_update(arg1, "Computer")
+
+   elseif op == "COMPUTER_DELETE" then
+      ic_delete(arg1, "Computer")
+
+
    -- Operacao desconhecida
    else
       if not op then op = "NIL" end
-      log_glpisync("Unknown operation: "..op.."\n")
+      log_glpisync("Unknown operation: |"..op.."|\n")
       return false
 
    end

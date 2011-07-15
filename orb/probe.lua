@@ -58,7 +58,7 @@ function objects:count_alike(name1, name2)
    end
 
    if clause ~= "" then clause = clause.." and " end
-   clause = clause .. " objecttype_id = 2 and is_active = 1"
+   clause = clause .. " objecttype_id = 2"
 
    q = Model.query("nagios_objects", clause)
    if q then res = #q + 1 end
@@ -288,7 +288,7 @@ function add(web, query, c_id, p_id, sv_id, do_test, new_cmd)
          chk_params[i].flag = web.input["flag"..i]
          chk_params[i].default_value = web.input["opt"..i]
       end
-      text_file_writer("/tmp/ss", #chk_params.." "..chk_id.."\n")
+      --DEBUG: text_file_writer("/tmp/ss", #chk_params.." "..chk_id.."\n")
    end
 
    return render_add(web, ics, chk, params, chk_params, monitor_name)
@@ -371,7 +371,7 @@ function remove(web, service_object_id)
                       "ax.id in (select app_id from itvision_app_objects where service_object_id in ("..slist.."))", true)
    end
 
-text_file_writer("/tmp/q", slist)
+   --DEBUG: text_file_writer("/tmp/q", slist)
 
    return render_remove(web, M, S, APPS, APPS_S)
 end
@@ -381,7 +381,8 @@ ITvision:dispatch_post(remove, "/remove/(%d+)")
 
 ------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------
--- executa a operacao de remocao da monitoracao
+-- executa a operacao de remocao da monitoracao e de todos os servicos associados se objeto for hsot
+-- remove ainda todas as entrada relacionada aos hosts e servicos que existam em alguma aplicacao
 function delete(web, service_object_id)
    local msg = ""
    local monitor = monitors:select_monitor_from_service(service_object_id) 
@@ -416,7 +417,11 @@ function delete(web, service_object_id)
    msg = "Check de SERVIÇO: "..monitor[1].name.." removido."
 
    os.reset_monitor()
-   return web:redirect(web:link("/list/"..msg))
+   if web then
+      return web:redirect(web:link("/list/"..msg))
+   else
+      return true
+   end
 
 end
 ITvision:dispatch_get(delete, "/delete/(%d+)")
@@ -630,7 +635,7 @@ function desable_service(web, service_object_id, c_id, p_id, query, no_header, f
       --os.sleep(1)
       return web:redirect(web:link("/update/"..query..":"..c_id..":"..p_id..":0:0:"..service_object_id..":"..no_header..":"..msg))
    else
-      return msg --para criacao de probes em massa
+      return true, msg --para criacao de probes em massa
    end
 
 end
@@ -816,7 +821,7 @@ function render_checkcmd(web, chk_id, hst_name, ip, url_test, url_insert, url_up
       return res
    end
 
-   text_file_writer("/tmp/cm", " "..chk_id.."\n")
+   --DEBUG: text_file_writer("/tmp/cm", " "..chk_id.."\n")
    local c, p = Checkcmds.get_checkcmd_default_params(chk_id, nil, false)
    local chk = path.."/"..c[1].command
    monitor_name = monitor_name or c[1].label

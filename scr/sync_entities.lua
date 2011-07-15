@@ -53,7 +53,7 @@ function entity_delete(id)
    local entity = Model.query("glpi_entities e", "e.id = "..id)
 
    if entity[1] then
-      replace_entity(id, entity[1].entities_id)
+      entity_replace(id, entity[1].entities_id)
    end
 end
 
@@ -98,13 +98,14 @@ function entity_update(id, id2)
    local new_parent_app = Model.query("itvision_apps ", "entities_id = "..id2.." and is_entity_root = 1" ); 
    new_parent_app = new_parent_app[1]
 
-   Model.update("itvision_apps", { name=entity.name } , "entities_id = "..id)
+   Model.update("itvision_apps", { name=entity.name } , "entities_id = "..id.." and is_entity_root = 1")
    Model.update("itvision_app_objects", { app_id=new_parent_app.id } , "service_object_id = "..child_app.service_object_id)
    App.remake_apps_config_file()
 end
 
 
 
+--[[
 if arg[1] and arg[2]  then 
    local cmd = tostring(arg[1])
    local e_id = tonumber(arg[2])
@@ -128,4 +129,4 @@ if arg[1] and arg[2]  then
    end
 end
 
-
+]]

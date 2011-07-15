@@ -62,7 +62,7 @@ if (isset($_POST["add"])) {
 } else if (isset($_POST["delete"])) {
 
    // included by daniel@itvision.com.br
-   //exec("/usr/local/itvision/scr/externals.sh ENTITY_REPLACE ". $_POST["id"]." ". $_POST["_replace_by"]);
+   exec("/usr/local/itvision/scr/externals.sh NETWORKEQUIPMENT_DELETE ". $_POST["id"]);
    exec("echo NETWORKEQUIPMENT_DELETE  ".$_POST["id"]." >> /usr/local/itvision/scr/ic.queue");
 
    $netdevice->check($_POST["id"],'d');
@@ -94,14 +94,14 @@ if (isset($_POST["add"])) {
 
 
 } else if (isset($_POST["update"])) {
-
-   // included by daniel@itvision.com.br
-   //exec("/usr/local/itvision/scr/externals.sh ENTITY_REPLACE ". $_POST["id"]." ". $_POST["_replace_by"]);
-   exec("echo NETWORKEQUIPMENT_UPDATE ".$_POST["id"]." >> /usr/local/itvision/scr/ic.queue");
-
    $netdevice->check($_POST["id"],'w');
 
    $netdevice->update($_POST);
+
+   // included by daniel@itvision.com.br
+   exec("/usr/local/itvision/scr/externals.sh NETWORKEQUIPMENT_UPDATE ". $_POST["id"]);
+   exec("echo NETWORKEQUIPMENT_UPDATE ".$_POST["id"]." >> /usr/local/itvision/scr/ic.queue");
+
    Event::log($_POST["id"], "networkequipment", 4, "inventory", $_SESSION["glpiname"]." ".$LANG['log'][21]);
    glpi_header($_SERVER['HTTP_REFERER']);
 

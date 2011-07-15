@@ -116,6 +116,8 @@ end
 function remove_svc_cfg_file (hostname, service_desc)
    local filename = config.monitor.dir.."/services/"..hostname.."-"..service_desc..".cfg"
    remove_file(filename)
+   local filename = config.monitor.dir.."/services/"..hostname..".cfg" -- arquivo de config do nagiosgrapher
+   remove_file(filename)
 end
 
 

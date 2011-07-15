@@ -99,7 +99,7 @@ ITvision:dispatch_get(add, "/add/(%d+)", "/add/(%d+):(.+)")
 
 
 
-function insert_obj(web)
+function insert_obj(web, app_id)
    app_objects:new()
    -- inclusão de multiplos itens. deve-se acionar a selecao de multiplos itens na interface. bug abaixo
    if type(web.input.item) == "table" then
@@ -111,22 +111,25 @@ function insert_obj(web)
          app_objects:save()
       end
    else
-      app_objects.app_id = web.input.app_id
-      app_objects.type = web.input.type
-      app_objects.instance_id = Model.db.instance_id
-      app_objects.service_object_id = web.input.item
-      app_objects:save()
+      if web.input.item then
+         app_objects.app_id = web.input.app_id
+         app_objects.type = web.input.type
+         app_objects.instance_id = Model.db.instance_id
+         app_objects.service_object_id = web.input.item
+         app_objects:save()
+      end
    end
 
-   if web.input.type == 'app' then 
+   if web.input.type == 'app' and web.input.item then 
       update_apps(web)
       --os.sleep(1)
    end
 
    web.prefix = "/orb/app_tabs"
-   return web:redirect(web:link("/list/"..app_objects.app_id..":"..tab_id))
+   --return web:redirect(web:link("/list/"..app_objects.app_id..":"..tab_id))
+   return web:redirect(web:link("/list/"..app_id..":"..tab_id))
 end
-ITvision:dispatch_post(insert_obj, "/insert_obj")
+ITvision:dispatch_post(insert_obj, "/insert_obj:(%d+)")
 
 
 
@@ -236,7 +239,7 @@ end
 
 function render_add(web, HST, SVC, APP, APPOBJ, app_id, msg)
    local res = {}
-   local url_app = "/insert_obj"
+   local url_app = "/insert_obj:"..app_id
    local url_relat = "/insert_relat"
    local list_size = 10
    local header = ""

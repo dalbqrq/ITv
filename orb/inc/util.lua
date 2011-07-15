@@ -325,7 +325,7 @@ end
 
 
 function os.capture(cmd, raw)
-text_file_writer("/tmp/cmd", cmd)
+--DEBUG: text_file_writer("/tmp/cmd", cmd)
    local f = assert(io.popen(cmd, 'r'))
    local s = assert(f:read('*a'))
    f:close()

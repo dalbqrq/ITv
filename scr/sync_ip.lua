@@ -55,30 +55,3 @@ function ip_delete(id)
 end
 
 
---[[ Esta funcao está caduca pois os comandos são repassados direamente do php para o external.sh 
-     que chama o código acima
-
-function sync_ip()
-
-   local lines = line_reader(ipfile)
-   if not lines then return false end
-
-   for _,l in ipairs(lines) do
-      local _, _, n_id, op = string.find(l, '(%d+) (%a+)')
-
-      if op == "update" then
-         ip_update(n_id)
-      elseif op == "delete" then
-         ip_delete(n_id)
-      else
-         print("Unknown operation")
-      end
-   end
-
-   text_file_writer(ipfile, "") 
-end
-
-]]--
-
-
-

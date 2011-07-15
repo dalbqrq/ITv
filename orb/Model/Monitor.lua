@@ -999,8 +999,6 @@ function tree2(app_id, clause)
       app_id = App.select_root_app()
    end
 
-   text_file_writer("/tmp/tt", app_id)
-
    local q5 = make_query_5(app_id, clause)
    for _,v in ipairs(q5) do 
       local content = Model.query("itvision_apps", "service_object_id = "..v.ao_service_object_id)

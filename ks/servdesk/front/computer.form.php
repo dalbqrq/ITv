@@ -65,7 +65,7 @@ if (isset($_POST["add"])) {
 } else if (isset($_POST["delete"])) {
 
    // included by daniel@itvision.com.br
-   exec("/usr/local/itvision/scr/externals.sh COMPUTER_DELETE ". $_POST["id"]]);
+   exec("/usr/local/itvision/scr/externals.sh COMPUTER_DELETE ". $_POST["id"]);
    exec("echo COMPUTER_DELETE  ".$_POST["id"]." >> /usr/local/itvision/scr/ic.queue");
 
    $computer->check($_POST['id'],'d');
@@ -100,14 +100,14 @@ if (isset($_POST["add"])) {
 //update a computer
 } else if (isset($_POST["update"])) {
 
-   // included by daniel@itvision.com.br
-   exec("/usr/local/itvision/scr/externals.sh COMPUTER_UPDATE ". $_POST["id"]]);
-   exec("echo COMPUTER_UPDATE  ".$_POST["id"]." >> /usr/local/itvision/scr/ic.queue");
-
    $computer->check($_POST['id'],'w');
 
    $computer->update($_POST);
    Event::log($_POST["id"], "computers", 4, "inventory", $_SESSION["glpiname"]." ".$LANG['log'][21]);
+
+   // included by daniel@itvision.com.br
+   exec("/usr/local/itvision/scr/externals.sh COMPUTER_UPDATE ". $_POST["id"]);
+   exec("echo COMPUTER_UPDATE  ".$_POST["id"]." >> /usr/local/itvision/scr/ic.queue");
 
    glpi_header($_SERVER['HTTP_REFERER']);
 
