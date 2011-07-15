@@ -6,16 +6,12 @@ local DEBUG = true
 local DEBUG = false
 
 --[[
-
-  - A LIGACAO COM SOFTWARE ESTAh SETDO RETIRADA A PEDIDO DA VERTO (José Antônio) EM JUL/2011
-
-
         +------------+    +-------------------------+    +-----------------+      +----------+
         |  glpi_     |----| glpi_                   |----|  glpi_          |------|  glpi_   |
         | COMPUTER   |    |COMPUTER_SOFTWAREVERSION |    | SOFTWAREVERSION |      | SOFTWARE |
         | NET_EQUIP_ |    +-------------------------+    +-----------------+      +----------+
-        +------------+                                          
-              |                                                 
+        +------------+                                          |
+              |                                                 |
         +-------------+                                    +-----------+
         |  glpi_      |------------------------------------| itvision_ |
         | NETWORKPORT |                                    | MONITOR   |
@@ -31,14 +27,14 @@ local DEBUG = false
 
 
         QUERY 1 - computador/networkequip com porta sem software e sem monitor
-        XXX removido XXX QUERY 2 - computador              com porta com software e sem monitor
+        QUERY 2 - computador              com porta com software e sem monitor
         QUERY 3 - computador/networkequip com porta sem software e com monitor - monitoracao de host onde o service eh ping
-        QUERY 4 - computador              com porta sem software e com monitor - monitoracao de service 
+        QUERY 4 - computador              com porta com software e com monitor - monitoracao de service 
 	QUERY 5 - aplicacao com monitor - monitoracao de service 
 	QUERY 6 - computador com porta sem software e com monitor pendente
-	XXX removido XXX QUERY 7 - computador com porta com software e com monitor pendente
+	QUERY 7 - computador com porta com software e com monitor pendente
         QUERY 8 - computador com porta sem software e com monitor e service state pendente
-        XXX removido XXX QUERY 9 - computador com porta com software e com monitor e service state pendente
+        QUERY 9 - computador com porta com software e com monitor e service state pendente
         QUERY 10 - aplicacao com monitor para grafico de arvore 
 	QUERY 11 - aplicacao com monitor para grafico de arvore com ss pendente
         
@@ -384,29 +380,28 @@ end
 
 
 ----------------------------------------------------------------------
---  QUERY 4 - computador com porta sem software e com monitor - monitoracao de service 
+--  QUERY 4 - computador com porta com software e com monitor - monitoracao de service 
 ----------------------------------------------------------------------
 function make_query_4(c_id, p_id, sv_id, a_id, clause)
    local q, t = {}, {}
    if a_id then
-       t = { "c", "p", "o", "s", "m", "ss", "a", "ao" }
+       t = { "c", "p", "csv", "sv", "sw", "o", "s", "m", "ss", "a", "ao" }
    else
-       t = { "c", "p", "o", "s", "m", "ss" }
+       t = { "c", "p", "csv", "sv", "sw", "o", "s", "m", "ss" }
    end
-   n = { "csv", "sv", "sw" }
+   n = { }
 
    local columns_ = make_columns(t)
    local tables_  = make_tables(t)
    local cond_    = make_where(t)
 
    cond_ = cond_ .. [[ 
-      and p.itemtype in ( "Computer", "NetworkEquipment" )
+      and p.itemtype = "Computer" 
    ]] .. g_excludes
-
 
    if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
    if p_id  then cond_ = cond_ .. " and p.id = "  .. p_id  end
-   --if sv_id then cond_ = cond_ .. " and sv.id = " .. sv_id end
+   if sv_id then cond_ = cond_ .. " and sv.id = " .. sv_id end
    if a_id then cond_ = cond_ .. " and a.id = " .. a_id end
    if clause  then cond_ = cond_ .. " and " .. clause end
 
@@ -723,7 +718,7 @@ end
 function select_monitors(clause)
    local q = {}
    local q1 = make_query_1(nil, nil, clause)
-   -- XXX -- local q2 = make_query_2(nil, nil, nil, clause)
+   --local q2 = make_query_2(nil, nil, nil, clause)
    local q3 = make_query_3(nil, nil, nil, clause)
    local q4 = make_query_4(nil, nil, nil, nil, clause)
    local q6 = make_query_6(nil, nil, clause)
@@ -732,7 +727,7 @@ function select_monitors(clause)
    local q9 = make_query_9(nil, nil, nil, clause)
 
    for _,v in ipairs(q1) do table.insert(q, v) end
-   -- XXX -- for _,v in ipairs(q2) do table.insert(q, v) end
+   --for _,v in ipairs(q2) do table.insert(q, v) end
    for _,v in ipairs(q3) do table.insert(q, v) end
    for _,v in ipairs(q4) do table.insert(q, v) end
    for _,v in ipairs(q6) do table.insert(q, v) end
@@ -900,7 +895,7 @@ function how_to_use()
    --a = make_query_5()
    --a = select_monitors()
 
-   a = make_query_4(nil, nil, nil, nil)
+   a = make_query_4(nil, nil, nil, 45)
 
 --[[
    for i,v in ipairs(a) do
