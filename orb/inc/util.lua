@@ -6,6 +6,7 @@
    OS
 
 ]]
+require "config"
 
 loop = 500000
 
@@ -342,11 +343,26 @@ function os.sleep(seg)
 end
 
 
+function os.reboot()
+   return os.capture("/usr/bin/sudo /sbin/reboot")
+end
+
+
+function os.shutdown()
+   return os.capture("/usr/bin/sudo /sbin/poweroff")
+end
+
+
 function os.reset_monitor()
    return os.capture("/usr/sbin/invoke-rc.d nagios3 reload")
 end
 
 
+function os.reinit_monitor()
+   return os.capture("/usr/sbin/invoke-rc.d nagios3 restart")
+end
+
+
 function os.reset_monitor_db()
-   return os.capture("/usr/sbin/invoke-rc.d ndoutils restart")
+   return os.capture(config.path.itvision.."/bin/rendo")
 end

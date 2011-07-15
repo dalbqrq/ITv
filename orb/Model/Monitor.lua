@@ -1049,14 +1049,14 @@ function how_to_use()
 ]]
 
    --a = tree(8)
-   a = make_query_5(2)
-   --a = select_monitors()
+   --a = make_query_5(2)
+   a = select_monitors("p.entities_id in (0, 24, 26)")
 
 
---[[
    for i,v in ipairs(a) do
       print("A: ", v[1], v.c_alias, v.c_name, v.s_name, v.sv_name, v.p_itemtype, v.ao_type, v.c_geotag, v.m_service_object_id) 
    end
+--[[
 ]]
 
 
