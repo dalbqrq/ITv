@@ -146,21 +146,16 @@ function make_app_objects_table(web, appobj)
          remove_button = { "-" }
       end
   
---[[
-      row[#row+1] = { 
-         obj,
-         remove_button
-      }
-]]
-
       local ss = servicestatus:select_servicestatus(v.object_id)
 
-      if col_count < 4 then
+      if col_count < 5 then
          --col[#col+1] = { { value=obj.."("..name_hst_svc_app_ent(v.obj_type, is_ent)..")", state=0} }
          --col[#col+1] = { {value=obj, state=0} }
          col[#col+1] = { value=obj, state=ss[1].current_state }
       else
          --row[#row+1] = { appobj[1].name, appobj[2].name, appobj[3].name, "" }
+         row[#row+1] = col
+         row[#row+1] = col
          row[#row+1] = col
          col = {}
          col_count = 0
@@ -171,12 +166,55 @@ function make_app_objects_table(web, appobj)
 end
 
 
+function make_grid(web, obj)
+   local res, row, col = {}, {}, {}
+   local permission = Auth.check_permission(web, "application")
+   local col_count = 1
+   local max_cols = 4
+
+   web.prefix = "/orb/app_objects"
+
+   for _, t in ipairs({ "app", "hst", "svc", "ent" }) do
+      for i,v in ipairs(obj) do
+         if v.ao_type == "app" and v.a_is_entity_root == "1" then v.ao_type = "ent" end
+         
+            if v.ao_type == t then
+            end
+         if col_count <= max_cols then
+               local obj = v[1].." "..v.ao_type.." "..v.o_name1..":"..t
+               col[#col+1] = { value=obj, state=v.ss_current_state }
+               col_count = col_count + 1
+         else
+            row[#row+1] = col
+            col = {}
+            col_count = 1
+         end
+      end
+
+      if col_count > 1 and col_count < max_cols+1 then
+         for i = col_count, max_cols do  
+            col[#col+1] = { value=".", state=-1 }
+         end
+         row[#row+1] = col
+         res[#res+1] = { col_count.."-"..max_cols }
+         col_count = 1
+      end
+
+      res[#res+1] = { t }
+      res[#res+1] = render_table(row, nil, "tab_cadre_appgrid")
+      row, col = {}, {}
+   end
+
+   return res
+end
+
+
 function render_show(web, app, entities, app_name, app_id, obj, rel, obj_id, appobj, no_header)
    local auth = Auth.check(web)
    local permission = Auth.check_permission(web, "application")
    local res = {}
    local lnkgeo, lnkedt  = nil, nil
-   local refresh_time = 15
+   local refresh_time = 5
 
    if obj_id then 
       web.prefix = "/orb/obj_info"
@@ -197,7 +235,9 @@ function render_show(web, app, entities, app_name, app_id, obj, rel, obj_id, app
            a{ href=lnkedt,  strings.edit } ,
          } )
 
-   res[#res+1] = render_table(make_app_objects_table(web, appobj), nil, "tab_cadre_appgrid")
+   --res[#res+1] = render_table(make_app_objects_table(web, appobj), nil, "tab_cadre_appgrid")
+   --res[#res+1] = render_table(make_grid(web, obj), nil, "tab_cadre_appgrid")
+   res[#res+1] = make_grid(web, obj)
    res[#res+1] = { br(), br(), br(), br() }
 
 
