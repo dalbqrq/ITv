@@ -89,7 +89,7 @@ function render_show(web, obj, rel, sep)
    local res = {}
    local engene = "dot"
    local file_type = "png"
-   local refresh_time = 15
+   local refresh_time = 20
    local gv_name = "TREE"
    local imgfile, imglink, mapfile, maplink, dotfile = Graph.make_gv_filename(gv_name, file_type)
 

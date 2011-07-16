@@ -91,7 +91,8 @@ function add(web, app_id, msg)
 
    clause = " ( a.entities_id in "..entity_auth.." or a.visibility = 1 )"
    local APP = App.select_app_service_object(clause, nil, nil, app_id)
-   local APPOBJ = App.select_app_app_objects(app_id)
+   --local APPOBJ = App.select_app_app_objects(app_id)
+   local APPOBJ = Monitor.select_monitors_app_objs(app_id)
 
    return render_add(web, HST, SVC, APP, APPOBJ, app_id, msg)
 end
@@ -183,51 +184,57 @@ function make_app_objects_table(web, A)
          ic = ic[1]
       end
 
-      if v.obj_type == "hst" then
-         obj = find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.ip..")"
-
---[[
-         web.prefix = "/servdesk"
-         if v.itemtype == "Computer" then
-            url = web:link("/front/computer.form.php?id="..ic.id)
-         elseif v.itemtype == "NetworkEquipment" then
-            url = web:link("/front/networkequipment.form.php?id="..ic.id)
-         end
-]]
+      if v.ao_type == "hst" then
+         obj = find_hostname(v.c_alias, v.c_name, v.c_itv_key).." ("..v.p_ip..")"
          web.prefix = "/orb/obj_info"
-         url = web:link("/hst/"..v.object_id)
+         url = web:link("/hst/"..v.o_object_id)
          obj = button_link(obj, url, "negative")
-
-      elseif v.obj_type == "svc" then
+      elseif v.ao_type == "svc" then
          web.prefix = "/orb/obj_info"
-         url = web:link("/svc/"..v.object_id)
-         obj = button_link(make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.ip..")", v.name), url, "negative")
+         url = web:link("/svc/"..v.o_object_id)
+         obj = button_link(make_obj_name(find_hostname(v.c_alias, v.c_name, v.c_itv_key).." ("..v.p_ip..")", v.m_name), url, "negative")
       else
          local tag = ""
-         if v.app_type_id == "1" then
+         if v.ax_app_type_id == "1" then
             tag = "+ "
             is_ent = 1
-         elseif v.app_type_id == "2" then
+         elseif v.ax_app_type_id == "2" then
             tag = "# "
          else
             tag = "- "
          end
 
-         obj = tag..v.name
+         obj = tag..v.ax_name
          web.prefix = "/orb/app_tabs"
-         obj = button_link(obj, web:link("/list/"..v.id..":"..tab_id), "negative")
+         obj = button_link(obj, web:link("/list/"..v.a_id..":"..tab_id), "negative")
       end
       web.prefix = "/orb/app_objects"
 
       if permission == "w" and v.app_type_id ~= "1" then
-         remove_button = button_link(strings.remove, web:link("/delete_obj/"..v.app_id..":"..v.object_id), "negative")
+         remove_button = button_link(strings.remove, web:link("/delete_obj/"..v.a_id..":"..v.o_object_id), "negative")
       else
          remove_button = { "-" }
       end
 
+      local state 
+      if tonumber(v.ss_has_been_checked) == 1 then
+         if tonumber(v.m_state) == 0 then
+            state = tonumber(APPLIC_DISABLE)
+            output = ""
+         else     
+            state = tonumber(v.ss_current_state)
+            output = v.ss_output
+         end      
+                  
+      else        
+         state = 4
+      end      
+      local statename = applic_alert[state].name
+
       row[#row+1] = { 
          obj,
-         name_hst_svc_app_ent(v.obj_type, is_ent),
+         name_hst_svc_app_ent(v.ao_type, is_ent),
+         { value=statename, state=state },
          remove_button
       }
    end
@@ -252,7 +259,9 @@ function render_add(web, HST, SVC, APP, APPOBJ, app_id, msg)
    res[#res+1] = br()
    if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ font{ color="red", msg } } end
    --res[#res+1] = render_content_header(strings.app_object)
-   header = { strings.object.." ("..strings.host.." / "..strings.service.."@"..strings.host.." / "..strings.application.." / "..strings.entity..")", strings.type, "." }
+   res[#res+1] = render_title(strings.app_object)
+   --header = { strings.object.." ("..strings.host.." / "..strings.service.."@"..strings.host.." / "..strings.application.." / "..strings.entity..")", strings.status, strings.type, "." }
+   header = { strings.object, strings.type, strings.status, "." }
    res[#res+1] = render_table(make_app_objects_table(web, APPOBJ), header)
    res[#res+1] = br()
 

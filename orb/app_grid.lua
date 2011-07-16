@@ -90,118 +90,59 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 
 -- views ------------------------------------------------------------
 
-function make_app_objects_table(web, appobj)
-   local row, col, ic = {}, {}, {}
-   local remove_button = {}
-   local obj = ""
-   local permission = Auth.check_permission(web, "application")
-   local col_count = 0
 
-   web.prefix = "/orb/app_objects"
-
-   for i, v in ipairs(appobj) do
-      local is_ent = 0
-      col_count = col_count + 1
-
-      if v.itemtype == "Computer" then
-         ic = Model.query("glpi_computers", "id = "..v.items_id)
-         ic = ic[1]
-      elseif v.itemtype == "NetworkEquipment" then
-         ic = Model.query("glpi_networkequipments", "id = "..v.items_id)
-         ic = ic[1]
-      end
-
-      if v.obj_type == "hst" then
-         --obj = find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.ip..")"
-         obj = find_hostname(ic.alias, ic.name, ic.itv_key)
-         web.prefix = "/orb/obj_info"
-         url = web:link("/hst/"..v.object_id)
-         obj = button_link(obj, url, "negative")
-
-      elseif v.obj_type == "svc" then
-         web.prefix = "/orb/obj_info"
-         url = web:link("/svc/"..v.object_id)
-         --obj = button_link(make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.ip..")", v.name), url, "negative")
-         obj = button_link(make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key), v.name), url, "negative")
-      else
-         local tag = ""
-         if v.app_type_id == "1" then
-            tag = "+ "
-            is_ent = 1
-         elseif v.app_type_id == "2" then
-            tag = "# "
-         else
-            tag = "- "
-         end
-
-         obj = tag..v.name
-         web.prefix = "/orb/app_tabs"
-         obj = button_link(obj, web:link("/list/"..v.id..":"..tab_id), "negative")
-      end
-      web.prefix = "/orb/app_objects"
-
-      if permission == "w" and v.app_type_id ~= "1" then
-         remove_button = button_link(strings.remove, web:link("/delete_obj/"..v.app_id..":"..v.object_id), "negative")
-      else
-         remove_button = { "-" }
-      end
-  
-      local ss = servicestatus:select_servicestatus(v.object_id)
-
-      if col_count < 5 then
-         --col[#col+1] = { { value=obj.."("..name_hst_svc_app_ent(v.obj_type, is_ent)..")", state=0} }
-         --col[#col+1] = { {value=obj, state=0} }
-         col[#col+1] = { value=obj, state=ss[1].current_state }
-      else
-         --row[#row+1] = { appobj[1].name, appobj[2].name, appobj[3].name, "" }
-         row[#row+1] = col
-         row[#row+1] = col
-         row[#row+1] = col
-         col = {}
-         col_count = 0
-      end
-   end
-
-   return row
-end
-
-
-function make_grid(web, obj)
+function make_grid(web, O)
    local res, row, col = {}, {}, {}
    local permission = Auth.check_permission(web, "application")
+   local auth = Auth.check(web)
    local col_count = 1
    local max_cols = 4
 
    web.prefix = "/orb/app_objects"
 
+   -- A lista de objetos "O" será percorrida 4 vezes, uma para cada tipo de objeto.
    for _, t in ipairs({ "app", "hst", "svc", "ent" }) do
-      for i,v in ipairs(obj) do
-         if v.ao_type == "app" and v.a_is_entity_root == "1" then v.ao_type = "ent" end
+      for i,v in ipairs(O) do
+         if v.ao_type == "app" and v.ax_is_entity_root and v.ax_is_entity_root == "1" then v.ao_type = "ent" end
          
+         if #col < max_cols then
             if v.ao_type == t then
-            end
-         if col_count <= max_cols then
-               local obj = v[1].." "..v.ao_type.." "..v.o_name1..":"..t
+               ----------------------
+               if v.ao_type == "hst" then
+                  obj = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
+                  web.prefix = "/orb/obj_info"
+                  url = web:link("/hst/"..v.o_object_id)
+                  obj = button_link(obj, url, "negative")
+               elseif v.ao_type == "svc" then
+                  web.prefix = "/orb/obj_info"
+                  url = web:link("/svc/"..v.o_object_id)
+                  obj = button_link(make_obj_name(find_hostname(v.c_alias, v.c_name, v.c_itv_key), v.m_name), url, "negative")
+               else
+                  obj = v.ax_name
+                  web.prefix = "/orb/app_tabs"
+                  obj = button_link(obj, web:link("/list/"..v.ax_id..":"..tab_id), "negative")
+               end
+               ----------------------
                col[#col+1] = { value=obj, state=v.ss_current_state }
-               col_count = col_count + 1
+            end
          else
             row[#row+1] = col
             col = {}
-            col_count = 1
          end
       end
 
-      if col_count > 1 and col_count < max_cols+1 then
-         for i = col_count, max_cols do  
-            col[#col+1] = { value=".", state=-1 }
+      -- Completa as columas com brancos (state=-1)
+      if #col >= 1 and #col < max_cols then
+         for i = #col+1, max_cols do  
+            col[#col+1] = { value="", state=-1 }
          end
          row[#row+1] = col
-         res[#res+1] = { col_count.."-"..max_cols }
-         col_count = 1
       end
 
-      res[#res+1] = { t }
-      res[#res+1] = render_table(row, nil, "tab_cadre_appgrid")
+      if #row > 0 then
+         res[#res+1] = render_title(name_hst_svc_app_ent(t))
+         res[#res+1] = render_table(row, nil, "tab_cadre_appgrid")
+      end
       row, col = {}, {}
    end
 
@@ -214,7 +155,7 @@ function render_show(web, app, entities, app_name, app_id, obj, rel, obj_id, app
    local permission = Auth.check_permission(web, "application")
    local res = {}
    local lnkgeo, lnkedt  = nil, nil
-   local refresh_time = 5
+   local refresh_time = 20
 
    if obj_id then 
       web.prefix = "/orb/obj_info"
@@ -235,8 +176,6 @@ function render_show(web, app, entities, app_name, app_id, obj, rel, obj_id, app
            a{ href=lnkedt,  strings.edit } ,
          } )
 
-   --res[#res+1] = render_table(make_app_objects_table(web, appobj), nil, "tab_cadre_appgrid")
-   --res[#res+1] = render_table(make_grid(web, obj), nil, "tab_cadre_appgrid")
    res[#res+1] = make_grid(web, obj)
    res[#res+1] = { br(), br(), br(), br() }
 

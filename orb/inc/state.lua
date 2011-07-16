@@ -1,5 +1,6 @@
 require "monitor_inc"
 
+
 color = {
 	blue =   "#0066ff",	-- blue color used by peding hosts and services
 	green =  "#00ff33",	-- green color used by up hosts and ok services
@@ -7,6 +8,7 @@ color = {
 	orange = "#ff6600",	-- orange color used by warning services
 	red =    "#d90000",	-- red color used by down hosts and critical services
 	gray =   "#999999",	-- gray color used by all non problem status
+	white =  "#ffffff",	-- white color used by "none" state
 	purple = "#9900CC",	-- unused
 
         lightblue = "#AFEEEE",
@@ -21,6 +23,7 @@ color = {
 
 
 applic_alert = {   
+	[APPLIC_NONE]     = { name= "",			status = APPLIC_NONE,		color = color.white,	lightcolor = color.white,	color_name = "white" },
 	[APPLIC_OK]       = { name= "NORMAL",		status = APPLIC_OK,		color = color.green,	lightcolor = color.lightgreen,	color_name = "green" },
 	[APPLIC_WARNING]  = { name= "ANORMAL",	 	status = APPLIC_WARNING,	color = color.yellow,	lightcolor = color.lightyellow,	color_name = "yellow" },
 	[APPLIC_CRITICAL] = { name= "CRITICO", 		status = APPLIC_CRITICAL,	color = color.red,	lightcolor = color.lightred,	color_name = "red" },
@@ -31,6 +34,7 @@ applic_alert = {
 
 
 host_alert = {   
+	[HOST_NONE]        = { name= "",		status = HOST_NONE,		color = color.white,	color_name = "white" },
 	[HOST_UP]          = { name= "NORMAL",		status = HOST_UP,		color = color.green,	color_name = "green" },
 	[HOST_DOWN]        = { name= "CRITICO", 	status = HOST_DOWN,		color = color.red,	color_name = "red" },
 	[HOST_UNREACHABLE] = { name= "INDETERMINADO",	status = HOST_UNREACHABLE,	color = color.gray,	color_name = "gray" },
@@ -40,6 +44,7 @@ host_alert = {
 
 
 service_alert = {
+	[STATE_NONE]     = { name= "",			status = STATE_NONE,		color = color.white,	color_name = "white" },
 	[STATE_OK]       = { name= "NORMAL",		status = STATE_OK,		color = color.green,	color_name = "green" },
 	[STATE_WARNING]  = { name= "ANORMAL",	 	status = STATE_WARNING,		color = color.yellow,	color_name = "yellow" },
 	[STATE_CRITICAL] = { name= "CRITICO", 		status = STATE_CRITICAL,	color = color.red,	color_name = "red" },

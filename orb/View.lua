@@ -751,6 +751,14 @@ function select_hst_or_svc_or_app(name, default)
    return select_option(name, HostOrServiceOrApp, "id", "name", default)
 end
 
+
+function render_title(name)
+   local myul = { li{ a{href='#', class='here', title="'"..name.."'", name} }, }
+   --local myul = name
+   return div{ id='menu_navigate', div { id='c_ssmenu2', ul{ myul } } }
+end
+
+
 function render_content_header(auth, name, add, list, edit, geotag, back)
    local myul = { li{ a{href='#', class='here', title="'"..name.."'", name} }, }
 

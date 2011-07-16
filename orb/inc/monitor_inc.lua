@@ -1,14 +1,16 @@
 --------------------- APPLICATION STATUS (Only for IT Vision) --------------------
 
-APPLIC_OK                        = 0
-APPLIC_WARNING                   = 1
-APPLIC_CRITICAL                  = 2
-APPLIC_UNKNOWN                   = 3
-APPLIC_PENDING                   = 4     -- Only for IT Vision
-APPLIC_DISABLE                   = 5     -- Only for IT Vision
+APPLIC_NONE			= -1
+APPLIC_OK                       = 0
+APPLIC_WARNING                  = 1
+APPLIC_CRITICAL                 = 2
+APPLIC_UNKNOWN                  = 3
+APPLIC_PENDING                  = 4     -- Only for IT Vision
+APPLIC_DISABLE                  = 5     -- Only for IT Vision
 
 --------------------- HOST STATUS --------------------
 
+HOST_NONE			= -1
 HOST_UP				= 0
 HOST_DOWN			= 1
 HOST_UNREACHABLE		= 2
@@ -18,6 +20,7 @@ HOST_DISABLE	 		= 4	-- Only for IT Vision
 
 ------------------- SERVICE STATES -------------------
 
+STATE_NONE			= -1
 STATE_OK                        = 0
 STATE_WARNING                   = 1
 STATE_CRITICAL                  = 2

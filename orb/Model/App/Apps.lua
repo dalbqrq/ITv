@@ -279,6 +279,7 @@ function select_app_relat_object (id, from, to)
                       NULL as to_ip,
                       m1.name as from_name,
                       m1.type as from_type,
+                      ap.app_type_id as app_type_id,
                       ap.name as to_name,
                       'app' as to_type 
                     ]]
@@ -315,6 +316,7 @@ function select_app_relat_object (id, from, to)
                       NULL as from_ip,
                       n2.ip as to_ip,
 
+                      ap.app_type_id as app_type_id,
                       ap.name as from_name,
                         'app' as from_type,
                       m2.name as to_name,
@@ -352,8 +354,10 @@ function select_app_relat_object (id, from, to)
                       NULL as to_itemtype,
                       NULL as to_items_id,
 
+                      a1.app_type_id as app_type_id,
                       a1.name as from_name,
                       'app' as from_type,
+                      a2.app_type_id as app_type_id,
                       a2.name as to_name,
                       'app' as to_type
                     ]]

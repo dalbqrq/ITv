@@ -74,7 +74,7 @@ ITvision:dispatch_get(show_hst, "/hst/(%d+)")
 function show_svc(web, obj_id)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
-   active_tab = active_tab or 2
+   active_tab = active_tab or 3
 
    local A = Monitor.make_query_4(nil, nil, nil, "m.service_object_id = "..obj_id)
    local H = objects:select_host(A[1].o_name1)

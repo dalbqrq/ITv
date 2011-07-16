@@ -94,7 +94,7 @@ function render_show(web, app, entities, app_name, app_id, obj, rel, obj_id, no_
    local res = {}
    local engene = "dot"
    local file_type = "png"
-   local refresh_time = 15
+   local refresh_time = 20
    local imgfile, imglink, mapfile, maplink, dotfile = Graph.make_gv_filename(app_name, file_type)
 
    engene = "dot"

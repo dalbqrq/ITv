@@ -196,6 +196,7 @@ function render_add(web, APP, CONTACTS, USERS, app_id, msg)
    res[#res+1] = show(web, app_id)
    res[#res+1] = br()
 
+   res[#res+1] = render_title(strings.contact.."s")
    header = { "Login", strings.name, "E-mail", "." }
    res[#res+1] = render_table(make_app_contacts_table(web, CONTACTS), header)
    res[#res+1] = br()

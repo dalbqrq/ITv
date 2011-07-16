@@ -137,13 +137,23 @@ function make_app_relat_table(web, AR)
          ic = ic[1]
       end
 
+      local tag
+      if v.app_type_id == "1" then
+         tag = "+ "
+      elseif v.app_type_id == "2" then
+         tag = "# "
+      else
+         tag = "- "
+      end
+
       local from
       if v.from_type == "hst" then
          from = find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.from_ip..")"
       elseif v.from_type == "svc" then
          from = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.from_ip..")", v.from_name)
       elseif v.from_type == "app" then
-         from = "# "..v.from_name
+         --from = "# "..v.from_name
+         from = tag..v.from_name
       end
 
       if v.to_itemtype == "Computer" then
@@ -160,8 +170,10 @@ function make_app_relat_table(web, AR)
       elseif v.to_type == "svc" then
          to = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.to_ip..")", v.to_name)
       else
-         to = "# "..v.to_name
+         --to = "# "..v.to_name
+         to = tag..v.to_name
       end
+
 
       if permission == "w" then
          remove_button = button_link(strings.remove, web:link("/delete_relat/"..v.app_id..":"..v.from_object_id
@@ -200,6 +212,7 @@ function render_add(web, APPOBJ, AR, RT, app_id, msg)
    res[#res+1] = show(web, app_id)
    res[#res+1] = br()
    --res[#res+1] = render_content_header(strings.relation)
+   res[#res+1] = render_title(strings.relation.."s")
    header =  { strings.origin, strings.type, strings.destiny, "." }
    res[#res+1] = render_table(make_app_relat_table(web, AR), header)
    res[#res+1] = br()
@@ -219,12 +232,21 @@ function render_add(web, APPOBJ, AR, RT, app_id, msg)
                ic = ic[1]
             end
 
+            local tag
+            if v.app_type_id == "1" then
+               tag = "+ "
+            elseif v.app_type_id == "2" then
+               tag = "# "
+            else
+               tag = "- "
+            end
+
             if v.obj_type == "hst" then
                obj = find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.ip..")"
             elseif v.obj_type == "svc" then
                obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.ip..")", v.name)
             else
-               obj = "# "..v.name
+               obj = tag..v.name
             end
             opt_from[#opt_from+1] = option{ value=v.object_id, obj }
          end
@@ -251,12 +273,21 @@ function render_add(web, APPOBJ, AR, RT, app_id, msg)
                ic = ic[1]
             end
 
+            local tag
+            if v.app_type_id == "1" then
+               tag = "+ "
+            elseif v.app_type_id == "2" then
+               tag = "# "
+            else
+               tag = "- "
+            end
+
             if v.obj_type == "hst" then
                obj = find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.ip..")"
             elseif v.obj_type == "svc" then
                obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.ip..")", v.name)
             else
-               obj = "# "..v.name
+               obj = tag..v.name
             end
             opt_to[#opt_to+1] = option{ value=v.object_id, obj }
          end
