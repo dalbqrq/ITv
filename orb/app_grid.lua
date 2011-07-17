@@ -156,7 +156,7 @@ function render_show(web, app, entities, app_name, app_id, obj, rel, obj_id, app
    local permission = Auth.check_permission(web, "application")
    local res = {}
    local lnkgeo, lnkedt  = nil, nil
-   local refresh_time = 5
+   local refresh_time = 20
 
    if obj_id then 
       web.prefix = "/orb/obj_info"
