@@ -1,2 +1,2 @@
-version = "0.9.6"
-patch = 5
+version = "1.0.0"
+patch = 0
