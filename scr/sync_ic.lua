@@ -43,15 +43,10 @@ end
 function ic_delete(id, itemtype)
    print("delete: "..id)
    local m = Model.query("itvision_monitors", "name1 like '"..id.."_%'")
-   --DEBUG: 
-text_file_writer("/tmp/cd", id, "|", m[1].name1, "|")
 
    if m[1] then
       for i,v in ipairs(m) do
-         service_object_id = v.service_object_id
-         ITvision.delete(nil, service_object_id)  -- chama funcao de remocao de probe.lua -  remove tudo que está relacionaod ao objeto
-         --DEBUG: 
-text_file_writer("/tmp/cd"..i, service_object_id)
+         ITvision.delete(nil, v.service_object_id)  -- chama funcao de remocao de probe.lua -  remove tudo que está relacionaod ao objeto
       end
    end
    os.reset_monitor()
