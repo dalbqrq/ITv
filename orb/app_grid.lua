@@ -136,10 +136,10 @@ function make_grid(web, O)
          for i = #col+1, max_cols do  
             col[#col+1] = { value="", state=-1 }
          end
-         row[#row+1] = col
       end
+      row[#row+1] = col
 
-      if #row > 0 then
+      if #col > 0 then
          res[#res+1] = render_title(name_hst_svc_subapp_subent(t).."(s)")
          res[#res+1] = render_table(row, nil, "tab_cadre_appgrid")
       end
