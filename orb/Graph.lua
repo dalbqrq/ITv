@@ -29,9 +29,13 @@ local node_def = {
 }
 
 
-function set_color(state, obj_type)
+function set_color(state, has_been_checked, obj_type)
    local color
-   state = tonumber(state)
+   if tonumber(has_been_checked) == 1 then
+      state = tonumber(state)
+   else
+      state = 4
+   end
 
 --[[
    if obj_type == 'hst' then
@@ -116,7 +120,7 @@ function make_content(obj, rel)
             end
          end
 
-         color = set_color(v.ss_current_state, v.ao_type)
+         color = set_color(v.ss_current_state, v.ss_has_been_checked, v.ao_type)
          table.insert(content, 
             node {
                name, 
@@ -221,7 +225,7 @@ function make_tree_content(obj, rel, sep)
             shape = "hexagon"
          end
 
-         color = set_color(v.ss_current_state, "app")
+         color = set_color(v.ss_current_state, v.ss_has_been_checked, "app")
          table.insert(content, 
             node {
                name, 
