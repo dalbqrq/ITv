@@ -534,6 +534,7 @@ function render_checkcmd(web, chk_id, hst_name, ip, url_test, url_insert, chk_pa
 
    if permission == "w" then
       res[#res+1] = center{ render_form(web:link(url_test), nil, params, true, strings.test ) }
+      --res[#res+1] = { br(), chk.." "..args, br(), br(), os.capture(chk.." "..args, true) }
       res[#res+1] = { br(), os.capture(chk.." "..args, true) }
       res[#res+1] = center{ render_form(web:link(url_insert), nil, params_hidden, true, "Criar checagem" ) }
    else
