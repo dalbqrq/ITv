@@ -426,7 +426,7 @@ function select_app_relat_to_graph (id)
 
    local content3 = query (tables_, cond_, extra_, columns_)
 
-   -- POR FIM, SELECIONA RELACIONAMENTOS ENTRE APLICACOES NA ORIGEM e HOSTS e SERVICES NO DESTINO
+   -- POR FIM, SELECIONA RELACIONAMENTOS ENTRE APLICACOES NA ORIGEM e NO DESTINO
    local tables_  = "itvision_apps a, itvision_app_relats ar, itvision_app_relat_types art, "..
                     "nagios_objects o1, nagios_objects o2 "
    local columns_ = "a.name as a_name, art.name as art_name, "..

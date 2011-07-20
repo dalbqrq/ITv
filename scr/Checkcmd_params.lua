@@ -49,7 +49,7 @@ cmds = {
       command = "check_ftp",
       args = {
          { sequence=nil, flag="-H",  variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP" },
-         { sequence=1, flag="-p",  variable="$ARG1$", default_value="22", description="Porta FTP" },
+         { sequence=1, flag="-p",  variable="$ARG1$", default_value="21", description="Porta FTP" },
       },
    },
 
@@ -65,7 +65,7 @@ cmds = {
    },
 
    HTTP = {
-      label = "HTTP",
+      label = "HTTP_IP",
       command = "check_http",
       args = {
          { sequence=nil, flag="-I",  variable="$HOSTADDRESS$", default_value=nil, description="Endereço IP" },

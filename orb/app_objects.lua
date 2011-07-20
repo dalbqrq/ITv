@@ -83,10 +83,11 @@ function add(web, app_id, msg)
    local exclude = [[ o.object_id not in ( select service_object_id from itvision_app_objects where app_id = ]]..app_id..[[) 
                       and o.is_active = 1 ]]
          clause  = [[ and p.entities_id in ]]..entity_auth
-   local extra   = [[ order by o.name1, o.name2 ]]
+   local extra   = [[ order by c.alias, c.name ]]
    local HST = Monitor.make_query_3(nil, nil, nil, exclude .. clause .. extra)
-      clause = clause..[[ and o.name2 <> ']]..config.monitor.check_host..[[' ]]
-   local SVC = Monitor.make_query_4(nil, nil, nil, nil, exclude .. clause .. extra)
+   --   clause = clause..[[ and o.name2 <> ']]..config.monitor.check_host..[[' ]]
+   --local SVC = Monitor.make_query_4(nil, nil, nil, nil, exclude .. clause .. extra)
+   local SVC = Monitor.make_query_4(nil, nil, nil, exclude .. clause .. extra)
 
    clause = " ( a.entities_id in "..entity_auth.." or a.visibility = 1 )"
    local APP = App.select_app_service_object(clause, nil, nil, app_id)
@@ -119,7 +120,7 @@ function insert_obj(web)
 
    if web.input.type == 'app' then 
       update_apps(web)
-      os.sleep(1)
+      --os.sleep(1)
    end
 
    web.prefix = "/orb/app_tabs"
@@ -266,8 +267,8 @@ function render_add(web, HST, SVC, APP, APPOBJ, app_id, msg)
          local hst_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
          opt_svc[#opt_svc+1] = option{ value=v.o_object_id, make_obj_name(hst_name.." ("..v.p_ip..")", v.m_name)}
       end  
-         local svc = { render_form(web:link(url_app), web:link("/add/"..app_id),
-               { H("select") { size=list_size, style="width: 100%;", name="item", opt_svc }, br(),
+      local svc = { render_form(web:link(url_app), web:link("/add/"..app_id),
+                  { H("select") { size=list_size, style="width: 100%;", name="item", opt_svc }, br(),
                     input{ type="hidden", name="app_id", value=app_id },
                     input{ type="hidden", name="type", value="svc" } }, true, strings.add ) }
 
@@ -283,7 +284,7 @@ function render_add(web, HST, SVC, APP, APPOBJ, app_id, msg)
                     input{ type="hidden", name="type", value="app" } }, true, strings.add ) }
 
 
-      header = { strings.host, strings.service, strings.application }
+      header = { strings.alias.."/"..strings.name, strings.service, strings.application }
       res[#res+1] = render_table({ {hst, svc, app} }, header)
 
       res[#res+1] = { br(), br(), br(), br() }

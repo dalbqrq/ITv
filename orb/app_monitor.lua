@@ -59,7 +59,7 @@ function list(web, msg)
 
    local clause = nil
 
-   if web.input.hostname ~= "" and web.input.hostname ~= nil then clause = "c.name like '%"..web.input.hostname.."%' " end
+   if web.input.hostname ~= "" and web.input.hostname ~= nil then clause = " c.name like '%"..web.input.hostname.."%' " end
    if web.input.inventory ~= "" and web.input.inventory ~= nil then 
       local a = ""
       if clause then a = " and " else clause = "" end
@@ -108,10 +108,11 @@ function render_list(web, ics, msg)
    local refresh_time = 60
 
    local header = { 
-      strings.alias.."/"..strings.name, strings.status, "IP", "Software / Versão", strings.type, "."
+      strings.alias.."/"..strings.name, strings.status, "IP", "CHECAGEM", strings.type, "."
    }
 
    for i, v in ipairs(ics) do
+      local probe = v.m_name
       local serv, ip, itemtype, id, hst_name, alias = "", "", "", "", nil, nil
       if v.sw_name ~= "" and v.sv_name ~= nil then serv = v.sw_name.." / "..v.sv_name end
 
@@ -159,6 +160,7 @@ function render_list(web, ics, msg)
       else 
          web.prefix = "/orb/app_tabs"
          url = web:link("/list/"..v.ax_id..":2")
+         probe = ""
       end
 
       if v.sw_name ~= "" then itemtype = "Service" end
@@ -171,9 +173,14 @@ function render_list(web, ics, msg)
          name = hst_name
       end
 
-      local state = tonumber(v.ss_current_state)
+      local state
+      if tonumber(v.ss_has_been_checked) == 1 then
+         state = tonumber(v.ss_current_state)
+      else
+         state = 4
+      end
       local statename = applic_alert[state].name
-      row[#row + 1] = { status={state=state, colnumber=2}, name, statename, ip, serv, itemtype, v.ss_output }
+      row[#row + 1] = { status={state=state, colnumber=2}, name, statename, ip, probe, itemtype, v.ss_output }
    end
 
    res[#res+1] = render_content_header(auth, "Monitoração", nil, web:link("/list"))

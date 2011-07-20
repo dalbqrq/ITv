@@ -76,10 +76,13 @@ function render_menu_frame(inner_html)
 
    local imgs = make_logo(config.database.instance_name)
    local logo = {}
+   local header_imgs = {}
 
    for _,v in ipairs(imgs) do
       logo[#logo+1] = img{ src=v.src, width=v.width, height=v.height }
    end
+
+   if #inner_html > 0 then header_imgs = { img{ src="/pics/logo_itv.png" }, logo } end
 
    return html{
       head{
@@ -95,11 +98,7 @@ function render_menu_frame(inner_html)
       },
 
       body{
-         div{ id="header", 
-            img{ src="/pics/logo_itv.png" },
-            logo,
-            inner_html
-         }
+         div{ id="header", header_imgs, inner_html }
       }
    }
 end
@@ -289,15 +288,17 @@ end
          Se "nil" então não possui header
          Se tabela vazia ("{}") entao o header estah dentro da tabela t
          Se tabela com lista de strings, estao este eh o header a ser utilizado
+   class -> classe do css a ser usada para a tabela. Default: tab_cadre_fixe
 
 ]]
-function render_table(t, h)
+function render_table(t, h, class)
    local row = {}
    local col = {}
    local hea = {}
    local i, j, v, w
    local bgclass = "tab_bg_1"
    local span = 1
+   class = class or "tab_cadre_fixe"
 
    if h ~= nil and table.getn(h) > 0 then -- h contendo o header
       for c, w in ipairs(h) do
@@ -343,7 +344,33 @@ function render_table(t, h)
       col = {}
    end
 
-   return H("table") { border="0", class="tab_cadre_fixe", thead{ hea }, tbody{ row } }
+   return H("table") { border="0", class=class, thead{ hea }, tbody{ row } }
+end
+
+
+function render_grid(content)
+   local row = {}
+   local col = {}
+   local i, j, v, w
+   local class = "tab_bg_1"
+   local span = 1
+
+   for r, v in ipairs(content) do
+      for c, w in pairs(v) do
+         if c == "colspan" then 
+            span = w
+         else 
+            col[#col+1] = td{ colspan=span, w }
+            span = 1
+         end
+      end
+
+      row[#row+1] = tr{ class=class, col }
+      col = {}
+   end
+
+   return H("table") { border="0", class="tab_cadre_fixe", tbody{ row } }
+
 end
 
 
@@ -601,7 +628,7 @@ HostOrServiceOrApp = {
 }
 
 function name_hst_svc_app(id, is_entity)
-   if is_entity then id = "ent" end
+   if is_entity == 1 then id = "ent" end
    return choose_name(HostOrServiceOrApp, id, is_entity)
 end
 

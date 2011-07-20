@@ -112,9 +112,8 @@ function render_show(web, app, entities, app_name, app_id, obj, rel, obj_id, no_
       lnkgeo = web:link("/geotag/app:"..obj_id) 
       web.prefix = "/orb/app_tabs"
       lnkedt = web:link("/list/"..app_id..":2") 
-      web.prefix = "/orb"
    end
-
+   web.prefix = "/orb"
 
    if no_header == nil then
       if auth then -- se nao estiver logado, valor de auth é "false" e não a arvore de autenticacao (mod Auth)
