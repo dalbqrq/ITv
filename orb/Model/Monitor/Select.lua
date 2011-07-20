@@ -385,7 +385,7 @@ end
 function make_query_4(c_id, p_id, sv_id, a_id, clause)
    local q, t = {}, {}
    if a_id then
-       t = { "c", "p", "csv", "sv", "sw", "o", "s", "m", "ss", "ax", "ao" }
+       t = { "c", "p", "csv", "sv", "sw", "o", "s", "m", "ss", "a", "ao" }
    else
        t = { "c", "p", "csv", "sv", "sw", "o", "s", "m", "ss" }
    end
@@ -402,13 +402,13 @@ function make_query_4(c_id, p_id, sv_id, a_id, clause)
    if c_id  then cond_ = cond_ .. " and c.id = "  .. c_id  end
    if p_id  then cond_ = cond_ .. " and p.id = "  .. p_id  end
    if sv_id then cond_ = cond_ .. " and sv.id = " .. sv_id end
-   if a_id then cond_ = cond_ .. " and ax.id = " .. a_id end
+   if a_id then cond_ = cond_ .. " and a.id = " .. a_id end
    if clause  then cond_ = cond_ .. " and " .. clause end
 
    q = Model.query(tables_, cond_, nil, columns_)
    for _,v in ipairs(q) do table.insert(v, 1, 4) end
 
-   --if DEBUG then print( "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
+   if DEBUG then print( "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
 
    return q
 end
@@ -888,7 +888,7 @@ function how_to_use()
    --a = make_query_5()
    --a = select_monitors()
 
-   a = make_query_3(nil, nil, 15)
+   a = make_query_4(nil, nil, nil, 45)
 
 --[[
    for i,v in ipairs(a) do
