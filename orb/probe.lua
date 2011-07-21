@@ -248,10 +248,23 @@ p_id    = address             = 147.65.1.3
 ------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------
 function insert_host(web, p_id, sv_id, c_id, n_id, c_name, ip)
-   local msg = ""
+   local msg, check_args = "", ""
    local hst_name = c_id.."_"..p_id
+   local h = monitors:select_monitors(hst_name)
 
-   h = monitors:select_monitors(hst_name)
+   ------------------------------------------------------------
+   -- recupera argumentos defaults do check_host (HOST_ALIVE)
+   ------------------------------------------------------------
+   local tables_ = [[nagios_objects o, itvision_checkcmds c, itvision_checkcmd_default_params p]]
+   local cond_   = [[o.objecttype_id = 12 and o.is_active = 1 and o.object_id = c.cmd_object_id and c.id = p.checkcmds_id 
+                     and p.sequence is not null and o.name2 is null and o.name1 = ']]..config.monitor.check_host..[[']]
+   local extras_ = [[order by p.sequence]]
+   local p = Model.query(tables_, cond_, extras_)
+
+   for i,v in ipairs(p) do
+      check_args = check_args.."!"..v.default_value
+      insert_params( hst_name, config.monitor.check_host, v.object_id, i, v.default_value )
+   end
 
    ------------------------------------------------------
    -- cria check host e service ping caso nao exista
@@ -262,7 +275,7 @@ function insert_host(web, p_id, sv_id, c_id, n_id, c_name, ip)
       -- cria monitor sem a referencia do servico check_alive associado.
       insert_host_cfg_file (hst_name, hst_name, ip)
       monitors:insert_monitor(p_id, nil, -1, config.monitor.check_host, hst_name, config.monitor.check_host, 0, "hst")
-      insert_service_cfg_file (hst_name, config.monitor.check_host, config.monitor.check_host, nil)
+      insert_service_cfg_file (hst_name, config.monitor.check_host, config.monitor.check_host, check_args)
 
       msg = msg.."Check do HOST: "..c_name.." para o IP "..ip.." criado. "..error_message(11)
    else
