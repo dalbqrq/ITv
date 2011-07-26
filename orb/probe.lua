@@ -202,13 +202,13 @@ function add(web, query, c_id, p_id, sv_id, default)
    elseif query == 3 then
       ics = Monitor.make_query_3(c_id, p_id)
    elseif query == 4 then
-      ics = Monitor.make_query_4(c_id, p_id, sv_id)
+      ics = Monitor.make_query_4(c_id, p_id)
    end
 
    local params = { query=query, c_id=c_id, p_id=p_id, sv_id=sv_id, default=default }
 
    if chk_id then
-      _, chk_params = Checkcmds.get_check_params(chk_id, false, false)
+      _, chk_params = Checkcmds.get_checkcmd_default_params(chk_id, false, false)
       for i,v in ipairs(chk_params) do
          chk_params[i].flag = web.input["flag"..i]
          chk_params[i].default_value = web.input["opt"..i]
@@ -219,6 +219,46 @@ function add(web, query, c_id, p_id, sv_id, default)
 end
 ITvision:dispatch_get(add, "/add/(%d+):(%d+):(%d+):(%d+)", "/add/(%d+):(%d+):(%d+):(%d+):(%d+)")
 ITvision:dispatch_post(add, "/add/(%d+):(%d+):(%d+):(%d+)", "/add/(%d+):(%d+):(%d+):(%d+):(%d+)")
+
+
+function update(web, query, c_id, p_id, m_service_object_id)
+   local auth = Auth.check(web)
+   if not auth then return Auth.redirect(web) end
+
+   local count = web.input.count
+   local chk_id = web.input.chk_id
+   local chk_name = web.input.chk_name
+   local monitor_name = web.input.monitor_name
+   local chk_params = nil
+
+   local chk = Checkcmds.select_checkcmds(m_service_object_id)
+   local chk = Checkcmds.select_checkcmds(nil, true)
+   local ics = {}
+
+   chk_id = chk[1].id
+
+   query = tonumber(query)
+
+   if query == 3 then
+      ics = Monitor.make_query_3(c_id, p_id)
+   elseif query == 4 then
+      ics = Monitor.make_query_4(c_id, p_id)
+   end
+
+   local params = { query=query, c_id=c_id, p_id=p_id, default=m_service_object_id }
+
+   if chk_id then
+      chk_params = Checkcmds.get_checkcmd_params(chk_id)
+      for i,v in ipairs(chk_params) do
+         chk_params[i].flag = web.input["flag"..i]
+         chk_params[i].default_value = web.input["opt"..i]
+      end
+   end
+
+   return render_add(web, ics, chk, params, chk_params, chk[1].name)
+end
+ITvision:dispatch_get(update, "/update/(%d+):(%d+):(%d+):(%d+)", "/add/(%d+):(%d+):(%d+):(%d+):(%d+)")
+ITvision:dispatch_post(update, "/update/(%d+):(%d+):(%d+):(%d+)", "/add/(%d+):(%d+):(%d+):(%d+):(%d+)")
 
 
 function pend(web)
@@ -429,7 +469,7 @@ function render_list(web, ics, chk, msg)
                                        -- Por isso estou tirando esta entrada da tabela na tela de checagem!
          end
          link = "-" -- DEBUG: ..v[1]
-         link = a{ href= web:link("/edit/"..v[1]..":"..c_id..":"..v.p_id..":"..v.sv_id), strings.edit }
+         --link = a{ href= web:link("/update/"..v[1]..":"..c_id..":"..v.p_id..":"..v.m_service_object_id), strings.edit }
          link2 = a{ href= web:link("/add/"..v[1]..":"..c_id..":"..v.p_id..":0"), strings.add }
       end
 
@@ -495,7 +535,7 @@ function render_checkcmd(web, chk_id, hst_name, ip, url_test, url_insert, chk_pa
       return res
    end
 
-   local c, p = Checkcmds.get_check_params(chk_id, false, false)
+   local c, p = Checkcmds.get_checkcmd_default_params(chk_id, false, false)
    if chk_params then p = chk_params end
    local chk = path.."/"..c[1].command
 

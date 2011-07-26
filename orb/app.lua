@@ -168,6 +168,7 @@ function update(web, id)
       --A.is_active = web.input.is_active
       A.visibility = web.input.visibility
       A.service_object_id = web.input.service_object_id
+      A.entities_id = web.input.entity
       Model.update (tables, A, clause) 
    end
 
