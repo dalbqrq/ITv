@@ -120,12 +120,14 @@ function make_content(obj, rel)
             end
          end
 
+         name = v.o_object_id
+
          color = set_color(v.ss_current_state, v.ss_has_been_checked, v.ao_type)
          table.insert(content, 
             node {
                name, 
                label = label,
-               shape  =shape,
+               shape = shape,
                fillcolor = color,
                URL = url,
                height = node_def.height,
@@ -160,6 +162,7 @@ function make_content(obj, rel)
             ic = ic[1]
          end
 
+--[[
          if string.find(v.o1_name1, config.monitor.check_app) then
             from_name = string.gsub(v.m1_name, "[%s,%p]", "")
          elseif v.o1_name2 == config.monitor.check_host then
@@ -167,6 +170,8 @@ function make_content(obj, rel)
          else
             from_name = string.gsub(find_hostname(ic.alias, ic.name, ic.itv_key)..v.m1_name, "[%s,%p]", "")
          end
+]] -- substituido pela linha de comando abaixo
+         from_name = v.o2_object_id
 
 
          -- TO -------------------------------
@@ -178,6 +183,7 @@ function make_content(obj, rel)
             ic = ic[1]
          end
 
+--[[
          if string.find(v.o2_name1, config.monitor.check_app) then
             to_name = string.gsub(v.m2_name, "[%s,%p]", "")
          elseif v.o2_name2 == config.monitor.check_host then
@@ -185,7 +191,8 @@ function make_content(obj, rel)
          else
             to_name = string.gsub(find_hostname(ic.alias, ic.name, ic.itv_key)..v.m2_name, "[%s,%p]", "")
          end
-
+]] -- substituido pela linha de comando abaixo
+         to_name = v.o1_object_id
 
          -- RELAT -------------------------------
          if use_relat_label then
