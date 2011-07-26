@@ -802,7 +802,7 @@ function select_monitors(clause)
    local q1 = make_query_1(nil, nil, clause)
    -- XXX -- local q2 = make_query_2(nil, nil, nil, clause)
    local q3 = make_query_3(nil, nil, nil, clause)
-   local q4 = make_query_4(nil, nil, nil, nil, clause)
+   local q4 = make_query_4(nil, nil, nil, clause)
    local q6 = make_query_6(nil, nil, clause)
    local q7 = make_query_7(nil, nil, nil, clause)
    local q8 = make_query_8(nil, nil, clause)
@@ -899,7 +899,7 @@ function tree(app_id, show_svc)
    end
 
    local q3 = make_query_3(nil, nil, app_id, clause)
-   local q4 = make_query_4(nil, nil, nil, app_id, clause)
+   local q4 = make_query_4(nil, nil, app_id, clause)
    for _,v in ipairs(q3) do table.insert(q, v) end
    for _,v in ipairs(q4) do table.insert(q, v) end
 
@@ -974,7 +974,9 @@ function how_to_use()
 ]]
 
    --a = tree(8)
-   a = make_query_5(2)
+   a = make_query_3(nil, nil, 39)
+   a = make_query_4(nil, nil, 39)
+   a = make_query_5(39)
    --a = select_monitors()
 
 
