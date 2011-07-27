@@ -171,7 +171,7 @@ function make_content(obj, rel)
             from_name = string.gsub(find_hostname(ic.alias, ic.name, ic.itv_key)..v.m1_name, "[%s,%p]", "")
          end
 ]] -- substituido pela linha de comando abaixo
-         from_name = v.o2_object_id
+         from_name = v.o1_object_id
 
 
          -- TO -------------------------------
@@ -192,7 +192,7 @@ function make_content(obj, rel)
             to_name = string.gsub(find_hostname(ic.alias, ic.name, ic.itv_key)..v.m2_name, "[%s,%p]", "")
          end
 ]] -- substituido pela linha de comando abaixo
-         to_name = v.o1_object_id
+         to_name = v.o2_object_id
 
          -- RELAT -------------------------------
          if use_relat_label then
