@@ -148,14 +148,14 @@ end
 ITvision:dispatch_get(show, "/show/(%d+)")
 
 
-function edit(web, id, nm, tp, vz)
+function edit(web, id, nm, tp, vz, et)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
 
-   local edt = { id = id, name = nm, type = tp, visibility = vz }
+   local edt = { id = id, name = nm, type = tp, visibility = vz, entity_id = et }
    return render_add(web, edt)
 end
-ITvision:dispatch_get(edit, "/edit/(%d+):(.+):(%a+):(%d)")
+ITvision:dispatch_get(edit, "/edit/(%d+):(.+):(%a+):(%d):(%d+)")
 
 
 function update(web, id)
@@ -346,7 +346,7 @@ function render_list(web, A, root, msg, no_header)
       if v.is_entity_root == "0" then
          category = strings.application
          button_remove = button_link(strings.remove, web:link("/remove/"..v.id), "negative")
-         button_edit   = button_link(strings.edit, web:link("/edit/"..v.id..":"..v.name..":"..v.type..":"..v.visibility))
+         button_edit   = button_link(strings.edit, web:link("/edit/"..v.id..":"..v.name..":"..v.type..":"..v.visibility..":"..v.entity_id))
       end
 
       if v.is_active == "0" then
@@ -428,7 +428,7 @@ function render_add(web, edit)
       strings.name..": ", input{ type="text", name="name", value = edit.name }, " ",
       strings.logic..": ", select_and_or("type", edit.type ),  " ",
       strings.visibility..": ", select_private_public("visibility", edit.visibility ),  " ",
-      strings.entity..": ", select_option("entity", entities, "id", "completename", auth.session.glpidefault_entity ),  " ",
+      strings.entity..": ", select_option("entity", entities, "id", "completename", edit.entity_id ),  " ",
       --VERSAO_APP_01: strings.application..": ", select_option("app_parent", apps, "id", "name", auth.session.glpidefault_entity ),  " ",
       "<INPUT TYPE=HIDDEN NAME=\"is_active\" value=\"0\">",
    }
