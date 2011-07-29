@@ -120,17 +120,18 @@ function insert_contact_cfg_file (name, full_name, email, apps)
 
    local text = [[
 define contact{
-        contact_name]].."\t"..name..[[ 
-        alias]].."\t\t"..full_name..[[ 
-        email]].."\t\t"..email..[[ 
-        contact_groups]].."\t"..app_list..[[
+        contact_name]].."\t\t\t"..name..[[ 
+        alias]].."\t\t\t\t"..full_name..[[ 
+        email]].."\t\t\t\t"..email..[[ 
+        contact_groups]].."\t\t\t"..app_list..[[
 
-        service_notification_period     24x7
-        host_notification_period        24x7
-        service_notification_options    w,u,c,r
-        host_notification_options       d,r
-        service_notification_commands   notify-service-by-email
-        host_notification_commands      notify-host-by-email
+        service_notification_period	24x7
+        host_notification_period	24x7
+        service_notification_options	w,u,c,r
+        host_notification_options	d,r
+        #service_notification_commands	notify-service-by-email
+        #host_notification_commands	notify-host-by-email
+        service_notification_commands	notify-aplication-by-email
         }
 ]]
 
