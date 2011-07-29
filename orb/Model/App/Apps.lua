@@ -28,18 +28,8 @@ end
 
 ----------------------------- APP ----------------------------------
 
--- Retorna as aplicacoes já com os nomes da entidades e os seus estados (nagios_servicestatus).
--- POREM... por enquanto tenho que remover o status pois, depois que uma app é criada ela nao
---   tem nagios_objects nem status. A solucao é parecida com as make_queries do modulo Monitor.
+-- Retorna as aplicacoes já com os nomes da entidades SEM os seus estados (nagios_servicestatus).
 function select_app (cond__, extra_, columns_)
---   local tables_  = [[  itvision_apps a, nagios_servicestatus ss ,
---                        (select a.entities_id as entity_id, a.name as entity_name, a.name as entity_completename 
---                         from itvision_app_trees t, itvision_apps a 
---                         where a.id = t.app_id and t.lft=1
---                         union 
---                         select id as entity_id, name as entity_name, completename asentity_completename 
---                         from glpi_entities) as e ]]
---   local cond_   = [[ a.entities_id = e.entity_id and a.service_object_id = ss.service_object_id ]]
    local tables_  = [[  itvision_apps a,
                         (select a.entities_id as entity_id, a.name as entity_name, 
                             a.name as entity_completename 
@@ -49,6 +39,25 @@ function select_app (cond__, extra_, columns_)
                          select id as entity_id, name as entity_name, completename as entity_completename 
                          from glpi_entities) as e ]]
    local cond_   = [[ a.entities_id = e.entity_id ]]
+   local extra_  = [[ order by entity_completename ]]
+
+   if cond__ then cond_ = cond_.." and "..cond__ end
+   local content = query (tables_, cond_, extra_, columns_)
+
+   return content
+end
+
+
+-- Retorna as aplicacoes já com os nomes da entidades COM os seus estados (nagios_servicestatus).
+function select_app_state (cond__, extra_, columns_)
+   local tables_  = [[  itvision_apps a, nagios_servicestatus ss ,
+                        (select a.entities_id as entity_id, a.name as entity_name, a.name as entity_completename 
+                         from itvision_app_trees t, itvision_apps a 
+                         where a.id = t.app_id and t.lft=1
+                         union 
+                         select id as entity_id, name as entity_name, completename asentity_completename 
+                         from glpi_entities) as e ]]
+   local cond_   = [[ a.entities_id = e.entity_id and a.service_object_id = ss.service_object_id ]]
    local extra_  = [[ order by entity_completename ]]
 
    if cond__ then cond_ = cond_.." and "..cond__ end
@@ -132,7 +141,7 @@ function select_app_app_objects (id)
    local tables_ = "nagios_objects o, itvision_app_objects ao, itvision_apps a, glpi_networkports p, itvision_monitors m"
    local columns_ = [[ o.object_id, o.objecttype_id, o.name1, o.name2, ao.type as obj_type, a.id as 
 	app_id, a.name as a_name, a.type as a_type, a.is_active, a.service_object_id as service_id, 
-        p.itemtype as itemtype, p.items_id as items_id, p.ip as ip,
+        p.itemtype as itemtype, p.items_id as items_id, p.ip as ip, p.id as p_id,
         m.name as name ]]
    local content = query (tables_, cond_, extra_, columns_)
 
