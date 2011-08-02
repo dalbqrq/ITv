@@ -60,7 +60,7 @@ function includeCommonHtmlHeader($title='') {
           \"http://www.w3.org/TR/html4/loose.dtd\">";
    echo "\n<html><head><title>".$title."</title>";
 /* daniel
-   echo "\n<html><head><title>GLPI - ".$title."</title>";
+   echo "\n<html><head><title>ITvision - ".$title."</title>";
 daniel */
    echo "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8 \" >";
    // Send extra expires header
@@ -1668,7 +1668,7 @@ function displayDebugInfos($with_session=true) {
 
    if ($_SESSION['glpi_use_mode']==DEBUG_MODE) { // mode debug
       echo "<div id='debug'>";
-      echo "<h1><a id='see_debug' name='see_debug'>GLPI MODE DEBUG</a></h1>";
+      echo "<h1><a id='see_debug' name='see_debug'>ITvision MODE DEBUG</a></h1>";
       if ($CFG_GLPI["debug_sql"]) {
          echo "<h2>SQL REQUEST : ";
          echo $SQL_TOTAL_REQUEST." Queries ";
@@ -1756,13 +1756,13 @@ function commonFooter($keepDB=false) {
 
    if ($_SESSION['glpi_use_mode']==TRANSLATION_MODE) { // debug mode traduction
       echo "<div id='debug-float'>";
-      echo "<a href='#see_debug'>GLPI MODE TRANSLATION</a>";
+      echo "<a href='#see_debug'>ITvision MODE TRANSLATION</a>";
       echo "</div>";
    }
 
    if ($_SESSION['glpi_use_mode']==DEBUG_MODE) { // mode debug
       echo "<div id='debug-float'>";
-      echo "<a href='#see_debug'>GLPI MODE DEBUG</a>";
+      echo "<a href='#see_debug'>ITvision MODE DEBUG</a>";
       echo "</div>";
    }
    displayDebugInfos();
@@ -1815,13 +1815,13 @@ function helpFooter() {
 
    if ($_SESSION['glpi_use_mode']==TRANSLATION_MODE) { // debug mode traduction
       echo "<div id='debug-float'>";
-      echo "<a href='#see_debug'>GLPI MODE TRANSLATION</a>";
+      echo "<a href='#see_debug'>ITvision MODE TRANSLATION</a>";
       echo "</div>";
    }
 
    if ($_SESSION['glpi_use_mode']==DEBUG_MODE) { // mode debug
       echo "<div id='debug-float'>";
-      echo "<a href='#see_debug'>GLPI MODE DEBUG</a>";
+      echo "<a href='#see_debug'>ITvision MODE DEBUG</a>";
       echo "</div>";
    }
    displayDebugInfos();
