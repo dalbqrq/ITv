@@ -131,7 +131,7 @@ define contact{
         host_notification_options	n
         host_notification_commands	notify-host-by-email
         #service_notification_commands	notify-service-by-email
-        service_notification_commands	notify-aplication-by-email
+        service_notification_commands	notify-application-by-email
         }
 ]]
 
