@@ -3,13 +3,17 @@ module("Checkcmds", package.seeall)
 require "Model"
 require "util"
 
-function select_checkcmds(id, hide_check_host)
+function select_checkcmds(id, object_id, hide_check_host)
    local table_ = [[ nagios_objects o, itvision_checkcmds c ]]
    local cond_ = [[ objecttype_id = 12 and is_active = 1 and 
       o.object_id = c.cmd_object_id ]]
 
    if id ~= nil then
-      cond_ = cond_ .. [[ and o.object_id = ]]..id
+      cond_ = cond_ .. [[ and c.id = ]]..id
+   end
+
+   if object_id ~= nil then
+      cond_ = cond_ .. [[ and o.object_id = ]]..object_id
    end
 
    if hide_check_host then
@@ -22,9 +26,9 @@ function select_checkcmds(id, hide_check_host)
 end
 
 
-function select_checkcmd_params(object_id)
+function select_checkcmd_params(service_object_id)
    local table_ = [[ itvision_checkcmd_params  ]]
-   local cond_ =  [[ cmd_object_id = ]].. object_id
+   local cond_ =  [[ service_object_id = ]].. service_object_id
    local extra_ = [[ order by sequence ]]
 
    return Model.query(table_, cond_, extra_)
@@ -44,7 +48,7 @@ function select_checkcmd_default_params(id, exclude_fixed_params)
 
    local extra_ = [[ order by p.sequence ]]
 
-   return Model.query(table_, cond_, extra_)
+   return Model.query(table_, cond_, extra_ )
 end
 
 
@@ -54,9 +58,9 @@ end
 
 
 function get_checkcmd_default_params(id, exclude_fixed_params, hide_check_host)
-   local c = select_checkcmds(id, hide_check_host)
+   local c = select_checkcmds(nil, id, hide_check_host)
    local counter = 0
-
+ 
    local p = select_checkcmd_default_params(c[1].id, exclude_fixed_params)
    return c, p
 end

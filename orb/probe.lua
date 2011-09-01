@@ -189,33 +189,30 @@ ITvision:dispatch_post(list, "/list", "/list/(.+)")
 
 ------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------
-function add(web, query, c_id, p_id, sv_id, default)
+function add(web, query, c_id, p_id, sv_id, new_cmd, do_test)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
+   if do_test ~= nil then do_test = true else do_test = false end
 
    local count = web.input.count
    local chk_id = web.input.chk_id
    local chk_name = web.input.chk_name
    local monitor_name = web.input.monitor_name
    local chk_params = nil
-
-   local chk = Checkcmds.select_checkcmds(nil, true)
+   local chk = Checkcmds.select_checkcmds(nil, nil, true)
    local ics = {}
 
    query = tonumber(query)
 
    if query == 1 then
       ics = Monitor.make_query_1(c_id, p_id)
-   -- A query_2 nao faz mais sentido pois probe de servico nao depende mais de software
-   --elseif query == 2 then
-   --   ics = Monitor.make_query_2(c_id, p_id, sv_id)
    elseif query == 3 then
       ics = Monitor.make_query_3(c_id, p_id)
    elseif query == 4 then
       ics = Monitor.make_query_4(c_id, p_id)
    end
 
-   local params = { query=query, c_id=c_id, p_id=p_id, sv_id=sv_id, default=default }
+   local params = { query=query, c_id=c_id, p_id=p_id, sv_id=sv_id, origin="add", cmd=new_cmd, do_test=do_test }
 
    if chk_id then
       _, chk_params = Checkcmds.get_checkcmd_default_params(chk_id, false, false)
@@ -227,15 +224,15 @@ function add(web, query, c_id, p_id, sv_id, default)
 
    return render_add(web, ics, chk, params, chk_params, monitor_name)
 end
-ITvision:dispatch_get(add, "/add/(%d+):(%d+):(%d+):(%d+)", "/add/(%d+):(%d+):(%d+):(%d+):(%d+)")
-ITvision:dispatch_post(add, "/add/(%d+):(%d+):(%d+):(%d+)", "/add/(%d+):(%d+):(%d+):(%d+):(%d+)")
+ITvision:dispatch_get(add, "/add/(%d+):(%d+):(%d+):(%d+)","/add/(%d+):(%d+):(%d+):(%d+):(%d+)","/add/(%d+):(%d+):(%d+):(%d+):(%d+):(%d)")
+ITvision:dispatch_post(add, "/add/(%d+):(%d+):(%d+):(%d+)","/add/(%d+):(%d+):(%d+):(%d+):(%d+)","/add/(%d+):(%d+):(%d+):(%d+):(%d+):(%d)")
 
 
-function update(web, query, c_id, p_id, service_object_id)
+function update(web, query, c_id, p_id, sv_id, service_object_id, do_test)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
    local ics = {}
-   local chk = nil
+   query = tonumber(query)
 
    local count = web.input.count
    local chk_id = web.input.chk_id
@@ -243,32 +240,43 @@ function update(web, query, c_id, p_id, service_object_id)
    local monitor_name = web.input.monitor_name
    local chk_params = nil
 
-
-   query = tonumber(query)
-
    if query == 3 then
       ics = Monitor.make_query_3(c_id, p_id)
    elseif query == 4 then
       ics = Monitor.make_query_4(c_id, p_id)
    end
 
-
    local monitor = monitors:select_monitor_from_service(service_object_id) 
-   local chk = Checkcmds.select_checkcmds(monitor[1].cmd_object_id)
-   if chk ~= nil then
-      chk_params = Checkcmds.get_checkcmd_params(chk[1].id)
+
+   local chk = Checkcmds.select_checkcmds(nil, monitor[1].cmd_object_id)
+   chk_id = chk[1].id
+
+   if do_test ~= nil then
+   text_file_writer("/tmp/v", chk_id.." "..chk[1].id.." "..monitor[1].cmd_object_id.." "..service_object_id.."\n")
+      _, chk_params = Checkcmds.get_checkcmd_default_params(monitor[1].cmd_object_id, false, false)
       for i,v in ipairs(chk_params) do
          chk_params[i].flag = web.input["flag"..i]
          chk_params[i].default_value = web.input["opt"..i]
       end
+   else
+      chk_params = Checkcmds.get_checkcmd_params(service_object_id)
+   text_file_writer("/tmp/v", chk_id.." INIT "..#chk_params.." "..chk[1].id.." "..monitor[1].cmd_object_id.." "..service_object_id.."\n")
+      for i,v in ipairs(chk_params) do
+         chk_params[i].flag = "flag"..i
+         chk_params[i].default_value = v.value
+      end
    end
 
-   local params = { query=query, c_id=c_id, p_id=p_id, default=service_object_id }
+   text_file_writer("/tmp/h", chk_id.." INIT "..#chk_params.."\n")
+
+   if do_test ~= nil then do_test = true else do_test = false end
+
+   local params = { query=query, c_id=c_id, p_id=p_id, sv_id==nil,  origin="update", cmd=monitor[1].cmd_object_id, do_test=do_test, service_object_id=service_object_id }
 
    return render_add(web, ics, chk, params, chk_params, chk[1].name)
 end
-ITvision:dispatch_get(update, "/update/(%d+):(%d+):(%d+):(%d+)", "/add/(%d+):(%d+):(%d+):(%d+):(%d+)")
-ITvision:dispatch_post(update, "/update/(%d+):(%d+):(%d+):(%d+)", "/add/(%d+):(%d+):(%d+):(%d+):(%d+)")
+ITvision:dispatch_get(update,"/update/(%d+):(%d+):(%d+):(%d+)","/update/(%d+):(%d+):(%d+):(%d+):(%d+)","/update/(%d+):(%d+):(%d+):(%d+):(%d+):(%d)")
+ITvision:dispatch_post(update,"/update/(%d+):(%d+):(%d+):(%d+)","/update/(%d+):(%d+):(%d+):(%d+):(%d+)","/update/(%d+):(%d+):(%d+):(%d+):(%d+):(%d)")
 
 
 function pend(web)
@@ -474,7 +482,7 @@ function render_list(web, ics, chk, msg)
                                        -- Deve estar relacionado a demora do ndo2db
                                        -- Por isso estou tirando esta entrada da tabela na tela de checagem!
          end
-         link_add_host = a{ href= web:link("/update/"..v[1]..":"..c_id..":"..v.p_id..":"..v.m_service_object_id), strings.edit }
+         link_add_host = a{ href= web:link("/update/"..v[1]..":"..c_id..":"..v.p_id..":0:"..v.m_service_object_id), strings.edit }
          link_add_serv = a{ href= web:link("/add/"..v[1]..":"..c_id..":"..v.p_id..":0"), strings.add.." "..strings.service }
       end
 
@@ -528,7 +536,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------
-function render_checkcmd(web, chk_id, hst_name, ip, url_test, url_insert, chk_params, monitor_name)
+function render_checkcmd(web, chk_id, hst_name, ip, url_test, url_insert, chk_params, monitor_name, do_test, origin)
    local permission = Auth.check_permission(web, "checkcmds")
    local row, row_hidden, cmd = {}, {}, ""
    local readonly, text = "", ""
@@ -542,8 +550,8 @@ function render_checkcmd(web, chk_id, hst_name, ip, url_test, url_insert, chk_pa
       return res
    end
 
-   local c, p = Checkcmds.get_checkcmd_default_params(chk_id, false, false)
-   if chk_params then p = chk_params end
+   local c, p = Checkcmds.get_checkcmd_default_params(chk_id, nil, false)
+   if chk_params ~= nil then text_file_writer("/tmp/d", #chk_params); p = chk_params end
    local chk = path.."/"..c[1].command
 
    monitor_name = monitor_name or c[1].label
@@ -596,7 +604,9 @@ function render_checkcmd(web, chk_id, hst_name, ip, url_test, url_insert, chk_pa
    if permission == "w" then
       res[#res+1] = center{ render_form(web:link(url_test), nil, params, true, strings.test ) }
       -- DEBUG: res[#res+1] = { br(), chk.." "..args, br(), br() }
-      res[#res+1] = { br(), os.capture(chk.." "..args, true) }
+      if do_test then
+         res[#res+1] = { br(), os.capture(chk.." "..args, true) }
+      end
       res[#res+1] = center{ render_form(web:link(url_insert), nil, params_hidden, true, "Criar checagem" ) }
    else
       res[#res+1] = params
@@ -618,35 +628,35 @@ function render_add(web, ics, chk, params, chk_params, monitor_name)
    local s, r, url_test, url_insert, chk_id
 
    -- ESTE RENDER SOh SERVE PARA SERVICES.
-   --if params.default then chk_id = params.default else chk_id = chk[1].object_id end
-   if params.default then chk_id = params.default else chk_id = 0 end
+   --if params.cmd then chk_id = params.cmd else chk_id = chk[1].object_id end
+   if params.cmd then chk_id = params.cmd else chk_id = 0 end
    local header = { strings.alias.."/"..strings.name, "IP", "SW / Versão", strings.type, strings.command }
 
    if v then
-      --serv = v.sw_name.." / "..v.sv_name
       v.c_id = v.c_id or 0; v.n_id = v.n_id or 0; v.p_id = v.p_id or 0; v.sv_id = v.sv_id or 0;
-      --if v.p_itemtype then itemtype = v.p_itemtype else itemtype = "NetworkEquipment" end
 
       hst_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
- --     url_insert = "/insert_service/"..v.p_id..":"..v.sv_id..":"..v.c_id..":"..v.n_id..":"..hst_name..":"..v.sw_name
- --                   ..":"..v.sv_name..":"..v.p_ip
-      url_insert = "/insert_service/"..v.p_id..":"..v.sv_id..":"..v.c_id..":"..v.n_id..":"..hst_name..":nana:nono:"..v.p_ip
 
-      url_test="/add/"..params.query..":"..params.c_id
-      if params.p_id    then url_test = url_test..":"..params.p_id    end
-      if params.sv_id   then url_test = url_test..":"..params.sv_id   end
+      url_insert = "/insert_service/"..v.p_id..":"..v.sv_id..":"..v.c_id..":"..v.n_id..":"..hst_name..":nana:nono:"..v.p_ip
+      url_test   = "/"..params.origin.."/"..params.query..":"..params.c_id
+
+      if params.p_id  then url_test = url_test..":"..params.p_id  else url_test = url_test..":0" end
+      if params.sv_id then url_test = url_test..":"..params.sv_id else url_test = url_test..":0" end
 
       cmd = { select_option_onchange("check", chk, "object_id", "label", chk_id, web:link(url_test)), " " }
       row[#row + 1] = { hst_name, v.p_ip, serv, itemtype, cmd, }
-
-      url_test = url_test..":"..chk_id
+      
+      if params.origin == "update" then
+         url_test = url_test..":"..params.service_object_id..":1"
+      else
+         url_test = url_test..":"..chk_id..":1"
+      end
    end
 
 
    res[#res+1] = render_content_header(auth, "Checagem", nil, web:link("/list"))
    res[#res+1] = render_table(row, header)
---text_file_writer("/tmp/chk", chk_id.." : "..params.default)
-   res[#res+1] = render_checkcmd(web, chk_id, hst_name, v.p_ip, url_test, url_insert, chk_params, monitor_name)
+   res[#res+1] = render_checkcmd(web, chk_id, hst_name, v.p_ip, url_test, url_insert, chk_params, monitor_name, params.do_test, params.origin)
 
 
    return render_layout(res)
