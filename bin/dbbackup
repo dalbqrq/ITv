@@ -7,6 +7,7 @@ d=`date "+%m"`
 dir=/var/log/itvision/_dumps
 opt="--add-drop-table"
 
+rm -f $dir/dbbackup"_"$d.sql.bz2
 mysqldump -u $dbuser --default-character-set=latin1 --password=$dbpass $opt $dbname | bzip2 > $dir/dbbackup"_"$d.sql.bz2
 
 #
@@ -17,6 +18,7 @@ mysqldump -u $dbuser --default-character-set=latin1 --password=$dbpass $opt $dbn
 # para decriptar use: gpg -o foo.txt -d foo.txt.gpg
 
 if [ "$1" == "-d" ]; then
+   rm -f $dir/dbbackup"_"$d.sql.bz2.gpg
    gpg -e -r ITvision $dir/dbbackup"_"$d.sql.bz2
    rm -f $dir/dbbackup"_"$d.sql.bz2
 fi

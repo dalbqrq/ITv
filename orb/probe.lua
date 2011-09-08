@@ -743,8 +743,7 @@ function render_checkcmd(web, chk_id, hst_name, ip, url_test, url_insert, url_up
       end 
 
       if do_test then
-         -- DEBUG: 
-         res[#res+1] = { br(), chk.." "..args, br() }
+         -- DEBUG: res[#res+1] = { br(), chk.." "..args, br() }; 
          res[#res+1] = { br(), br(), os.capture(chk.." "..args, true) }
       end
       if origin == "add" then

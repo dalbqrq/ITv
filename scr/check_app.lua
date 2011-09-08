@@ -1,6 +1,7 @@
 --[[ 
 ]]
 require "Model"
+require "Monitor"
 require "App"
 require "util"
 require "monitor_util"
@@ -8,23 +9,20 @@ require "monitor_util"
 require "state"
 
 
-function check_app(app_id)
+function check_app(debug, app_id)
+   if debug == "-d" or debug == "--debug" then debug = true else app_id = debug; debug = false end
    local state, logic, name
    local app = Model.query("itvision_apps", "id = "..app_id)
-   local app_object_states = Model.query("itvision_apps a, itvision_app_objects ao, nagios_objects o, nagios_servicestatus ss, itvision_monitors m", 
-          [[a.id = ao.app_id and ao.service_object_id = ss.service_object_id and o.is_active = 1 and 
-            o.object_id = ss.service_object_id and ao.service_object_id = m.service_object_id 
-             and o.is_active = 1 and ao.app_id = ]].. app_id, nil, 
-           "a.type, ao.service_object_id, ss.current_state, a.name, m.state as monitor_state" )
+   local app_object_states = Monitor.select_monitors_app_objs(app_id)
 
---o.instance_id = ]]..config.database.instance_id..[[
 
    if app[1] then
       name = app[1].name
+      if debug then print("APP_NAME: ", name) end
    end
 
    if app_object_states[1] then
-      logic = app_object_states[1].type
+      logic = app_object_states[1].a_type
    else
       return APPLIC_UNKNOWN, name
    end
@@ -37,12 +35,12 @@ function check_app(app_id)
    else
       return APPLIC_UNKNOWN
    end
-   --DEBUG: print(logic)
+   if debug then print("LOGIC: ", logic) end
 
    for i, v in ipairs(app_object_states) do
-     --DEBUG: print(i,v.current_state, v.name, v.service_object_id)
-     current_state = tonumber(v.current_state)
-     monitor_state = tonumber(v.monitor_state)
+     if debug then  print(i,v.ss_current_state, v.a_name, v.ao_service_object_id) end
+     current_state = tonumber(v.ss_current_state)
+     monitor_state = tonumber(v.m_state)
      if monitor_state ~= 0 then
         if logic == "and" then
            if current_state > state then
@@ -59,7 +57,7 @@ function check_app(app_id)
    return state, name
 end
 
-local res, nom = check_app(arg[1])
+local res, nom = check_app(arg[1], arg[2])
 local info = ""
 if nom then
    --info = "The state of the application "..nom.." is "..applic_alert[res].name..". | "..res

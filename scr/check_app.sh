@@ -6,4 +6,4 @@ PROGDIR=$(dirname $(readlink -f $0))
 
 export LUA_PATH=$LUA_PATH
 
-lua $PROGDIR/check_app.lua $1
+lua $PROGDIR/check_app.lua $1 $2
