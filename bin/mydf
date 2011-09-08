@@ -1,0 +1,23 @@
+#!/bin/bash
+
+progdir=$(dirname $(readlink -f $0))
+. $progdir/dbconf
+
+tables=`echo "show tables" | mysql -u $dbuser --password=$dbpass $dbname |grep -v Tables_in_itvision`
+
+echo
+date
+echo "----------------------------"
+df
+echo "----------------------------"
+ls -l /var/log/itvision/_dumps/dbbackup* | cut -c32-1000
+echo "----------------------------"
+echo  TABLE COUNT ROWS
+echo "----------------------------"
+for tname in $tables; do
+   nrows=`echo "select count(*) from $tname" | mysql -u $dbuser --password=$dbpass $dbname |grep -v count`
+   echo "$nrows	$tname"
+done
+echo
+echo
+

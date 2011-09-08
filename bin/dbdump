@@ -21,6 +21,6 @@ if [ $# -ge 1 ]; then
    fi
 fi
 
-mysqldump -u $dbuser --default-character-set=latin1 --password=$dbpass $opt $dbname $tables > /tmp/dumpdb$ext"_"$d.sql
+mysqldump -u $dbuser --default-character-set=latin1 --password=$dbpass $opt $dbname $tables | bzip2 > /tmp/dumpdb$ext"_"$d.sql.bz2
 
 \rm -f $tmpfile

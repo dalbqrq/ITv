@@ -710,6 +710,10 @@ source /home/$user/.bashrc
 sudo crontab -u $user -l > /tmp/crontab
 sudo cat << EOF >> /tmp/crontab
 #
+# ITvision mantainance
+#
+0 1 * * * $itvhome/bin/dbbackup
+#
 # ITvision Pendings
 #
 LUA_PATH="$LUA_PATH"

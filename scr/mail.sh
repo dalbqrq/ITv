@@ -6,4 +6,4 @@ PROGDIR=$(dirname $(readlink -f $0))
 
 export LUA_PATH=$LUA_PATH
 
-lua $PROGDIR/mail.lua $1 # parametro deve ser o id de uma aplicacao válida
+lua $PROGDIR/mail.lua $1 $2 # o primeiro parametro deve ser o id de uma aplicacao válida e o segundo o service state id

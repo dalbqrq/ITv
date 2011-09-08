@@ -394,7 +394,7 @@ menu_itens = {
       --{ name="Dicionários", field={"rule_dictionnary_software", "rule_dictionnary_dropdown" }, link="/servdesk/front/dictionnary.php" },
       { name="Perfis", field="profile", link="/servdesk/front/profile.php" },
       { name="Logs", field="logs", link="/servdesk/front/event.php" },
-      { name="Backup", field="backup", link="/servdesk/front/backup.php" },
+      --{ name="Backup", field="backup", link="/servdesk/front/backup.php" },
       },
    },
    { name="Configurar", link="#",
