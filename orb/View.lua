@@ -10,6 +10,7 @@ require "Model"
 require "Auth"
 require "messages"
 require "state"
+require "monitor_inc"
 
 module(Model.name, package.seeall, orbit.new)
 
@@ -624,14 +625,14 @@ end
 
 --  HOST or SERVICE or APP
 HostOrServiceOrApp = {
+   { id = "all", name = strings.all},
    { id = "hst", name = strings.host },
    { id = "svc", name = strings.service},
    { id = "app", name = strings.application},
    { id = "ent", name = strings.entity},
 }
 
-function name_hst_svc_app(id, is_entity)
-   if is_entity == 1 then id = "ent" end
+function name_hst_svc_app(id)
    return choose_name(HostOrServiceOrApp, id, is_entity)
 end
 
@@ -640,19 +641,40 @@ function select_hst_svc_app(name, default)
 end
 
 
--- OK or WARNING or CRITICAL or UNKNOWN
-OkOrWarningOrCritialOrUnknown = {
-   { id = "ok", name = strings.ok },
-   { id = "warning",  name = strings.warning},
-   { id = "critial",  name = strings.critical},
-   { id = "Unknown",  name = strings.unknow},
+--  HOST or SERVICE or APP
+HostOrServiceOrAppOrEnt = {
+   { id = "hst", name = strings.host },
+   { id = "svc", name = strings.service},
+   { id = "app", name = strings.application},
+   { id = "ent", name = strings.entity},
 }
 
-function name_ok_warning_critical_unknow(id)
+function name_hst_svc_app_ent(id, is_entity)
+   if is_entity == 1 then id = "ent" end
+   return choose_name(HostOrServiceOrAppOrEnt, id, is_entity)
+end
+
+function select_hst_svc_app_ent(name, default)
+   return select_option(name, HostOrServiceOrAppOrEnt, "id", "name", default)
+end
+
+
+-- OK or WARNING or CRITICAL or UNKNOWN
+OkOrWarningOrCritialOrUnknown = {
+   { id = -1,               name = strings.all },
+   { id = APPLIC_OK,       name = strings.ok },
+   { id = APPLIC_WARNING,  name = strings.warning },
+   { id = APPLIC_CRITICAL, name = strings.critical },
+   { id = APPLIC_UNKNOWN,  name = strings.unknown },
+   { id = APPLIC_PENDING,  name = strings.pending },
+   { id = APPLIC_DISABLE,  name = strings.disable },
+}
+
+function name_ok_warning_critical_unknown(id)
    return choose_name(OkOrWarningOrCritialOrUnknown, id)
 end
 
-function select_ok_warning_critical_unknow(name, default)
+function select_ok_warning_critical_unknown(name, default)
    return select_option(name, OkOrWarningOrCritialOrUnknown, "id", "name", default)
 end
 

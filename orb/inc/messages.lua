@@ -82,8 +82,10 @@ strgs.pt_BR = {
 	status = "Status",
 	ok = "Ok",
 	warning = "Anormal",
-	critial = "Crítico",
-	unknow = "Desconhecido",
+	critical = "Crítico",
+	unknown = "Desconhecido",
+	pending = "Pendente",
+	disable = "Desabilitado",
 
 }
 
@@ -166,8 +168,10 @@ strgs.us = {
 	status = "Status",
 	ok = "Ok",
 	warning = "Warning",
-	critial = "Critical",
-	unknow = "Unknown",
+	critical = "Critical",
+	unknown = "Unknown",
+	pending = "Pending",
+	disable = "Disable",
 }
 
 

@@ -6,6 +6,7 @@ require "Monitor"
 require "Auth"
 require "Checkcmds"
 require "View"
+require "Resume"
 require "util"
 require "monitor_util"
 require "sync_services"
@@ -627,6 +628,7 @@ function render_list(web, ics, chk, msg)
       end
    end
 
+   res[#res+1] = render_table({render_counter()})
    res[#res+1] = render_content_header(auth, "Checagem", nil, web:link("/list"))
    if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ font{ color="red", msg } } end
    local bar = {}

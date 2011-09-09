@@ -5,6 +5,7 @@ require "Model"
 require "Monitor"
 require "Auth"
 require "View"
+require "Resume"
 require "util"
 require "monitor_util"
 
@@ -12,8 +13,24 @@ module(Model.name, package.seeall,orbit.new)
 
 local objects  = Model.nagios:model "objects"
 local monitors = Model.itvision:model "monitors"
+local apps = Model.itvision:model "apps"
+
 
 -- models ------------------------------------------------------------
+
+function apps:select_apps(id, clause_)
+   local q = {}
+   local clause = " is_active = 1"
+   if id then clause = clause.." and  id = "..id end
+   if clause_ then clause = clause.." and "..clause_ end
+
+   q[1] = { id = 0, name = strings.all }
+   q2 = Model.query("itvision_apps", clause, "order by id")
+
+   for _,v in ipairs(q2) do table.insert(q, v) end
+
+   return q
+end
 
 
 function objects:select(name1, name2)
@@ -53,73 +70,99 @@ end
 
 ---------------------------------------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------------------------------------
---[[
-function list(web, msg)
-   local auth = Auth.check(web)
-   if not auth then return Auth.redirect(web) end
 
-   local clause = nil
+function pre_list(web, msg)
+   local hostname, tipo
 
-   if web.input.hostname ~= "" and web.input.hostname ~= nil then clause = " c.name like '%"..web.input.hostname.."%' " end
-   if web.input.inventory ~= "" and web.input.inventory ~= nil then 
-      local a = ""
-      if clause then a = " and " else clause = "" end
-      clause = clause..a.."c.otherserial like '%"..web.input.inventory.."%' "
+   if web.input.hostname ~= "" and web.input.hostname ~= nil and web.input.hostname ~= "all" then 
+      hostname = web.input.hostname
+   else
+      hostname = "all"
    end
-   if web.input.sn ~= "" and web.input.sn ~= nil then 
-      local a = ""
-      if clause then a = " and " else clause = ""  end
-      clause = clause..a.."c.serial like '%"..web.input.sn.."%' "
+   if web.input.tipo ~= "" and web.input.tipo ~= nil then
+      tipo = web.input.tipo
+   else
+      tipo = "all"
    end
-   if web.input.tipo ~= "" and web.input.sn ~= nil then 
-      local a = ""
-      if clause then a = " and " else clause = ""  end
-      clause = clause..a.."c.serial like '%"..web.input.sn.."%' "
+   if web.input.app ~= "" and web.input.app ~= nil then
+      app = web.input.app
+   else
+      app = "0"
    end
-   local a = ""
-   if clause then a = " and " else clause = "" end
-   clause = clause..a.." p.entities_id in "..Auth.make_entity_clause(auth)
+   if web.input.status ~= "" and web.input.status ~= nil then
+      status = web.input.status
+   else
+      status = "-1"
+   end
 
-   local ics = Monitor.select_monitors_app_objs(nil, clause)
-
-   return render_list(web, ics, msg)
+   return web:redirect(web:link("/"..hostname..":"..tipo..":"..app..":"..status))
 end
-ITvision:dispatch_get(list, "/", "/list", "/list/(.+)")
-ITvision:dispatch_post(list, "/list", "/list/(.+)")
-]]
+ITvision:dispatch_get(pre_list, "/", "/pre_list", "/pre_list/(.+)")
+ITvision:dispatch_post(pre_list, "/pre_list", "/pre_list/(.+)")
 
-function list(web, msg)
---function list(web, hostname, tipo, msg)
+
+
+function list(web, hostname, tipo, app, status)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
+   local filter = { hostname = hostname, tipo = tipo, app = app, status = status }
+   local clause, clause5 = nil, nil
 
-   local clause = nil
 
-   if web.input.hostname ~= "" and web.input.hostname ~= nil then clause = " c.name like '%"..web.input.hostname.."%' " end
-   --if hostname ~= "" and hostname ~= nil then clause = " c.name like '%"..hostname.."%' " end
-   if web.input.tipo ~= "" and web.input.tipo ~= nil then 
-   --if tipo ~= "" and tipo ~= nil then 
-      local a = ""
-      if clause then a = " and " else clause = ""  end
-      if tipo == 'hst' then
+   -- Filtro de hostname
+   if filter.hostname ~= "" and filter.hostname ~= nil and filter.hostname ~= "all" then 
+      clause = " c.name like '%"..filter.hostname.."%' "
+   end
+   -- Filtro de tipo
+   if filter.tipo ~= "" and filter.tipo ~= nil then 
+      if filter.tipo == 'hst' then
+         local a = ""
+         if clause then a = " and " else clause = ""  end
          clause = clause..a.."o.name2 = '"..config.monitor.check_host.."' and o.objecttype_id = 2"
-      elseif tipo == 'svc' then
+      elseif filter.tipo == 'svc' then
+         local a = ""
+         if clause then a = " and " else clause = ""  end
          clause = clause..a.."o.name2 <> '"..config.monitor.check_host.."' and o.name1 <> '"..config.monitor.check_app.."' and o.objecttype_id = 2"
-      else 
-         clause = clause..a.."o.name1 = '".. config.monitor.check_app.."' and o.objecttype_id = 2"
+      elseif filter.tipo == 'app' then
+         local a = ""
+         if clause then a = " and " else clause = ""  end
+         clause = clause..a.."o.name1 = '".. config.monitor.check_app.."' and o.objecttype_id = 2"  
+         clause5 = " and ax.is_entity_root = 0"
+      elseif filter.tipo == 'ent' then
+         local a = ""
+         if clause then a = " and " else clause = ""  end
+         clause = clause..a.."o.name1 = '".. config.monitor.check_app.."' and o.objecttype_id = 2"  
+         clause5 = " and ax.is_entity_root = 1"
       end
    end
+   -- Filtro de app
+   if filter.app ~= "" and filter.app ~= nil and filter.app ~= "0" then 
+      app = filter.app
+   else
+      app = nil
+   end
+   -- Filtro de staus
+   if filter.status ~= "" and filter.status ~= nil and filter.status ~= "-1" then 
+      local a = ""
+      if clause then a = " and " else clause = ""  end
+      if filter.status == APPLIC_DISABLE then
+         clause = clause..a.."ss.active_checks_enabled = 0"
+      end
+      clause = clause..a.."ss.current_state = ".. filter.status
+   end
+
    local a = ""
    if clause then a = " and " else clause = "" end
    clause = clause..a.." p.entities_id in "..Auth.make_entity_clause(auth)
 
-   local ics = Monitor.select_monitors_app_objs(nil, clause)
+   local ics = Monitor.select_monitors_app_objs(app, clause, clause5)
 
-   return render_list(web, ics, msg)
+   return render_list(web, ics, filter)
 end
-ITvision:dispatch_get(list, "/", "/list", "/list/(.+)")
-ITvision:dispatch_post(list, "/list", "/list/(.+)")
-
+--ITvision:dispatch_get(list, "/(%a+):(%a+):(%d+)", "/list/(%a+):(%a+):(%d+)", "/list/(%a+):(%a+):(%d+):(.+)")
+--ITvision:dispatch_post(list, "/list/(%a+):(%a+):(%d+)", "/list/(%a+):(%a+):(%d+):(.+)")
+ITvision:dispatch_get(list, "/(.+):(.+):(.+):(.+)", "/list/(.+):(.+):(.+):(.+)")
+ITvision:dispatch_post(list, "/(.+):(.+):(.+):(.+)")
 
 
 
@@ -128,12 +171,15 @@ ITvision:dispatch_post(list, "/list", "/list/(.+)")
 
 ---------------------------------------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------------------------------------
-function render_filter(web)
+function render_filter(web, filter)
    local res = {}
 
-   res[#res+1] = {strings.name..": ", input{ type="text", name="hostname", value = web.input.hostname }, " "}
-   res[#res+1] = {strings.type..": ", select_hst_svc_app("tipo", web.input.tipo)}
-   -- EXEMPLO res[#res+1] = {strings.inventory..": ", input{ type="text", name="inventory", value = web.input.inventory }, " "} 
+   if filter.hostname == "all" then filter.hostname = "" end
+
+   res[#res+1] = {strings.name..": ", input{ type="text", name="hostname", value = filter.hostname }, " "}
+   res[#res+1] = {strings.type..": ", select_hst_svc_app("tipo", filter.tipo), " "}
+   res[#res+1] = {strings.application..": ", select_option("app", apps:select_apps(), "id", "name", filter.app), " " }
+   res[#res+1] = {strings.status..": ", select_ok_warning_critical_unknown("status", filter.status), " "}
 
    return res
 end
@@ -142,7 +188,7 @@ end
 
 ---------------------------------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------------------------------
-function render_list(web, ics, msg)
+function render_list(web, ics, filter, msg)
    local permission, auth = Auth.check_permission(web, "checkcmds")
    local row, res, link, url = {}, {}, {}, ""
    local refresh_time = 60
@@ -150,6 +196,7 @@ function render_list(web, ics, msg)
    local header = { 
       strings.alias.."/"..strings.name, strings.status, "IP", "CHECAGEM", strings.type, "."
    }
+
 
    for i, v in ipairs(ics) do
       local probe = v.m_name
@@ -166,7 +213,7 @@ function render_list(web, ics, msg)
       if v.p_itemtype then 
          itemtype = v.p_itemtype 
       else 
-         if v.a_app_type_id == "1" then 
+         if v.ax_is_entity_root == "1" then 
             itemtype = strings.entity 
          else 
             itemtype = strings.application 
@@ -199,11 +246,13 @@ function render_list(web, ics, msg)
          url = web:link("/front/networkequipment.form.php?id="..c_id)
       else 
          web.prefix = "/orb/app_tabs"
-         url = web:link("/list/"..v.ax_id..":2")
+         url = web:link("/pre_list/"..v.ax_id..":2")
          probe = ""
       end
 
-      if v.sw_name ~= "" then itemtype = "Service" end
+      if probe ~= config.monitor.check_host and probe ~=  "" then
+         itemtype = strings.service
+      end
       web.prefix = "/orb/app_monitor"
 
       local name
@@ -228,15 +277,16 @@ function render_list(web, ics, msg)
       row[#row + 1] = { status={state=state, colnumber=2}, name, statename, ip, probe, itemtype, v.ss_output }
    end
 
-   res[#res+1] = render_content_header(auth, "Monitoração", nil, web:link("/list"))
-   if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ font{ color="red", msg } } end
-   res[#res+1] = render_form_bar( render_filter(web), strings.search, web:link("/list"), web:link("/list") )
+
+   res[#res+1] = render_table({render_counter()})
+   res[#res+1] = render_content_header(auth, "Monitoração", nil, web:link("/pre_list"))
+   --DEBUG: msg = filter.status; res[#res+1] = p{ font{ color="red", msg } }
+   res[#res+1] = render_form_bar( render_filter(web, filter), strings.search, web:link("/pre_list"), web:link("/pre_list") )
    res[#res+1] = render_table(row, header)
    res[#res+1] = { br(), br(), br(), br() }
 
    return render_layout(res, refresh_time)
 end
-
 
 
 orbit.htmlify(ITvision, "render_.+")

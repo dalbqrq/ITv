@@ -164,7 +164,7 @@ function render_list(web, ics, msg)
       end
 
       if v.sw_name ~= "" then itemtype = "Service" end
-      web.prefix = "/orb/app_monitor"
+      web.prefix = "/orb/app_resume"
 
       local name
       if permission == "w" then

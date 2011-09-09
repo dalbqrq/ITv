@@ -5,6 +5,7 @@ require "Model"
 require "App"
 require "Auth"
 require "View"
+require "Resume"
 require "Glpi"
 require "util"
 require "monitor_util"
@@ -384,6 +385,7 @@ function render_list(web, A, root, msg, no_header)
       }
    end
 
+   res[#res+1] = render_table({render_counter()})
    local header =  { strings.name, strings.entity, strings.type, strings.logic, strings.is_active, strings.visibility,".", ".", "." }
    local c_header = {}
    if no_header == nil then
