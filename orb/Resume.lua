@@ -118,6 +118,7 @@ function count_apps()
    from nagios_servicestatus ss, nagios_objects o, itvision_apps a
    where ss.service_object_id = o.object_id
        and o.name1 = 'BUSPROC_HOST' and o.objecttype_id = 2
+       and o.object_id = a.service_object_id and o.is_active = 1
        and a.is_entity_root = 0
    group by ss.current_state;]]
 
@@ -125,6 +126,7 @@ function count_apps()
    t = [[nagios_servicestatus ss, nagios_objects o, itvision_apps a]]
    r = [[ss.service_object_id = o.object_id
        and o.name1 = 'BUSPROC_HOST' and o.objecttype_id = 2
+       and o.object_id = a.service_object_id and o.is_active = 1
        and a.is_entity_root = 0]]
    e = [[group by ss.current_state]]
    q = Model.query(t, r, e, c)
