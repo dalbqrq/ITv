@@ -35,7 +35,7 @@ function count_hosts()
    --[[select count(*), ss.current_state 
    from nagios_servicestatus ss, nagios_objects o, itvision_monitors m, glpi_networkports p, glpi_computers c
    where ss.service_object_id = o.object_id
-       and o.name2 <> 'HOST_ALIVE' and o.name1 <> 'BUSPROC_HOST' and o.objecttype_id = 2
+       and o.name2 = 'HOST_ALIVE' and o.objecttype_id = 2 and o.is_active = 1
        and m.service_object_id = o.object_id
        and m.networkports_id = p.id and p.items_id = c.id and p.itemtype = 'Computer'
        and c.is_deleted = 0 and c.is_template = 0 and c.states_id = 1
@@ -44,7 +44,7 @@ function count_hosts()
    c = [[count(*) as count, ss.current_state as state]]
    t = [[nagios_servicestatus ss, nagios_objects o, itvision_monitors m, glpi_networkports p, glpi_computers c]]
    r = [[ss.service_object_id = o.object_id
-       and o.name2 <> 'HOST_ALIVE' and o.name1 <> 'BUSPROC_HOST' and o.objecttype_id = 2
+       and o.name2 = 'HOST_ALIVE' and o.objecttype_id = 2 and o.is_active = 1
        and m.service_object_id = o.object_id
        and m.networkports_id = p.id and p.items_id = c.id and p.itemtype = 'Computer'
        and c.is_deleted = 0 and c.is_template = 0 and c.states_id = 1]]
@@ -60,7 +60,7 @@ function count_hosts()
    --[[select count(*), ss.current_state 
    from nagios_servicestatus ss, nagios_objects o, itvision_monitors m, glpi_networkports p, glpi_networkequipments c
    where ss.service_object_id = o.object_id
-       and o.name2 <> 'HOST_ALIVE' and o.name1 <> 'BUSPROC_HOST' and o.objecttype_id = 2
+       and o.name2 = 'HOST_ALIVE' and o.objecttype_id = 2 and o.is_active = 1
        and m.service_object_id = o.object_id
        and m.networkports_id = p.id and p.items_id = c.id and p.itemtype = 'NetworkEquipment'
        and c.is_deleted = 0 and c.is_template = 0 and c.states_id = 1
@@ -69,7 +69,7 @@ function count_hosts()
    c = [[count(*) as count, ss.current_state as state]]
    t = [[nagios_servicestatus ss, nagios_objects o, itvision_monitors m, glpi_networkports p, glpi_networkequipments c]]
    r = [[ss.service_object_id = o.object_id
-       and o.name2 <> 'HOST_ALIVE' and o.name1 <> 'BUSPROC_HOST' and o.objecttype_id = 2
+       and o.name2 = 'HOST_ALIVE' and o.objecttype_id = 2 and o.is_active = 1
        and m.service_object_id = o.object_id
        and m.networkports_id = p.id and p.items_id = c.id and p.itemtype = 'NetworkEquipment'
        and c.is_deleted = 0 and c.is_template = 0 and c.states_id = 1]]
@@ -94,13 +94,15 @@ function count_services()
    --[[select count(*), ss.current_state 
    from nagios_servicestatus ss, nagios_objects o
    where ss.service_object_id = o.object_id
-       and o.name2 = 'HOST_ALIVE' and o.objecttype_id = 2
+       and o.name2 <> 'HOST_ALIVE' and o.name1 <> 'BUSPROC_HOST' and o.objecttype_id = 2
+       and and o.is_active = 1 and o.name1 <> 'dummy'
    group by ss.current_state;]]
 
    c = [[count(*) as count, ss.current_state as state]]
    t = [[nagios_servicestatus ss, nagios_objects o]]
    r = [[ss.service_object_id = o.object_id
-       and o.name2 = 'HOST_ALIVE' and o.objecttype_id = 2]]
+       and o.name2 <> 'HOST_ALIVE' and o.name1 <> 'BUSPROC_HOST' and o.objecttype_id = 2
+       and o.is_active = 1 and o.name1 <> 'dummy']]
    e = [[group by ss.current_state]]
    q = Model.query(t, r, e, c)
 
@@ -162,8 +164,10 @@ function render_resume(web)
    local col = {}
    local hea = {}
    local span = 1
-   local bgclass = "tab_bg_1"
+   --local bgclass = "tab_bg_1"
+   local bgclass = "tab_bg_X"
    local class = "tab_cadre_fixe"
+   local class = "tab_glpi"
    local counts = counter()
 
    local h = count_hosts()
@@ -174,30 +178,30 @@ function render_resume(web)
 
    web.prefix = "/orb/app_monitor"
 
-   col[#col+1] = td{ border="0", align="center", colspan=span, bgcolor=white, strings.entity..":" }
-   col[#col+1] = td{ border="0", align="center", colspan=span, bgcolor=applic_alert[0].color, H("a"){ href= web:link("/all:ent:0:0"), e[0] } }
-   col[#col+1] = td{ border="0", align="center", colspan=span, bgcolor=applic_alert[1].color, H("a"){ href= web:link("/all:ent:0:1"), e[1] } }
-   col[#col+1] = td{ border="0", align="center", colspan=span, bgcolor=applic_alert[2].color, H("a"){ href= web:link("/all:ent:0:2"), e[2] } }
-   col[#col+1] = td{ border="0", align="center", colspan=span, bgcolor=applic_alert[3].color, H("a"){ href= web:link("/all:ent:0:3"), e[3] } }
-   col[#col+1] = td{ border="0", align="center", colspan=span, bgcolor=white, strings.application..":" }
-   col[#col+1] = td{ border="0", align="center", colspan=span, bgcolor=applic_alert[0].color, H("a"){ href= web:link("/all:app:0:0"), a[0] } }
-   col[#col+1] = td{ border="0", align="center", colspan=span, bgcolor=applic_alert[1].color, H("a"){ href= web:link("/all:app:0:1"), a[1] } }
-   col[#col+1] = td{ border="0", align="center", colspan=span, bgcolor=applic_alert[2].color, H("a"){ href= web:link("/all:app:0:2"), a[2] } }
-   col[#col+1] = td{ border="0", align="center", colspan=span, bgcolor=applic_alert[3].color, H("a"){ href= web:link("/all:app:0:3"), a[3] } }
-   col[#col+1] = td{ border="0", align="center", colspan=span, bgcolor=white, strings.host..":" }
-   col[#col+1] = td{ border="0", align="center", colspan=span, bgcolor=applic_alert[0].color, H("a"){ href= web:link("/all:hst:0:0"), h[0] } }
-   col[#col+1] = td{ border="0", align="center", colspan=span, bgcolor=applic_alert[1].color, H("a"){ href= web:link("/all:hst:0:1"), h[1] } }
-   col[#col+1] = td{ border="0", align="center", colspan=span, bgcolor=applic_alert[2].color, H("a"){ href= web:link("/all:hst:0:2"), h[2] } }
-   col[#col+1] = td{ border="0", align="center", colspan=span, bgcolor=applic_alert[3].color, H("a"){ href= web:link("/all:hst:0:3"), h[3] } }
-   col[#col+1] = td{ border="0", align="center", colspan=span, bgcolor=white, strings.service..":" }
-   col[#col+1] = td{ border="0", align="center", colspan=span, bgcolor=applic_alert[0].color, H("a"){ href= web:link("/all:svc:0:0"), s[0] } }
-   col[#col+1] = td{ border="0", align="center", colspan=span, bgcolor=applic_alert[1].color, H("a"){ href= web:link("/all:svc:0:1"), s[1] } }
-   col[#col+1] = td{ border="0", align="center", colspan=span, bgcolor=applic_alert[2].color, H("a"){ href= web:link("/all:svc:0:2"), s[2] } }
-   col[#col+1] = td{ border="0", align="center", colspan=span, bgcolor=applic_alert[3].color, H("a"){ href= web:link("/all:svc:0:3"), s[3] } }
+   col[#col+1] = td{ align="right", width="40px", bgcolor=white, strings.entity..": " }
+   col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[0].color, H("a"){ href= web:link("/all:ent:0:0"), font{ color="black", e[0] } } }
+   col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[1].color, H("a"){ href= web:link("/all:ent:0:1"), font{ color="black", e[1] } } }
+   col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[2].color, H("a"){ href= web:link("/all:ent:0:2"), font{ color="black", e[2] } } }
+   col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[3].color, H("a"){ href= web:link("/all:ent:0:3"), font{ color="black", e[3] } } }
+   col[#col+1] = td{ align="right", width="40px", bgcolor=white, strings.application..": " }
+   col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[0].color, H("a"){ href= web:link("/all:app:0:0"), font{ color="black", a[0] } } }
+   col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[1].color, H("a"){ href= web:link("/all:app:0:1"), font{ color="black", a[1] } } }
+   col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[2].color, H("a"){ href= web:link("/all:app:0:2"), font{ color="black", a[2] } } }
+   col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[3].color, H("a"){ href= web:link("/all:app:0:3"), font{ color="black", a[3] } } }
+   col[#col+1] = td{ align="right", width="40px", bgcolor=white, strings.host..": " }
+   col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[0].color, H("a"){ href= web:link("/all:hst:0:0"), font{ color="black", h[0] } } }
+   col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[1].color, H("a"){ href= web:link("/all:hst:0:1"), font{ color="black", h[1] } } }
+   col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[2].color, H("a"){ href= web:link("/all:hst:0:2"), font{ color="black", h[2] } } }
+   col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[3].color, H("a"){ href= web:link("/all:hst:0:3"), font{ color="black", h[3] } } }
+   col[#col+1] = td{ align="right", width="40px", bgcolor=white, strings.service..": " }
+   col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[0].color, H("a"){ href= web:link("/all:svc:0:0"), font{ color="black", s[0] } } }
+   col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[1].color, H("a"){ href= web:link("/all:svc:0:1"), font{ color="black", s[1] } } }
+   col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[2].color, H("a"){ href= web:link("/all:svc:0:2"), font{ color="black", s[2] } } }
+   col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[3].color, H("a"){ href= web:link("/all:svc:0:3"), font{ color="black", s[3] } } }
 
    row[#row+1] = tr{ class=bgclass, col }
 
-   return H("table") { border="0", bordercolor="black", class=class, tbody{ row } }
+   return H("table") { class=class, width="800px", border="0", fontsize="20px", tbody{ row } }
 end
 
 --render_counter()

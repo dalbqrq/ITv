@@ -314,6 +314,18 @@ td { }
 
 
 
+.tab_cadre_resume, .tab_cadre_resumehov{
+	margin: 0 auto;
+	-moz-border-radius: 4px;
+	border: 0px solid #cccccc;
+	z-index:1;
+	text-align: center;
+	font-size: 20px;
+	width:950px;
+}
+
+
+
 .tab_cadrehov, .tab_cadrehov_pointer{
 	margin: 0 auto;
 	-moz-border-radius: 4px;
@@ -336,7 +348,7 @@ td { }
 	width:90%;
 }
 
-.tab_cadre th, .tab_cadre_fixe th, .tab_cadre_fixehov th, .tab_cadrehov th, .tab_cadrehov_pointer th , .tab_cadre_report th  {
+.tab_cadre th, .tab_cadre_fixe th, .tab_cadre_fixehov th, .tab_cadre_resume th, .tab_cadre_resumehov th, .tab_cadrehov th, .tab_cadrehov_pointer th , .tab_cadre_report th  {
 	font-size: 11px;
 	font-weight: bold;
 	background-color: #fccc6f;
@@ -345,11 +357,11 @@ td { }
 	border-bottom:1px solid #cccccc;
 }
 
-.tab_cadre td, .tab_cadre_fixe td, .tab_cadre_fixehov td, .tab_cadrehov td, .tab_cadrehov_pointer td , .tab_cadre_report td  {
+.tab_cadre td, .tab_cadre_fixe td, .tab_cadre_fixehov td, .tab_cadre_resume th, .tab_cadre_resumehov th, .tab_cadrehov td, .tab_cadrehov_pointer td , .tab_cadre_report td  {
 	padding-left: 5px;
 }
 
-.tab_cadrehov tr:hover, .tab_cadre_fixehov tr:hover {
+.tab_cadrehov tr:hover, .tab_cadre_fixehov tr:hover, .tab_cadre_resumehov tr:hover, {
 
 	background-color: #FFF4DF;
 }
@@ -419,6 +431,17 @@ td { }
 
 .tab_bg_5 {
 	background-color: #f2f2f2;
+}
+.tab_bg_X {
+	background-color: #000000;
+	margin: 0 auto;
+	-moz-border-radius: 4px;
+	border: 10px solid #cccccc;
+	z-index:1;
+	text-align: left;
+	font-size: 11px;
+	width:950px;
+
 }
 
 
