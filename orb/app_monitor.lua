@@ -191,7 +191,7 @@ end
 ---------------------------------------------------------------------------------------------------------------------
 function render_list(web, ics, filter, msg)
    local permission, auth = Auth.check_permission(web, "checkcmds")
-   local row, res, link, url = {}, {}, {}, ""
+   local row, res, link, url, output = {}, {}, {}, "", ""
    local refresh_time = 60
 
    local header = { 
@@ -267,15 +267,17 @@ function render_list(web, ics, filter, msg)
       if tonumber(v.ss_has_been_checked) == 1 then
          if tonumber(v.m_state) == 0 then
             state = tonumber(APPLIC_DISABLE)
+            output = ""
          else
             state = tonumber(v.ss_current_state)
+            output = v.ss_output
          end
 
       else
          state = 4
       end
       local statename = applic_alert[state].name
-      row[#row + 1] = { status={state=state, colnumber=2}, name, statename, ip, probe, itemtype, v.ss_output }
+      row[#row + 1] = { status={state=state, colnumber=2}, name, statename, ip, probe, itemtype, output }
    end
 
 
