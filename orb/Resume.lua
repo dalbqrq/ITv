@@ -32,9 +32,10 @@ end
 function count_hosts()
    local res = {}
 
-   --[[select count(*), ss.current_state 
+-- COMPUTERS HABILITADOS
+   --[[select count(*), ss.current_state
    from nagios_servicestatus ss, nagios_objects o, itvision_monitors m, glpi_networkports p, glpi_computers c
-   where ss.service_object_id = o.object_id
+   where ss.service_object_id = o.object_id and ss.active_checks_enabled = 1
        and o.name2 = 'HOST_ALIVE' and o.objecttype_id = 2 and o.is_active = 1
        and m.service_object_id = o.object_id
        and m.networkports_id = p.id and p.items_id = c.id and p.itemtype = 'Computer'
@@ -43,8 +44,8 @@ function count_hosts()
    
    c = [[count(*) as count, ss.current_state as state]]
    t = [[nagios_servicestatus ss, nagios_objects o, itvision_monitors m, glpi_networkports p, glpi_computers c]]
-   r = [[ss.service_object_id = o.object_id
-       and o.name2 = 'HOST_ALIVE' and o.objecttype_id = 2 and o.is_active = 1
+   r = [[ss.service_object_id = o.object_id and ss.active_checks_enabled = 1
+       and o.name2 = ']]..config.monitor.check_host..[[' and o.objecttype_id = 2 and o.is_active = 1
        and m.service_object_id = o.object_id
        and m.networkports_id = p.id and p.items_id = c.id and p.itemtype = 'Computer'
        and c.is_deleted = 0 and c.is_template = 0 and c.states_id = 1]]
@@ -57,9 +58,10 @@ function count_hosts()
    print("------------------------------")
 ]]
    
+-- NETWORKEQUIPMENTS HABILITADOS
    --[[select count(*), ss.current_state 
    from nagios_servicestatus ss, nagios_objects o, itvision_monitors m, glpi_networkports p, glpi_networkequipments c
-   where ss.service_object_id = o.object_id
+   where ss.service_object_id = o.object_id and ss.active_checks_enabled = 1
        and o.name2 = 'HOST_ALIVE' and o.objecttype_id = 2 and o.is_active = 1
        and m.service_object_id = o.object_id
        and m.networkports_id = p.id and p.items_id = c.id and p.itemtype = 'NetworkEquipment'
@@ -68,22 +70,57 @@ function count_hosts()
 
    c = [[count(*) as count, ss.current_state as state]]
    t = [[nagios_servicestatus ss, nagios_objects o, itvision_monitors m, glpi_networkports p, glpi_networkequipments c]]
-   r = [[ss.service_object_id = o.object_id
-       and o.name2 = 'HOST_ALIVE' and o.objecttype_id = 2 and o.is_active = 1
+   r = [[ss.service_object_id = o.object_id and ss.active_checks_enabled = 1
+       and o.name2 = ']]..config.monitor.check_host..[[' and o.objecttype_id = 2 and o.is_active = 1
        and m.service_object_id = o.object_id
        and m.networkports_id = p.id and p.items_id = c.id and p.itemtype = 'NetworkEquipment'
        and c.is_deleted = 0 and c.is_template = 0 and c.states_id = 1]]
    e = [[group by ss.current_state]]
    q2 = Model.query(t, r, e, c)
---[[DEBUG
-   for j,w in ipairs(q2) do
-      print(w.state, w.count)
-   end
-   print("------------------------------")
-]]
+
+-- COMPUTERS DESABILITADOS
+   --[[select count(*) as count, 5 as state
+   from nagios_servicestatus ss, nagios_objects o, itvision_monitors m, glpi_networkports p, glpi_computers c
+   where ss.service_object_id = o.object_id and ss.active_checks_enabled = 0
+       and o.name2 = 'HOST_ALIVE' and o.objecttype_id = 2 and o.is_active = 1
+       and m.service_object_id = o.object_id
+       and m.networkports_id = p.id and p.items_id = c.id and p.itemtype = 'Computer'
+       and c.is_deleted = 0 and c.is_template = 0 and c.states_id = 1]]
+   
+   c = [[count(*) as count, 5 as state]]
+   t = [[nagios_servicestatus ss, nagios_objects o, itvision_monitors m, glpi_networkports p, glpi_computers c]]
+   r = [[ss.service_object_id = o.object_id and ss.active_checks_enabled = 0
+       and o.name2 = ']]..config.monitor.check_host..[[' and o.objecttype_id = 2 and o.is_active = 1
+       and m.service_object_id = o.object_id
+       and m.networkports_id = p.id and p.items_id = c.id and p.itemtype = 'Computer'
+       and c.is_deleted = 0 and c.is_template = 0 and c.states_id = 1]]
+   e = nil
+   q3 = Model.query(t, r, e, c)
+   
+-- NETWORKEQUIPMENTS DESABILITADOS
+   --[[select count(*) as count, 5 as state
+   from nagios_servicestatus ss, nagios_objects o, itvision_monitors m, glpi_networkports p, glpi_networkequipments c
+   where ss.service_object_id = o.object_id and ss.active_checks_enabled = 0
+       and o.name2 = 'HOST_ALIVE' and o.objecttype_id = 2 and o.is_active = 1
+       and m.service_object_id = o.object_id
+       and m.networkports_id = p.id and p.items_id = c.id and p.itemtype = 'NetworkEquipment'
+       and c.is_deleted = 0 and c.is_template = 0 and c.states_id = 1]]
+
+   c = [[count(*) as count, 5 as state]]
+   t = [[nagios_servicestatus ss, nagios_objects o, itvision_monitors m, glpi_networkports p, glpi_networkequipments c]]
+   r = [[ss.service_object_id = o.object_id and ss.active_checks_enabled = 0
+       and o.name2 = ']]..config.monitor.check_host..[[' and o.objecttype_id = 2 and o.is_active = 1
+       and m.service_object_id = o.object_id
+       and m.networkports_id = p.id and p.items_id = c.id and p.itemtype = 'NetworkEquipment'
+       and c.is_deleted = 0 and c.is_template = 0 and c.states_id = 1]]
+   e = nil
+   q4 = Model.query(t, r, e, c)
+
 
    res = make_result_table(res, q)
    res = make_result_table(res, q2)
+   res = make_result_table(res, q3)
+   res = make_result_table(res, q4)
    return res
 end
 
@@ -91,17 +128,34 @@ end
 function count_services()
    local res = {}
 
+--SERVICES HABILITADOS
    --[[select count(*), ss.current_state 
    from nagios_servicestatus ss, nagios_objects o
-   where ss.service_object_id = o.object_id
+   where ss.service_object_id = o.object_id and ss.active_checks_enabled = 1
        and o.name2 <> 'HOST_ALIVE' and o.name1 <> 'BUSPROC_HOST' and o.objecttype_id = 2
-       and and o.is_active = 1 and o.name1 <> 'dummy'
+       and o.is_active = 1 and o.name1 <> 'dummy'
    group by ss.current_state;]]
 
    c = [[count(*) as count, ss.current_state as state]]
    t = [[nagios_servicestatus ss, nagios_objects o]]
-   r = [[ss.service_object_id = o.object_id
+   r = [[ss.service_object_id = o.object_id and ss.active_checks_enabled = 1
+       and o.name2 <> ']]..config.monitor.check_host..[[' and o.name1 <> ']]..config.monitor.check_app..[[' and o.objecttype_id = 2
+       and o.is_active = 1 and o.name1 <> 'dummy']]
+   e = [[group by ss.current_state]]
+   q = Model.query(t, r, e, c)
+
+
+--SERVICES DESABILITADOS
+   --[[select count(*) as count, 5 as state
+   from nagios_servicestatus ss, nagios_objects o
+   where ss.service_object_id = o.object_id and ss.active_checks_enabled = 0
        and o.name2 <> 'HOST_ALIVE' and o.name1 <> 'BUSPROC_HOST' and o.objecttype_id = 2
+       and o.is_active = 1 and o.name1 <> 'dummy']]
+
+   c = [[count(*) as count, 5 as state]]
+   t = [[nagios_servicestatus ss, nagios_objects o]]
+   r = [[ss.service_object_id = o.object_id and ss.active_checks_enabled = 0
+       and o.name2 <> ']]..config.monitor.check_host..[[' and o.name1 <> ']]..config.monitor.check_app..[[' and o.objecttype_id = 2
        and o.is_active = 1 and o.name1 <> 'dummy']]
    e = [[group by ss.current_state]]
    q = Model.query(t, r, e, c)
@@ -125,7 +179,7 @@ function count_apps()
    c = [[count(*) as count, ss.current_state as state]]
    t = [[nagios_servicestatus ss, nagios_objects o, itvision_apps a]]
    r = [[ss.service_object_id = o.object_id
-       and o.name1 = 'BUSPROC_HOST' and o.objecttype_id = 2
+       and o.name1 = ']]..config.monitor.check_app..[[' and o.objecttype_id = 2
        and o.object_id = a.service_object_id and o.is_active = 1
        and a.is_entity_root = 0]]
    e = [[group by ss.current_state]]
@@ -150,7 +204,7 @@ function count_entities()
    c = [[count(*) as count, ss.current_state as state]]
    t = [[nagios_servicestatus ss, nagios_objects o, itvision_apps a]]
    r = [[ss.service_object_id = o.object_id
-       and o.name1 = 'BUSPROC_HOST' and o.objecttype_id = 2
+       and o.name1 = ']]..config.monitor.check_app..[[' and o.objecttype_id = 2
        and o.object_id = a.service_object_id
        and a.is_entity_root = 1]]
    e = [[group by ss.current_state]]
@@ -184,22 +238,24 @@ function render_resume(web)
    col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[0].color, H("a"){ href= web:link("/all:ent:0:0"), font{ color="black", e[0] } } }
    col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[1].color, H("a"){ href= web:link("/all:ent:0:1"), font{ color="black", e[1] } } }
    col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[2].color, H("a"){ href= web:link("/all:ent:0:2"), font{ color="black", e[2] } } }
-   col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[3].color, H("a"){ href= web:link("/all:ent:0:3"), font{ color="black", e[3] } } }
+   --col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[3].color, H("a"){ href= web:link("/all:ent:0:3"), font{ color="black", e[3] } } }
    col[#col+1] = td{ align="right", width="40px", bgcolor=white, strings.application..": " }
    col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[0].color, H("a"){ href= web:link("/all:app:0:0"), font{ color="black", a[0] } } }
    col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[1].color, H("a"){ href= web:link("/all:app:0:1"), font{ color="black", a[1] } } }
    col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[2].color, H("a"){ href= web:link("/all:app:0:2"), font{ color="black", a[2] } } }
-   col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[3].color, H("a"){ href= web:link("/all:app:0:3"), font{ color="black", a[3] } } }
+   --col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[3].color, H("a"){ href= web:link("/all:app:0:3"), font{ color="black", a[3] } } }
    col[#col+1] = td{ align="right", width="40px", bgcolor=white, strings.host..": " }
    col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[0].color, H("a"){ href= web:link("/all:hst:0:0"), font{ color="black", h[0] } } }
    col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[1].color, H("a"){ href= web:link("/all:hst:0:1"), font{ color="black", h[1] } } }
    col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[2].color, H("a"){ href= web:link("/all:hst:0:2"), font{ color="black", h[2] } } }
-   col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[3].color, H("a"){ href= web:link("/all:hst:0:3"), font{ color="black", h[3] } } }
+   --col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[3].color, H("a"){ href= web:link("/all:hst:0:3"), font{ color="black", h[3] } } }
+   col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[5].color, H("a"){ href= web:link("/all:hst:0:5"), font{ color="black", h[5] } } }
    col[#col+1] = td{ align="right", width="40px", bgcolor=white, strings.service..": " }
    col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[0].color, H("a"){ href= web:link("/all:svc:0:0"), font{ color="black", s[0] } } }
    col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[1].color, H("a"){ href= web:link("/all:svc:0:1"), font{ color="black", s[1] } } }
    col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[2].color, H("a"){ href= web:link("/all:svc:0:2"), font{ color="black", s[2] } } }
-   col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[3].color, H("a"){ href= web:link("/all:svc:0:3"), font{ color="black", s[3] } } }
+   --col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[3].color, H("a"){ href= web:link("/all:svc:0:3"), font{ color="black", s[3] } } }
+   col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[5].color, H("a"){ href= web:link("/all:svc:0:5"), font{ color="black", s[5] } } }
 
    row[#row+1] = tr{ class=bgclass, col }
 
