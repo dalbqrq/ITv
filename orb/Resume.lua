@@ -157,10 +157,11 @@ function count_services()
    r = [[ss.service_object_id = o.object_id and ss.active_checks_enabled = 0
        and o.name2 <> ']]..config.monitor.check_host..[[' and o.name1 <> ']]..config.monitor.check_app..[[' and o.objecttype_id = 2
        and o.is_active = 1 and o.name1 <> 'dummy']]
-   e = [[group by ss.current_state]]
-   q = Model.query(t, r, e, c)
+   e = nil
+   q2 = Model.query(t, r, e, c)
 
    res = make_result_table(res, q)
+   res = make_result_table(res, q2)
    return res
 end
 
