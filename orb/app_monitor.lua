@@ -145,10 +145,11 @@ function list(web, hostname, tipo, app, status)
    if filter.status ~= "" and filter.status ~= nil and filter.status ~= "-1" then 
       local a = ""
       if clause then a = " and " else clause = ""  end
-      if filter.status == APPLIC_DISABLE then
+      if tonumber(filter.status) == APPLIC_DISABLE then
          clause = clause..a.."ss.active_checks_enabled = 0"
+      else
+         clause = clause..a.."ss.current_state = ".. filter.status.." and ss.active_checks_enabled = 1"
       end
-      clause = clause..a.."ss.current_state = ".. filter.status
    end
 
    local a = ""
@@ -280,7 +281,7 @@ function render_list(web, ics, filter, msg)
 
    res[#res+1] = render_resume(web)
    res[#res+1] = render_content_header(auth, "Monitoração", nil, web:link("/pre_list"))
-   --DEBUG: msg = filter.status; res[#res+1] = p{ font{ color="red", msg } }
+   --DEBUG: msg = filter.status.." | "..APPLIC_DISABLE; res[#res+1] = p{ font{ color="red", msg } }
    res[#res+1] = render_form_bar( render_filter(web, filter), strings.search, web:link("/pre_list"), web:link("/pre_list") )
    res[#res+1] = render_table(row, header)
    res[#res+1] = { br(), br(), br(), br() }
