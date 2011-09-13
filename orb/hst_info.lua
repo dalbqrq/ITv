@@ -17,6 +17,7 @@ local entities = Model.glpi:model "entities"
 local states = Model.glpi:model "states"
 local networkequipmenttypes = Model.glpi:model "networkequipmenttypes"
 local computertypes = Model.glpi:model "computertypes"
+local statehistory = Model.nagios:model "statehistory"
 
 
 -- models ------------------------------------------------------------
@@ -84,6 +85,15 @@ function computertypes:select(id)
 end
 
 
+function statehistory:select(id)
+   local clause = ""
+   local dash = {}; dash.state_time = false
+   if id then clause = "object_id = "..id end
+   local res = self:find_all(clause)
+   if #res == 0 then return dash else return res[1] end
+end
+
+
 
 -- controllers ------------------------------------------------------------
 
@@ -96,11 +106,12 @@ function info(web, tab, obj_id)
    if tab == 1 then
       return render_info(web, obj_id, A)
    elseif tab == 2 then
-      return render_data(web, obj_id, A)
+      --local H = statehistory:select(obj_id)
+      return render_history(web, obj_id, A, H)
    elseif tab == 3 then
-      return render_graph(web, obj_id, A)
-   elseif tab == 4 then
       return render_cmdb(web, obj_id, A)
+   elseif tab == 4 then
+      return render_data(web, obj_id, A)
    end
 end
 ITvision:dispatch_get(info, "/(%d+):(%d+)")
@@ -152,6 +163,8 @@ function render_info(web, obj_id, A)
    tab[#tab+1] = { ".", " " }
    tab[#tab+1] = { ".", " " }
    tab[#tab+1] = { ".", " " }
+   tab[#tab+1] = { ".", " " }
+   tab[#tab+1] = { ".", " " }
    lft[#lft+1] = render_table( tab, nil, "tab_cadre_grid" )
 
 
@@ -177,9 +190,23 @@ function render_info(web, obj_id, A)
    rgt[#rgt+1] = render_table( tab, nil, "tab_cadre_grid" )
 
    row[#row+1] = {lft, rgt }
-   res[#res+1] = render_grid( row )
+   res[#res+1] = render_table( row )
    res[#res+1] = { br(), br(), br(), br() }
    
+   return render_layout(res)
+end
+
+
+function render_history(web, obj_id, A, H)
+   local permission, auth = Auth.check_permission(web, "application")
+   local res = {}
+   local row = {}
+
+   res[#res+1] = { "HISTORY" }
+   for i,v in ipairs(H) do
+      row[#row+1] = { v.state_time, v.state_time_usec, v.state_change, v.state, v.state_type, v.last_state, v.last_hard_state }
+   end
+
    return render_layout(res)
 end
 
@@ -211,18 +238,6 @@ function render_data(web, obj_id, A)
 end
 
 
-
-function render_graph(web, obj_id, A)
-   local permission, auth = Auth.check_permission(web, "application")
-   local res = {}
-   local row = {}
-
-   res[#res+1] = { "GRAPH" }
-
-   return render_layout(res)
-end
-
-
 function render_cmdb(web, obj_id, A)
    local permission, auth = Auth.check_permission(web, "application")
    local res = {}
@@ -237,7 +252,7 @@ function render_cmdb(web, obj_id, A)
    web.prefix = "/servdesk"
    local url = web:link("/front/computer.form.php?id=78")
 
-   res[#res+1] = iframe{ src=url, width="100%", height="100%", "---" }
+   res[#res+1] = iframe{ src=url, width="100%", height="100%", frameborder="0", "---" }
 
 
    return render_layout(res)

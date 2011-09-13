@@ -33,22 +33,23 @@ function show_hst(web, obj_id, active_tab)
 
    local A = Monitor.make_query_3(nil, nil, nil, "m.service_object_id = "..obj_id)
 
+--[[ TODO; coloca aba com o CMDB. Devo fazer isso?
    local url
    web.prefix = "/servdesk"
    if itemtype == "Computer" then
-         url = web:link("/front/computer.form.php?id="..c_id)
+      url = web:link("/front/computer.form.php?id="..c_id)
    else --if itemtype == "NetworkEquipment" then
-         url = web:link("/front/computer.form.php?id=78")
-         --url = web:link("/front/networkequipment.form.php?id="..c_id)
-      end
-
+      url = web:link("/front/computer.form.php?id=78")
+      --url = web:link("/front/networkequipment.form.php?id="..c_id)
+   end
+]]
 
    local t = { 
       { title="Host", html="", href="/orb/hst_info/1:"..obj_id },
-      { title="Data", html="", href="/orb/hst_info/2:"..obj_id },
-      { title="Graph", html="", href="/orb/hst_info/3:"..obj_id },
-      { title="CMDB", html="", href="/orb/hst_info/4:"..obj_id },
-      { title="CMDB2", html="", href=url },
+      { title="Histórico", html="", href="/orb/hst_info/2:"..obj_id },
+      -- Sera? { title="CMDB", html="", href="/orb/hst_info/3:"..obj_id },
+      -- Sera? { title="CMDB2", html="", href=url },
+      { title="Raw Data", html="", href="/orb/hst_info/4:"..obj_id },
    }
 
    local res = {}
@@ -71,8 +72,8 @@ function show_svc(web, obj_id)
    local t = { 
       { title="Host", html="", href="/orb/hst_info/1:"..obj_id },
       { title="Serviço", html="", href="/orb/svc_info/1:"..obj_id },
-      { title="Data", html="", href="/orb/svc_info/2:"..obj_id },
-      { title="Graph", html="", href="/orb/svc_info/3:"..obj_id },
+      { title="Histórico", html="", href="/orb/svc_info/2:"..obj_id },
+      { title="Raw Data", html="", href="/orb/svc_info/3:"..obj_id },
    }
 
    local res = {}
