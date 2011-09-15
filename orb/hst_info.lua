@@ -110,8 +110,10 @@ function info(web, tab, obj_id)
 
    local A = Monitor.make_query_3(nil, nil, nil, "m.service_object_id = "..obj_id)
    local C = objects:select(A[1].s_check_command_object_id) --check_command
+   local APPS = Monitor.make_query_5(nil, "ax.id in (select app_id from itvision_app_objects where service_object_id = "..obj_id..")", true) 
+
    if tab == 1 then
-      return render_info(web, obj_id, A)
+      return render_info(web, obj_id, A, APPS)
    elseif tab == 2 then
       local H = statehistory:select(obj_id)
       return render_history(web, obj_id, A, H)
@@ -121,6 +123,8 @@ function info(web, tab, obj_id)
       return render_data(web, obj_id, A)
    elseif tab == 5 then
       return render_check(web, obj_id, A)
+   elseif tab == 6 then
+      return render_apps(web, obj_id, APPS)
    end
 end
 ITvision:dispatch_get(info, "/(%d+):(%d+)")
@@ -132,7 +136,7 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 
 -- views ------------------------------------------------------------
 
-function render_info(web, obj_id, A)
+function render_info(web, obj_id, A, APPS)
    local permission, auth = Auth.check_permission(web, "application")
    local h = A[1]
    local res = {}
@@ -145,9 +149,9 @@ function render_info(web, obj_id, A)
    local lnkgeo = web:link("/geotag/hst:"..obj_id)
    local lnkedt = web:link("/geotag/hst:"..obj_id)
    web.prefix="/hst_info"
-      --DEBUG: 
-      res[#res+1] = { "COUNT : " ..obj_id.." : "..#A}
    local header = { "DISPOSITIVO", "RESULTADO DA CHECAGEM" }
+
+   --DEBUG: res[#res+1] = { "COUNT : " ..obj_id.." : "..#A}
 
    tab = {}
    tab[#tab+1] = { b{"Hostname: "}, h.c_name }
@@ -204,6 +208,17 @@ function render_info(web, obj_id, A)
    res[#res+1] = render_table( row, header )
    res[#res+1] = { br(), br(), br(), br() }
    
+   header = { "APLICAÇÕES QUE POSSUEM ESTE DISPOSITIVO" }
+   row = {}
+
+   for i, v in ipairs(APPS) do
+      row[#row+1] = { v.ax_name }
+   end
+
+   --res[#res+1] = { "APPS: "..obj_id.." : "..#APPS }
+   res[#res+1] = render_table( row, header )
+   res[#res+1] = { br(), br(), br() }
+
    return render_layout(res)
 end
 
@@ -298,6 +313,26 @@ function render_check(web, obj_id, A)
    web.prefix = "/orb/probe"
    local url = web:link("/update/3:"..A[1].c_id..":"..A[1].p_id..":0:"..obj_id..":0:1")
    res[#res+1] = iframe{ src=url, width="100%", height="100%", frameborder="0", "---" }
+
+   return render_layout(res)
+end
+
+
+
+function render_apps(web, obj_id, APPS)
+   local permission, auth = Auth.check_permission(web, "application")
+   local res = {}
+   local row = {}
+
+   local header = { "Aplicações que possuem este dispositivo" }
+
+   for i, v in ipairs(APPS) do
+      row[#row+1] = { v.ax_name }
+   end
+
+   res[#res+1] = { "APPS: "..obj_id.." : "..#APPS }
+   res[#res+1] = render_table( row )
+   res[#res+1] = { br(), br(), br() }
 
    return render_layout(res)
 end

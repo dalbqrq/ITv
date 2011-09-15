@@ -1,3 +1,21 @@
+select * 
+from nagios_objects o,
+   nagios_services s,
+   nagios_servicestatus ss,
+   itvision_apps a,
+   itvision_app_objects ao,
+   itvision_apps ax where    o.object_id = s.service_object_id and
+   o.object_id = ss.service_object_id and
+   o.object_id = ao.service_object_id and
+   o.object_id = ax.service_object_id and
+   s.service_object_id = ss.service_object_id and
+   ss.service_object_id = s.service_object_id and
+   a.id = ao.app_id and
+   ao.app_id = a.id 
+      and o.name1 = 'BUSPROC_HOST' 
+      and o.is_active = 1
+    and a.id in (select app_id from itvision_app_objects where service_object_id = 284);
+
 
 
 

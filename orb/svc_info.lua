@@ -41,8 +41,11 @@ function info(web, tab, obj_id)
 
    local A = Monitor.make_query_4(nil, nil, nil, "m.service_object_id = "..obj_id)
    local C = objects:select(A[1].s_check_command_object_id) --check_command
+   local APPS = Monitor.make_query_5(nil, "ax.id in (select app_id from itvision_app_objects where service_object_id = "..obj_id..")", true) 
+
+
    if tab == 1 then
-      return render_info(web, obj_id, A, C)
+      return render_info(web, obj_id, A, C, APPS)
    elseif tab == 2 then
       return render_history(web, obj_id, A)
    elseif tab == 3 then
@@ -60,7 +63,7 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 
 -- views ------------------------------------------------------------
 
-function render_info(web, obj_id, A, C)
+function render_info(web, obj_id, A, C, APPS)
    local permission, auth = Auth.check_permission(web, "application")
    local s = A[1]
    local cmd = C[1]
@@ -71,8 +74,7 @@ function render_info(web, obj_id, A, C)
    local state
    local header = { "SERVIÇO", "RESULTADO DA CHECAGEM" }
 
-      --DEBUG: 
-      res[#res+1] = { "COUNT : " ..obj_id.." : "..#A}
+      --DEBUG: res[#res+1] = { "COUNT : " ..obj_id.." : "..#A}
 
 
    tab = {}
@@ -122,8 +124,19 @@ function render_info(web, obj_id, A, C)
 
    row[#row+1] = {lft, rgt }
    res[#res+1] = render_table( row, header )
-   res[#res+1] = { br(), br(), br(), br() }
+   res[#res+1] = { br(), br() }
    
+
+   header = { "APLICAÇÕES QUE POSSUEM ESTE DISPOSITIVO" }
+   row = {}
+
+   for i, v in ipairs(APPS) do
+      row[#row+1] = { v.ax_name }
+   end
+
+   --res[#res+1] = { "APPS: "..obj_id.." : "..#APPS }
+   res[#res+1] = render_table( row, header )
+   res[#res+1] = { br(), br(), br() }
 
    return render_layout(res)
 end

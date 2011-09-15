@@ -487,9 +487,9 @@ end
 ----------------------------------------------------------------------
 --  QUERY 5 - aplicacao com monitor - monitoracao de service 
 ----------------------------------------------------------------------
-function make_query_5(a_id, clause)
+function make_query_5(a_id, clause, all_apps)
    local q, t = {}, {}
-   if a_id then
+   if a_id or all_apps then
       t = { "o", "s", "ss", "a", "ao", "ax" }
    else
       t = { "o", "s", "ss", "ax" }
@@ -502,7 +502,7 @@ function make_query_5(a_id, clause)
    local cond_    = make_where(t)
 
    if clause then clause = string.gsub(clause, "p.entities_id", "ax.entities_id") end
-   if a_id then
+   if a_id or all_apps then
       if clause then clause = string.gsub(clause, "c.name", "a.name") end
    else 
       if clause then clause = string.gsub(clause, "c.name", "ax.name") end
