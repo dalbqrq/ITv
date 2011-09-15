@@ -312,14 +312,26 @@ function render_table(t, h, class)
    for r, v in ipairs(t) do
       local color, lightcolor, colnumber
 
-      -- A coluna "status" não deve ser apresentada. Serve somente para trazer as informações de 
+      -- EXEMPLOS DE LINHAS: 
+      --
+      -- A primeira possui uma sub-tabela "status" a ser aplicada em cota a linha selecionando a coluna da 
+      -- cor forte e colocando as cores leves nas demais colunas
+      --
+      --     row[#row + 1] = { status={ state=state, colnumber=2 }, name, statename, ip, probe, itemtype, output }
+      --
+      -- O segundo exemplo coloca cores individualmente em cada coluna com o auxilido de uma tabela.O
+      --
+      --     row[#row + 1] = { name, { value=statename, state=state }, ip, probe, itemtype, output 
+      --
+      -- A coluna "status" (uma sub-tabela) não deve ser apresentada. Serve somente para trazer as informações de 
       -- cores de determinada linha dada pelo status de um objeto
       if v.status then 
           color = applic_alert[tonumber(v.status.state)].color
           if v.status.nolightcolor ~= true then
              lightcolor = applic_alert[tonumber(v.status.state)].lightcolor
           end
-          colnumber = tonumber(v.status.colnumber)
+          colnumber = v.status.colnumber -- colnumber pode ser um valor ou uma tabela contento as
+                                        
       end
 
       -- Percorre as colunas (cols)
@@ -335,8 +347,14 @@ function render_table(t, h, class)
                hea[#hea+1] = th{ align="center", w }
             else                                               -- nao possui header, tudo eh linha
                local bgcolor = nil
-               if c == colnumber then bgcolor = color else bgcolor = lightcolor end
-               col[#col+1] = td{ colspan=span, bgcolor=bgcolor, w }
+               if type(w) == "table" then -- cores individuais por coluna
+                  bgcolor = applic_alert[tonumber(w.state)].color
+                  value   = w.value
+               else -- cores especificadas pela sub-tabela status
+                  if c == tonumber(colnumber) then bgcolor = color else bgcolor = lightcolor end
+                  value = w
+               end
+               col[#col+1] = td{ colspan=span, bgcolor=bgcolor, value }
             end
             span = 1
          end

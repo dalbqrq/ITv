@@ -201,6 +201,8 @@ function render_history(web, obj_id, A, H)
 
    local header = { "Data e hora", "usec", "Houve Mudança", "Estado Atual", "Tipo", "Último Estado", "Últimpo HARD", "Output"}
    if H then
+      res[#res+1] = { "COUNT : " ..obj_id}
+      res[#res+1] = { "COUNT : "..#H }
       for i,v in ipairs(H) do
          row[#row+1] = { v.state_time, v.state_time_usec, name_yes_no(v.state_change), 
                          name_ok_warning_critical_unknown(v.state), name_soft_hard(v.state_type), 

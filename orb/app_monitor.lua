@@ -277,7 +277,8 @@ function render_list(web, ics, filter, msg)
          state = 4
       end
       local statename = applic_alert[state].name
-      row[#row + 1] = { status={state=state, colnumber=2}, name, statename, ip, probe, itemtype, output }
+      row[#row + 1] = { status={ state=state, colnumber=2 }, name, statename, ip, probe, itemtype, output }
+      --row[#row + 1] = { name, { value=statename, state=state }, ip, probe, itemtype, output }
    end
 
 
