@@ -71,6 +71,10 @@ function render_info(web, obj_id, A, C)
    local state
    local header = { "SERVIÇO", "RESULTADO DA CHECAGEM" }
 
+      --DEBUG: 
+      res[#res+1] = { "COUNT : " ..obj_id.." : "..#A}
+
+
    tab = {}
    tab[#tab+1] = { b{"Nome do serviço: "}, s.m_name }
    tab[#tab+1] = { b{"Comando de checagm: "}, cmd.name1 }
@@ -136,7 +140,8 @@ function render_history(web, obj_id, A, H)
       end
    else
       res[#res+1] = b{ "SEM HISTÓRICO DISPONÍVEL" }
-      --DEBUG: res[#res+1] = { " ["..obj_id.."]" }
+      --DEBUG: 
+      res[#res+1] = { " ["..obj_id.."]" }
    end
 
    res[#res+1] = render_table( row )

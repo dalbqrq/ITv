@@ -145,6 +145,8 @@ function render_info(web, obj_id, A)
    local lnkgeo = web:link("/geotag/hst:"..obj_id)
    local lnkedt = web:link("/geotag/hst:"..obj_id)
    web.prefix="/hst_info"
+      --DEBUG: 
+      res[#res+1] = { "COUNT : " ..obj_id.." : "..#A}
    local header = { "DISPOSITIVO", "RESULTADO DA CHECAGEM" }
 
    tab = {}
@@ -214,7 +216,8 @@ function render_history(web, obj_id, A, H)
    --local header = { "Data e hora", "usec", "Estado Atual", "Tipo", "Tentativa", "Houve Mudança", "Último Estado", "Último HARD", "Output"}
    local header = { "Data e hora", "Estado Atual", "Tipo", "Tentativas", "Output"}
    if H then
-      --DEBUG: res[#res+1] = { "COUNT : " ..obj_id.." : "..#H}
+      --DEBUG: 
+      res[#res+1] = { "COUNT : " ..obj_id.." : "..#H}
       for i,v in ipairs(H) do
       --[[
          row[#row+1] = { v.state_time, v.state_time_usec, 
