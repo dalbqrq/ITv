@@ -138,6 +138,17 @@ string.extract_latlon = function(str)
    return lat, lon
 end
 
+string.extract_datetime = function(str, splited)
+   local _, _, Y, m, d, H, M, S = string.find(str, "(%d+)-(%d+)-(%d+) (%d+):(%d+):(%d+)")
+
+   if splited then
+      return Y, m, d, H, M, S
+   else
+      return d.."-"..m.."-"..Y.." "..H..":"..M..":"..S
+   end
+
+end
+
 ----------------------------- ECT ----------------------------------
 
 find_hostname = function( a, h, k ) 

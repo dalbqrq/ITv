@@ -47,6 +47,8 @@ function info(web, tab, obj_id)
       return render_history(web, obj_id, A)
    elseif tab == 3 then
       return render_data(web, obj_id, A)
+   elseif tab == 4 then
+      return render_check(web, obj_id, A)
    end
 end
 ITvision:dispatch_get(info, "/(%d+):(%d+)")
@@ -67,11 +69,16 @@ function render_info(web, obj_id, A, C)
    local tab = {}
    local lft, rgt = {}, {}
    local state
+   local header = { "SERVIÇO", "RESULTADO DA CHECAGEM" }
 
    tab = {}
    tab[#tab+1] = { b{"Nome do serviço: "}, s.m_name }
    tab[#tab+1] = { b{"Comando de checagm: "}, cmd.name1 }
-   tab[#tab+1] = { "-", " " }
+   tab[#tab+1] = { ". ", " " }
+   tab[#tab+1] = { ".", " " }
+   tab[#tab+1] = { ".", " " }
+   tab[#tab+1] = { colspan=2, ".", " " }
+   tab[#tab+1] = { center{b{"DISPOSITIVO"}} }
    tab[#tab+1] = { b{"Hostname: "}, s.c_name }
    tab[#tab+1] = { b{"Alias: "}, s.c_alias }
    tab[#tab+1] = { b{"IP: "}, s.p_ip }
@@ -82,13 +89,9 @@ function render_info(web, obj_id, A, C)
       class = strings.networkequipment
    end
    tab[#tab+1] = { b{"Classe: "}, class }
-   tab[#tab+1] = { "-", " " }
-   tab[#tab+1] = { "-", " " }
-   tab[#tab+1] = { "-", " " }
-   tab[#tab+1] = { "-", " " }
-   tab[#tab+1] = { "-", " " }
-   tab[#tab+1] = { "-", " " }
-   tab[#tab+1] = { "-", " " }
+   tab[#tab+1] = { ".", " " }
+   tab[#tab+1] = { ".", " " }
+   tab[#tab+1] = { ".", " " }
    lft[#lft+1] = render_table( tab, nil, "tab_cadre_grid" )
 
 
@@ -98,10 +101,10 @@ function render_info(web, obj_id, A, C)
    tab[#tab+1] = { status={ state=state, colnumber=2, nolightcolor=true}, b{"Status atual: "}, name_ok_warning_critical_unknown(s.ss_current_state) }
    tab[#tab+1] = { b{"Status info: "}, s.ss_output }
    tab[#tab+1] = { b{"No. de tentativas/Máximo de tentativas: "}, s.ss_current_check_attempt.."/"..s.ss_max_check_attempts }
-   tab[#tab+1] = { b{"Ultima checagem: "}, s.ss_last_check }
-   tab[#tab+1] = { b{"Próxima checagem: "}, s.ss_next_check }
-   tab[#tab+1] = { b{"Última mudança de estado: "}, s.ss_last_state_change }
-   tab[#tab+1] = { b{"Última mudança de estado tipo 'HARD': "}, s.ss_last_hard_state_change }
+   tab[#tab+1] = { b{"Ultima checagem: "}, string.extract_datetime(s.ss_last_check) }
+   tab[#tab+1] = { b{"Próxima checagem: "}, string.extract_datetime(s.ss_next_check) }
+   tab[#tab+1] = { b{"Última mudança de estado: "}, string.extract_datetime(s.ss_last_state_change) }
+   tab[#tab+1] = { b{"Última mudança de estado tipo 'HARD': "}, string.extract_datetime(s.ss_last_hard_state_change) }
    if s.ss_is_flapping == 1 then state = 2 else state = s.ss_is_flapping end
    tab[#tab+1] = { status={ state=state, colnumber=2, nolightcolor=true}, b{"Está flapping: "}, name_yes_no(s.ss_is_flapping) }
    tab[#tab+1] = { b{"Último status tipo 'HARD': "}, name_ok_warning_critical_unknown(s.ss_last_hard_state) }
@@ -114,7 +117,7 @@ function render_info(web, obj_id, A, C)
    rgt[#rgt+1] = render_table( tab, nil, "tab_cadre_grid" )
 
    row[#row+1] = {lft, rgt }
-   res[#res+1] = render_table( row )
+   res[#res+1] = render_table( row, header )
    res[#res+1] = { br(), br(), br(), br() }
    
 
@@ -132,7 +135,8 @@ function render_history(web, obj_id, A, H)
          row[#row+1] = { v.state_time, v.state_time_usec, v.state_change, v.state, v.state_type, v.last_state, v.last_hard_state }
       end
    else
-      res[#res+1] = { "HISTORY : "..obj_id }
+      res[#res+1] = b{ "SEM HISTÓRICO DISPONÍVEL" }
+      --DEBUG: res[#res+1] = { " ["..obj_id.."]" }
    end
 
    res[#res+1] = render_table( row )
@@ -167,6 +171,18 @@ function render_data(web, obj_id, A)
    return render_layout(res)
 end
 
+
+function render_check(web, obj_id, A)
+   local permission, auth = Auth.check_permission(web, "application")
+   local res = {}
+   local row = {}
+
+   web.prefix = "/orb/probe"
+   local url = web:link("/update/4:"..A[1].c_id..":"..A[1].p_id..":0:"..obj_id..":0:1")
+   res[#res+1] = iframe{ src=url, width="100%", height="100%", frameborder="0", "---" }
+
+   return render_layout(res)
+end
 
 
 orbit.htmlify(ITvision, "render_.+")

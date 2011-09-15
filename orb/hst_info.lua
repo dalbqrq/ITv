@@ -17,6 +17,7 @@ local entities = Model.glpi:model "entities"
 local states = Model.glpi:model "states"
 local networkequipmenttypes = Model.glpi:model "networkequipmenttypes"
 local computertypes = Model.glpi:model "computertypes"
+local objects = Model.nagios:model "objects"
 local statehistory = Model.nagios:model "statehistory"
 
 
@@ -85,6 +86,13 @@ function computertypes:select(id)
 end
 
 
+function objects:select(id)
+   local clause = ""
+   if id then clause = "object_id = "..id end
+   return Model.query("nagios_objects", clause)
+end
+
+
 function statehistory:select(id)
    local clause = ""
    if id then clause = "object_id = "..id end
@@ -101,6 +109,7 @@ function info(web, tab, obj_id)
    if not auth then return Auth.redirect(web) end
 
    local A = Monitor.make_query_3(nil, nil, nil, "m.service_object_id = "..obj_id)
+   local C = objects:select(A[1].s_check_command_object_id) --check_command
    if tab == 1 then
       return render_info(web, obj_id, A)
    elseif tab == 2 then
@@ -110,6 +119,8 @@ function info(web, tab, obj_id)
       return render_cmdb(web, obj_id, A)
    elseif tab == 4 then
       return render_data(web, obj_id, A)
+   elseif tab == 5 then
+      return render_check(web, obj_id, A)
    end
 end
 ITvision:dispatch_get(info, "/(%d+):(%d+)")
@@ -134,6 +145,7 @@ function render_info(web, obj_id, A)
    local lnkgeo = web:link("/geotag/hst:"..obj_id)
    local lnkedt = web:link("/geotag/hst:"..obj_id)
    web.prefix="/hst_info"
+   local header = { "DISPOSITIVO", "RESULTADO DA CHECAGEM" }
 
    tab = {}
    tab[#tab+1] = { b{"Hostname: "}, h.c_name }
@@ -157,11 +169,11 @@ function render_info(web, obj_id, A)
    tab[#tab+1] = { b{"Entidade: "}, ent.name }
    local resp = users:select(h.c_users_id_tech)
    tab[#tab+1] = { b{"Técnico responsável: "}, resp.name }
-   tab[#tab+1] = { "-", " " }
-   tab[#tab+1] = { "-", " " }
-   tab[#tab+1] = { "-", " " }
-   tab[#tab+1] = { "-", " " }
-   tab[#tab+1] = { "-", " " }
+   tab[#tab+1] = { ".", " " }
+   tab[#tab+1] = { ".", " " }
+   tab[#tab+1] = { ".", " " }
+   tab[#tab+1] = { ".", " " }
+   tab[#tab+1] = { ".", " " }
    lft[#lft+1] = render_table( tab, nil, "tab_cadre_grid" )
 
 
@@ -171,10 +183,10 @@ function render_info(web, obj_id, A)
    tab[#tab+1] = { status={ state=state, colnumber=2, nolightcolor=true}, b{"Status atual: "}, name_ok_warning_critical_unknown(h.ss_current_state) }
    tab[#tab+1] = { b{"Status info: "}, h.ss_output }
    tab[#tab+1] = { b{"No. de tentativas/Máximo de tentativas: "}, h.ss_current_check_attempt.."/"..h.ss_max_check_attempts }
-   tab[#tab+1] = { b{"Ultima checagem: "}, h.ss_last_check }
-   tab[#tab+1] = { b{"Próxima checagem: "}, h.ss_next_check }
-   tab[#tab+1] = { b{"Última mudança de estado: "}, h.ss_last_state_change }
-   tab[#tab+1] = { b{"Última mudança de estado tipo 'HARD': "}, h.ss_last_hard_state_change }
+   tab[#tab+1] = { b{"Ultima checagem: "}, string.extract_datetime(h.ss_last_check) }
+   tab[#tab+1] = { b{"Próxima checagem: "}, string.extract_datetime(h.ss_next_check) }
+   tab[#tab+1] = { b{"Última mudança de estado: "}, string.extract_datetime(h.ss_last_state_change) }
+   tab[#tab+1] = { b{"Última mudança de estado tipo 'HARD': "}, string.extract_datetime(h.ss_last_hard_state_change) }
    if h.ss_is_flapping == 1 then state = 2 else state = h.ss_is_flapping end
    tab[#tab+1] = { status={ state=state, colnumber=2, nolightcolor=true}, b{"Está flapping: "}, name_yes_no(h.ss_is_flapping) }
    tab[#tab+1] = { b{"Último status tipo 'HARD': "}, name_ok_warning_critical_unknown(h.ss_last_hard_state) }
@@ -187,7 +199,7 @@ function render_info(web, obj_id, A)
    rgt[#rgt+1] = render_table( tab, nil, "tab_cadre_grid" )
 
    row[#row+1] = {lft, rgt }
-   res[#res+1] = render_table( row )
+   res[#res+1] = render_table( row, header )
    res[#res+1] = { br(), br(), br(), br() }
    
    return render_layout(res)
@@ -199,19 +211,32 @@ function render_history(web, obj_id, A, H)
    local res = {}
    local row = {}
 
-   local header = { "Data e hora", "usec", "Houve Mudança", "Estado Atual", "Tipo", "Último Estado", "Últimpo HARD", "Output"}
+   --local header = { "Data e hora", "usec", "Estado Atual", "Tipo", "Tentativa", "Houve Mudança", "Último Estado", "Último HARD", "Output"}
+   local header = { "Data e hora", "Estado Atual", "Tipo", "Tentativas", "Output"}
    if H then
-      res[#res+1] = { "COUNT : " ..obj_id}
-      res[#res+1] = { "COUNT : "..#H }
+      --DEBUG: res[#res+1] = { "COUNT : " ..obj_id.." : "..#H}
       for i,v in ipairs(H) do
-         row[#row+1] = { v.state_time, v.state_time_usec, name_yes_no(v.state_change), 
-                         name_ok_warning_critical_unknown(v.state), name_soft_hard(v.state_type), 
-                         name_ok_warning_critical_unknown(v.last_state), name_ok_warning_critical_unknown(v.last_hard_state), 
+      --[[
+         row[#row+1] = { v.state_time, v.state_time_usec, 
+                         {value=name_ok_warning_critical_unknown(v.state), state=v.state},
+                         name_soft_hard(v.state_type), 
+                         v.current_check_attempt.."/"..v.max_check_attempts,
+                         name_yes_no(v.state_change),
+                         {value=name_ok_warning_critical_unknown(v.last_state), state=v.last_state},
+                         {value=name_ok_warning_critical_unknown(v.last_hard_state),  state=v.last_hard_state},
+                         v.output }
+       ]]
+
+         row[#row+1] = { string.extract_datetime(v.state_time), 
+                         {value=name_ok_warning_critical_unknown(v.state), state=v.state},
+                         name_soft_hard(v.state_type), 
+                         v.current_check_attempt.."/"..v.max_check_attempts,
                          v.output }
 
       end
    else
-      res[#res+1] = { "HISTORY : "..obj_id }
+      res[#res+1] = b{ "SEM HISTÓRICO DISPONÍVEL" }
+      --DEBUG: res[#res+1] = { " ["..obj_id.."]" }
    end
 
    res[#res+1] = render_table( row, header )
@@ -253,17 +278,23 @@ function render_cmdb(web, obj_id, A)
    local res = {}
    local row = {}
 
---[[
-<iframe src="html_intro.asp" width="100%" height="300">
-  <p>Your browser does not support iframes.</p>
-</iframe>
-]]
-
    web.prefix = "/servdesk"
    local url = web:link("/front/computer.form.php?id=78")
-
    res[#res+1] = iframe{ src=url, width="100%", height="100%", frameborder="0", "---" }
 
+   return render_layout(res)
+end
+
+
+
+function render_check(web, obj_id, A)
+   local permission, auth = Auth.check_permission(web, "application")
+   local res = {}
+   local row = {}
+
+   web.prefix = "/orb/probe"
+   local url = web:link("/update/3:"..A[1].c_id..":"..A[1].p_id..":0:"..obj_id..":0:1")
+   res[#res+1] = iframe{ src=url, width="100%", height="100%", frameborder="0", "---" }
 
    return render_layout(res)
 end

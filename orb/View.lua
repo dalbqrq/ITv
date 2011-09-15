@@ -323,6 +323,8 @@ function render_table(t, h, class)
       --
       --     row[#row + 1] = { name, { value=statename, state=state }, ip, probe, itemtype, output 
       --
+      -- Nada impede ainda que cada entrada da linha seja uma tabela, mas ela nao pode conter o campo "state".
+      --
       -- A coluna "status" (uma sub-tabela) não deve ser apresentada. Serve somente para trazer as informações de 
       -- cores de determinada linha dada pelo status de um objeto
       if v.status then 
@@ -347,7 +349,7 @@ function render_table(t, h, class)
                hea[#hea+1] = th{ align="center", w }
             else                                               -- nao possui header, tudo eh linha
                local bgcolor = nil
-               if type(w) == "table" then -- cores individuais por coluna
+               if type(w) == "table" and w.state ~= nil then -- cores individuais por coluna
                   bgcolor = applic_alert[tonumber(w.state)].color
                   value   = w.value
                else -- cores especificadas pela sub-tabela status
@@ -650,12 +652,12 @@ end
 
 -- SOFT or HARD
 SoftOrHard = {
-   { id = 1, name = "SOFT" },
-   { id = 2, name = "HARD"},
+   { id = 0, name = "SOFT" },
+   { id = 1, name = "HARD"},
 }
 
 function name_soft_hard(id)
-   return choose_name(SoftOrHard, id)
+   return choose_name(SoftOrHard, tonumber(id))
 end
 
 function select_soft_hard(name, default)

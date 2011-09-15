@@ -259,10 +259,15 @@ ITvision:dispatch_get(add, "/add/(%d+):(%d+):(%d+):(%d+)","/add/(%d+):(%d+):(%d+
 ITvision:dispatch_post(add, "/add/(%d+):(%d+):(%d+):(%d+)","/add/(%d+):(%d+):(%d+):(%d+):(%d+)","/add/(%d+):(%d+):(%d+):(%d+):(%d+):(%d)")
 
 
-function update(web, query, c_id, p_id, sv_id, service_object_id, do_test)
+-- do_test e no_header devem receber 0 ou 1 para false ou true
+function update(web, query, c_id, p_id, sv_id, service_object_id, do_test, no_header, msg)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
    local ics = {}
+   do_test = tonumber(do_test)
+   --if no_header == nil then no_header = 1 else no_header = 0 end
+   if no_header == nil then no_header = 0 end
+   no_header = tonumber(no_header)
    query = tonumber(query)
 
    local count = web.input.count
@@ -280,13 +285,15 @@ function update(web, query, c_id, p_id, sv_id, service_object_id, do_test)
    local monitor = monitors:select_monitor_from_service(service_object_id) 
    local chk = Checkcmds.select_checkcmds(nil, monitor[1].cmd_object_id)
 
-   if do_test ~= nil then
+   if do_test == 1 then
+      do_test = true
       _, chk_params = Checkcmds.get_checkcmd_default_params(monitor[1].cmd_object_id, false, false)
       for i,v in ipairs(chk_params) do
          chk_params[i].flag = web.input["flag"..i]
          chk_params[i].default_value = web.input["opt"..i]
       end
    else
+      do_test = false
       chk_params = Checkcmds.get_checkcmd_params(service_object_id)
       for i,v in ipairs(chk_params) do
          chk_params[i].flag = v.flag
@@ -294,17 +301,21 @@ function update(web, query, c_id, p_id, sv_id, service_object_id, do_test)
       end
    end
 
-   if do_test ~= nil then do_test = true else do_test = false end
-   local params = { query=query, c_id=c_id, p_id=p_id, sv_id==nil,  origin="update", cmd=monitor[1].cmd_object_id, state=monitor[1].state,
-      do_test=do_test, service_object_id=service_object_id }
 
-   --return render_add(web, ics, chk, params, chk_params, chk[1].name)
+   local params = { query=query, c_id=c_id, p_id=p_id, sv_id==nil, origin="update", cmd=monitor[1].cmd_object_id, 
+                    state=monitor[1].state, do_test=do_test, no_header=no_header, service_object_id=service_object_id,
+                    msg=msg }
+
    return render_add(web, ics, chk, params, chk_params, monitor[1].name)
 end
 ITvision:dispatch_get(update,"/update/(%d+):(%d+):(%d+):(%d+)","/update/(%d+):(%d+):(%d+):(%d+):(%d+)",
-      "/update/(%d+):(%d+):(%d+):(%d+):(%d+):(%d)")
+      "/update/(%d+):(%d+):(%d+):(%d+):(%d+):(%d)",
+      "/update/(%d+):(%d+):(%d+):(%d+):(%d+):(%d):(%d)",
+      "/update/(%d+):(%d+):(%d+):(%d+):(%d+):(%d):(%d):(.+)")
 ITvision:dispatch_post(update,"/update/(%d+):(%d+):(%d+):(%d+)","/update/(%d+):(%d+):(%d+):(%d+):(%d+)",
-      "/update/(%d+):(%d+):(%d+):(%d+):(%d+):(%d)")
+      "/update/(%d+):(%d+):(%d+):(%d+):(%d+):(%d)",
+      "/update/(%d+):(%d+):(%d+):(%d+):(%d+):(%d):(%d)",
+      "/update/(%d+):(%d+):(%d+):(%d+):(%d+):(%d):(%d):(.+)")
 
 
 function pend(web)
@@ -437,7 +448,7 @@ ITvision:dispatch_post(insert_service, "/insert_service/(%d+):(%d+):(%d+):(%d+):
 
 ------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------
-function update_service(web, service_object_id)
+function update_service(web, service_object_id, c_id, p_id, query, no_header)
    local msg = ""
 
    local flags, opts = {}, {}
@@ -460,6 +471,7 @@ function update_service(web, service_object_id)
    -- atualiza o service check caso tenha sido requisitado
    -- e cria monitor sem a referencia do servico associado.
    ------------------------------------------------------
+   if not monitor_name then monitor_name = config.monitor.check_host end
    monitors:update_monitor(service_object_id, monitor_name)
    local monitor = monitors:select_monitor_from_service(service_object_id) 
    local host_name = monitor[1].name1
@@ -470,14 +482,14 @@ function update_service(web, service_object_id)
 
    if web then
       --os.sleep(1)
-      return web:redirect(web:link("/list/"..msg..""))
+      return web:redirect(web:link("/update/"..query..":"..c_id..":"..p_id..":0:"..service_object_id..":0:"..no_header..":"..msg))
    else
       return msg --para criacao de probes em massa
    end
 
 end
-ITvision:dispatch_get(update_service, "/update_service/(%d+)")
-ITvision:dispatch_post(update_service, "/update_service/(%d+)")
+ITvision:dispatch_get(update_service, "/update_service/(%d+):(%d+):(%d+):(%d+):(%d+)")
+ITvision:dispatch_post(update_service, "/update_service/(%d+):(%d+):(%d+):(%d+):(%d+)")
 
 
 ------------------------------------------------------------------------------------------------------------------------------
@@ -599,7 +611,7 @@ function render_list(web, ics, chk, msg)
                                        -- Deve estar relacionado a demora do ndo2db
                                        -- Por isso estou tirando esta entrada da tabela na tela de checagem!
          end
-         link_add_host = a{ href= web:link("/update/"..v[1]..":"..c_id..":"..v.p_id..":0:"..v.m_service_object_id), strings.edit }
+         link_add_host = a{ href= web:link("/update/"..v[1]..":"..c_id..":"..v.p_id..":0:"..v.m_service_object_id..":0:0"), strings.edit }
          link_add_serv = a{ href= web:link("/add/"..v[1]..":"..c_id..":"..v.p_id..":0"), strings.add.." "..strings.service }
       end
 
@@ -752,7 +764,7 @@ function render_checkcmd(web, chk_id, hst_name, ip, url_test, url_insert, url_up
          res[#res+1] = center{ render_form(web:link(url_insert), nil, params_hidden, true, "Criar checagem" ) }
       else
          local b_name, flag
-         if state == 1 then
+         if state == 1 and do_test then 
             res[#res+1] = center{ render_form(web:link(url_update), nil, params_hidden, true, "Atualizar checagem" ) }
             b_name = "Desabilitar checagem"
             flag = ":0"
@@ -798,7 +810,7 @@ function render_add(web, ics, chk, params, chk_params, monitor_name)
       hst_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
 
       url_insert = "/insert_service/"..v.p_id..":"..v.sv_id..":"..v.c_id..":"..v.n_id..":"..hst_name..":nana:nono:"..v.p_ip
-      url_update = "/update_service/"..params.service_object_id
+      url_update = "/update_service/"..params.service_object_id..":"..params.c_id..":".. params.p_id..":"..params.query..":".. params.no_header
       url_desable = "/desable_service/"..params.service_object_id
       url_test   = "/"..params.origin.."/"..params.query..":"..params.c_id
 
@@ -809,14 +821,19 @@ function render_add(web, ics, chk, params, chk_params, monitor_name)
       row[#row + 1] = { hst_name, v.p_ip, serv, itemtype, cmd, }
       
       if params.origin == "update" then
-         url_test = url_test..":"..params.service_object_id..":1"
+         url_test = url_test..":"..params.service_object_id..":1:"..params.no_header
       else
-         url_test = url_test..":"..chk_id..":1"
+         url_test = url_test..":"..chk_id..":1:"..params.no_header
       end
    end
 
 
-   res[#res+1] = render_content_header(auth, "Checagem", nil, web:link("/list"))
+   if params.no_header == 0 then
+      res[#res+1] = render_content_header(auth, "Checagem", nil, web:link("/list"))
+   end
+   if params.msg ~= nil then
+      res[#res + 1] = p{ font{ color="red", params.msg }, br()  }
+   end
    res[#res+1] = render_table(row, header)
    res[#res+1] = render_checkcmd(web, chk_id, hst_name, v.p_ip, url_test, url_insert, url_update, url_desable, chk_params, monitor_name, params.do_test, params.origin, params.state)
 
