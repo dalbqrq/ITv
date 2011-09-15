@@ -630,6 +630,21 @@ function select_physical_logical(name, default)
 end
 
 
+-- SOFT or HARD
+SoftOrHard = {
+   { id = 1, name = "SOFT" },
+   { id = 2, name = "HARD"},
+}
+
+function name_soft_hard(id)
+   return choose_name(SoftOrHard, id)
+end
+
+function select_soft_hard(name, default)
+   return select_option(name, SoftOrHard, "id", "name", default)
+end
+
+
 --  HOST or SERVICE or APP
 HostOrServiceOrApp = {
    { id = "all", name = strings.all},

@@ -199,15 +199,20 @@ function render_history(web, obj_id, A, H)
    local res = {}
    local row = {}
 
+   local header = { "Data e hora", "usec", "Houve Mudança", "Estado Atual", "Tipo", "Último Estado", "Últimpo HARD", "Output"}
    if H then
       for i,v in ipairs(H) do
-         row[#row+1] = { v.state_time, v.state_time_usec, v.state_change, v.state, v.state_type, v.last_state, v.last_hard_state, v.output }
+         row[#row+1] = { v.state_time, v.state_time_usec, name_yes_no(v.state_change), 
+                         name_ok_warning_critical_unknown(v.state), name_soft_hard(v.state_type), 
+                         name_ok_warning_critical_unknown(v.last_state), name_ok_warning_critical_unknown(v.last_hard_state), 
+                         v.output }
+
       end
    else
       res[#res+1] = { "HISTORY : "..obj_id }
    end
 
-   res[#res+1] = render_table( row )
+   res[#res+1] = render_table( row, header )
    res[#res+1] = { br(), br(), br(), br() }
 
    return render_layout(res)
