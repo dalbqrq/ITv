@@ -109,10 +109,10 @@ function info(web, tab, obj_id)
    if not auth then return Auth.redirect(web) end
 
    local A = Monitor.make_query_3(nil, nil, nil, "m.service_object_id = "..obj_id)
-   local C = objects:select(A[1].s_check_command_object_id) --check_command
-   local APPS = Monitor.make_query_5(nil, "ax.id in (select app_id from itvision_app_objects where service_object_id = "..obj_id..")", true) 
 
    if tab == 1 then
+      local APPS = Monitor.make_query_5(nil,
+                      "ax.id in (select app_id from itvision_app_objects where service_object_id = "..obj_id..")", true) 
       return render_info(web, obj_id, A, APPS)
    elseif tab == 2 then
       local H = statehistory:select(obj_id)
@@ -229,8 +229,8 @@ function render_history(web, obj_id, A, H)
    local res = {}
    local row = {}
 
-   --local header = { "Data e hora", "usec", "Estado Atual", "Tipo", "Tentativa", "Houve Mudança", "Último Estado", "Último HARD", "Output"}
-   local header = { "Data e hora", "Estado Atual", "Tipo", "Tentativas", "Output"}
+   --local header = { "Data e hora", "usec", "Estado", "Tipo", "Tentativa", "Houve Mudança", "Último Estado", "Último HARD", "Output"}
+   local header = { "Data e hora", "Estado", "Tipo", "Tentativas", "Output"}
    if H then
       --DEBUG: res[#res+1] = { "COUNT : " ..obj_id.." : "..#H}
       for i,v in ipairs(H) do

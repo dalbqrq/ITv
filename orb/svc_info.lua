@@ -40,14 +40,15 @@ function info(web, tab, obj_id)
    if not auth then return Auth.redirect(web) end
 
    local A = Monitor.make_query_4(nil, nil, nil, "m.service_object_id = "..obj_id)
-   local C = objects:select(A[1].s_check_command_object_id) --check_command
-   local APPS = Monitor.make_query_5(nil, "ax.id in (select app_id from itvision_app_objects where service_object_id = "..obj_id..")", true) 
-
 
    if tab == 1 then
+      local APPS = Monitor.make_query_5(nil, 
+                      "ax.id in (select app_id from itvision_app_objects where service_object_id = "..obj_id..")", true) 
+      local C = objects:select(A[1].s_check_command_object_id) --check_command
       return render_info(web, obj_id, A, C, APPS)
    elseif tab == 2 then
-      return render_history(web, obj_id, A)
+      local H = statehistory:select(obj_id)
+      return render_history(web, obj_id, A, H)
    elseif tab == 3 then
       return render_data(web, obj_id, A)
    elseif tab == 4 then
@@ -149,16 +150,35 @@ function render_history(web, obj_id, A, H)
    local res = {}
    local row = {}
 
+   --local header = { "Data e hora", "usec", "Estado", "Tipo", "Tentativa", "Houve Mudança", "Último Estado", "Último HARD", "Output"}
+   local header = { "Data e hora", "Estado", "Tipo", "Tentativas", "Output"}
    if H then
+      --DEBUG: res[#res+1] = { "COUNT : " ..obj_id.." : "..#H}
       for i,v in ipairs(H) do
-         row[#row+1] = { v.state_time, v.state_time_usec, v.state_change, v.state, v.state_type, v.last_state, v.last_hard_state }
+      --[[
+         row[#row+1] = { v.state_time, v.state_time_usec, 
+                         {value=name_ok_warning_critical_unknown(v.state), state=v.state},
+                         name_soft_hard(v.state_type), 
+                         v.current_check_attempt.."/"..v.max_check_attempts,
+                         name_yes_no(v.state_change),
+                         {value=name_ok_warning_critical_unknown(v.last_state), state=v.last_state},
+                         {value=name_ok_warning_critical_unknown(v.last_hard_state),  state=v.last_hard_state},
+                         v.output }
+       ]]
+
+         row[#row+1] = { string.extract_datetime(v.state_time), 
+                         {value=name_ok_warning_critical_unknown(v.state), state=v.state},
+                         name_soft_hard(v.state_type), 
+                         v.current_check_attempt.."/"..v.max_check_attempts,
+                         v.output }
+
       end
    else
       res[#res+1] = b{ "SEM HISTÓRICO DISPONÍVEL" }
       --DEBUG: res[#res+1] = { " ["..obj_id.."]" }
    end
 
-   res[#res+1] = render_table( row )
+   res[#res+1] = render_table( row, header )
    res[#res+1] = { br(), br(), br(), br() }
 
    return render_layout(res)
