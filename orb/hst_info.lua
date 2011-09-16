@@ -123,8 +123,6 @@ function info(web, tab, obj_id)
       return render_data(web, obj_id, A)
    elseif tab == 5 then
       return render_check(web, obj_id, A)
-   elseif tab == 6 then
-      return render_apps(web, obj_id, APPS)
    end
 end
 ITvision:dispatch_get(info, "/(%d+):(%d+)")
@@ -206,13 +204,16 @@ function render_info(web, obj_id, A, APPS)
 
    row[#row+1] = {lft, rgt }
    res[#res+1] = render_table( row, header )
-   res[#res+1] = { br(), br(), br(), br() }
-   
-   header = { "APLICAÇÕES QUE POSSUEM ESTE DISPOSITIVO" }
+   res[#res+1] = { br(), br() }
+
+   -- APLICACOES
    row = {}
+   header = { "APLICAÇÕES COM ESTE DISPOSITIVO", "STATUS ATUAL", "Última checagem", "Próxima checagem", "Última mudança de estado"  }
 
    for i, v in ipairs(APPS) do
-      row[#row+1] = { v.ax_name }
+      row[#row+1] = { v.ax_name, {value=name_ok_warning_critical_unknown(v.ss_current_state), state=v.ss_current_state}, 
+                      string.extract_datetime(v.ss_last_check),
+                      string.extract_datetime(v.ss_next_check), string.extract_datetime(v.ss_last_state_change), }
    end
 
    --res[#res+1] = { "APPS: "..obj_id.." : "..#APPS }
@@ -231,8 +232,7 @@ function render_history(web, obj_id, A, H)
    --local header = { "Data e hora", "usec", "Estado Atual", "Tipo", "Tentativa", "Houve Mudança", "Último Estado", "Último HARD", "Output"}
    local header = { "Data e hora", "Estado Atual", "Tipo", "Tentativas", "Output"}
    if H then
-      --DEBUG: 
-      res[#res+1] = { "COUNT : " ..obj_id.." : "..#H}
+      --DEBUG: res[#res+1] = { "COUNT : " ..obj_id.." : "..#H}
       for i,v in ipairs(H) do
       --[[
          row[#row+1] = { v.state_time, v.state_time_usec, 
@@ -317,25 +317,6 @@ function render_check(web, obj_id, A)
    return render_layout(res)
 end
 
-
-
-function render_apps(web, obj_id, APPS)
-   local permission, auth = Auth.check_permission(web, "application")
-   local res = {}
-   local row = {}
-
-   local header = { "Aplicações que possuem este dispositivo" }
-
-   for i, v in ipairs(APPS) do
-      row[#row+1] = { v.ax_name }
-   end
-
-   res[#res+1] = { "APPS: "..obj_id.." : "..#APPS }
-   res[#res+1] = render_table( row )
-   res[#res+1] = { br(), br(), br() }
-
-   return render_layout(res)
-end
 
 
 orbit.htmlify(ITvision, "render_.+")

@@ -74,8 +74,7 @@ function render_info(web, obj_id, A, C, APPS)
    local state
    local header = { "SERVIÇO", "RESULTADO DA CHECAGEM" }
 
-      --DEBUG: res[#res+1] = { "COUNT : " ..obj_id.." : "..#A}
-
+   --DEBUG: res[#res+1] = { "COUNT : " ..obj_id.." : "..#A}
 
    tab = {}
    tab[#tab+1] = { b{"Nome do serviço: "}, s.m_name }
@@ -127,11 +126,14 @@ function render_info(web, obj_id, A, C, APPS)
    res[#res+1] = { br(), br() }
    
 
-   header = { "APLICAÇÕES QUE POSSUEM ESTE DISPOSITIVO" }
+   -- APLICACOES
    row = {}
+   header = { "APLICAÇÕES COM ESTE SERVIÇO", "STATUS ATUAL", "Última checagem", "Próxima checagem", "Última mudança de estado"  }
 
    for i, v in ipairs(APPS) do
-      row[#row+1] = { v.ax_name }
+      row[#row+1] = { v.ax_name, {value=name_ok_warning_critical_unknown(v.ss_current_state), state=v.ss_current_state}, 
+                      string.extract_datetime(v.ss_last_check),
+                      string.extract_datetime(v.ss_next_check), string.extract_datetime(v.ss_last_state_change), }
    end
 
    --res[#res+1] = { "APPS: "..obj_id.." : "..#APPS }
@@ -153,8 +155,7 @@ function render_history(web, obj_id, A, H)
       end
    else
       res[#res+1] = b{ "SEM HISTÓRICO DISPONÍVEL" }
-      --DEBUG: 
-      res[#res+1] = { " ["..obj_id.."]" }
+      --DEBUG: res[#res+1] = { " ["..obj_id.."]" }
    end
 
    res[#res+1] = render_table( row )

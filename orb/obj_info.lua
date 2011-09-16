@@ -58,7 +58,6 @@ function show_hst(web, obj_id, active_tab)
       -- Sera? { title="CMDB", html="", href="/orb/hst_info/3:"..obj_id },
       -- Sera? { title="CMDB2", html="", href=url },
       --{ title="Raw Data", html="", href="/orb/hst_info/4:"..obj_id },
-      { title="Aplicações", html="", href="/orb/hst_info/6:"..obj_id },
    }
 
    local res = {}
