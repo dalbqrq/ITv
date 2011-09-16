@@ -12,6 +12,7 @@ module(Model.name, package.seeall,orbit.new)
 
 local apps = Model.itvision:model "apps"
 local objects = Model.nagios:model "objects"
+local statehistory = Model.nagios:model "statehistory"
 
 
 -- models ------------------------------------------------------------
@@ -30,6 +31,14 @@ function objects:select(id)
    if id then clause = "object_id = "..id end
    return Model.query("nagios_objects", clause)
 end
+
+
+function statehistory:select(id)
+   local clause = ""
+   if id then clause = "object_id = "..id end
+   return Model.query("nagios_statehistory", clause, "order by state_time desc")
+end
+
 
 
 -- controllers ------------------------------------------------------------
