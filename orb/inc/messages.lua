@@ -88,6 +88,7 @@ strgs.pt_BR = {
 	disable = "Desabilitado",
 	computer = "Computador",
 	networkequipment = "Equipamento de rede",
+	informations = "Informações",
 
 }
 
@@ -176,6 +177,7 @@ strgs.us = {
 	disable = "Disable",
 	computer = "Computer",
 	networkequipment = "Network Equipment",
+	informations = "Informations",
 }
 
 

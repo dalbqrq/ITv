@@ -701,6 +701,22 @@ function select_hst_svc_app_ent(name, default)
 end
 
 
+
+--  ENTITY or APP
+AppOrEntity = {
+   { id = 0, name = strings.application},
+   { id = 1, name = strings.entity },
+}
+
+function name_app_ent(id)
+   return choose_name(AppOrEntity, tonumber(id))
+end
+
+function select_app_ent(name, default)
+   return select_option(name, AppOrEntity, "id", "name", default)
+end
+
+
 -- OK or WARNING or CRITICAL or UNKNOWN
 OkOrWarningOrCritialOrUnknown = {
    { id = -1,              name = strings.all },
@@ -742,8 +758,8 @@ function render_content_header(auth, name, add, list, edit, geotag, back)
 
    if add then
       myul[#myul+1] = li{ a{ href=add, img{ src='/servdesk/pics/menu_add.png', title='Adicionar', alt='Adicionar'} } }
-   else
-      myul[#myul+1] = li{ img{ src='/servdesk/pics/menu_add_off.png'} }
+   --else
+   --   myul[#myul+1] = li{ img{ src='/servdesk/pics/menu_add_off.png'} }
    end
 
    if list then

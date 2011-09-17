@@ -494,7 +494,7 @@ ITvision:dispatch_post(update_service, "/update_service/(%d+):(%d+):(%d+):(%d+):
 
 ------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------
-function desable_service(web, service_object_id, flag)
+function desable_service(web, service_object_id, c_id, p_id, query, no_header, flag)
    local msg = ""
    local flags, opts = {}, {}
    local chk, chk_id
@@ -523,18 +523,22 @@ function desable_service(web, service_object_id, flag)
    local service_desc = monitor[1].name2
    insert_service_cfg_file (host_name, service_desc, chk_name, check_args, flag)
 
-   msg = "Check de SERVIÇO: desabilitado."
+   if tonumber(flag) == 0 then
+      msg = "Check de SERVIÇO: desabilitado."
+   else
+      msg = "Check de SERVIÇO: habilitado."
+   end
 
    if web then
       --os.sleep(1)
-      return web:redirect(web:link("/list/"..msg..""))
+      return web:redirect(web:link("/update/"..query..":"..c_id..":"..p_id..":0:"..service_object_id..":0:"..no_header..":"..msg))
    else
       return msg --para criacao de probes em massa
    end
 
 end
-ITvision:dispatch_get(desable_service, "/desable_service/(%d+):(%d+)")
-ITvision:dispatch_post(desable_service, "/desable_service/(%d+):(%d+)")
+ITvision:dispatch_get(desable_service, "/desable_service/(%d+):(%d+):(%d+):(%d+):(%d+):(%d+)")
+ITvision:dispatch_post(desable_service, "/desable_service/(%d+):(%d+):(%d+):(%d+):(%d+):(%d+)")
 
 
 
@@ -764,12 +768,15 @@ function render_checkcmd(web, chk_id, hst_name, ip, url_test, url_insert, url_up
          res[#res+1] = center{ render_form(web:link(url_insert), nil, params_hidden, true, "Criar checagem" ) }
       else
          local b_name, flag
-         if state == 1 and do_test then 
+         if do_test then
             res[#res+1] = center{ render_form(web:link(url_update), nil, params_hidden, true, "Atualizar checagem" ) }
+         end
+         --if state == 1 and do_test then 
+         if state == 1 then 
             b_name = "Desabilitar checagem"
             flag = ":0"
          else
-            b_name = "Abilitar checagem"
+            b_name = "Habilitar checagem"
             flag = ":1"
          end
          res[#res+1] = center{ render_form(web:link(url_desable..flag), nil, { hidden, row_hidden } , true, b_name ) }
@@ -811,7 +818,7 @@ function render_add(web, ics, chk, params, chk_params, monitor_name)
 
       url_insert = "/insert_service/"..v.p_id..":"..v.sv_id..":"..v.c_id..":"..v.n_id..":"..hst_name..":nana:nono:"..v.p_ip
       url_update = "/update_service/"..params.service_object_id..":"..params.c_id..":".. params.p_id..":"..params.query..":".. params.no_header
-      url_desable = "/desable_service/"..params.service_object_id
+      url_desable = "/desable_service/"..params.service_object_id..":"..params.c_id..":".. params.p_id..":"..params.query..":".. params.no_header
       url_test   = "/"..params.origin.."/"..params.query..":"..params.c_id
 
       if params.p_id  then url_test = url_test..":"..params.p_id  else url_test = url_test..":0" end

@@ -98,6 +98,30 @@ ITvision:dispatch_get(show_svc, "/svc/(%d+)")
 
 function show_app(web, obj_id)
    local auth = Auth.check(web)
+   if not auth then return Auth.redirect(web) end
+   active_tab = active_tab or 1
+
+   --local A = Monitor.make_query_5(nil, "o.object_id = "..obj_id)
+   local A = apps:select(nil, obj_id)
+
+   local t = { 
+      { title="Applicação", html="", href="/orb/app_info/1:"..obj_id },
+      { title="Histórico", html="", href="/orb/app_info/2:"..obj_id },
+      --{ title="Raw Data", html="", href="/orb/app_info/3:"..obj_id },
+   }
+
+   local res = {}
+   res[#res+1] = render_content_header(auth.session.glpiactive_entity_shortname, A[1].name, nil, nil)
+   res[#res+1] = render_tabs(t, active_tab)
+
+   return render_layout(res)
+
+end
+ITvision:dispatch_get(show_app, "/show_app/(%d+)")
+
+
+function show_app(web, obj_id)
+   local auth = Auth.check(web)
    local permission = Auth.check_permission(web, "application")
 
    if not auth then return Auth.redirect(web) end

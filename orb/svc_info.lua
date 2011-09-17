@@ -112,22 +112,41 @@ function render_info(web, obj_id, A, C, APPS)
 
 
    tab = {}
-   state = s.ss_current_state
-   tab[#tab+1] = { status={ state=state, colnumber=2, nolightcolor=true}, b{"Status atual: "}, name_ok_warning_critical_unknown(s.ss_current_state) }
-   tab[#tab+1] = { b{"Status info: "}, s.ss_output }
-   tab[#tab+1] = { b{"No. de tentativas/Máximo de tentativas: "}, s.ss_current_check_attempt.."/"..s.ss_max_check_attempts }
-   tab[#tab+1] = { b{"Ultima checagem: "}, string.extract_datetime(s.ss_last_check) }
-   tab[#tab+1] = { b{"Próxima checagem: "}, string.extract_datetime(s.ss_next_check) }
+   if tonumber(s.m_state) == 0 then
+      state = APPLIC_DISABLE
+   else
+      state = s.ss_current_state
+   end
+   tab[#tab+1] = { status={ state=state, colnumber=2, nolightcolor=true}, b{"Status atual: "}, name_ok_warning_critical_unknown(state) }
+   if tonumber(s.m_state) == 0 then
+      tab[#tab+1] = { b{"Status info: "}, "" }
+      tab[#tab+1] = { b{"No. de tentativas/Máximo de tentativas: "}, "" }
+      tab[#tab+1] = { b{"Ultima checagem: "}, "" }
+      tab[#tab+1] = { b{"Próxima checagem: "}, "" }
+   else
+      tab[#tab+1] = { b{"Status info: "}, s.ss_output }
+      tab[#tab+1] = { b{"No. de tentativas/Máximo de tentativas: "}, s.ss_current_check_attempt.."/"..s.ss_max_check_attempts }
+      tab[#tab+1] = { b{"Ultima checagem: "}, string.extract_datetime(s.ss_last_check) }
+      tab[#tab+1] = { b{"Próxima checagem: "}, string.extract_datetime(s.ss_next_check) }
+   end
    tab[#tab+1] = { b{"Última mudança de estado: "}, string.extract_datetime(s.ss_last_state_change) }
    tab[#tab+1] = { b{"Última mudança de estado tipo 'HARD': "}, string.extract_datetime(s.ss_last_hard_state_change) }
-   if s.ss_is_flapping == 1 then state = 2 else state = s.ss_is_flapping end
-   tab[#tab+1] = { status={ state=state, colnumber=2, nolightcolor=true}, b{"Está flapping: "}, name_yes_no(s.ss_is_flapping) }
+   if tonumber(s.m_state) == 0 then
+      tab[#tab+1] = { status={ state=state, colnumber=2, nolightcolor=true}, b{"Está flapping: "}, strings.no }
+   else
+      if s.ss_is_flapping == 1 then state = 2 else state = s.ss_is_flapping end
+      tab[#tab+1] = { status={ state=state, colnumber=2, nolightcolor=true}, b{"Está flapping: "}, name_yes_no(s.ss_is_flapping) }
+   end
    tab[#tab+1] = { b{"Último status tipo 'HARD': "}, name_ok_warning_critical_unknown(s.ss_last_hard_state) }
    tab[#tab+1] = { b{"Tempo entre checagens: "}, s.ss_normal_check_interval.."min" }
    tab[#tab+1] = { b{"Tempo entre checagens após falha: "}, s.ss_retry_check_interval.."min" }
    tab[#tab+1] = { b{"Output completo: "}, s.ss_long_output }
    tab[#tab+1] = { b{"Dados de performance: "}, s.ss_perfdata }
-   tab[#tab+1] = { b{"Latência: "}, s.ss_latency.."ms" }
+   if tonumber(s.m_state) == 0 then
+      tab[#tab+1] = { b{"Latência: "}, "" }
+   else
+      tab[#tab+1] = { b{"Latência: "}, s.ss_latency.."ms" }
+   end
 
    rgt[#rgt+1] = render_table( tab, nil, "tab_cadre_grid" )
 
@@ -138,7 +157,7 @@ function render_info(web, obj_id, A, C, APPS)
 
    -- APLICACOES
    row = {}
-   header = { "APLICAÇÕES COM ESTE SERVIÇO", "STATUS ATUAL", "Última checagem", "Próxima checagem", "Última mudança de estado"  }
+   header = { "APLICAÇÕES QUE POSSUEM ESTE SERVIÇO", "STATUS ATUAL", "Última checagem", "Próxima checagem", "Última mudança de estado"  }
 
    for i, v in ipairs(APPS) do
       row[#row+1] = { v.ax_name, {value=name_ok_warning_critical_unknown(v.ss_current_state), state=v.ss_current_state}, 

@@ -113,17 +113,20 @@ function render_show(web, app, entities, app_name, app_id, obj, rel, obj_id, no_
       lnkgeo = web:link("/geotag/app:"..obj_id) 
       web.prefix = "/orb/app_tabs"
       lnkedt = web:link("/list/"..app_id..":2") 
+      lnkapp = web:link("/list/"..app_id..":6") 
    end
    web.prefix = "/orb"
 
-   res[#res+1] = render_resume(web)
    if no_header == nil then
       if auth then -- se nao estiver logado, valor de auth é "false" e não a arvore de autenticacao (mod Auth)
+         res[#res+1] = render_resume(web)
          res[#res+1] = render_content_header(auth, strings.vision, nil, nil, nil)
       end
+      web.prefix = "/orb"
       res[#res+1] = render_bar( 
          { render_selector_bar(web, app, app_id, "/gviz/show"), 
            --render_selector_bar(web, entities, app_id, "/gviz/show"),  -- tentativa de colocar selecao por entidades
+           a{ href=lnkapp,  strings.status } ,
            a{ href=lnkgeo,  "Mapa" } ,
            a{ href=lnkedt,  strings.edit } ,
          } )

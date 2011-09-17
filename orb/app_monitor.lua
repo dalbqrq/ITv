@@ -240,19 +240,19 @@ function render_list(web, ics, filter, msg)
          link = "--"
       end
 
-      web.prefix = "/servdesk"
-      if itemtype == "Computer" then
-         url = web:link("/front/computer.form.php?id="..c_id)
-      elseif itemtype == "NetworkEquipment" then
-         url = web:link("/front/networkequipment.form.php?id="..c_id)
-      else 
+      if probe == nil then
          web.prefix = "/orb/app_tabs"
-         url = web:link("/pre_list/"..v.ax_id..":2")
+         url = web:link("/list/"..v.ax_id..":6")
          probe = ""
+      else if probe ~= config.monitor.check_host and probe ~=  "" then
+         web.prefix = "/orb/obj_info"
+         url = web:link("/svc/"..v.m_service_object_id)
+         itemtype = strings.service
+      else 
+         web.prefix = "/orb/obj_info"
+         url = web:link("/hst/"..v.m_service_object_id)
       end
 
-      if probe ~= config.monitor.check_host and probe ~=  "" then
-         itemtype = strings.service
       end
       web.prefix = "/orb/app_monitor"
 
