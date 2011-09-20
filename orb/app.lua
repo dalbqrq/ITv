@@ -124,8 +124,9 @@ function list(web, msg)
    if web.input.app_name then clause = clause.." and name like '%"..web.input.app_name.."%' " end
    --OLD: local A, root = apps:select(nil, clause)
    local A = App.select_app(clause)
+   local AS = App.select_app_state(clause)
    local root = App.select_root_app()
-   return render_list(web, A, root, msg)
+   return render_list(web, A, AS,  root, msg)
 end
 ITvision:dispatch_get(list, "/", "/list", "/list/(.+)")
 ITvision:dispatch_post(list, "/list")
@@ -142,9 +143,10 @@ function show(web, app_id)
    local clause = "id = "..app_id.." and entities_id in "..Auth.make_entity_clause(auth)
    --OLD: local A, root = apps:select(nil, clause)
    local A = App.select_app(clause)
+   local AS = App.select_app_state(clause)
    local root = App.select_root_app()
    local no_header = true
-   return render_list(web, A, root, nil, no_header)
+   return render_list(web, A, AS, root, nil, no_header)
 end 
 ITvision:dispatch_get(show, "/show/(%d+)")
 
@@ -329,14 +331,14 @@ function render_filter(web)
 end
 
 
-function render_list(web, A, root, msg, no_header)
+function render_list(web, A, AS, root, msg, no_header)
    local res = {}
    local row = {}
    local svc, stract
    local permission, auth = Auth.check_permission(web, "application")
    local tag = ""
 
-   for i, v in ipairs(A) do
+   for i, v in ipairs(AS) do
       local button_remove, button_edit, button_active = "-", "-", "-"
       local category = strings.entity
 
@@ -372,9 +374,26 @@ function render_list(web, A, root, msg, no_header)
          tag = "- "
       end
 
-      row[#row+1] = {
+      local state, statename, status
+      if tonumber(v.has_been_checked) == 1 then
+         if tonumber(v.state) == 0 then
+            state = tonumber(APPLIC_DISABLE)
+         else
+            state = tonumber(v.current_state)
+         end
+         statename = applic_alert[state].name
+         status={ state=state, colnumber=3, nolightcolor=true }
+      else
+         state = -1
+         statename = "-"
+         status=nil
+      end
+
+      row[#row+1] = { 
+         status=status,
          a{ href=lnk, tag..v.name },
          v.entity_completename,
+         statename,
          category,
          strings["logical_"..v.type],
          NoOrYes[tonumber(v.is_active)+1].name,
@@ -386,7 +405,7 @@ function render_list(web, A, root, msg, no_header)
    end
 
    --res[#res+1] = render_resume(web)
-   local header =  { strings.name, strings.entity, strings.type, strings.logic, strings.is_active, strings.visibility,".", ".", "." }
+   local header =  { strings.name, strings.entity, strings.status, strings.type, strings.logic, strings.is_active, strings.visibility,".", ".", "." }
    local c_header = {}
    if no_header == nil then
       if permission == "w" then

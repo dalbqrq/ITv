@@ -89,6 +89,7 @@ strgs.pt_BR = {
 	computer = "Computador",
 	networkequipment = "Equipamento de rede",
 	informations = "Informações",
+	checkcommand = "Comando de Checagem",
 
 }
 
@@ -178,6 +179,7 @@ strgs.us = {
 	computer = "Computer",
 	networkequipment = "Network Equipment",
 	informations = "Informations",
+	checkcommand = "Check command",
 }
 
 

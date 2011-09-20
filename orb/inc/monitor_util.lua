@@ -101,8 +101,21 @@ define service{
 
    text_file_writer (filename, text)
    cmd = os.reset_monitor()
-
    return cmd
+end
+
+
+
+function remove_hst_cfg_file (hostname)
+   local filename = config.monitor.dir.."/hosts/"..hostname..".cfg"
+   remove_file(filename)
+end
+
+
+
+function remove_svc_cfg_file (hostname, service_desc)
+   local filename = config.monitor.dir.."/services/"..hostname.."-"..service_desc..".cfg"
+   remove_file(filename)
 end
 
 
