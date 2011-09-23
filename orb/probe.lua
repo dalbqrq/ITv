@@ -193,7 +193,14 @@ function update_params( service_object_id, seq, value )
 end
 
 
+
+
+------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------
+
+
 -- controllers ------------------------------------------------------------
+
 
 ------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------
@@ -232,7 +239,7 @@ ITvision:dispatch_post(list, "/list", "/list/(.+)")
 
 ------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------
-function add(web, query, c_id, p_id, sv_id, new_cmd, do_test)
+function add(web, query, c_id, p_id, sv_id, do_test, new_cmd)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
    if do_test ~= nil then do_test = true else do_test = false end
@@ -258,12 +265,6 @@ function add(web, query, c_id, p_id, sv_id, new_cmd, do_test)
    local params = { query=query, c_id=c_id, p_id=p_id, sv_id=sv_id, origin="add", cmd=new_cmd, 
                     state=nil, do_test=do_test, no_header="0", service_object_id=0,
                     msg=msg }
---[[
-   local params = { query=query, c_id=c_id, p_id=p_id, sv_id==nil, origin="update", cmd=monitor[1].cmd_object_id, 
-                    state=monitor[1].state, do_test=do_test, no_header=no_header, service_object_id=service_object_id,
-                    msg=msg }
-]]
-
 
    if chk_id then
       _, chk_params = Checkcmds.get_checkcmd_default_params(chk_id, false, false)
@@ -271,13 +272,13 @@ function add(web, query, c_id, p_id, sv_id, new_cmd, do_test)
          chk_params[i].flag = web.input["flag"..i]
          chk_params[i].default_value = web.input["opt"..i]
       end
-      --text_file_writer("/tmp/ss", #chk_params.." "..chk_id.."\n")
+      text_file_writer("/tmp/ss", #chk_params.." "..chk_id.."\n")
    end
 
    return render_add(web, ics, chk, params, chk_params, monitor_name)
 end
-ITvision:dispatch_get(add, "/add/(%d+):(%d+):(%d+):(%d+)","/add/(%d+):(%d+):(%d+):(%d+):(%d+)","/add/(%d+):(%d+):(%d+):(%d+):(%d+):(%d)")
-ITvision:dispatch_post(add, "/add/(%d+):(%d+):(%d+):(%d+)","/add/(%d+):(%d+):(%d+):(%d+):(%d+)","/add/(%d+):(%d+):(%d+):(%d+):(%d+):(%d)")
+ITvision:dispatch_get(add, "/add/(%d+):(%d+):(%d+):(%d+)","/add/(%d+):(%d+):(%d+):(%d+):(%d+)","/add/(%d+):(%d+):(%d+):(%d+):(%d+):(%d+)")
+ITvision:dispatch_post(add, "/add/(%d+):(%d+):(%d+):(%d+)","/add/(%d+):(%d+):(%d+):(%d+):(%d+)","/add/(%d+):(%d+):(%d+):(%d+):(%d+):(%d+)")
 
 
 -- do_test e no_header devem receber 0 ou 1 para false ou true
@@ -341,6 +342,7 @@ ITvision:dispatch_post(update,"/update/(%d+):(%d+):(%d+):(%d+)","/update/(%d+):(
 
 ------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------
+-- prepara a operacao para remover uma monitoracao
 function remove(web, service_object_id)
 
    --local monitor = monitors:select_monitor_from_service(service_object_id) 
@@ -356,8 +358,10 @@ end
 ITvision:dispatch_get(remove, "/remove/(%d+)")
 ITvision:dispatch_post(remove, "/remove/(%d+)")
 
+
 ------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------
+-- executa a operacao de remocao da monitoracao
 function delete(web, service_object_id)
    local msg = ""
    local monitor = monitors:select_monitor_from_service(service_object_id) 
@@ -384,9 +388,9 @@ ITvision:dispatch_get(delete, "/delete/(%d+)")
 ITvision:dispatch_post(delete, "/delete/(%d+)")
 
 
-------------------------------------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------------------------------------
 
+------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------
 function pend(web)
    os.reset_monitor()
    sync_services()
@@ -397,22 +401,7 @@ ITvision:dispatch_get(pend, "/pend/")
 
 ------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------
-
---[[
-          command_name        = PING
-          command_line        = chck_ping
-name1   = host_name           = Euler
-name2   = service_description = My_PING
-c_alias = alias               = euler
-          check_command       = PING!400.0,20%!999.0,70%
-p_id    = address             = 147.65.1.3
-
-
-]]
-
-
-------------------------------------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------------------------------------
+-- executa a operacao de insersao de host
 function insert_host(web, p_id, sv_id, c_id, n_id, c_name, ip)
    local msg, check_args = "", ""
    local hst_name = c_id.."_"..p_id
@@ -466,6 +455,7 @@ ITvision:dispatch_post(insert_host, "/insert_host/(%d+):(%d+):(%d+):(%d+):(.+):(
 
 ------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------
+-- executa a operacao de insersao de service
 function insert_service(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, ip)
    local msg = ""
    local hst_name = c_id.."_"..p_id
@@ -517,6 +507,7 @@ ITvision:dispatch_post(insert_service, "/insert_service/(%d+):(%d+):(%d+):(%d+):
 
 ------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------
+-- executa a operacao de update de monitoracao de servico
 function update_service(web, service_object_id, c_id, p_id, query, no_header)
    local msg = ""
 
@@ -563,6 +554,7 @@ ITvision:dispatch_post(update_service, "/update_service/(%d+):(%d+):(%d+):(%d+):
 
 ------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------
+--executa a desabilitacao de monitoracao de servico
 function desable_service(web, service_object_id, c_id, p_id, query, no_header, flag)
    local msg = ""
    local flags, opts = {}, {}
@@ -624,7 +616,13 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 
 
 
+
+------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------
+
+
 -- views ------------------------------------------------------------
+
 
 ------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------
@@ -783,6 +781,7 @@ function render_checkcmd(web, chk_id, hst_name, ip, url_test, url_insert, url_up
       return res
    end
 
+   text_file_writer("/tmp/cm", #chk_params.." "..chk_id.."\n")
    local c, p = Checkcmds.get_checkcmd_default_params(chk_id, nil, false)
    local chk = path.."/"..c[1].command
    monitor_name = monitor_name or c[1].label
@@ -856,7 +855,6 @@ function render_checkcmd(web, chk_id, hst_name, ip, url_test, url_insert, url_up
       if state == 1 then
          res[#res+1] = center{ render_form(web:link(url_test), nil, params, true, strings.test ) }
       end 
-res[#res+1] = { br(), chk.." "..args, br() }; 
 
       if do_test then
          -- DEBUG: 
@@ -920,8 +918,8 @@ function render_add(web, ics, chk, params, chk_params, monitor_name)
       if params.p_id  then url_test = url_test..":"..params.p_id  else url_test = url_test..":0" end
       if params.sv_id then url_test = url_test..":"..params.sv_id else url_test = url_test..":0" end
 
-      cmd = { select_option_onchange("check", chk, "object_id", "label", chk_id, web:link(url_test)), " " }
-      row[#row + 1] = { hst_name, v.p_ip, "", cmd, }
+      cmd = { select_option_onchange("check", chk, "object_id", "label", chk_id, web:link(url_test..":1")), " " }
+      row[#row + 1] = { hst_name, v.p_ip, "-", cmd, }
       
       if params.origin == "update" then
          url_test = url_test..":"..params.service_object_id..":1:"..params.no_header
@@ -945,6 +943,10 @@ function render_add(web, ics, chk, params, chk_params, monitor_name)
 end
 
 
+
+
+------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------
 function render_remove(web, M, S, APPS)
    M = M[1]
    local res, row, url, tp = {}, {}, "" , ""
