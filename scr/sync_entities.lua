@@ -71,10 +71,16 @@ function entity_replace(id, id2)
 | itvision_app_contacts                     |
 ]]
 
+   local child_app = Model.query("itvision_apps ", "entities_id = "..id.." and is_entity_root = 1" ); 
+   child_app = child_app[1]
+   local parent_app = Model.query("itvision_apps ", "entities_id = "..id2.." and is_entity_root = 1" ); 
+   parent_app = parent_app[1]
+
    Model.update("itvision_apps", { entities_id=id2 }, "entities_id = "..id.." and is_entity_root = 0" )
    Model.update("itvision_monitors", { entities_id=id2 }, "entities_id = "..id )
-
-   local parent_app = Model.query("itvision_apps ", "entities_id = "..id.." and is_entity_root = 1" )
+   Model.update("itvision_app_objects", { app_id=parent_app.id }, "app_id = "..child_app.id )
+   Model.update("itvision_app_relats", { app_id=parent_app.id }, "app_id = "..child_app.id )
+   Model.update("itvision_app_contacts", { app_id=parent_app.id }, "app_id = "..child_app.id )
 
    Model.delete("itvision_apps", "entities_id = "..id.." and is_entity_root = 1" )
    App.remake_apps_config_file()
@@ -85,7 +91,15 @@ end
 ]]
 function entity_update(id, id2)
    --DEBUG: print("update: "..id.." to "..id2)
+   local entity = Model.query("glpi_entities e", "e.id = "..id)
+   entity = entity[1]
+   local child_app = Model.query("itvision_apps ", "entities_id = "..id.." and is_entity_root = 1" ); 
+   child_app = child_app[1]
+   local new_parent_app = Model.query("itvision_apps ", "entities_id = "..id2.." and is_entity_root = 1" ); 
+   new_parent_app = new_parent_app[1]
 
+   Model.update("itvision_apps", { name=entity.name } , "entities_id = "..id)
+   Model.update("itvision_app_objects", { app_id=new_parent_app.id } , "service_object_id = "..child_app.service_object_id)
    App.remake_apps_config_file()
 end
 

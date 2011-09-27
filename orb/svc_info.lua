@@ -88,7 +88,7 @@ function render_info(web, obj_id, A, C, APPS)
 
    tab = {}
    tab[#tab+1] = { b{"Nome do serviço: "}, s.m_name }
-   tab[#tab+1] = { b{"Comando de checagm: "}, cmd.name1 }
+   tab[#tab+1] = { b{"Comando de checagem: "}, cmd.name1 }
    tab[#tab+1] = { ". ", " " }
    tab[#tab+1] = { ".", " " }
    tab[#tab+1] = { ".", " " }
@@ -244,7 +244,7 @@ function render_check(web, obj_id, A)
    local row = {}
 
    web.prefix = "/orb/probe"
-   local url = web:link("/update/4:"..A[1].c_id..":"..A[1].p_id..":0:"..obj_id..":0:1")
+   local url = web:link("/update/4:"..A[1].c_id..":"..A[1].p_id..":0:0:"..obj_id..":1")
    res[#res+1] = iframe{ src=url, width="100%", height="100%", frameborder="0", "---" }
 
    return render_layout(res)

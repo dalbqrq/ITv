@@ -50,7 +50,7 @@ end
 function select_app_state (cond__, extra_, columns_)
    local tables_  = [[  itvision_apps a, nagios_servicestatus ss ,
                         (select a.entities_id as entity_id, a.name as entity_name, a.name as entity_completename 
-                         from itvision_apps a where a.entities_id = 0
+                         from itvision_apps a where a.entities_id = 0 and is_entity_root = 1
                          union 
                          select id as entity_id, name as entity_name, completename asentity_completename 
                          from glpi_entities) as e ]]

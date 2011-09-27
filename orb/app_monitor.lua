@@ -195,7 +195,7 @@ function render_list(web, ics, filter, msg)
    local refresh_time = 60
 
    local header = { 
-      strings.alias.."/"..strings.name, strings.status, "IP", "CHECAGEM", strings.type, "."
+      strings.name, strings.status, "IP", "CHECAGEM", strings.type, "."
    }
 
 

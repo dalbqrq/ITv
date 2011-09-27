@@ -17,6 +17,7 @@ local objects  = Model.nagios:model "objects"
 local monitors = Model.itvision:model "monitors"
 local checkcmds = Model.itvision:model "checkcmds"
 local app_objects = Model.itvision:model "app_objects"
+local app_relats = Model.itvision:model "app_relats"
 
 local no_software_code = "_no_software_code_"
 
@@ -162,8 +163,23 @@ function monitors:delete(service_object_id)
 end
 
 
+function monitors:delete_cond(cond)
+   return Model.delete("itvision_monitors", cond)
+end
+
+
 function app_objects:delete(service_object_id)
    return Model.delete("itvision_app_objects", "service_object_id = "..service_object_id)
+end
+
+
+function app_objects:delete_cond(cond)
+   return Model.delete("itvision_app_objects", cond)
+end
+
+
+function app_relats:delete_cond(cond)
+   return Model.delete("itvision_app_relats", cond)
 end
 
 
@@ -338,16 +354,26 @@ ITvision:dispatch_post(update, "/update/(%d+):(%d+):(%d+):(%d+):(%d+):(%d+)", "/
 ------------------------------------------------------------------------------------------------------------------------------
 -- prepara a operacao para remover uma monitoracao
 function remove(web, service_object_id)
-
-   --local monitor = monitors:select_monitor_from_service(service_object_id) 
+   local APPS_S = {}
    local M = Monitor.select_ics("m.service_object_id = "..service_object_id)
-   --local S = Monitor.select_ics("m.name1 = '"..M[1].m_name1.."' and m.name2 <> '"..config.monitor.check_host.."'")
-   local S = Monitor.select_ics("m.name1 = '"..M[1].m_name1.."'")
+   local S = Monitor.select_ics("m.name1 = '"..M[1].m_name1.."' and m.name2 <> '"..config.monitor.check_host.."'")
+   -- aplicacoes com o objecto especificado
    local APPS = Monitor.make_query_5(nil,
                       "ax.id in (select app_id from itvision_app_objects where service_object_id = "..service_object_id..")", true)
+   -- se o objecto for host e se ele possuir services associados, APPS_S sao as aplicacoes que possuem estes services
+   local slist = ""
+   if #S > 0 then
+      for i,v in ipairs(S) do
+         if slist ~= "" then slist = slist.."," end
+         slist = slist..v.m_service_object_id --"298"
+      end
+      APPS_S = Monitor.make_query_5(nil,
+                      "ax.id in (select app_id from itvision_app_objects where service_object_id in ("..slist.."))", true)
+   end
 
-   return render_remove(web, M, S, APPS)
+text_file_writer("/tmp/q", slist)
 
+   return render_remove(web, M, S, APPS, APPS_S)
 end
 ITvision:dispatch_get(remove, "/remove/(%d+)")
 ITvision:dispatch_post(remove, "/remove/(%d+)")
@@ -361,21 +387,36 @@ function delete(web, service_object_id)
    local monitor = monitors:select_monitor_from_service(service_object_id) 
    local hostname = monitor[1].name1
    local service_desc = monitor[1].name2
+   local cond_
 
-   remove_hst_cfg_file (hostname)
+   -- remove o monitor e o host/sevice de todas as apps
    remove_svc_cfg_file (hostname, service_desc)
-   app_objects:delete(service_object_id)
-   monitors:delete(service_object_id)
+   monitors:delete_cond("service_object_id = "..service_object_id)
+   app_objects:delete_cond("service_object_id = "..service_object_id)
+   app_relats:delete_cond("from_object_id = "..service_object_id.." or to_object_id = "..service_object_id)
+   --DEBUG: text_file_writer("/tmp/rr", hostname.."\n"..service_desc.."\n"..service_object_id.."\n")
+
+   -- se o objeto for um host remova os servicos associados e as aplicacoes associadas a estes servicos
+   if service_desc == config.monitor.check_host then
+      remove_hst_cfg_file (hostname)
+
+      svc = Model.query("itvision_monitors", "name1 = '"..hostname.."'", nil, "service_object_id, name2")
+      if #svc > 0 then
+         for i,v in ipairs(svc) do
+            local service_desc = v.name2
+            --DEBUG: text_file_writer("/tmp/rs"..i, hostname.."\n"..service_desc.."\n"..v.service_object_id.."\n")
+            remove_svc_cfg_file (hostname, service_desc)
+            monitors:delete_cond("service_object_id = "..v.service_object_id)
+            app_objects:delete_cond("service_object_id = "..v.service_object_id)
+            app_relats:delete_cond("from_object_id = "..v.service_object_id.." or to_object_id = "..v.service_object_id)
+         end         
+      end
+   end
 
    msg = "Check de SERVIÇO: "..monitor[1].name.." removido."
 
    os.reset_monitor()
-   if web then
-      --os.sleep(1)
-      return web:redirect(web:link("/list/"..msg))
-   else
-      return msg --para criacao de probes em massa
-   end
+   return web:redirect(web:link("/list/"..msg))
 
 end
 ITvision:dispatch_get(delete, "/delete/(%d+)")
@@ -499,6 +540,7 @@ end
 ITvision:dispatch_get(insert_service, "/insert_service/(%d+):(%d+):(%d+):(%d+):(.+):(.+):(.+):(.+)")
 ITvision:dispatch_post(insert_service, "/insert_service/(%d+):(%d+):(%d+):(%d+):(.+):(.+):(.+):(.+)")
 
+
 ------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------
 -- executa a operacao de update de monitoracao de servico
@@ -606,7 +648,6 @@ ITvision:dispatch_get(blank, "/blank")
 
 
 ITvision:dispatch_static("/css/%.css", "/script/%.js")
-
 
 
 
@@ -946,7 +987,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------
-function render_remove(web, M, S, APPS)
+function render_remove(web, M, S, APPS, APPS_S)
    M = M[1]
    local res, row, url, tp = {}, {}, "" , ""
    --local permission, auth = Auth.check_permission(web, "probe", true)
@@ -963,7 +1004,7 @@ function render_remove(web, M, S, APPS)
    -- APLICACOES
    if #APPS > 0 then
       header = { "NOME", "STATUS ATUAL", "Última checagem", "Próxima checagem", "Última mudança de estado"  }
-      res[#res+1] = { b{ "APLICAÇÕES QUE POSSUEM ESTE "..tp.." E QUE SERÃO ALTERADAS" }}
+      res[#res+1] = { b{ "APLICAÇÕES QUE POSSUEM ESTE "..tp.." QUE SERÃO ALTERADAS" }}
       for i, v in ipairs(APPS) do
          row[#row+1] = { v.ax_name, {value=name_ok_warning_critical_unknown(v.ss_current_state), state=v.ss_current_state}, 
                       string.extract_datetime(v.ss_last_check), string.extract_datetime(v.ss_next_check), string.extract_datetime(v.ss_last_state_change), }
@@ -977,10 +1018,28 @@ function render_remove(web, M, S, APPS)
       if tp == "DISPOSITIVO" then
          row = {}
          header = { "NOME", "STATUS ATUAL", "Última checagem", "Próxima checagem", "Última mudança de estado"  }
-         res[#res+1] = { b{ "SERVIÇOS ASSOCIADOS A ESTE "..tp.." E QUE TAMBÉM SERÃO REMOVIDOS" }}
+         res[#res+1] = { b{ "SERVIÇOS ASSOCIADOS A ESTE "..tp.." QUE TAMBÉM SERÃO REMOVIDOS" }}
          if M.m_name2 == config.monitor.check_host and v.m_name then
             for i, v in ipairs(S) do
                row[#row+1] = { v.m_name, {value=name_ok_warning_critical_unknown(v.ss_current_state), state=v.ss_current_state}, 
+                            string.extract_datetime(v.ss_last_check), string.extract_datetime(v.ss_next_check), string.extract_datetime(v.ss_last_state_change), }
+            end
+         end
+         res[#res+1] = render_table( row, header )
+         res[#res+1] = { br(), br(), br() }
+      end
+   end
+
+
+   -- APLICACOES DOS SERVIÇOS
+   if APPS_S and #APPS_S > 0 then
+      if tp == "DISPOSITIVO" then
+         row = {}
+         header = { "NOME", "STATUS ATUAL", "Última checagem", "Próxima checagem", "Última mudança de estado"  }
+         res[#res+1] = { b{ "APLICAÇÕES QUE POSSUEM SERVIÇOS ASSOCIADOS A ESTE "..tp.." QUE TAMBÉM SERÃO ALTERADOS" }}
+         if M.m_name2 == config.monitor.check_host and v.m_name then
+            for i, v in ipairs(APPS_S) do
+               row[#row+1] = { v.ax_name, {value=name_ok_warning_critical_unknown(v.ss_current_state), state=v.ss_current_state}, 
                             string.extract_datetime(v.ss_last_check), string.extract_datetime(v.ss_next_check), string.extract_datetime(v.ss_last_state_change), }
             end
          end

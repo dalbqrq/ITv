@@ -49,15 +49,7 @@ function render_list(web, app_id, active_tab, no_menu, msg)
 
    local A = apps:select(app_id)
 
-   if A[1] then
-   t = { 
-      { title="Principal", html="", href="/orb/app/show/"..app_id },
-      { title="Objetos", html="", href="/orb/app_objects/add/"..app_id..msg }, 
-      { title="Relacionamentos", html="", href="/orb/app_relats/add/"..app_id }, 
-      { title="Contatos", html="", href="/orb/app_contacts/add/"..app_id }, 
-      { title="Visão Gráfica", html="", href="/orb/gviz/show/"..app_id..":1" }, 
-   }
-   else
+   if A[1].service_object_id then
    t = { 
       { title="Principal", html="", href="/orb/app/show/"..app_id },
       { title="Objetos", html="", href="/orb/app_objects/add/"..app_id..msg }, 
@@ -66,6 +58,14 @@ function render_list(web, app_id, active_tab, no_menu, msg)
       { title="Visão Gráfica", html="", href="/orb/gviz/show/"..app_id..":1" }, 
       { title="Status", html="", href="/orb/app_info/1:"..A[1].service_object_id },
       { title="Histórico", html="", href="/orb/app_info/2:"..A[1].service_object_id },
+   }
+   else
+   t = { 
+      { title="Principal", html="", href="/orb/app/show/"..app_id },
+      { title="Objetos", html="", href="/orb/app_objects/add/"..app_id..msg }, 
+      { title="Relacionamentos", html="", href="/orb/app_relats/add/"..app_id }, 
+      { title="Contatos", html="", href="/orb/app_contacts/add/"..app_id }, 
+      { title="Visão Gráfica", html="", href="/orb/gviz/show/"..app_id..":1" }, 
    }
    end
 

@@ -183,17 +183,22 @@ function make_app_objects_table(web, A)
       if v.obj_type == "hst" then
          obj = find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.ip..")"
 
+--[[
          web.prefix = "/servdesk"
          if v.itemtype == "Computer" then
             url = web:link("/front/computer.form.php?id="..ic.id)
          elseif v.itemtype == "NetworkEquipment" then
             url = web:link("/front/networkequipment.form.php?id="..ic.id)
          end
-
+]]
+         web.prefix = "/orb/obj_info"
+         url = web:link("/hst/"..v.object_id)
          obj = button_link(obj, url, "negative")
 
       elseif v.obj_type == "svc" then
-         obj = make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.ip..")", v.name)
+         web.prefix = "/orb/obj_info"
+         url = web:link("/svc/"..v.object_id)
+         obj = button_link(make_obj_name(find_hostname(ic.alias, ic.name, ic.itv_key).." ("..v.ip..")", v.name), url, "negative")
       else
          local tag = ""
          if v.app_type_id == "1" then
@@ -244,7 +249,7 @@ function render_add(web, HST, SVC, APP, APPOBJ, app_id, msg)
    res[#res+1] = br()
    if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ font{ color="red", msg } } end
    --res[#res+1] = render_content_header(strings.app_object)
-   header = { strings.object.." ("..strings.service.."@"..strings.host..")", strings.type, "." }
+   header = { strings.object.." ("..strings.host.." / "..strings.service.."@"..strings.host.." / "..strings.application.." / "..strings.entity..")", strings.type, "." }
    res[#res+1] = render_table(make_app_objects_table(web, APPOBJ), header)
    res[#res+1] = br()
 
@@ -286,7 +291,7 @@ function render_add(web, HST, SVC, APP, APPOBJ, app_id, msg)
                     input{ type="hidden", name="type", value="app" } }, true, strings.add ) }
 
 
-      header = { strings.alias.."/"..strings.name, strings.service, strings.application }
+      header = { strings.host, strings.service.."@"..strings.host, strings.application }
       res[#res+1] = render_table({ {hst, svc, app} }, header)
 
       res[#res+1] = { br(), br(), br(), br() }
