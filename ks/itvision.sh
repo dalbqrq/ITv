@@ -735,6 +735,9 @@ rm -f /tmp/crontab
 #htpasswd -bc $itvhome/bin/htpasswd $user $dbpass; $itvhome/bin/htpasswd 
 chown -R $user.$user $itvhome/html/gv $itvhome/bin/dbconf $itvhome/bin/lua_path
 
+# Liberando poweroff e reboot para $user
+chmod u+s /sbin/poweroff
+chmod u+s /sbin/reboot
 
 
 

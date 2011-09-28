@@ -34,14 +34,14 @@ ITvision:dispatch_get(list, "/", "/list", "/list/", "/list/(.+)")
 
 function reboot(web)
    local mgs = os.reboot()
-   return web:redirect(web:link("/list/"..mgs))
+   --return web:redirect(web:link("/list/"..mgs))
 end
 ITvision:dispatch_get(reboot, "/reboot")
 
 
 function shutdown(web)
    local mgs = os.shutdown()
-   return web:redirect(web:link("/list/"..mgs))
+   --return web:redirect(web:link("/list/"..mgs))
 end
 ITvision:dispatch_get(shutdown, "/shutdown")
 
@@ -75,34 +75,36 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 function render_list(web, msg)
    local rows = {}
    local res = {}
+--[[
    res[#res + 1] = p{ br(), "<hr>", br() }
    res[#res + 1] = p{ br(), br() }
    res[#res + 1] = p{ msg } 
    res[#res + 1] = p{ br(), br() }
+]]
 
-   res[#res + 1] = p{ br(), "<hr>", br() }
+   --res[#res + 1] = p{ br(), "<hr>", br() }
    res[#res + 1] = p{ br(), br() }
-   res[#res + 1] = p{ "Reboot" } 
+   --res[#res + 1] = p{ "Reboot" } 
    res[#res + 1] = p{ button_link("Reboot no Servidor ITvision", web:link("/reboot")) }
    res[#res + 1] = p{ br(), br() }
-   res[#res + 1] = p{ br(), "<hr>", br() }
+   --res[#res + 1] = p{ br(), "<hr>", br() }
 
-   res[#res + 1] = p{ "Desligar" } 
+   --res[#res + 1] = p{ "Desligar" } 
    res[#res + 1] = p{ button_link("Desligar o Servidor ITvision", web:link("/shutdown")) }
    res[#res + 1] = p{ br(), br() }
-   res[#res + 1] = p{ br(), "<hr>", br() }
+   --res[#res + 1] = p{ br(), "<hr>", br() }
 
-   res[#res + 1] = p{ "Atualizar Pendências" } 
-   res[#res + 1] = p{ button_link("Reload no Monitor", web:link("/reset_monitor")) }
+   --res[#res + 1] = p{ "Atualizar Pendências" } 
+   res[#res + 1] = p{ button_link("Atualizar Pendências no Monitor (Reload)", web:link("/reset_monitor")) }
    res[#res + 1] = p{ br(), br() }
-   res[#res + 1] = p{ br(), "<hr>", br() }
+   --res[#res + 1] = p{ br(), "<hr>", br() }
 
-   res[#res + 1] = p{ "Reset Monitor" } 
-   res[#res + 1] = p{ button_link("Reiniciar Monitor", web:link("/reinit_monitor")) }
+   --res[#res + 1] = p{ "Reset Monitor" } 
+   res[#res + 1] = p{ button_link("Reiniciar Monitor (Reset)", web:link("/reinit_monitor")) }
    res[#res + 1] = p{ br(), br() }
-   res[#res + 1] = p{ br(), "<hr>", br() }
+   --res[#res + 1] = p{ br(), "<hr>", br() }
 
-   res[#res + 1] = p{ "Reset Database Monitor" } 
+   --res[#res + 1] = p{ "Reset Database Monitor" } 
    res[#res + 1] = p{ button_link("Reiniciar Banco de Dados ITvision", web:link("/reset_monitor_db")) }
    res[#res + 1] = p{ br(), br() }
    res[#res + 1] = p{ br(), "<hr>", br() }

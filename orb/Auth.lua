@@ -344,6 +344,7 @@ end
 menu_itens = {
    { name="Monitor", link="#",
       submenu = {
+      { name="Grid", field="application", link="/orb/app_grid/show" },
       { name="Árvore", field="application", link="/orb/treeviz/show" },
       { name="Visão", field="application", link="/orb/gviz/show" },
       { name="Aplicações", field="application", link="/orb/app" },

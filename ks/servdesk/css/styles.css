@@ -326,7 +326,6 @@ td { }
 }
 
 
-
 .tab_cadre_grid, .tab_cadre_gridhov{
 	margin: 0 auto;
 	-moz-border-radius: 0px;
@@ -336,6 +335,19 @@ td { }
 	vertical-align: top;
 	font-size: 11px;
 	width: 100%;
+	background-color: #ffffff;
+}
+
+
+.tab_cadre_appgrid, .tab_cadre_appgridhov{
+	margin: 0 auto;
+	border: 0px solid #FFFFFF;
+	-moz-border-radius: 0px;
+	z-index:10px;
+	text-align: left;
+	vertical-align: top;
+	font-size: 11px;
+	width:900px;
 	background-color: #ffffff;
 }
 
@@ -359,7 +371,7 @@ td { }
 	border: 1px solid #cccccc;
 	z-index:1;
 	text-align: left;
-	font-size: 11px;
+	font-size: 21px;
 	text-align: center;
 	width:90%;
 	background-color: #ffffff;
@@ -375,12 +387,42 @@ td { }
 	background-color: #ffffff;
 }
 
+.tab_cadre_appgrid th, .tab_cadre_appgridhov th {
+	font-size: 11px;
+	font-weight: bold;
+	text-align: center;
+/*
+	background-color: #fccc6f;
+	background:  url("../pics/fond_th.png") repeat-x; 
+*/
+	border-bottom:10px solid #cccccc;
+	background-color: #ffffff;
+}
+
 .tab_cadre td, .tab_cadre_fixe td, .tab_cadre_fixehov td, .tab_cadre_grid td, .tab_cadre_gridhov td, .tab_cadrehov td, .tab_cadrehov_pointer td , .tab_cadre_report td  {
 	padding-left: 2px;
 }
 
-.tab_cadrehov tr:hover, .tab_cadre_fixehov tr:hover, .tab_cadre_gridhov tr:hover {
+.tab_cadre_appgrid td, .tab_cadre_appgridhov td {
+	font-size: 11px;
+	font-weight: bold;
+	padding: 10px;
+	margin: 10px;
+	border-spacing: 20px;
+	text-align: center;
+}
 
+.tab_cadre_appgrid a, .tab_cadre_appgrid a:link {
+	font-size: 15px;
+	color: #000000;
+}
+
+
+.tab_cadrehov tr:hover, .tab_cadre_fixehov tr:hover, .tab_cadre_gridhov tr:hover {
+	background-color: #FFF4DF;
+}
+
+.tab_cadre_appgridhov tr:hover  {
 	background-color: #FFF4DF;
 }
 

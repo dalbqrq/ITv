@@ -53,7 +53,7 @@ function show_hst(web, obj_id, active_tab)
 
    local t = { 
       { title="Dispositivo", html="", href="/orb/hst_info/1:"..obj_id },
-      { titl="CMDB", html="", href="/orb/hst_info/3:"..obj_id },
+      { title="CMDB", html="", href="/orb/hst_info/3:"..obj_id },
       { title="Checagem", html="", href="/orb/hst_info/5:"..obj_id },
       { title="Histórico", html="", href="/orb/hst_info/2:"..obj_id },
       -- Sera? 

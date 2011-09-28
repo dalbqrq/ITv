@@ -344,12 +344,12 @@ end
 
 
 function os.reboot()
-   return os.capture("/usr/bin/sudo /sbin/reboot")
+   return os.capture("/sbin/reboot")
 end
 
 
 function os.shutdown()
-   return os.capture("/usr/bin/sudo /sbin/poweroff")
+   return os.capture("/sbin/poweroff")
 end
 
 

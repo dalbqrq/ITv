@@ -78,6 +78,7 @@ function entity_replace(id, id2)
 
    Model.update("itvision_apps", { entities_id=id2 }, "entities_id = "..id.." and is_entity_root = 0" )
    Model.update("itvision_monitors", { entities_id=id2 }, "entities_id = "..id )
+   Model.update("glpi_networkports", { entities_id=id2 }, "entities_id = "..id )
    Model.update("itvision_app_objects", { app_id=parent_app.id }, "app_id = "..child_app.id )
    Model.update("itvision_app_relats", { app_id=parent_app.id }, "app_id = "..child_app.id )
    Model.update("itvision_app_contacts", { app_id=parent_app.id }, "app_id = "..child_app.id )
