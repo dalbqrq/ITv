@@ -96,11 +96,13 @@ if (!file_exists(GLPI_CONFIG_DIR . "/config_db.php")) {
       echo "<input type='hidden' name='noAUTO' value='1'/>";
    }
 
+*/
    // redirect to ticket
    if (isset($_GET["redirect"])) {
       manageRedirect($_GET["redirect"]);
       echo '<input type="hidden" name="redirect" value="'.$_GET['redirect'].'">';
    }
+/*
    echo "<fieldset>";
    echo '<legend>'.$LANG['login'][10].'</legend>';
    echo '<div class="row"><span class="label"><label>'.$LANG['login'][6].' :  </label></span>';

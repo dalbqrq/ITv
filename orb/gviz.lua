@@ -114,6 +114,8 @@ function render_show(web, app, entities, app_name, app_id, obj, rel, obj_id, no_
       web.prefix = "/orb/app_tabs"
       lnkedt = web:link("/list/"..app_id..":2") 
       lnkapp = web:link("/list/"..app_id..":6") 
+      web.prefix = "/orb/app_monitor"
+      lnklst = web:link("/all:all:"..app_id..":-1") 
    end
    web.prefix = "/orb"
 
@@ -129,6 +131,7 @@ function render_show(web, app, entities, app_name, app_id, obj, rel, obj_id, no_
            a{ href=lnkapp,  strings.status } ,
            a{ href=lnkgeo,  "Mapa" } ,
            a{ href=lnkedt,  strings.edit } ,
+           a{ href=lnklst,  strings.list } ,
          } )
    else
       refresh_time = nil

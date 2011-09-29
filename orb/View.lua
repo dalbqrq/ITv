@@ -683,7 +683,7 @@ function select_hst_svc_app(name, default)
 end
 
 
---  HOST or SERVICE or APP
+--  HOST or SERVICE or APP or ENT
 HostOrServiceOrAppOrEnt = {
    { id = "hst", name = strings.host },
    { id = "svc", name = strings.service},
@@ -698,6 +698,24 @@ end
 
 function select_hst_svc_app_ent(name, default)
    return select_option(name, HostOrServiceOrAppOrEnt, "id", "name", default)
+end
+
+
+--  HOST or SERVICE or SUB-APP or SUB-ENT
+HostOrServiceOrASubppOrSubEnt = {
+   { id = "hst", name = strings.host },
+   { id = "svc", name = strings.service},
+   { id = "app", name = "Sub-"..strings.application},
+   { id = "ent", name = "Sub-"..strings.entity},
+}
+
+function name_hst_svc_subapp_subent(id, is_entity)
+   if is_entity == 1 then id = "ent" end
+   return choose_name(HostOrServiceOrASubppOrSubEnt, id, is_entity)
+end
+
+function select_hst_svc_subapp_subent(name, default)
+   return select_option(name, HostOrServiceOrASubppOrSubEnt, "id", "name", default)
 end
 
 

@@ -116,7 +116,7 @@ function render_show(web, obj, rel, sep)
    res[#res+1] = render_bar( { 
          --a{ href=web:link("/show/0"),  "Unificada" } ,
          --a{ href=web:link("/show/1"),  "Separada" } ,     -- VISAO EM SAPARADO DESABILITADO. Com ERRO EM GRAPH.LUA
-         ".",
+         ". ",
    } )
    res[#res+1] = br()
    res[#res+1] = { imgmap }

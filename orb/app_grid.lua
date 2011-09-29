@@ -101,7 +101,7 @@ function make_grid(web, O)
    web.prefix = "/orb/app_objects"
 
    -- A lista de objetos "O" será percorrida 4 vezes, uma para cada tipo de objeto.
-   for _, t in ipairs({ "app", "hst", "svc", "ent" }) do
+   for _, t in ipairs({ "hst", "svc", "app", "ent" }) do
       for i,v in ipairs(O) do
          if v.ao_type == "app" and v.ax_is_entity_root and v.ax_is_entity_root == "1" then v.ao_type = "ent" end
          
@@ -140,7 +140,7 @@ function make_grid(web, O)
       end
 
       if #row > 0 then
-         res[#res+1] = render_title(name_hst_svc_app_ent(t))
+         res[#res+1] = render_title(name_hst_svc_subapp_subent(t).."(s)")
          res[#res+1] = render_table(row, nil, "tab_cadre_appgrid")
       end
       row, col = {}, {}
@@ -161,19 +161,22 @@ function render_show(web, app, entities, app_name, app_id, obj, rel, obj_id, app
       web.prefix = "/orb/obj_info"
       lnkgeo = web:link("/geotag/app:"..obj_id) 
       web.prefix = "/orb/app_tabs"
-      lnkedt = web:link("/list/"..app_id..":2") 
       lnkapp = web:link("/list/"..app_id..":6") 
+      lnkedt = web:link("/list/"..app_id..":2") 
+      web.prefix = "/orb/app_monitor"
+      lnklst = web:link("/all:all:"..app_id..":-1") 
    end
    web.prefix = "/orb"
 
 
    res[#res+1] = render_resume(web)
-   res[#res+1] = render_content_header(auth, "Grid", nil, web:link("/show"))
+   res[#res+1] = render_content_header(auth, "Grade", nil, web:link("/show"))
    web.prefix = "/orb"
    res[#res+1] = render_bar( { render_selector_bar(web, app, app_id, "/app_grid/show"),
            a{ href=lnkapp,  strings.status } ,
            a{ href=lnkgeo,  "Mapa" } ,
            a{ href=lnkedt,  strings.edit } ,
+           a{ href=lnklst,  strings.list } ,
          } )
 
    res[#res+1] = make_grid(web, obj)
