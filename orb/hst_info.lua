@@ -292,12 +292,17 @@ end
 
 function render_cmdb(web, obj_id, A)
    local permission, auth = Auth.check_permission(web, "application")
+   local url
    local res = {}
    local row = {}
 
    web.prefix = "/servdesk"
-   local url = web:link("/front/computer.form.php?id=78")
-   res[#res+1] = iframe{ src=url, width="100%", height="100%", frameborder="0", "---" }
+   if A[1].p_itemtype == "Computer" then
+      url = web:link("/front/computer.form.php?id="..A[1].c_id)
+   else
+      url = web:link("/front/networkequipment.form.php?id="..A[1].c_id)
+   end
+   res[#res+1] = iframe{ src=url, width="980px", height="90%", frameborder="0", "---" }
 
    return render_layout(res)
 end

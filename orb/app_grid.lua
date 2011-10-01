@@ -105,9 +105,7 @@ function make_grid(web, O)
       for i,v in ipairs(O) do
          if v.ao_type == "app" and v.ax_is_entity_root and v.ax_is_entity_root == "1" then v.ao_type = "ent" end
          
-         if #col < max_cols then
             if v.ao_type == t then
-               ----------------------
                if v.ao_type == "hst" then
                   obj = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
                   web.prefix = "/orb/obj_info"
@@ -122,10 +120,12 @@ function make_grid(web, O)
                   web.prefix = "/orb/app_tabs"
                   obj = button_link(obj, web:link("/list/"..v.ax_id..":"..tab_id), "negative")
                end
-               ----------------------
+      
                col[#col+1] = { value=obj, state=v.ss_current_state }
             end
-         else
+
+
+         if #col == max_cols then
             row[#row+1] = col
             col = {}
          end
@@ -143,7 +143,8 @@ function make_grid(web, O)
          res[#res+1] = render_title(name_hst_svc_subapp_subent(t).."(s)")
          res[#res+1] = render_table(row, nil, "tab_cadre_appgrid")
       end
-      row, col = {}, {}
+      row = {}
+      col = {}
    end
 
    return res

@@ -2,6 +2,7 @@ require "Model"
 require "App"
 require "util"
 require "monitor_util"
+require "probe"
 
 local ipfile = "/usr/local/itvision/scr/update_ip.queue"
 
@@ -23,6 +24,8 @@ function ip_delete(id)
    print("delete: "..id)
    local m = Model.query("itvision_monitors", "networkports_id = "..id)
 
+
+
    if m[1] then
       hst_name = m[1].name1
 
@@ -41,11 +44,10 @@ function ip_delete(id)
       end
 
       for _,v in ipairs(m) do
-         local servicefile = config.monitor.dir.."/services/"..v.name1.."-"..v.name2..".cfg"
          Model.delete ("itvision_app_objects", "service_object_id = "..v.service_object_id)
          Model.delete ("itvision_app_relats", "from_object_id = "..v.service_object_id)
          Model.delete ("itvision_app_relats", "to_object_id = "..v.service_object_id)
-         remove_file(servicefile)
+         ITvision.delete(nil, v.service_object_id)  -- chama funcao de remocao de probe.lua -  remove tudo que está relacionaod ao objeto
       end
 
       local hostfile = config.monitor.dir.."/hosts/"..id..".cfg"
