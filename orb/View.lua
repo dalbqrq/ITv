@@ -589,6 +589,33 @@ function select_option_onchange(name, T, value_idx, label_idx, default_value, ur
 end
 
 
+
+Months = { 
+   { id=1,  string="01", short="Jan", },
+   { id=2,  string="02", short="Fev", },
+   { id=3,  string="03", short="Mar", },
+   { id=4,  string="04", short="Abr", },
+   { id=5,  string="05", short="Mai", },
+   { id=6,  string="06", short="Jun", },
+   { id=7,  string="07", short="Jul", },
+   { id=8,  string="08", short="Ago", },
+   { id=9,  string="09", short="Set", },
+   { id=10, string="10", short="Out", },
+   { id=11, string="11", short="Nov", },
+   { id=12, string="12", short="Dez", },
+}
+
+function name_month(id)
+   return choose_name(Months, tonumber(id))
+end
+
+function select_month(name, default)
+   return select_option(name, Months, "id", "short", default)
+end
+
+
+
+
 -- YES or NO
 NoOrYes = {
    { id = 0, name = strings.no },

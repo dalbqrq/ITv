@@ -361,6 +361,7 @@ menu_itens = {
       { name="Ticket", field=nil, link="/servdesk/front/ticket.php" },
       { name="Estatística", field=nil, link="/servdesk/front/stat.php" },
       { name="Relatorios", field=nil, link="/servdesk/relatorios/index.php" },
+      { name="Exporta Relatorios", field=nil, link="/orb/relat_ticket/add" },
       },
    },
    { name="CMDB", link="#",
