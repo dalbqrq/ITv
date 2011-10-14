@@ -9,7 +9,7 @@ dbuser=$user
 dbname=itvision
 itvhome=/usr/local/itvision
 instance=ROOT
-hostname=itvision
+hostname=ITv-IMPA
 
 function install_pack() {
 	apt-get -y install $1
@@ -104,7 +104,17 @@ install_pack jhead
 /usr/sbin/invoke-rc.d nagiosgrapher stop
 rm -rf /var/cache/nagios3/ndo.sock
 
-#exit
+exit
+
+# --------------------------------------------------
+# PRE-CONFIGURACAO
+# --------------------------------------------------
+install_msg PRE-CONFIGURACAO
+mkdir -p /var/log/itvision/apache2
+mkdir -p /var/log/itvision/nagios3
+mkdir -p /var/log/itvision/nagiosgrapher
+chown -R $user.$user /var/log/itvision
+chmod -R 755 /var/log/itvision
 
 # --------------------------------------------------
 # ITVISION
@@ -114,11 +124,6 @@ echo "CREATE DATABASE $dbname DEFAULT CHARACTER SET utf8  DEFAULT COLLATE utf8_g
 echo "CREATE USER '$dbuser'@'localhost' IDENTIFIED BY '$dbpass';" | mysql -u root --password=$dbpass
 echo "GRANT ALL PRIVILEGES ON *.* TO '$dbuser'@'localhost' WITH GRANT OPTION;" | mysql -u root --password=$dbpass
 mysql -u root --password=$dbpass $dbname < $itvhome/ks/db/itvision.sql
-mkdir -p /var/log/itvision/apache2
-mkdir -p /var/log/itvision/nagios3
-mkdir -p /var/log/itvision/nagiosgrapher
-chown -R $user.$user /var/log/itvision
-chmod -R 755 /var/log/itvision
 cat << EOF > /etc/apache2/conf.d/itvision.conf
 <VirtualHost *:80>
         ServerAdmin webmaster@itvision.com.br
@@ -188,9 +193,6 @@ language = "pt_BR"
 EOF
 chown -R $user.$user $itvhome/orb/config.lua
 
-mkdir -p /var/log/itvision
-chown -R $user.$user /var/log/itvision
-
 cd /home/$user
 ln -s $itvhome itv
 ln -s $itvhome/bin
@@ -199,7 +201,7 @@ chown -R $user.$user bin
 
 cat << EOF > $itvhome/bin/dbconf
 dbuser=$dbuser
-dbpass=$dbpass
+dbpass=itv
 dbname=$dbname
 EOF
 
@@ -345,57 +347,57 @@ chmod 4750 /usr/lib/nagios/plugins/check_dhcp
 # --------------------------------------------------
 install_msg NAGIOS BUSINESS PROCESS
 
-bp=nagiosbp
-tar zxf $itvhome/ks/files/nagiosbp-0.9.5.tgz -C /usr/local/src
-cd /usr/local/src/nagios-business-process-addon-0.9.5
-./configure --prefix=/usr/local/$bp --with-nagiosbp-user=$user --with-nagiosbp-group=$user --with-nagetc=/etc/nagios3 --with-naghtmurl=/nagios3 --with-nagcgiurl=/cgi-bin/nagios3 --with-htmurl=/$bp --with-apache-user=$user
-make install
-cat << EOF > /usr/local/$bp/etc/ndo.cfg
-# Nagios Business Process
-# backend
-ndo=db
-ndodb_host=localhost
-ndodb_port=3306
-ndodb_database=$dbname
-ndodb_username=$dbuser
-ndodb_password=$dbpass
-ndodb_prefix=nagios_
-# common settings
-cache_time=0
-cache_file=/usr/local/$bp/var/cache/ndo_backend_cache
-# unused but must be here with dummy values
-ndofs_basedir=/usr/local/ndo2fs/var
-ndofs_instance_name=default
-ndo_livestatus_socket=/usr/local/nagios/var/rw/live
-EOF
-#mkdir /usr/local/$bp/etc/sample
-#sed -i.orig -e "s/generic-bp-service/BUSPROC_SERVICE/g" -e "s/generic-bp-detail-service/BUSPROC_SERVICE_DESABLED/g" -e "s/check_bp_status/BUSPROC_STATUS/g" /usr/local/nagiosbp/bin/bp_cfg2service_cfg.pl
-#cat << EOF > $itvhome/bin/bp2cfg
-##!/bin/bash
-#/usr/local/$bp/bin/bp_cfg2service_cfg.pl -o /etc/nagios3/apps/apps.cfg
+#bp=nagiosbp
+#tar zxf $itvhome/ks/files/nagiosbp-0.9.5.tgz -C /usr/local/src
+#cd /usr/local/src/nagios-business-process-addon-0.9.5
+#./configure --prefix=/usr/local/$bp --with-nagiosbp-user=$user --with-nagiosbp-group=$user --with-nagetc=/etc/nagios3 --with-naghtmurl=/nagios3 --with-nagcgiurl=/cgi-bin/nagios3 --with-htmurl=/$bp --with-apache-user=$user
+#make install
+#cat << EOF > /usr/local/$bp/etc/ndo.cfg
+## Nagios Business Process
+## backend
+#ndo=db
+#ndodb_host=localhost
+#ndodb_port=3306
+#ndodb_database=$dbname
+#ndodb_username=$dbuser
+#ndodb_password=$dbpass
+#ndodb_prefix=nagios_
+## common settings
+#cache_time=0
+#cache_file=/usr/local/$bp/var/cache/ndo_backend_cache
+## unused but must be here with dummy values
+#ndofs_basedir=/usr/local/ndo2fs/var
+#ndofs_instance_name=default
+#ndo_livestatus_socket=/usr/local/nagios/var/rw/live
 #EOF
-#chmod 755 $itvhome/bin/bp2cfg
-#chown $user.$user /usr/local/$bp/etc/ndo.cfg $itvhome/bin/bp2cfg
-cat << EOF > /etc/nagios3/apps/apps.cfg
-
-define service{
-	use			BUSPROC_SERVICE
-	service_description	1 
-	check_command		BUSPROC_STATUS!1  
-	}  
-
-EOF
-
-sed -i.orig -e "139a \\
-  <tr> \\
-    <td width=13><img src=\"images/greendot.gif\" width=\"13\" height=\"14\" name=\"statuswrl-dot\"></td> \\
-    <td nowrap><a href=\"/nagiosbp/cgi-bin/nagios-bp.cgi\" target=\"main\" onMouseOver=\"switchdot('statuswrl-dot',1)\" onMouseOut=\"switchdot('statuswrl-dot',0)\" class=\"NavBarItem\">Business Process View</a></td> \\
-  </tr> \\
-  <tr> \\
-    <td width=13><img src=\"images/greendot.gif\" width=\"13\" height=\"14\" name=\"statuswrl-dot\"></td> \\
-    <td nowrap><a href=\"/nagiosbp/cgi-bin/nagios-bp.cgi?mode=bi\" target=\"main\" onMouseOver=\"switchdot('statuswrl-dot',1)\" onMouseOut=\"switchdot('statuswrl-dot',0)\" class=\"NavBarItem\">Business Impact</a></td> \\
-  </tr>" /usr/share/nagios3/htdocs/side.php
-
+##mkdir /usr/local/$bp/etc/sample
+##sed -i.orig -e "s/generic-bp-service/BUSPROC_SERVICE/g" -e "s/generic-bp-detail-service/BUSPROC_SERVICE_DESABLED/g" -e "s/check_bp_status/BUSPROC_STATUS/g" /usr/local/nagiosbp/bin/bp_cfg2service_cfg.pl
+##cat << EOF > $itvhome/bin/bp2cfg
+###!/bin/bash
+##/usr/local/$bp/bin/bp_cfg2service_cfg.pl -o /etc/nagios3/apps/apps.cfg
+##EOF
+##chmod 755 $itvhome/bin/bp2cfg
+##chown $user.$user /usr/local/$bp/etc/ndo.cfg $itvhome/bin/bp2cfg
+#cat << EOF > /etc/nagios3/apps/apps.cfg
+#
+#define service{
+#	use			BUSPROC_SERVICE
+#	service_description	1 
+#	check_command		BUSPROC_STATUS!1  
+#	}  
+#
+#EOF
+#
+#sed -i.orig -e "139a \\
+#  <tr> \\
+#    <td width=13><img src=\"images/greendot.gif\" width=\"13\" height=\"14\" name=\"statuswrl-dot\"></td> \\
+#    <td nowrap><a href=\"/nagiosbp/cgi-bin/nagios-bp.cgi\" target=\"main\" onMouseOver=\"switchdot('statuswrl-dot',1)\" onMouseOut=\"switchdot('statuswrl-dot',0)\" class=\"NavBarItem\">Business Process View</a></td> \\
+#  </tr> \\
+#  <tr> \\
+#    <td width=13><img src=\"images/greendot.gif\" width=\"13\" height=\"14\" name=\"statuswrl-dot\"></td> \\
+#    <td nowrap><a href=\"/nagiosbp/cgi-bin/nagios-bp.cgi?mode=bi\" target=\"main\" onMouseOver=\"switchdot('statuswrl-dot',1)\" onMouseOut=\"switchdot('statuswrl-dot',0)\" class=\"NavBarItem\">Business Impact</a></td> \\
+#  </tr>" /usr/share/nagios3/htdocs/side.php
+#
 
 
 # --------------------------------------------------
