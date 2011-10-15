@@ -605,9 +605,9 @@ luarocks install orbit
 luarocks install dado
 luarocks install luagraph
 #
-sed -i.orig '/^#/ a\
-. '$itvhome'/bin/lua_path' /usr/local/bin/wsapi.cgi
-
+sed -i.orig -e "/bin/ i\
+> \. /usr/local/itvision/bin/lua_path
+> " /usr/local/bin/wsapi.cgi
 
 
 # --------------------------------------------------
