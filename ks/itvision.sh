@@ -449,15 +449,9 @@ cd $itvhome/ks/servdesk
 tar cf - * | ( cd /usr/local/servdesk; tar xfp -)
 
 
-echo "ALTER TABLE itvision.glpi_computers ADD COLUMN geotag VARCHAR(40) NULL DEFAULT NULL AFTER ticket_tco ;" | mysql -u root --password=$dbpass
-echo "ALTER TABLE itvision.glpi_computers ADD COLUMN alias VARCHAR(30) NULL DEFAULT NULL AFTER ticket_tco ;" | mysql -u root --password=$dbpass
-echo "ALTER TABLE itvision.glpi_computers ADD COLUMN itv_key VARCHAR(30) NULL DEFAULT NULL AFTER ticket_tco ;" | mysql -u root --password=$dbpass
-echo "ALTER TABLE itvision.glpi_networkequipments ADD COLUMN geotag VARCHAR(40) NULL DEFAULT NULL AFTER ticket_tco ;" | mysql -u root --password=$dbpass
-echo "ALTER TABLE itvision.glpi_networkequipments ADD COLUMN alias VARCHAR(30) NULL DEFAULT NULL AFTER ticket_tco ;" | mysql -u root --password=$dbpass
-echo "ALTER TABLE itvision.glpi_networkequipments ADD COLUMN itv_key VARCHAR(30) NULL DEFAULT NULL AFTER ticket_tco ;" | mysql -u root --password=$dbpass
-echo "ALTER TABLE itvision.glpi_profiles ADD COLUMN app_relat_type CHAR(1) NULL DEFAULT NULL AFTER create_validation ;" | mysql -u root --password=$dbpass
-echo "ALTER TABLE itvision.glpi_profiles ADD COLUMN checkcmds      CHAR(1) NULL DEFAULT NULL AFTER create_validation ;" | mysql -u root --password=$dbpass
-echo "ALTER TABLE itvision.glpi_profiles ADD COLUMN application    CHAR(1) NULL DEFAULT NULL AFTER create_validation ;" | mysql -u root --password=$dbpass
+mysql -u root --password=$dbpass $dbname < $itvhome/ks/db/glpi_init.sql
+mysql -u root --password=$dbpass $dbname < $itvhome/ks/db/glpi_extra_columns.sql
+
 
  
 # --------------------------------------------------
@@ -473,6 +467,7 @@ sed -i.orig -e "s/DB_SERVER_USER=\"ocs\"/DB_SERVER_USER=\"$user\"/" \
         -e "s/DB_SERVER_PWD=\"ocs\"/DB_SERVER_PWD=\"$dbpass\"/" /usr/local/OCSNG_UNIX_SERVER-1.3.2/setup.sh
 
 #perl -MCPAN -e 'install XML::Entities'
+mv  /etc/perl/CPAN/Config.pm /etc/perl/CPAN/Config.pm.orig
 cpan -i XML::Entities
 cpan -i YAML 
 \rm -f /tmp/ans; for i in `seq 16`; do echo >> /tmp/ans; done
@@ -488,10 +483,9 @@ sed -i -e "s/Alias \/ocsreports/Alias \/ocs/g" /etc/apache2/conf.d/ocsinventory-
 install_msg NEDI
 
 cd /tmp
-wget http://nedi.ch/_media/files:nedi-1.0.5.tgz
-mv files:nedi-1.0.5.tgz nedi-1.0.5.tgz
-tar -xzf nedi-1.0.5.tgz
-mv nedi /usr/local
+wget http://www.nedi.ch/pub/nedi-1.0.6.tgz
+mkdir /usr/local/nedi
+tar -xzf nedi-1.0.6.tgz -C /usr/local/nedi
 chown -R $user.$user /usr/local/nedi
 chmod 775 /usr/local/nedi/html/log/
 
@@ -524,8 +518,8 @@ echo "#\$now stop" >> \$LASTRUN'
 EOF
 
 chmod +x /usr/local/nedi/startnedi.sh
-sudo mkdir /var/log/itvision/nedi.log
-sudo chown -R $user:$user /var/log/itvision/nedi /usr/local/nedi
+mkdir /var/log/itvision/nedi
+chown -R $user:$user /var/log/itvision/nedi /usr/local/nedi
 
 echo "15 0,4,8,12,16,20 * * * /usr/local/nedi/startnedi.sh  # Discover and gather device configurations NEDI" >> /var/spool/cron/crontabs/$user
 
@@ -571,16 +565,12 @@ rm -f ~/SERVER* && rm -rf ~/demoCA*
 mkdir -p /var/log/itvision/mysql
 chown -R mysql.adm /var/log/itvision/mysql
 sed -i -e 's/\/var\/log\/mysql\/error.log/\/var\/log\/itvision\/mysql\/error.log/' /etc/mysql/my.cnf 
-	-e 's/weekly/daily/g' /etc/logrotate.d/apache2
-
+sed -i -e 's/weekly/daily/g' /etc/logrotate.d/apache2
 sed -i -e 's/weekly/daily/g' /etc/logrotate.d/nagiosgrapher
-
 sed -i -e '/compress/ i\
 notifempty' /etc/logrotate.d/mysql-server
-
 sed -i -e '/compress/ i\
 notifempty' /etc/logrotate.d/ocsinventory-server
-
 cat << EOF > /etc/cron.d/logrotate 
 00 03 * * * root /usr/sbin/logrotate /etc/logrotate.conf
 EOF
@@ -701,7 +691,7 @@ install_msg CLEAN UP
 /usr/sbin/invoke-rc.d nagiosgrapher start
 cd
 \rm -rf /tmp/*
-rm -f ~/SERVER* && rm -rf ~/demoCA*
+\rm -f ~/SERVER* && rm -rf ~/demoCA*
 apt-get -y -f install
 apt-get -y clean
 apt-get -y autoremove
