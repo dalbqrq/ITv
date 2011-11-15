@@ -31,13 +31,14 @@ ITvision:dispatch_get(show,"/show")
 function tickets(web)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
+
    if tonumber(web.input.month) < 10 then web.input.month = "0"..web.input.month end
    local clause = " and t.entities_id in "..Auth.make_entity_clause(auth)
                 .." and t.date like '"..web.input.year.."-"..web.input.month.."%'"
          --clause =  " U.date like \'"..web.input.year.."-"..web.input.month.."%\'"
          --clause = ""
 
-   tkts = select_tickets(clause)
+   local tkts = select_tickets(clause)
 
    return render_tickets(web, tkts, clause)
 end
@@ -81,13 +82,23 @@ function render_tickets(web, tkts, clause)
    local filename = "/ticket_relat.csv"
    web.prefix = "/csv"
 
+--[[
    for _,v in ipairs(tkts) do
-      --table.insert(res, toCSV(v,";"))
-      table.insert(res, v)
+      table.insert(res, toCSV(v,";"))
+      --table.insert(res, v)
    end
 
+tkts = {
+ { 1,2,3,4 },
+ { 5,6,7,8 },
+ { 9,0,9,8 },
+ { 7,6,5,4 }
+}
+]]
+
    --line_writer(config.path.itvision.."/html/csv/"..filename, { { tec = clause, n = #tkts } })
-   line_writer(config.path.itvision.."/html/csv/"..filename, res)
+   line_writer(config.path.itvision.."/html/csv/"..filename, tkts)
+
 
    return web:redirect(web:link(filename))
 end

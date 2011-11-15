@@ -356,13 +356,10 @@ function select_tickets(clause)
 
    ]]
 
-
-   --local tables_ = [[ glpi_tickets ]]
-            
    local cond_  = nil
    local extra_ = [[ order by U.id ]]
-   --local columns_  = "*"
 
+text_file_writer("/tmp/q.sql", tables_..extra_)
    return Model.query(tables_, cond_, extra_, columns_)
 
 end

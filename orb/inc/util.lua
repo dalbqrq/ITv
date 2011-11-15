@@ -277,7 +277,7 @@ function line_writer(filename, table_of_tables)
    f = io.open(filename, 'a')
    -- Append each table in CSV format to the file
    for _, v in ipairs(table_of_tables) do
-      f:write(toCSV(v,";"))
+      f:write(toCSV(v,";").."\n")
    end
    f:close()
 
