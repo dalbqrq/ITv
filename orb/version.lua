@@ -1,8 +1,15 @@
-version = "1.0.2"
+version = "1.0.3"
 patch = 0
 
 
 description = [[
+
+<br><br><b> Versão 1.0.3 (24 de Maio de 2012) </b>
+
+- Links para CMDB e Status nos balões que se abrem quando o pino do mapa é clicado.
+
+- Aba CMDB e Checagem na visão na tela de detalhamento de um dispositivo ou de um serviço foi substituida por links abaixo da tabela principal.
+
 
 <br><br><b> Versão 1.0.2 (21 de Maio de 2012) </b>
 
@@ -24,13 +31,13 @@ description = [[
 
 - Link das aplicações e das entidades da tela de Grade passam a apontar para a própria tela de grade. 
 
-- Bug: Link das aplicações e das entidades da tela de Aplicações passam a apontar para a própria tela de Aplicações. 
+- Fixed: Link das aplicações e das entidades da tela de Aplicações passam a apontar para a própria tela de Aplicações. 
 
-- Bug: A barra de resumo de status de Entidades, Aplicações, Dispositivos e Serviços passa a totalizar somente as respectivas informações para a Entidade corrente selecionada. Antes sempre mostrava o total de todas as entidads.
+- Fixed: A barra de resumo de status de Entidades, Aplicações, Dispositivos e Serviços passa a totalizar somente as respectivas informações para a Entidade corrente selecionada. Antes sempre mostrava o total de todas as entidads.
 
 - A barra de resumo foi colocada em todas as telas do menu Monitor.
 
-- Bug: Retirado o link para Remover uma entidade que aparecia na lista de objetos de uma aplicação na tela de Aplicações.  Isto porque uma sub-entidade só pode ser retirada de uma entidade pai se ela for totalmente removida do sistema.o
+- Fixed: Retirado o link para Remover uma entidade que aparecia na lista de objetos de uma aplicação na tela de Aplicações.  Isto porque uma sub-entidade só pode ser retirada de uma entidade pai se ela for totalmente removida do sistema.o
 
 - incluido o relógio ativo na barra de menu.
 
