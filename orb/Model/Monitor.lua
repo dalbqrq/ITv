@@ -333,8 +333,7 @@ end
 
 
 ----------------------------------------------------------------------
---  QUERY 3 - computador/networkequip com porta sem software e com monitor 
---                               - monitoracao de host onde o service eh ping
+--  QUERY 3 - computador/networkequip com porta sem software e com monitor - monitoracao de host onde o service eh ping
 ----------------------------------------------------------------------
 function make_query_3(c_id, p_id, a_id, clause)
    local q, t = {}, {}

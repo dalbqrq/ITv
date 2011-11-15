@@ -46,7 +46,7 @@ function show_hst(web, obj_id, active_tab)
    }
 
    local res = {}
-   res[#res+1] = render_content_header(auth.session.glpiactive_entity_shortname, "DISPOSITIVO: "..A[1].c_name, nil, nil)
+   --res[#res+1] = render_content_header(auth.session.glpiactive_entity_shortname, "DISPOSITIVO: "..A[1].c_name, nil, nil)
    res[#res+1] = render_tabs(t, active_tab)
 
    return render_layout(res)
@@ -193,13 +193,19 @@ function render_geotag(web, objtype, obj_id, A)
 
          res[#res+1] = " | "..geotag.." | "
          local icon = service_alert[tonumber(v.ss_current_state)].color_name
+         local dbcolor = service_alert[tonumber(v.ss_current_state)].color
+         local state = service_alert[tonumber(v.ss_current_state)].name
 
          marker_maker = marker_maker .. "var location"..i.." = new google.maps.LatLng("..geotag..");\n"
          marker_maker = marker_maker .. "var marker"..i.." = new google.maps.Marker({ position: location"..i..", map: map, icon: "..icon.." });\n"
          marker_maker = marker_maker .. "//marker"..i..".setTitle(\"VERTO\");\n"
          marker_maker = marker_maker .. "var infowindow"..i.." = new google.maps.InfoWindow( \n"
-         marker_maker = marker_maker .. "{ content: \""..v.c_name.."<br>"..v.p_ip.."<br>Funcionmaneto: "..service_alert[tonumber(v.ss_current_state)].name.."<br><a href='/servdesk/front/"..string.lower(v.p_itemtype)..".form.php?id="..v.c_id.."'>CMDB</a>\", size: new google.maps.Size(50,50) });\n" 
-         marker_maker = marker_maker .. "{ content: \""..v.c_name.."<br>"..v.p_ip.."<br>Funcionmaneto: "..service_alert[tonumber(v.ss_current_state)].name.."<br>\", size: new google.maps.Size(50,50) });\n" 
+         marker_maker = marker_maker .. "{ content: \""..
+               "Host: <a href='/servdesk/front/"..string.lower(v.p_itemtype)..".form.php?id="..v.c_id.."'>"..v.c_name.."</a> ("..v.p_ip..")<br>"..
+               "Status: <a style='background:"..dbcolor.."' href='/orb/obj_info/hst/"..v.s_service_object_id.."'>"..state.."</a><br>"..
+            "\", size: new google.maps.Size(50,50) });\n" 
+
+         --marker_maker = marker_maker .. "{ content: \""..v.c_name.."<br>"..v.p_ip.."<br>Funcionmaneto: "..service_alert[tonumber(v.ss_current_state)].name.."<br>\", size: new google.maps.Size(50,50) });\n" 
          marker_maker = marker_maker .. "google.maps.event.addListener(marker"..i..", 'click', function() { infowindow"..i..".open(map,marker"..i.."); });\n"
       end
    end
@@ -216,9 +222,9 @@ end
 -- que possui dois mapas lado a lado.
 function render_map_frame(web, objtype, obj_id)
    web.prefix = "/orb/obj_info/geotag"
-   --local iframe = iframe{ width="400px", height="400px", src=web:link("/"..objtype..":"..obj_id) }
-   --return render_layout (iframe)
-   return render_layout ( iframe{ width="400px", height="400px", src=web:link("/"..objtype..":"..obj_id) } )
+
+   local res = iframe{ width="400px", height="400px", src=web:link("/"..objtype..":"..obj_id) }
+   return render_layout (res)
 end
 
 
