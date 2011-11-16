@@ -9,6 +9,7 @@ require "Resume"
 require "Glpi"
 require "util"
 require "monitor_util"
+require "messages"
 
 module(Model.name, package.seeall,orbit.new)
 
@@ -330,21 +331,26 @@ end
 
 
 function render_list(web, A, AS, root, msg, no_header)
-   local res = {}
-   local row = {}
-   local svc, stract
+   local res, row = {}, {}
    local permission, auth = Auth.check_permission(web, "application")
-   local tag = ""
+   local svc, stract, tag = "", "", ""
+   local header = { 
+      strings.object, strings.entity, strings.status, strings.type, strings.logic, strings.is_active, strings.visibility, "", "" 
+   }
 
    for i, v in ipairs(AS) do
-      local button_remove, button_edit, button_active = "-", "-", "-"
       local category = strings.entity
+      -- esta imagem em branco é usada somente para formatacao, aumentando o espaço entre as linhas.
+      -- isso poderia ser feito no css!
+      local img_blk = img{src="/pics/blank.png",  height="20px"}
+      local img_edit, img_remove = img_blk, img_blk
 
       web.prefix = "/orb/app_tabs"
       local lnk = web:link("/list/"..v.id..":2")
       web.prefix = "/orb/app"
 
 
+      -- prepara botoes (icones) com as possiveis operacoes sobre o objeto
       if v.is_active == "0" then
          stract = strings.activate
          alarm_icon = "/pics/alarm_check.png"
@@ -353,33 +359,28 @@ function render_list(web, A, AS, root, msg, no_header)
          alarm_icon = "/pics/alarm_off.png"
       end
       url_disable = web:link("/activate/"..v.id..":"..v.is_active)
-      img_disable = { a{ href=url_disable, title=stract, img{src=alarm_icon,  height="20px"}}}
+      img_disable = a{ href=url_disable, title=stract, img{src=alarm_icon,  height="20px"}}
 
-      img_edit = "-"
-      img_remove = "-"
       if v.is_entity_root == "0" then
          category = strings.application
          url_edit = web:link("/edit/"..v.id..":"..v.name..":"..v.type..":"..v.visibility..":"..v.entity_id)
          url_remove = web:link("/remove/"..v.id)
-         img_edit = { a{ href=url_edit, title=strings.edit, img{src="/pics/pencil.png", height="20px"}}}
-         img_remove = { a{ href=url_remove, title=strings.remove, img{src="/pics/trash.png",  height="20px"}}}
+         img_edit = a{ href=url_edit, title=strings.edit, img{src="/pics/pencil.png", height="20px"}}
+         img_remove = a{ href=url_remove, title=strings.remove, img{src="/pics/trash.png",  height="20px"}}
       end
 
       if permission == "r" then
-         img_edit = "-"
-         img_remove = "-"
-         img_disable = "-"
+         img_edit, img_remove, img_disable = img_blk, img_blk, img_blk
       end
 
-
+      -- selecioma o tag com a indicação do tipo de objeto
       if v.app_type_id == "1" then
          tag = "+ "
       elseif v.app_type_id == "2" then
          tag = "# "
-      else
-         tag = "- "
       end
 
+      -- Inclui estado e cor na coluna status
       local state, statename, status
       if tonumber(v.has_been_checked) == 1 then
          if tonumber(v.state) == 0 then
@@ -410,13 +411,11 @@ function render_list(web, A, AS, root, msg, no_header)
          PrivateOrPublic[tonumber(v.visibility)+1].name,
          img_edit,
          img_remove,
+         -- link para desabilitar aplicacao com erro. Ver pivotaltracker!!!
          --img_disable,
       }
    end
 
-   --local header =  { strings.name, strings.entity, strings.status, strings.type, strings.logic, strings.is_active, strings.visibility,".", ".", "." }
-   local header =  { strings.name, strings.entity, strings.status, strings.type, strings.logic, strings.is_active, strings.visibility,".", "." }
-   local c_header = {}
    if no_header == nil then
       res[#res+1] = render_resume(web)
       web.prefix="/orb/app"
@@ -428,9 +427,9 @@ function render_list(web, A, AS, root, msg, no_header)
       res[#res+1] = render_form_bar( render_filter(web), strings.search, web:link("/list"), web:link("/list") )
       if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ font{ color="red", msg } } end
    end
+
    res[#res+1] = render_table(row, header)
    if not no_header then res[#res+1] = { br(), br(), br(), br() } end
-
 
    return render_layout(res)
 end

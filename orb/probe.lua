@@ -694,15 +694,15 @@ function render_list(web, ics, chk, msg)
    local typename
 
    local header = { -- sem o nome do comando 'chk'. Só que agora o alias aparece como o 'Comando' na tabela
-      "Dispositivo", "Status", strings.type, strings.command, "Ação"
+      strings.object, "Status", strings.type, strings.command, "", "", "", ""
    }
 
    -- AS imagens abaixo irão substituir os link em texto usado para editar, remover e acicionar..."
 
    for i, v in ipairs(ics) do
       local ip, itemtype, id, hst_name, m_name, name = "", "", "", nil, nil, nil
-      local img_blk = { img{src="/pics/blank.png",  height="20px"}, " " }
-      local img_edit, img_del, img_disable, img_add = img_blk, img_blk, img_blk
+      local img_blk = img{src="/pics/blank.png",  height="20px"}
+      local img_edit, img_remove, img_disable, img_add = img_blk, img_blk, img_blk
       local flag = 0
       local obj_name = ""
 
@@ -775,16 +775,16 @@ function render_list(web, ics, chk, msg)
       web.prefix = "/orb/probe"
 
       -- Determina quais são os links de açao que deverão aparece para cada entrada (linha contendo dispositivo ou serviço
-      url_add_host = web:link("/insert_host/"..v.p_id..":"..v.sv_id..":"..v.c_id..":"..v.n_id..":"..hst_name..":"..ip)
-      img_add = { a{ href=url_add_host, title="Adicionar dispositivo", img{src="/pics/plus.png",   height="20px"}}, " " }
+      url_add = web:link("/insert_host/"..v.p_id..":"..v.sv_id..":"..v.c_id..":"..v.n_id..":"..hst_name..":"..ip)
+      img_add = a{ href=url_add, title="Adicionar dispositivo", img{src="/pics/plus.png",   height="20px"}}
 
       if v.s_check_command_object_id == nil then -- se o ic não possuir um comando de check associado entao...
          chk = ""
          if permission == "w" then
             if tonumber(v.m_service_object_id) == -1 then -- se check cmd pendente...
-               url_add_host = font{ color="orange", "Pendente" }
+               url_add = font{ color="orange", "Pendente" }
             else
-               --url_add_host = a{ href= web:link("/insert_host/"..v.p_id..":"..v.sv_id..":"..v.c_id..":"..v.n_id..":"
+               --url_add = a{ href= web:link("/insert_host/"..v.p_id..":"..v.sv_id..":"..v.c_id..":"..v.n_id..":"
                --                          ..hst_name..":"..ip), strings.add.." "..strings.host }
             end
          end
@@ -798,7 +798,6 @@ function render_list(web, ics, chk, msg)
                                        -- Por isso estou tirando esta entrada da tabela na tela de checagem!
          end
          if permission == "w" then
-
             if state == APPLIC_DISABLE then
                flag = 1
                alarm_icon = "/pics/alarm_check.png"
@@ -807,27 +806,26 @@ function render_list(web, ics, chk, msg)
             end
             if  m_name == config.monitor.check_host or m_name ==  "-" then query = 3 else query = 4 end
 
-            url_edit_host = web:link("/update/"..v[1]..":"..c_id..":"..v.p_id..":0:0:"..v.m_service_object_id..":0")
-            url_del_host = web:link("/remove/"..v.m_service_object_id)
-            url_add_serv = web:link("/add/"..v[1]..":"..c_id..":"..v.p_id..":0")
+            url_add = web:link("/add/"..v[1]..":"..c_id..":"..v.p_id..":0")
+            url_edit = web:link("/update/"..v[1]..":"..c_id..":"..v.p_id..":0:0:"..v.m_service_object_id..":0")
+            url_remove = web:link("/remove/"..v.m_service_object_id)
             url_disable = web:link("/disable_service/"..v.m_service_object_id..":"..c_id..":".. v.p_id..":"..query..":0:"..flag)
 
-            img_edit = { a{ href=url_edit_host, title="Editar", img{src="/pics/pencil.png", height="20px"}}, " " }
-            img_del = { a{ href=url_del_host, title="Remover", img{src="/pics/trash.png",  height="20px"}}, " " }
-            img_add = { a{ href=url_add_serv, title="Adicionar serviço", img{src="/pics/plus.png",   height="20px"}}, " " }
-	    img_disable = { a{ href=url_disable, title="Desabilitar alerta", img{src=alarm_icon,  height="20px"}}, " " }
+            img_add = a{ href=url_add, title="Adicionar serviço", img{src="/pics/plus.png",   height="20px"}}
+            img_edit = a{ href=url_edit, title="Editar", img{src="/pics/pencil.png", height="20px"}}
+            img_remove = a{ href=url_remove, title="Remover", img{src="/pics/trash.png",  height="20px"}}
+	    img_disable = a{ href=url_disable, title="Desabilitar alerta", img{src=alarm_icon,  height="20px"}}
          end
       end
-      local imgs = { img_edit, img_del, img_disable, img_add }
 
-      row[#row + 1] = { status=status, name, statename, typename, m_name, imgs } 
+      row[#row + 1] = { status=status, name, statename, typename, m_name, img_edit, img_remove, img_disable, img_add } 
    end
+
+   web.prefix = "/orb/probe"
 
    res[#res+1] = render_resume(web)
    res[#res+1] = render_content_header(auth, "Checagem", nil, web:link("/list"))
    if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ font{ color="red", msg } } end
-   local bar = {}
-   web.prefix = "/orb/probe"
    res[#res+1] = render_form_bar( render_filter(web), strings.search, web:link("/list"), web:link("/list") )
    res[#res+1] = render_table(row, header)
    res[#res+1] = render_bar( button_link("Forçar Pendências", web:link("/pend/"), "calendrier") )
@@ -994,8 +992,10 @@ function render_add(web, ics, chk, params, chk_params, monitor_name)
       hst_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
 
       url_insert = "/insert_service/"..v.p_id..":"..v.sv_id..":"..v.c_id..":"..v.n_id..":"..hst_name..":nana:nono:"..v.p_ip
-      url_update = "/update_service/"..params.service_object_id..":"..params.c_id..":".. params.p_id..":"..params.query..":".. params.no_header
-      url_disable = "/disable_service/"..params.service_object_id..":"..params.c_id..":".. params.p_id..":"..params.query..":".. params.no_header
+      url_update = "/update_service/"..params.service_object_id..":"..params.c_id..":".. params.p_id..":"..params.query..":"
+         ..params.no_header
+      url_disable = "/disable_service/"..params.service_object_id..":"..params.c_id..":".. params.p_id..":"..params.query..":"
+         ..params.no_header
       url_remove = "/remove/"..params.service_object_id
       url_test   = "/"..params.origin.."/"..params.query..":"..params.c_id
 
@@ -1026,11 +1026,8 @@ function render_add(web, ics, chk, params, chk_params, monitor_name)
       res[#res + 1] = p{ font{ color="red", params.msg }, br()  }
    end
    res[#res+1] = render_table(row, header)
-   res[#res+1] = render_checkcmd(web, chk_id, 
-hst_name, 
-v.p_ip, 
-url_test, url_insert, 
-url_update, url_disable, url_remove, chk_params, monitor_name, params.do_test, params.origin, params.monitor_state)
+   res[#res+1] = render_checkcmd(web, chk_id, hst_name, v.p_ip, url_test, url_insert, 
+      url_update, url_disable, url_remove, chk_params, monitor_name, params.do_test, params.origin, params.monitor_state)
 
 
    return render_layout(res)

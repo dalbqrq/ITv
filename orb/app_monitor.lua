@@ -160,8 +160,6 @@ function list(web, hostname, tipo, app, status)
 
    return render_list(web, ics, filter)
 end
---ITvision:dispatch_get(list, "/(%a+):(%a+):(%d+)", "/list/(%a+):(%a+):(%d+)", "/list/(%a+):(%a+):(%d+):(.+)")
---ITvision:dispatch_post(list, "/list/(%a+):(%a+):(%d+)", "/list/(%a+):(%a+):(%d+):(.+)")
 ITvision:dispatch_get(list, "/(.+):(.+):(.+):(.+)", "/list/(.+):(.+):(.+):(.+)")
 ITvision:dispatch_post(list, "/(.+):(.+):(.+):(.+)")
 
@@ -194,39 +192,44 @@ function render_list(web, ics, filter, msg)
    local row, res, link, url, output = {}, {}, {}, "", ""
    local refresh_time = 60
 
-   local header = { 
-      strings.object, strings.status, "IP", strings.command, strings.type, "Resultado do comando de checagem"
-   }
-
+   local header = { strings.object, strings.status, strings.type, strings.command, "Resultado do comando de checagem" }
 
    for i, v in ipairs(ics) do
       local probe = v.m_name
-      local serv, ip, typename, id, hst_name, alias = "", "", "", "", nil, nil
+      local serv, ip, typename, id, hst_name = nil, "", "", "", nil
+      local name, obj_name = "", ""
       if v.sw_name ~= "" and v.sv_name ~= nil then serv = v.sw_name.." / "..v.sv_name end
 
-      -- muitos dos ifs abaixo existem em funcao da direrenca entre as queries com Computer e as com Network
-      v.c_id = v.c_id or 0 v.n_id = v.n_id or 0 v.p_id = v.p_id or 0 v.sv_id = v.sv_id or 0
-      hst_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
-      -- DEBUG: if hst_name == nil then hst_name = v.a_name.." ["..v.a_id..":"..v.o_object_id.."]" end
-      if hst_name == nil then hst_name = v.ax_name end
-      alias = v.m_name
-
-      if v.p_itemtype then 
-         if v.p_itemtype == "Computer" then
-            typename = "Computador"
-         elseif itemtype == "NetworkEquipment" then
-            typename = "Rede"
-         end
-      else 
-         if v.ax_is_entity_root == "1" then 
-            typename = strings.entity 
-         else 
-            typename = strings.application 
-         end
-      end
+      v.c_id = v.c_id or 0; v.n_id = v.n_id or 0; v.p_id = v.p_id or 0; v.sv_id = v.sv_id or 0;
       if v.p_ip then ip = v.p_ip else ip = v.n_ip end
       if v.c_id ~= 0 then c_id = v.c_id else c_id = v.n_id end
 
+      hst_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
+      if hst_name == nil then hst_name = v.ax_name end
+
+
+      -- determina o "tipo" de objeto a ser apresentado
+      if probe and probe ~= config.monitor.check_host and probe ~=  "" then
+         typename = strings.service
+         obj_name = make_obj_name(find_hostname(v.c_alias, v.c_name, v.c_itv_key).." ("..v.p_ip..")", v.m_name)
+      elseif v.p_itemtype then 
+         if v.p_itemtype == "Computer" then
+            typename = "Computador"
+         elseif v.p_itemtype == "NetworkEquipment" then
+            typename = "Rede"
+         end
+         obj_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key).." ("..v.p_ip..")"
+      else 
+         if v.ax_is_entity_root == "1" then 
+            typename = strings.entity 
+            obj_name = "+ "..v.ax_name
+         else 
+            typename = strings.application 
+            obj_name = "# "..v.ax_name
+         end
+      end
+
+--[[
       if v.s_check_command_object_id == nil then 
          if permission == "w" then
             if tonumber(v.m_service_object_id) == -1 then
@@ -243,7 +246,9 @@ function render_list(web, ics, filter, msg)
       else
          link = "--"
       end
+]]
 
+      -- define os links dos objetos para as suas vizões detalhadas
       if probe == nil then
          web.prefix = "/orb/app_tabs"
          url = web:link("/list/"..v.ax_id..":6")
@@ -251,7 +256,6 @@ function render_list(web, ics, filter, msg)
       else if probe ~= config.monitor.check_host and probe ~=  "" then
          web.prefix = "/orb/obj_info"
          url = web:link("/svc/"..v.m_service_object_id)
-         typename = strings.service
       else 
          web.prefix = "/orb/obj_info"
          url = web:link("/hst/"..v.m_service_object_id)
@@ -260,13 +264,13 @@ function render_list(web, ics, filter, msg)
       end
       web.prefix = "/orb/app_monitor"
 
-      local name
       if permission == "w" then
-         name = a{ href=url, hst_name}
+         name = a{ href=url, obj_name}
       else
-         name = hst_name
+         name = obj_name
       end
 
+      -- seta estado e resultado da probe de teste do nagios
       local state
       if tonumber(v.ss_has_been_checked) == 1 then
          if tonumber(v.m_state) == 0 then
@@ -276,17 +280,21 @@ function render_list(web, ics, filter, msg)
             state = tonumber(v.ss_current_state)
             output = v.ss_output
          end
-
       else
          state = 4
       end
       local statename = applic_alert[state].name
-      row[#row + 1] = { status={ state=state, colnumber=2 }, name, statename, ip, probe, typename, output }
+
+      -- esta imagem em branco é usada somente para formatacao, aumentando o espaço entre as linhas.
+      -- isso poderia ser feito no css!
+      local img_blk = img{src="/pics/blank.png",  height="20px"}
+
+      row[#row + 1] = { status={ state=state, colnumber=2 }, name, statename, typename, probe, output..img_blk }
    end
 
 
    res[#res+1] = render_resume(web)
-   res[#res+1] = render_content_header(auth, "Lista", nil, web:link("/pre_list"))
+   res[#res+1] = render_content_header(auth, "Lista de Objetos", nil, web:link("/pre_list"))
    res[#res+1] = render_form_bar( render_filter(web, filter), strings.search, web:link("/pre_list"), web:link("/pre_list") )
    res[#res+1] = render_table(row, header)
    res[#res+1] = { br(), br(), br(), br() }

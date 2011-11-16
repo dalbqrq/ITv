@@ -62,12 +62,6 @@ end
 function update_apps(web)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
-
---[[ CODIGO VELHO COM ARVORE
-   local APPS = App.select_uniq_app_in_tree()
-   make_all_apps_config(APPS)
-   os.sleep(1) -- CLUDGE Espera um pouco pois as queries das caixas de insercao estao retornando vazias!
-]]
    App.remake_apps_config_file()
 end
 
@@ -85,13 +79,10 @@ function add(web, app_id, msg)
          clause  = [[ and p.entities_id in ]]..entity_auth
    local extra   = [[ order by c.alias, c.name ]]
    local HST = Monitor.make_query_3(nil, nil, nil, exclude .. clause .. extra)
-   --   clause = clause..[[ and o.name2 <> ']]..config.monitor.check_host..[[' ]]
-   --local SVC = Monitor.make_query_4(nil, nil, nil, nil, exclude .. clause .. extra)
    local SVC = Monitor.make_query_4(nil, nil, nil, exclude .. clause .. extra)
 
    clause = " ( a.entities_id in "..entity_auth.." or a.visibility = 1 )"
    local APP = App.select_app_service_object(clause, nil, nil, app_id)
-   --local APPOBJ = App.select_app_app_objects(app_id)
    local APPOBJ = Monitor.select_monitors_app_objs(app_id)
 
    return render_add(web, HST, SVC, APP, APPOBJ, app_id, msg)
@@ -127,7 +118,6 @@ function insert_obj(web, app_id)
    end
 
    web.prefix = "/orb/app_tabs"
-   --return web:redirect(web:link("/list/"..app_objects.app_id..":"..tab_id))
    return web:redirect(web:link("/list/"..app_id..":"..tab_id))
 end
 ITvision:dispatch_post(insert_obj, "/insert_obj:(%d+)")
