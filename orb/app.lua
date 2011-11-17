@@ -345,11 +345,7 @@ function render_list(web, A, AS, root, msg, no_header)
       local img_blk = img{src="/pics/blank.png",  height="20px"}
       local img_edit, img_remove = img_blk, img_blk
 
-      web.prefix = "/orb/app_tabs"
-      local lnk = web:link("/list/"..v.id..":2")
       web.prefix = "/orb/app"
-
-
       -- prepara botoes (icones) com as possiveis operacoes sobre o objeto
       if v.is_active == "0" then
          stract = strings.activate
@@ -400,9 +396,11 @@ function render_list(web, A, AS, root, msg, no_header)
          status={ state=state, colnumber=3, nolightcolor=true }
       end
 
+      web.prefix = "/orb/app_tabs"
+
       row[#row+1] = { 
          status=status,
-         a{ href=lnk, tag..v.name },
+         a{ href=web:link("/list/"..v.id..":2"), tag..v.name },
          v.entity_completename,
          statename,
          category,
@@ -418,7 +416,7 @@ function render_list(web, A, AS, root, msg, no_header)
 
    if no_header == nil then
       res[#res+1] = render_resume(web)
-      web.prefix="/orb/app"
+      web.prefix = "/orb/app"
       if permission == "w" then
          res[#res+1] = render_content_header(auth, strings.application, web:link("/add"), web:link("/list"))
       else

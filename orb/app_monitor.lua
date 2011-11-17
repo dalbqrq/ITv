@@ -229,30 +229,11 @@ function render_list(web, ics, filter, msg)
          end
       end
 
---[[
-      if v.s_check_command_object_id == nil then 
-         if permission == "w" then
-            if tonumber(v.m_service_object_id) == -1 then
-               link = font{ color="orange", "Pendente" }
-            elseif serv ~= "" then
-               link = a{ href= web:link("/add/"..v[1]..":"..c_id..":"..v.p_id..":"..v.sv_id), strings.add }
-            else
-               link = a{ href= web:link("/insert_host/"..v.p_id..":"..v.sv_id..":"..v.c_id..":"..v.n_id..":"
-                                         ..hst_name..":"..ip), strings.add.." host" }
-            end
-         else
-            link = "--"
-         end
-      else
-         link = "--"
-      end
-]]
-
       -- define os links dos objetos para as suas vizões detalhadas
       if probe == nil then
          web.prefix = "/orb/app_tabs"
          url = web:link("/list/"..v.ax_id..":6")
-         probe = ""
+         probe = "-"
       else if probe ~= config.monitor.check_host and probe ~=  "" then
          web.prefix = "/orb/obj_info"
          url = web:link("/svc/"..v.m_service_object_id)

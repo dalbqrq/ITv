@@ -43,12 +43,13 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 function render_list(web, app_id, active_tab, no_menu, msg)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
+   local res, t = {}, {}
+   local A = apps:select(app_id)
+
    if msg then msg = ":"..msg else msg = "" end
    no_menu = no_menu or false
    active_tab = active_tab or 1
-   local t = {}
 
-   local A = apps:select(app_id)
 
    if A[1].service_object_id then
    t = { 
@@ -69,8 +70,6 @@ function render_list(web, app_id, active_tab, no_menu, msg)
       { title="Visão Gráfica", html="", href="/orb/gviz/show/"..app_id..":1" }, 
    }
    end
-
-
 
 --[[ TODO: incluir navegacao de apps. segue o html usago pelo glpi para computers
    <div id='menu_navigate'>
@@ -106,12 +105,11 @@ function render_list(web, app_id, active_tab, no_menu, msg)
 ]]
 
 
-   local res = {}
-   web.prefix = "/orb/app"
-
    if no_menu == false then
       res[#res+1] = render_resume(web)
-      res[#res+1] = render_content_header(auth.session.glpiactive_entity_shortname, strings.application, web:link("/add"), web:link("/list"))
+      web.prefix = "/orb/app"
+      res[#res+1] = render_content_header(auth.session.glpiactive_entity_shortname, strings.application, web:link("/add"), 
+         web:link("/list"))
    end
 
    -- inicio da implementacao da navegacao pelas apps
