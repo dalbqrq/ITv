@@ -639,8 +639,8 @@ function disable_service(web, service_object_id, c_id, p_id, query, no_header, f
       msg = "Check de SERVIÇO: habilitado."
    end
 
+   os.sleep(1)
    if count then
-      os.sleep(1)
       return web:redirect(web:link("/update/"..query..":"..c_id..":"..p_id..":0:0:"..service_object_id..":"..no_header..":"..msg))
    else
       return  web:redirect(web:link("/list/"..msg)) --para criacao de probes em massa
@@ -693,21 +693,16 @@ function render_list(web, ics, chk, msg)
    local row, res, url_add_host, url_edit_host, url_del_host, url_add_serv, url = {}, {}, "", "", nil
    local typename
 
-   local header = { -- sem o nome do comando 'chk'. Só que agora o alias aparece como o 'Comando' na tabela
-      strings.object, "Status", strings.type, strings.command, "", "", "", ""
-   }
-
-   -- AS imagens abaixo irão substituir os link em texto usado para editar, remover e acicionar..."
+   local header = { strings.object, "Status", strings.type, strings.command, "", "", "", "" }
 
    for i, v in ipairs(ics) do
-      local ip, itemtype, id, hst_name, m_name, name = "", "", "", nil, nil, nil
+      local ip, itemtype, id, m_name, name = "", "", "", nil, nil
       local img_blk = img{src="/pics/blank.png",  height="20px"}
-      local img_edit, img_remove, img_disable, img_add = img_blk, img_blk, img_blk
+      local img_add, img_edit, img_remove, img_disable, img_add = img_blk, img_blk, img_blk, img_blk, img_blk
       local flag = 0
       local obj_name = ""
 
       v.c_id = v.c_id or 0 v.n_id = v.n_id or 0 v.p_id = v.p_id or 0 v.sv_id = v.sv_id or 0
-      hst_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
       if v.m_name == "" then m_name = "-" else m_name = v.m_name end -- nome do comando de checagem
       url_add_host = "-"
       url_add_serv = "-"
@@ -716,8 +711,6 @@ function render_list(web, ics, chk, msg)
       if v.p_itemtype then itemtype = v.p_itemtype else itemtype = "NetworkEquipment" end
       if v.p_ip then ip = v.p_ip else ip = v.n_ip end
       if v.c_id ~= 0 then c_id = v.c_id else c_id = v.n_id end
-
-      web.prefix = "/orb/obj_info"
 
       -- Determina o valor da coluna "Tipo"
       if m_name == config.monitor.check_host or m_name ==  "-" then
@@ -730,8 +723,9 @@ function render_list(web, ics, chk, msg)
       else
          typename = strings.service
          obj_name = make_obj_name(find_hostname(v.c_alias, v.c_name, v.c_itv_key).." ("..v.p_ip..")", v.m_name)
-         img_add = ""
       end
+
+      web.prefix = "/orb/obj_info"
 
       -- Determina o link da primeira columa "Dispositivo"
       if v.m_service_object_id == nil then
@@ -747,7 +741,7 @@ function render_list(web, ics, chk, msg)
          url = web:link("/svc/"..v.m_service_object_id)
       end
 
-      -- Determina o valor da coluna "Dispositivo"
+      -- Determina o valor da coluna "Objeto"
       if permission == "w" and url ~= nil then
          name = a{ href=url, obj_name}
       else
@@ -775,8 +769,6 @@ function render_list(web, ics, chk, msg)
       web.prefix = "/orb/probe"
 
       -- Determina quais são os links de açao que deverão aparece para cada entrada (linha contendo dispositivo ou serviço
-      url_add = web:link("/insert_host/"..v.p_id..":"..v.sv_id..":"..v.c_id..":"..v.n_id..":"..hst_name..":"..ip)
-      img_add = a{ href=url_add, title="Adicionar dispositivo", img{src="/pics/plus.png",   height="20px"}}
 
       if v.s_check_command_object_id == nil then -- se o ic não possuir um comando de check associado entao...
          chk = ""
@@ -784,8 +776,9 @@ function render_list(web, ics, chk, msg)
             if tonumber(v.m_service_object_id) == -1 then -- se check cmd pendente...
                url_add = font{ color="orange", "Pendente" }
             else
-               --url_add = a{ href= web:link("/insert_host/"..v.p_id..":"..v.sv_id..":"..v.c_id..":"..v.n_id..":"
-               --                          ..hst_name..":"..ip), strings.add.." "..strings.host }
+               local hst_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
+               url_add = web:link("/insert_host/"..v.p_id..":"..v.sv_id..":"..v.c_id..":"..v.n_id..":"..hst_name..":"..ip)
+               img_add = a{ href=url_add, title="Adicionar dispositivo", img{src="/pics/plus.png",   height="20px"}}
             end
          end
       else -- caso o ic possua um comando de check associado...
@@ -811,7 +804,9 @@ function render_list(web, ics, chk, msg)
             url_remove = web:link("/remove/"..v.m_service_object_id)
             url_disable = web:link("/disable_service/"..v.m_service_object_id..":"..c_id..":".. v.p_id..":"..query..":0:"..flag)
 
-            img_add = a{ href=url_add, title="Adicionar serviço", img{src="/pics/plus.png",   height="20px"}}
+            if  m_name == config.monitor.check_host or m_name ==  "-" then 
+               img_add = a{ href=url_add, title="Adicionar serviço", img{src="/pics/plus.png",   height="20px"}}
+            end
             img_edit = a{ href=url_edit, title="Editar", img{src="/pics/pencil.png", height="20px"}}
             img_remove = a{ href=url_remove, title="Remover", img{src="/pics/trash.png",  height="20px"}}
 	    img_disable = a{ href=url_disable, title="Desabilitar alerta", img{src=alarm_icon,  height="20px"}}
@@ -821,11 +816,12 @@ function render_list(web, ics, chk, msg)
       row[#row + 1] = { status=status, name, statename, typename, m_name, img_edit, img_remove, img_disable, img_add } 
    end
 
-   web.prefix = "/orb/probe"
 
    res[#res+1] = render_resume(web)
+   web.prefix = "/orb/probe"
    res[#res+1] = render_content_header(auth, "Checagem", nil, web:link("/list"))
    if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ font{ color="red", msg } } end
+   web.prefix = "/orb/probe"
    res[#res+1] = render_form_bar( render_filter(web), strings.search, web:link("/list"), web:link("/list") )
    res[#res+1] = render_table(row, header)
    res[#res+1] = render_bar( button_link("Forçar Pendências", web:link("/pend/"), "calendrier") )

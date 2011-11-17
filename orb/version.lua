@@ -13,6 +13,7 @@ description = [[
 
 - Link de inclusão de novasa aplicações com erro na tela de Lista.
 
+- Status nas telas de detalhe de informação tanto de dispositivos quanto de serviços não apresentava o status "DESABILITADO".
 
 
 <br><br><b> Versão 1.0.3 (25 de Maio de 2012) </b>

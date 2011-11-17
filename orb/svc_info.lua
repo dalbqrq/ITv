@@ -131,12 +131,16 @@ function render_info(web, obj_id, A, C, APPS)
    end
    tab[#tab+1] = { b{"Última mudança de estado: "}, string.extract_datetime(s.ss_last_state_change) }
    tab[#tab+1] = { b{"Última mudança de estado tipo 'HARD': "}, string.extract_datetime(s.ss_last_hard_state_change) }
+--[[
    if tonumber(s.m_state) == 0 then
       tab[#tab+1] = { status={ state=state, colnumber=2, nolightcolor=true}, b{"Está flapping: "}, strings.no }
    else
       if s.ss_is_flapping == 1 then state = 2 else state = s.ss_is_flapping end
       tab[#tab+1] = { status={ state=state, colnumber=2, nolightcolor=true}, b{"Está flapping: "}, name_yes_no(s.ss_is_flapping) }
    end
+]]
+   if tonumber(s.ss_is_flapping) == 1 then state = APPLIC_CRITICAL else state = APPLIC_OK end
+   tab[#tab+1] = { status={ state=state, colnumber=2, nolightcolor=true}, b{"Está flapping: "}, name_yes_no(s.ss_is_flapping) }
    tab[#tab+1] = { b{"Último status tipo 'HARD': "}, name_ok_warning_critical_unknown(s.ss_last_hard_state) }
    tab[#tab+1] = { b{"Tempo entre checagens: "}, s.ss_normal_check_interval.."min" }
    tab[#tab+1] = { b{"Tempo entre checagens após falha: "}, s.ss_retry_check_interval.."min" }

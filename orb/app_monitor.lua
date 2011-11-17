@@ -195,7 +195,7 @@ function render_list(web, ics, filter, msg)
    local header = { strings.object, strings.status, strings.type, strings.command, "Resultado do comando de checagem" }
 
    for i, v in ipairs(ics) do
-      local probe = v.m_name
+      local m_name = v.m_name
       local serv, ip, typename, id, hst_name = nil, "", "", "", nil
       local name, obj_name = "", ""
       if v.sw_name ~= "" and v.sv_name ~= nil then serv = v.sw_name.." / "..v.sv_name end
@@ -209,7 +209,7 @@ function render_list(web, ics, filter, msg)
 
 
       -- determina o "tipo" de objeto a ser apresentado
-      if probe and probe ~= config.monitor.check_host and probe ~=  "" then
+      if m_name and m_name ~= config.monitor.check_host and m_name ~=  "" then
          typename = strings.service
          obj_name = make_obj_name(find_hostname(v.c_alias, v.c_name, v.c_itv_key).." ("..v.p_ip..")", v.m_name)
       elseif v.p_itemtype then 
@@ -230,11 +230,11 @@ function render_list(web, ics, filter, msg)
       end
 
       -- define os links dos objetos para as suas vizões detalhadas
-      if probe == nil then
+      if m_name == nil then
          web.prefix = "/orb/app_tabs"
          url = web:link("/list/"..v.ax_id..":6")
-         probe = "-"
-      else if probe ~= config.monitor.check_host and probe ~=  "" then
+         m_name = "-"
+      else if m_name ~= config.monitor.check_host and m_name ~=  "" then
          web.prefix = "/orb/obj_info"
          url = web:link("/svc/"..v.m_service_object_id)
       else 
@@ -270,7 +270,7 @@ function render_list(web, ics, filter, msg)
       -- isso poderia ser feito no css!
       local img_blk = img{src="/pics/blank.png",  height="20px"}
 
-      row[#row + 1] = { status={ state=state, colnumber=2 }, name, statename, typename, probe, output..img_blk }
+      row[#row + 1] = { status={ state=state, colnumber=2 }, name, statename, typename, m_name, output..img_blk }
    end
 
 
