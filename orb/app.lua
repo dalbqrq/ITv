@@ -388,11 +388,11 @@ function render_list(web, A, AS, root, msg, no_header)
          statename = applic_alert[state].name
          status={ state=state, colnumber=3, nolightcolor=true }
       elseif v.is_active == "0"  then
-         state = 5
+         state = APPLIC_DISABLE
          statename = applic_alert[state].name
          status={ state=state, colnumber=3, nolightcolor=true }
       else
-         state = 4
+         state = APPLIC_PENDING
          statename = applic_alert[state].name
          status={ state=state, colnumber=3, nolightcolor=true }
       end
@@ -411,6 +411,7 @@ function render_list(web, A, AS, root, msg, no_header)
          img_edit,
          img_remove,
          img_disable,
+v.has_been_checked, v.current_state
       }
    end
 
