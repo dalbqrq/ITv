@@ -75,28 +75,28 @@ function select_app_state (cond__, extra_, columns_)
    if cond__ then cond_ = cond_.." and "..cond__ end
    local content2 = query (tables_, cond_, extra_, columns_)
 
-
-   -- Retorna as aplicacoes já com os nomes da entidades que ainda não possuem entrada em nagios_services
-   local tables_  = [[  itvision_apps a, 
-                        (select a.entities_id as entity_id, a.name as entity_name, a.name as entity_completename 
-                         from itvision_apps a where a.entities_id = 0
-                         union 
-                         select id as entity_id, name as entity_name, completename asentity_completename 
-                         from glpi_entities) as e ]]
-   local cond_   = [[ a.entities_id = e.entity_id and a.service_object_id is null ]]
-   local extra_  = [[ order by entity_completename ]]
-
-   if cond__ then cond_ = cond_.." and "..cond__ end
-   local content3 = query (tables_, cond_, extra_, columns_)
-
-
    for _,v in ipairs(content2) do
       table.insert(content,v)
    end
 
-   for _,v in ipairs(content3) do
-      table.insert(content,v)
-   end
+
+   -- Retorna as aplicacoes já com os nomes da entidades que ainda não possuem entrada em nagios_services
+--   local tables_  = [[  itvision_apps a, 
+--                        (select a.entities_id as entity_id, a.name as entity_name, a.name as entity_completename 
+--                         from itvision_apps a where a.entities_id = 0
+--                         union 
+--                         select id as entity_id, name as entity_name, completename asentity_completename 
+--                         from glpi_entities) as e ]]
+--   local cond_   = [[ a.entities_id = e.entity_id and a.service_object_id is null ]]
+--   local extra_  = [[ order by entity_completename ]]
+--
+--   if cond__ then cond_ = cond_.." and "..cond__ end
+--   local content3 = query (tables_, cond_, extra_, columns_)
+--
+--   for _,v in ipairs(content3) do
+--      table.insert(content,v)
+--   end
+
 
    return content
 end
@@ -132,11 +132,9 @@ function deactivate_app (app_id, flag)
    return true
 end
 
---require "App.Tree"
 
 function remake_apps_config_file()
-   -- local APPS = select_uniq_app_in_tree() -- Nao precisa mais disso pois nao usa mais o nagiosbp
-   local APPS = query("itvision_apps", "is_active = 1")
+   local APPS = query("itvision_apps")
    make_all_apps_config(APPS)
 end
 

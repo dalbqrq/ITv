@@ -278,7 +278,7 @@ end
 
 function activate(web, id, flag)
    if tonumber(flag) == 0 then flag = 1 else flag = 0 end
-   local msg, counter
+   local msg, counter = "", 0
 
    if id then
       local clause = "id = "..id
@@ -309,12 +309,13 @@ function activate(web, id, flag)
             App.deactivate_app(id) 
          end
 
-         msg = "/"..error_message(9).." "..A[1].name
+         --msg = "/"..error_message(9).." "..A[1].name
 --      else
 --         msg = "/"..error_message(10).." "..A[1].name
 --      end
    end
 
+   os.sleep(1)
    return web:redirect(web:link("/list"..msg))
 end
 ITvision:dispatch_get(activate, "/activate/(%d+):(%d+)")

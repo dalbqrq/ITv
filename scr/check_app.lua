@@ -16,7 +16,7 @@ function check_app(debug, app_id)
    local state, logic, name
    local app = Model.query("itvision_apps", "id = "..app_id)
    local app_object_states = Monitor.select_monitors_app_objs(app_id)
-
+   local APPLIC_UNDEF = -1
 
    if app[1] then
       name = app[1].name
@@ -31,7 +31,7 @@ function check_app(debug, app_id)
 
 
    if logic == "and" then
-      state = APPLIC_OK
+      state = APPLIC_UNDEF
    elseif logic == "or" then
       state = APPLIC_UNKNOWN
    else
@@ -55,6 +55,8 @@ function check_app(debug, app_id)
         end
      end
    end
+
+   if state == APPLIC_UNDEF then state = APPLIC_UNKNOWN end
 
    return state, name
 end

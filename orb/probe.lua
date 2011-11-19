@@ -760,6 +760,11 @@ function render_list(web, ics, chk, msg)
          end
          statename = applic_alert[state].name
          status={ state=state, colnumber=2 }
+      --elseif tonumber(v.service_object_id) == nil then
+      elseif v.m_state ~= nil then
+            state = tonumber(APPLIC_PENDING)
+            statename = applic_alert[state].name
+            status={ state=state, colnumber=2 }
       else
          state = -1
          statename = "-"

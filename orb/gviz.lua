@@ -19,7 +19,8 @@ local entities = Model.glpi:model "entities"
 
 function apps:select_apps(id, clause_)
    --local clause = " is_active = 1 and app_type_id > 1" -- tentativa de colocar selecao por entidades
-   local clause = " is_active = 1"
+   --local clause = " is_active = 1"
+   local clause = " is_active in (0,1) "
    if id then clause = clause.." and  id = "..id end
    if clause_ then clause = clause.." and "..clause_ end
 

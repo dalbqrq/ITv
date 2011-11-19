@@ -240,6 +240,7 @@ define service{
 	check_command]].."\t\t"..[[BUSPROC_STATUS!]]..app.id..[[  
 	contact_groups]].."\t\t"..app.id..[[
 
+	active_checks_enabled]].."\t"..app.is_active..[[ 
 	}  
  
 ]]
@@ -260,9 +261,9 @@ function make_all_apps_config(apps)
       --if objs[1] then s = s .. make_app_config(v, objs, v.is_active) end
       --if objs[1] then s = s .. make_app_config_scr(v, objs, v.is_active) end
 
-      if tonumber(v.is_active) == 1 then
+      --if tonumber(v.is_active) == 1 then
          s = s .. make_app_config_scr(v)
-      end
+      --end
    end
 
    text_file_writer(file_name, s)
