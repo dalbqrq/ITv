@@ -156,7 +156,7 @@ function list(web, hostname, tipo, app, status)
    if clause then a = " and " else clause = "" end
    clause = clause..a.." p.entities_id in "..Auth.make_entity_clause(auth)
 
-   local ics = Monitor.select_monitors_app_objs(app, clause, clause34, clause5)
+   local ics = Monitor.select_monitors_app_objs(app, clause, clause34, clause5, true)
 
    return render_list(web, ics, filter)
 end

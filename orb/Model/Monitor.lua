@@ -948,7 +948,7 @@ function select_ics(clause)
 end
 
 
-function select_monitors_app_objs(app_id, clause, clause34, clause5)
+function select_monitors_app_objs(app_id, clause, clause34, clause5, clause12)
    local q = {}
 
    if clause and clause34 then
@@ -966,7 +966,10 @@ function select_monitors_app_objs(app_id, clause, clause34, clause5)
       clause5 = clause
    end
    local q5 = make_query_5(app_id, clause5)
-   local q12 = make_query_12(nil, true)
+   local q12 = nil
+   if clause12 then
+       q12 = make_query_12(nil, true)
+   end
 
    for _,v in ipairs(q3) do table.insert(q, v) end
    for _,v in ipairs(q4) do table.insert(q, v) end
