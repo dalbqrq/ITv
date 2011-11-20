@@ -199,6 +199,17 @@ function select_app_app_objects (id)
 end
 
 
+function select_app_parent_objects (obj_id)
+   -- seleciona aplicacoes pai de um objeto
+   local cond_ = "ss.service_object_id = a.service_object_id and a.id = ao.app_id and ao.service_object_id = "..obj_id
+   local tables_ = "nagios_servicestatus ss, itvision_app_objects ao, itvision_apps a"
+   local columns_ = nil
+   local content = query (tables_, cond_, extra_, columns_)
+
+   return content
+end
+
+
 function select_app_to_graph (id)
    local columns_ = "app_id, a.name as a_name, ao.type as ao_type, o.object_id as obj_id, o.name1, o.name2, ss.current_state as curr_state"
    local tables_  = "itvision_apps a, itvision_app_objects ao, nagios_services s, nagios_objects o, nagios_servicestatus ss"

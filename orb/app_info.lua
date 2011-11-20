@@ -5,6 +5,7 @@ require "Model"
 require "Monitor"
 require "Auth"
 require "View"
+require "App"
 require "util"
 require "state"
 
@@ -111,8 +112,10 @@ function info(web, tab, obj_id)
    local A = Monitor.make_query_5(nil, "o.object_id = "..obj_id)
 
    if tab == 1 then
-      local APPS = Monitor.make_query_5(nil,
-                      "ax.id in (select app_id from itvision_app_objects where service_object_id = "..obj_id..")", true) 
+      --local APPS = Monitor.make_query_5(nil,
+                      --"s.service_object_id = "..obj_id.."", true) 
+                      --"ax.id in (select app_id from itvision_app_objects where service_object_id = "..obj_id..")", true) 
+      local APPS = App.select_app_parent_objects(obj_id)
       return render_info(web, obj_id, A, APPS)
    elseif tab == 2 then
       local H = statehistory:select(obj_id)
@@ -206,20 +209,32 @@ function render_info(web, obj_id, A, APPS)
 
 
    for i, v in ipairs(APPS) do
+      if tonumber(v.is_active) == 0 then
+         state = APPLIC_DISABLE
+      else
+         state = v.current_state
+      end
+
+      web.prefix = "/orb/app_tabs"
+      link = button_link(v.name, web:link("/list/"..v.app_id..":6"), "negative")
+      row[#row+1] = { link,
+                      {value=name_ok_warning_critical_unknown(state), state=state}, 
+                      string.extract_datetime(v.last_check),
+                      string.extract_datetime(v.next_check), string.extract_datetime(v.last_state_change), }
+--[[
       if tonumber(v.ax_is_active) == 0 then
          state = APPLIC_DISABLE
       else
          state = v.ss_current_state
       end
 
-      web.prefix = "/orb/app_info"
-      link = button_link(v.ax_name, web:link("/1:"..v.ax_service_object_id), "negative")
       web.prefix = "/orb/app_tabs"
       link = button_link(v.ax_name, web:link("/list/"..v.ax_id..":6"), "negative")
       row[#row+1] = { link,
                       {value=name_ok_warning_critical_unknown(state), state=state}, 
                       string.extract_datetime(v.ss_last_check),
                       string.extract_datetime(v.ss_next_check), string.extract_datetime(v.ss_last_state_change), }
+]]
    end
 
    --res[#res+1] = { "APPS: "..obj_id.." : "..#APPS }
