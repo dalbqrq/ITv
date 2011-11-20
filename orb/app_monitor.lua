@@ -141,7 +141,7 @@ function list(web, hostname, tipo, app, status)
    else
       app = nil
    end
-   -- Filtro de staus
+   -- Filtro de status
    if filter.status ~= "" and filter.status ~= nil and filter.status ~= "-1" then 
       local a = ""
       if clause then a = " and " else clause = ""  end
@@ -264,6 +264,9 @@ function render_list(web, ics, filter, msg)
             state = tonumber(v.ss_current_state)
             output = v.ss_output
          end
+      elseif tonumber(v.ax_is_active) == 0 then
+            state = tonumber(APPLIC_DISABLE)
+            output = ""
       else
          state = 4
       end

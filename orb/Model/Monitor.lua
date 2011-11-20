@@ -43,6 +43,7 @@ local DEBUG = false
         XXX nao faz mais sentido XXX QUERY 9 - computador com porta com software e com monitor e service state pendente
         QUERY 10 - aplicacao com monitor para grafico de arvore 
 	QUERY 11 - aplicacao com monitor para grafico de arvore com ss pendente
+        QUERY 12 - aplicacao sem monitor que foi criada mais nunca foi ativada
         
 ]]
 
@@ -241,6 +242,8 @@ end
         QUERY 8 - computador com porta sem software e com monitor e service state pendente
         QUERY 9 - computador com porta com software e com monitor e service state pendente
         QUERY 10 - aplicacao com monitor para grafico de arvore 
+        QUERY 11 - aplicacao com monitor para grafico de arvore com ss pendente
+        QUERY 12 - aplicacao sem monitor que foi criada mais nunca foi ativada
         
 ]]
 
@@ -792,6 +795,46 @@ function make_query_11(a_id, clause)
 end
 
 
+----------------------------------------------------------------------
+--  QUERY 12 - aplicacao sem monitor - criada e nunca ativada
+----------------------------------------------------------------------
+function make_query_12(a_id, all_apps)
+   local q, t = {}, {}
+   if a_id or all_apps then
+      t = { "a" }
+   else
+      t = {  }
+   end
+   n = { "o", "s", "ss", "ao", "ax", "c", "p", "m", "csv", "sv", "sw" }
+
+   local columns_ = make_columns(t)
+   local _,nulls_ = make_columns(n)
+   local tables_  = make_tables(t)
+   local cond_    = make_where(t)
+
+   if clause then clause = string.gsub(clause, "p.entities_id", "ax.entities_id") end
+   if a_id or all_apps then
+      if clause then clause = string.gsub(clause, "c.name", "a.name") end
+   else 
+      if clause then clause = string.gsub(clause, "c.name", "ax.name") end
+   end
+
+   cond_ = cond_ .. [[ 
+      a.service_object_id is NULL
+   ]]
+
+   if a_id then cond_ = cond_ .. " and a.id = " .. a_id end
+   if clause then cond_ = cond_ .. " and " .. clause end
+
+   q = Model.query(tables_, cond_, nil, columns_)
+   for _,v in ipairs(q) do table.insert(v, 1, 12) end
+
+   if DEBUG then print( "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
+
+   return q
+end
+
+
 
 ----------------------------------------------------------------------
 --  END of the QUERIES
@@ -821,6 +864,8 @@ end
         QUERY 8 - computador com porta sem software e com monitor e service state pendente
         QUERY 9 - computador com porta com software e com monitor e service state pendente
         QUERY 10 - aplicacao com monitor para grafico de arvore 
+        QUERY 11 - aplicacao com monitor para grafico de arvore com ss pendente
+        QUERY 12 - aplicacao sem monitor que foi criada mais nunca foi ativada
         
 ]]
 
@@ -921,11 +966,12 @@ function select_monitors_app_objs(app_id, clause, clause34, clause5)
       clause5 = clause
    end
    local q5 = make_query_5(app_id, clause5)
-
+   local q12 = make_query_12(nil, true)
 
    for _,v in ipairs(q3) do table.insert(q, v) end
    for _,v in ipairs(q4) do table.insert(q, v) end
    for _,v in ipairs(q5) do table.insert(q, v) end
+   for _,v in ipairs(q12) do table.insert(q, v) end
 
    table.sort(q, function (a, b) 
       a.c_alias = a.c_alias  or ""
