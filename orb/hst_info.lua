@@ -245,8 +245,12 @@ function render_info(web, obj_id, A, APPS)
          state = v.ss_current_state
       end
 
+--[[
       web.prefix = "/orb/app_info"
       link = button_link(v.ax_name, web:link("/1:"..v.ax_service_object_id), "negative")
+]]
+      web.prefix = "/orb/app_tabs"
+      link = button_link(v.ax_name, web:link("/list/"..v.ax_id..":6"), "negative")
       row[#row+1] = { link,
                       {value=name_ok_warning_critical_unknown(state), state=state},
                       string.extract_datetime(v.ss_last_check),
