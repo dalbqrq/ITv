@@ -327,31 +327,31 @@ end
 
 
 function os.week_pt(week)
-   local weeks = { "Domingo",
-                   "Segunda-feira",
-                   "Terça-feira", 
-                   "Quarta-feira", 
-                   "Quinta-feira", 
-                   "Sexta-feira", 
-                   "Sábado" }
+   local weeks = { [0] = "Domingo",
+                   [1] = "Segunda-feira",
+                   [2] = "Terça-feira", 
+                   [3] = "Quarta-feira", 
+                   [4] = "Quinta-feira", 
+                   [5] = "Sexta-feira", 
+                   [6] = "Sábado" }
 
     return weeks[tonumber(week)]
 end
 
 
 function os.month_pt(month)
-   local months = { "Janeiro", 
-                    "Fevereiro", 
-                    "Março", 
-                    "Abril", 
-                    "Maio", 
-                    "Junho", 
-                    "Julho", 
-                    "Agosto", 
-                    "Setembro", 
-                    "Outubro", 
-                    "Novembro", 
-                    "Dezembro" }
+   local months = { [1] = "Janeiro", 
+                    [2] = "Fevereiro", 
+                    [3] = "Março", 
+                    [4] = "Abril", 
+                    [5] = "Maio", 
+                    [6] = "Junho", 
+                    [7] = "Julho", 
+                    [8] = "Agosto", 
+                    [9] = "Setembro", 
+                    [10] = "Outubro", 
+                    [11] = "Novembro", 
+                    [12] = "Dezembro" }
    return months[tonumber(month)]
 end
 

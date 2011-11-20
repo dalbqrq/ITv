@@ -878,7 +878,7 @@ function render_content_header(auth, name, add, list, edit, geotag, back)
       --DEBUG myul[#myul+1] = li{ Auth.make_entity_clause(auth) }
    end
 
-       clock = div{ id="clock", "[ "..os.week_pt(os.date("%w"))..", "..os.date("%d").." de "..
+   clock = div{ id="clock", "[ "..os.week_pt(os.date("%w"))..", "..os.date("%d").." de "..
                                   os.month_pt(os.date("%m"))..os.date(" - %H:%M:%S]") }
 
    return div{ id='menu_navigate', div { id='c_ssmenu2', ul{ myul }, clock } }
