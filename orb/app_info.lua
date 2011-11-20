@@ -112,9 +112,6 @@ function info(web, tab, obj_id)
    local A = Monitor.make_query_5(nil, "o.object_id = "..obj_id)
 
    if tab == 1 then
-      --local APPS = Monitor.make_query_5(nil,
-                      --"s.service_object_id = "..obj_id.."", true) 
-                      --"ax.id in (select app_id from itvision_app_objects where service_object_id = "..obj_id..")", true) 
       local APPS = App.select_app_parent_objects(obj_id)
       return render_info(web, obj_id, A, APPS)
    elseif tab == 2 then
@@ -221,23 +218,8 @@ function render_info(web, obj_id, A, APPS)
                       {value=name_ok_warning_critical_unknown(state), state=state}, 
                       string.extract_datetime(v.last_check),
                       string.extract_datetime(v.next_check), string.extract_datetime(v.last_state_change), }
---[[
-      if tonumber(v.ax_is_active) == 0 then
-         state = APPLIC_DISABLE
-      else
-         state = v.ss_current_state
-      end
-
-      web.prefix = "/orb/app_tabs"
-      link = button_link(v.ax_name, web:link("/list/"..v.ax_id..":6"), "negative")
-      row[#row+1] = { link,
-                      {value=name_ok_warning_critical_unknown(state), state=state}, 
-                      string.extract_datetime(v.ss_last_check),
-                      string.extract_datetime(v.ss_next_check), string.extract_datetime(v.ss_last_state_change), }
-]]
    end
 
-   --res[#res+1] = { "APPS: "..obj_id.." : "..#APPS }
    res[#res+1] = render_table( row, header )
    res[#res+1] = { br(), br(), br() }
 
