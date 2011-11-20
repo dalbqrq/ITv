@@ -967,14 +967,12 @@ function select_monitors_app_objs(app_id, clause, clause34, clause5, clause12)
    end
    local q5 = make_query_5(app_id, clause5)
    local q12 = nil
-   if clause12 then
-       q12 = make_query_12(nil, true)
-   end
+   --if clause12 then q12 = make_query_12(nil, true) end
 
    for _,v in ipairs(q3) do table.insert(q, v) end
    for _,v in ipairs(q4) do table.insert(q, v) end
    for _,v in ipairs(q5) do table.insert(q, v) end
-   for _,v in ipairs(q12) do table.insert(q, v) end
+   --for _,v in ipairs(q12) do table.insert(q, v) end
 
    table.sort(q, function (a, b) 
       a.c_alias = a.c_alias  or ""
