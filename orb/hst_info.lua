@@ -239,7 +239,16 @@ function render_info(web, obj_id, A, APPS)
    header = { "APLICAÇÕES QUE POSSUEM ESTE DISPOSITIVO", "STATUS ATUAL", "Última checagem", "Próxima checagem", "Última mudança de estado"  }
 
    for i, v in ipairs(APPS) do
-      row[#row+1] = { v.ax_name, {value=name_ok_warning_critical_unknown(v.ss_current_state), state=v.ss_current_state}, 
+      if tonumber(v.ax_is_active) == 0 then
+         state = APPLIC_DISABLE
+      else
+         state = v.ss_current_state
+      end
+
+      web.prefix = "/orb/app_info"
+      link = button_link(v.ax_name, web:link("/1:"..v.ax_service_object_id), "negative")
+      row[#row+1] = { link,
+                      {value=name_ok_warning_critical_unknown(state), state=state},
                       string.extract_datetime(v.ss_last_check),
                       string.extract_datetime(v.ss_next_check), string.extract_datetime(v.ss_last_state_change), }
    end
