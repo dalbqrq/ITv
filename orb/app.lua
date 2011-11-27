@@ -356,22 +356,22 @@ function render_list(web, A, AS, root, msg, no_header)
             state = tonumber(v.current_state)
          end
          statename = applic_alert[state].name
-         status={ state=state, colnumber=3, nolightcolor=true }
+         status={ state=state, colnumber=4, nolightcolor=true }
       elseif v.is_active == "0"  then
          state = APPLIC_DISABLE
          statename = applic_alert[state].name
-         status={ state=state, colnumber=3, nolightcolor=true }
+         status={ state=state, colnumber=4, nolightcolor=true }
       else
          state = APPLIC_PENDING
          statename = applic_alert[state].name
-         status={ state=state, colnumber=3, nolightcolor=true }
+         status={ state=state, colnumber=4, nolightcolor=true }
       end
 
       web.prefix = "/orb/app_tabs"
 
       row[#row+1] = { 
          status=status,
-         a{ href=web:link("/list/"..v.id..":3"), tag..v.name },
+         a{ href=web:link("/list/"..v.id..":2"), tag..v.name },
          v.entity_completename,
          category,
          statename,
