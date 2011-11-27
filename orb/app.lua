@@ -306,8 +306,7 @@ function render_list(web, A, AS, root, msg, no_header)
    local permission, auth = Auth.check_permission(web, "application")
    local svc, stract, tag = "", "", ""
    local header = { 
-      strings.object, strings.entity, strings.status, strings.type, strings.logic, strings.is_active, 
-      strings.visibility, "", "" , ""
+      strings.object, strings.entity, strings.type, strings.status, strings.logic, strings.visibility, "", "" , ""
    }
 
    for i, v in ipairs(AS) do
@@ -372,12 +371,12 @@ function render_list(web, A, AS, root, msg, no_header)
 
       row[#row+1] = { 
          status=status,
-         a{ href=web:link("/list/"..v.id..":2"), tag..v.name },
+         a{ href=web:link("/list/"..v.id..":3"), tag..v.name },
          v.entity_completename,
-         statename,
          category,
+         statename,
          strings["logical_"..v.type],
-         NoOrYes[tonumber(v.is_active)+1].name,
+         --NoOrYes[tonumber(v.is_active)+1].name,
          PrivateOrPublic[tonumber(v.visibility)+1].name,
          img_edit,
          img_remove,
