@@ -144,6 +144,14 @@ cat << EOF > /etc/apache2/conf.d/itvision.conf
                 Allow from all
         </Directory>
 
+        ScriptAlias /norb $itvhome/norb
+        <Directory "$itvhome/norb">
+                AllowOverride None
+                Options +ExecCGI +MultiViews +SymLinksIfOwnerMatch FollowSymLinks
+                Order allow,deny
+                Allow from all
+        </Directory>
+
         # Possible values: debug, info, notice, warn, error, crit,
         # alert, emerg.
         LogLevel warn
@@ -605,6 +613,7 @@ luarocks install cgilua
 luarocks install orbit
 luarocks install dado
 luarocks install luagraph
+luarocks install loop
 #
 sed -i.orig -e "/bin/ i\
 > \. /usr/local/itvision/bin/lua_path
@@ -654,7 +663,7 @@ aliases="\nalias mv='mv -i'\nalias cp='cp -i'\nalias rm='rm -i'\nalias psa='ps -
 printf "$path"    >> /home/$user/.bashrc
 printf "$aliases" >> /home/$user/.bashrc
 printf "$aliases" >> /root/.bashrc
-LUA_PATH="$itvhome/orb/?.lua;$itvhome/orb/inc/?.lua;$itvhome/scr/?.lua;$itvhome/orb/Model/?.lua;/usr/local/share/lua/5.1/?.lua"
+LUA_PATH="$itvhome/orb/?.lua;$itvhome/orb/inc/?.lua;$itvhome/scr/?.lua;$itvhome/orb/Model/?.lua;$itvhome/norb/Model/?.lua;/usr/local/share/lua/5.1/?.lua"
 printf "export LUA_PATH='$LUA_PATH'\n" >> /home/$user/.bashrc
 printf "LUA_PATH='$LUA_PATH'\n" > $itvhome/bin/lua_path
 export LUA_PATH=$LUA_PATH

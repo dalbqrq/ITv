@@ -352,6 +352,7 @@ menu_itens = {
       { name="Checagem", field="checkcmds", link="/orb/probe" },
       { name="Tipo de Relacionamento", field="app_relat_type", link="/orb/app_relat_types" },
       { name="Manutenção", field="backup", link="/orb/sysmgmt" },
+      { name="New Orbit", field="backup", link="/norb/app_monitor" },
       },
    },
    { name="ServiceDesk", link="#",
