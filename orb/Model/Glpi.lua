@@ -248,3 +248,97 @@ function select_active_entities(auth)
    local content = query(tables_, cond_, extra_, columns_)
    return content
 end
+
+
+--[[
+mysql> desc glpi_events;
++----------+--------------+------+-----+---------+----------------+
+| Field    | Type         | Null | Key | Default | Extra          |
++----------+--------------+------+-----+---------+----------------+
+| id       | int(11)      | NO   | PRI | NULL    | auto_increment |
+| items_id | int(11)      | NO   |     | 0       |                |
+| type     | varchar(255) | YES  | MUL | NULL    |                |
+| date     | datetime     | YES  | MUL | NULL    |                |
+| service  | varchar(255) | YES  |     | NULL    |                |
+| level    | int(11)      | NO   | MUL | 0       |                |
+| message  | text         | YES  |     | NULL    |                |
++----------+--------------+------+-----+---------+----------------+
+
+mysql> select distinct(type) from glpi_events;
++--------------------------+
+| type                     |
++--------------------------+
+| computers                |
+| dropdown                 |
+| entity                   |
+| groups                   |
+| infocom                  |
+| Location                 |
+| Manufacturer             |
+| networkequipment         |
+| NetworkEquipmentFirmware |
+| NetworkEquipmentModel    |
+| NetworkEquipmentType     |
+| networkport              |
+| notifications            |
+| software                 |
+| system                   |
+| ticket                   |
+| TicketCategory           |
+| users                    |
++--------------------------+
+
+select distinct(service) from glpi_events;
++--------------+
+| service      |
++--------------+
+| tracking     |
+| login        |
+| setup        |
+| inventory    |
+| financial    |
+| notification |
++--------------+
+
+]]
+event_msg = {
+   [1] = "Criou a aplicação ",			--ok
+   [2] = "Alterou a aplicação ",
+   [3] = "Removeu a aplicação ",
+   [4] = "Ligou a aplicação ",			--ok
+   [5] = "Desligou a aplicação ",		--ok
+   [6] = "Incluiu objeto na aplicação ",
+   [7] = "Removeu objeto da aplicação ",
+   [8] = "Incluiu relacionamento na aplicação ",
+   [9] = "Removeu relacioanmento da aplicação ",
+   [10] = "Incluiu contato na aplicação ",
+   [11] = "Removeu contato da aplicação ",
+   [12] = "Criou a checagem ",
+   [13] = "Alterou a checagem ",
+   [14] = "Removeu a checagem ",
+   [15] = "Ligou a checagem ",
+   [16] = "Desligou a checagem ",
+   [17] = "Incluiu tipo de relacionamento ",
+   [18] = "Removeu tipo de relacionamento ",
+   [19] = "Alterou tipo de relacionamento ",
+}
+
+function log_event( items_id, event_type, username, message, object_name )
+   -- event_type = [ 'application', 'probe' ]
+   local date = os.date("%Y-%m-%d %H:%M:%S")
+   local service = "setup"
+   local level = 4
+   local events = {}
+
+   events.items_id = items_id
+   events.type = event_type
+   events.date = date
+   events.service = service
+   events.level = level
+   events.message = username.." "..event_msg[message].." "..object_name
+
+   Model.insert("glpi_events", events)
+
+end
+
+

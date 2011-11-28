@@ -29,39 +29,23 @@ local node_def = {
 }
 
 
-function set_color(state, has_been_checked, monitor_state, obj_type)
+function set_color(current_state, has_been_checked, monitor_state, is_active, obj_type)
    local color
-   if tonumber(has_been_checked) == 1 then
-      if tonumber(monitor_state) == 0 then -- monitor_state == o indica que o probe está desabilitado
+   local state
+
+   if is_active == "0"  then
+      state = APPLIC_DISABLE
+   elseif tonumber(has_been_checked) == 1 then
+      if tonumber(monitor_state) == 0 then
          state = tonumber(APPLIC_DISABLE)
       else
-         state = tonumber(state)
+         state = tonumber(current_state)
       end
    else
-      state = 4
+      state = APPLIC_PENDING
    end
 
---[[
-   if obj_type == 'hst' then
-      color = host_alert[state+1].color
-   elseif obj_type == 'svc' then
-   if obj_type == 'svc' then
-      color = service_alert[state].color
-   elseif obj_type == 'app' then
-      color = applic_alert[state+1].color
-   end
-]]
-
-   if obj_type == 'app' then
-      -- state é nil quando uma aplicacao é reativada e ainda nao possui servicestatus
-      if state == nil then state = APPLIC_PENDING end
-      color = applic_alert[state].color
-   elseif obj_type == 'svc' then
-      color = service_alert[state].color
-   elseif obj_type == 'hst' then
-      --color = host_alert[state].color
-      color = service_alert[state].color
-   end
+   color = service_alert[state].color
 
    return color
 end
@@ -126,7 +110,7 @@ function make_content(obj, rel)
 
          name = v.o_object_id
 
-         color = set_color(v.ss_current_state, v.ss_has_been_checked, v.m_state, v.ao_type)
+         color = set_color(v.ss_current_state, v.ss_has_been_checked, v.m_state, v.ax_is_active, v.ao_type)
          table.insert(content, 
             node {
                name, 
@@ -213,6 +197,9 @@ function make_content(obj, rel)
 end
 
 
+-- sep era usado para apresentar de forma separada aplicacoes que apareciam debaixo de mais de uma
+-- super-aplicacao. Nao está fazendo sentido pois só é apresentada agora as entidades e nao mais as
+-- aplicacoes.
 function make_tree_content(obj, rel, sep)
    local content = {}
 
@@ -225,7 +212,7 @@ function make_tree_content(obj, rel, sep)
 
          label = v.a_name  -- DEBUG .." : "..v.a_is_entity_root  -- DEBUG ..":"..v.a_id
          name  = v.a_id
-         if sep == 1 then name = name..v.t_id end
+         --if sep == 1 then name = name..v.t_id end
          url   = "/orb/obj_info/app/"..v.a_service_object_id
          if v.a_is_entity_root == "1" then
             shape = "invhouse"
@@ -236,7 +223,7 @@ function make_tree_content(obj, rel, sep)
             shape = "hexagon"
          end
 
-         color = set_color(v.ss_current_state, v.ss_has_been_checked, v.m_state, "app")
+         color = set_color(v.ss_current_state, v.ss_has_been_checked, v.m_state, v.a_is_active, "app")
          table.insert(content, 
             node {
                name, 

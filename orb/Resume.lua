@@ -33,7 +33,7 @@ end
 function count_hosts(clause)
    local res = {}
 
--- COMPUTERS HABILITADOS
+-- COMPUTERS LIGADOS
    --[[select count(*), ss.current_state
    from nagios_servicestatus ss, nagios_objects o, itvision_monitors m, glpi_networkports p, glpi_computers c
    where ss.service_object_id = o.object_id and ss.active_checks_enabled = 1
@@ -60,7 +60,7 @@ function count_hosts(clause)
    print("------------------------------")
 ]]
    
--- NETWORKEQUIPMENTS HABILITADOS
+-- NETWORKEQUIPMENTS LIGADOS
    --[[select count(*), ss.current_state 
    from nagios_servicestatus ss, nagios_objects o, itvision_monitors m, glpi_networkports p, glpi_networkequipments c
    where ss.service_object_id = o.object_id and ss.active_checks_enabled = 1
@@ -81,7 +81,7 @@ function count_hosts(clause)
    e = [[group by ss.current_state]]
    q2 = Model.query(t, r, e, c)
 
--- COMPUTERS DESABILITADOS
+-- COMPUTERS DESLIGADOS
    --[[select count(*) as count, 5 as state
    from nagios_servicestatus ss, nagios_objects o, itvision_monitors m, glpi_networkports p, glpi_computers c
    where ss.service_object_id = o.object_id and ss.active_checks_enabled = 0
@@ -101,7 +101,7 @@ function count_hosts(clause)
    e = nil
    q3 = Model.query(t, r, e, c)
    
--- NETWORKEQUIPMENTS DESABILITADOS
+-- NETWORKEQUIPMENTS DESLIGADOS
    --[[select count(*) as count, 5 as state
    from nagios_servicestatus ss, nagios_objects o, itvision_monitors m, glpi_networkports p, glpi_networkequipments c
    where ss.service_object_id = o.object_id and ss.active_checks_enabled = 0
@@ -133,7 +133,7 @@ end
 function count_services(clause)
    local res = {}
 
---SERVICES HABILITADOS
+--SERVICES LIGADOS
    --[[select count(*), ss.current_state 
    from nagios_servicestatus ss, nagios_objects o
    where ss.service_object_id = o.object_id and ss.active_checks_enabled = 1
@@ -151,7 +151,7 @@ function count_services(clause)
    q = Model.query(t, r, e, c)
 
 
---SERVICES DESABILITADOS
+--SERVICES DESLIGADOS
    --[[select count(*) as count, 5 as state
    from nagios_servicestatus ss, nagios_objects o
    where ss.service_object_id = o.object_id and ss.active_checks_enabled = 0
@@ -175,6 +175,7 @@ end
 function count_apps(clause)
    local res = {}
 
+--APPS LIGADOS
    --[[select count(*), ss.current_state 
    from nagios_servicestatus ss, nagios_objects o, itvision_apps a
    where ss.service_object_id = o.object_id
@@ -193,7 +194,18 @@ function count_apps(clause)
    e = [[group by ss.current_state]]
    q = Model.query(t, r, e, c)
 
+--APPS DESLIGADOS
+   c = [[count(*) as count, 5 as state]]
+   t = [[itvision_apps a]]
+   r = [[a.is_active = 0
+       and a.is_entity_root = 0
+       and a.entities_id in ]]..clause
+   e = nil
+   q2 = Model.query(t, r, e, c)
+
+
    res = make_result_table(res, q)
+   res = make_result_table(res, q2)
    return res
 end
 
@@ -201,6 +213,7 @@ end
 function count_entities(clause)
    local res = {}
 
+--ENTIDADES LIGADOS
    --[[select count(*), ss.current_state 
    from nagios_servicestatus ss, nagios_objects o, itvision_apps a
    where ss.service_object_id = o.object_id
@@ -219,7 +232,17 @@ function count_entities(clause)
    e = [[group by ss.current_state]]
    q = Model.query(t, r, e, c)
 
+--ENTIDADES DESLIGADOS
+   c = [[count(*) as count, 5 as state]]
+   t = [[itvision_apps a]]
+   r = [[a.is_active = 0
+       and a.is_entity_root = 1
+       and a.entities_id in ]]..clause
+   e = nil
+   q2 = Model.query(t, r, e, c)
+
    res = make_result_table(res, q)
+   res = make_result_table(res, q2)
    return res
 end
 
@@ -254,17 +277,25 @@ function render_resume(web)
    col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[1].color, H("a"){ href= web:link("/all:ent:0:1"), font{ color="black", e[1] } } }
    col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[2].color, H("a"){ href= web:link("/all:ent:0:2"), font{ color="white", e[2] } } }
    --col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[3].color, H("a"){ href= web:link("/all:ent:0:3"), font{ color="black", e[3] } } }
+   col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[5].color, H("a"){ href= web:link("/all:ent:0:5"), font{ color="white", e[5] } } }
+
+
    col[#col+1] = td{ align="right", width="40px", bgcolor=white, "Aplicações: " }
    col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[0].color, H("a"){ href= web:link("/all:app:0:0"), font{ color="black", a[0] } } }
    col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[1].color, H("a"){ href= web:link("/all:app:0:1"), font{ color="black", a[1] } } }
    col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[2].color, H("a"){ href= web:link("/all:app:0:2"), font{ color="white", a[2] } } }
    --col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[3].color, H("a"){ href= web:link("/all:app:0:3"), font{ color="black", a[3] } } }
+   col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[5].color, H("a"){ href= web:link("/all:app:0:5"), font{ color="white", a[5] } } }
+
+
    col[#col+1] = td{ align="right", width="40px", bgcolor=white, "Dispositivos: " }
    col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[0].color, H("a"){ href= web:link("/all:hst:0:0"), font{ color="black", h[0] } } }
    col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[1].color, H("a"){ href= web:link("/all:hst:0:1"), font{ color="black", h[1] } } }
    col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[2].color, H("a"){ href= web:link("/all:hst:0:2"), font{ color="white", h[2] } } }
    --col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[3].color, H("a"){ href= web:link("/all:hst:0:3"), font{ color="black", h[3] } } }
    col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[5].color, H("a"){ href= web:link("/all:hst:0:5"), font{ color="white", h[5] } } }
+
+
    col[#col+1] = td{ align="right", width="40px", bgcolor=white, "Serviços: " }
    col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[0].color, H("a"){ href= web:link("/all:svc:0:0"), font{ color="black", s[0] } } }
    col[#col+1] = td{ align="center", width="40px", bgcolor=applic_alert[1].color, H("a"){ href= web:link("/all:svc:0:1"), font{ color="black", s[1] } } }

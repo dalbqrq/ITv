@@ -46,37 +46,60 @@ function select_app (cond__, extra_, columns_)
 end
 
 
--- Retorna as aplicacoes já com os nomes da entidades COM os seus estados (nagios_servicestatus).
 function select_app_state (cond__, extra_, columns_)
+   
+   -- Retorna as aplicacoes já com os nomes da entidades COM os seus estados (nagios_servicestatus).
    local tables_  = [[  itvision_apps a, nagios_servicestatus ss ,
                         (select a.entities_id as entity_id, a.name as entity_name, a.name as entity_completename 
                          from itvision_apps a where a.entities_id = 0 and is_entity_root = 1
                          union 
                          select id as entity_id, name as entity_name, completename asentity_completename 
                          from glpi_entities) as e ]]
-   local cond_   = [[ a.entities_id = e.entity_id and a.service_object_id = ss.service_object_id ]]
+   local cond_   = [[ a.entities_id = e.entity_id and a.service_object_id = ss.service_object_id and a.is_active = 1 ]]
    local extra_  = [[ order by entity_completename ]]
 
    if cond__ then cond_ = cond_.." and "..cond__ end
    local content = query (tables_, cond_, extra_, columns_)
 
 
+   -- Retorna as aplicacoes destivadas e por isso não possuem entradas no nagios
    local tables_  = [[  itvision_apps a, 
                         (select a.entities_id as entity_id, a.name as entity_name, a.name as entity_completename 
-                         from itvision_apps a where a.entities_id = 0
+                         from itvision_apps a where a.entities_id = 0 and is_entity_root = 1
                          union 
-                         select id as entity_id, name as entity_name, completename asentity_completename 
+                         select id as entity_id, name as entity_name, completename as entity_completename 
                          from glpi_entities) as e ]]
-   local cond_   = [[ a.entities_id = e.entity_id and a.service_object_id is null ]]
+   local cond_   = [[ a.entities_id = e.entity_id and a.is_active = 0 ]]
    local extra_  = [[ order by entity_completename ]]
 
    if cond__ then cond_ = cond_.." and "..cond__ end
    local content2 = query (tables_, cond_, extra_, columns_)
 
-
    for _,v in ipairs(content2) do
       table.insert(content,v)
    end
+
+
+   -- Retorna as aplicacoes já com os nomes da entidades que ainda não possuem entrada em nagios_services
+--   local tables_  = [[  itvision_apps a, 
+--                        (select a.entities_id as entity_id, a.name as entity_name, a.name as entity_completename 
+--                         from itvision_apps a where a.entities_id = 0
+--                         union 
+--                         select id as entity_id, name as entity_name, completename asentity_completename 
+--                         from glpi_entities) as e ]]
+--   local cond_   = [[ a.entities_id = e.entity_id and a.service_object_id is null ]]
+--   local extra_  = [[ order by entity_completename ]]
+--
+--   if cond__ then cond_ = cond_.." and "..cond__ end
+--   local content3 = query (tables_, cond_, extra_, columns_)
+--
+--   for _,v in ipairs(content3) do
+--      table.insert(content,v)
+--   end
+
+   table.sort(content, function(a,b)
+      return a.entity_id..a.name < b.entity_id..b.name
+   end )
 
    return content
 end
@@ -112,11 +135,9 @@ function deactivate_app (app_id, flag)
    return true
 end
 
---require "App.Tree"
 
 function remake_apps_config_file()
-   -- local APPS = select_uniq_app_in_tree() -- Nao precisa mais disso pois nao usa mais o nagiosbp
-   local APPS = query("itvision_apps", "is_active = 1")
+   local APPS = query("itvision_apps")
    make_all_apps_config(APPS)
 end
 
@@ -176,6 +197,17 @@ function select_app_app_objects (id)
    for _,v in ipairs(content2) do
       table.insert(content,v)
    end
+
+   return content
+end
+
+
+function select_app_parent_objects (obj_id)
+   -- seleciona aplicacoes pai de um objeto
+   local cond_ = "ss.service_object_id = a.service_object_id and a.id = ao.app_id and ao.service_object_id = "..obj_id
+   local tables_ = "nagios_servicestatus ss, itvision_app_objects ao, itvision_apps a"
+   local columns_ = nil
+   local content = query (tables_, cond_, extra_, columns_)
 
    return content
 end

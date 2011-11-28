@@ -20,7 +20,7 @@ local apps = Model.itvision:model "apps"
 
 function apps:select_apps(id, clause_)
    local q = {}
-   local clause = " is_active = 1"
+   --local clause = " is_active = 1"
    if id then clause = clause.." and  id = "..id end
    if clause_ then clause = clause.." and "..clause_ end
 
@@ -106,12 +106,13 @@ function list(web, hostname, tipo, app, status)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
    local filter = { hostname = hostname, tipo = tipo, app = app, status = status }
-   local clause, clause34, clause5 = nil, "", ""
+   local clause, clause34, clause5, clause12 = nil, "", "", ""
 
    -- Filtro de hostname
    if filter.hostname ~= "" and filter.hostname ~= nil and filter.hostname ~= "all" then 
       clause34 = "and (c.name like '%"..filter.hostname.."%' or c.alias like '%"..filter.hostname.."%' or c.itv_key like '%"..filter.hostname.."%')"
       clause5 = "and c.name like '%"..filter.hostname.."%' "
+      clause12 = "and ax.name like '%"..filter.hostname.."%' "
    end
    -- Filtro de tipo
    if filter.tipo ~= "" and filter.tipo ~= nil then 
@@ -119,20 +120,24 @@ function list(web, hostname, tipo, app, status)
          local a = ""
          if clause then a = " and " else clause = ""  end
          clause = clause..a.."o.name2 = '"..config.monitor.check_host.."' and o.objecttype_id = 2"
+         clause12 = clause12.." and ax.is_entity_root = -1000" -- exclude this query!
       elseif filter.tipo == 'svc' then
          local a = ""
          if clause then a = " and " else clause = ""  end
          clause = clause..a.."o.name2 <> '"..config.monitor.check_host.."' and o.name1 <> '"..config.monitor.check_app.."' and o.objecttype_id = 2"
+         clause12 = clause12.." and ax.is_entity_root = -1000" -- exclude this query!
       elseif filter.tipo == 'app' then
          local a = ""
          if clause then a = " and " else clause = ""  end
          clause = clause..a.."o.name1 = '".. config.monitor.check_app.."' and o.objecttype_id = 2"  
          clause5 = clause5.." and ax.is_entity_root = 0"
+         clause12 = clause12.." and ax.is_entity_root = 0"
       elseif filter.tipo == 'ent' then
          local a = ""
          if clause then a = " and " else clause = ""  end
          clause = clause..a.."o.name1 = '".. config.monitor.check_app.."' and o.objecttype_id = 2"  
          clause5 = clause5.." and ax.is_entity_root = 1"
+         clause12 = clause12.." and ax.is_entity_root = 1"
       end
    end
    -- Filtro de app
@@ -141,7 +146,7 @@ function list(web, hostname, tipo, app, status)
    else
       app = nil
    end
-   -- Filtro de staus
+   -- Filtro de status
    if filter.status ~= "" and filter.status ~= nil and filter.status ~= "-1" then 
       local a = ""
       if clause then a = " and " else clause = ""  end
@@ -156,12 +161,10 @@ function list(web, hostname, tipo, app, status)
    if clause then a = " and " else clause = "" end
    clause = clause..a.." p.entities_id in "..Auth.make_entity_clause(auth)
 
-   local ics = Monitor.select_monitors_app_objs(app, clause, clause34, clause5)
+   local ics = Monitor.select_monitors_app_objs(app, clause, clause34, clause5, clause12)
 
    return render_list(web, ics, filter)
 end
---ITvision:dispatch_get(list, "/(%a+):(%a+):(%d+)", "/list/(%a+):(%a+):(%d+)", "/list/(%a+):(%a+):(%d+):(.+)")
---ITvision:dispatch_post(list, "/list/(%a+):(%a+):(%d+)", "/list/(%a+):(%a+):(%d+):(.+)")
 ITvision:dispatch_get(list, "/(.+):(.+):(.+):(.+)", "/list/(.+):(.+):(.+):(.+)")
 ITvision:dispatch_post(list, "/(.+):(.+):(.+):(.+)")
 
@@ -194,60 +197,51 @@ function render_list(web, ics, filter, msg)
    local row, res, link, url, output = {}, {}, {}, "", ""
    local refresh_time = 60
 
-   local header = { 
-      strings.name, strings.status, "IP", "CHECAGEM", strings.type, "."
-   }
-
+   local header = { strings.object, strings.status, strings.type, strings.command, "Resultado do comando de checagem" }
 
    for i, v in ipairs(ics) do
-      local probe = v.m_name
-      local serv, ip, itemtype, id, hst_name, alias = "", "", "", "", nil, nil
+      local m_name = v.m_name
+      local serv, ip, typename, id, hst_name = nil, "", "", "", nil
+      local name, obj_name = "", ""
       if v.sw_name ~= "" and v.sv_name ~= nil then serv = v.sw_name.." / "..v.sv_name end
 
-      -- muitos dos ifs abaixo existem em funcao da direrenca entre as queries com Computer e as com Network
-      v.c_id = v.c_id or 0 v.n_id = v.n_id or 0 v.p_id = v.p_id or 0 v.sv_id = v.sv_id or 0
-      hst_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
-      -- DEBUG: if hst_name == nil then hst_name = v.a_name.." ["..v.a_id..":"..v.o_object_id.."]" end
-      if hst_name == nil then hst_name = v.ax_name end
-      alias = v.m_name
-
-      if v.p_itemtype then 
-         itemtype = v.p_itemtype 
-      else 
-         if v.ax_is_entity_root == "1" then 
-            itemtype = strings.entity 
-         else 
-            itemtype = strings.application 
-         end
-      end
+      v.c_id = v.c_id or 0; v.n_id = v.n_id or 0; v.p_id = v.p_id or 0; v.sv_id = v.sv_id or 0;
       if v.p_ip then ip = v.p_ip else ip = v.n_ip end
       if v.c_id ~= 0 then c_id = v.c_id else c_id = v.n_id end
 
-      if v.s_check_command_object_id == nil then 
-         if permission == "w" then
-            if tonumber(v.m_service_object_id) == -1 then
-               link = font{ color="orange", "Pendente" }
-            elseif serv ~= "" then
-               link = a{ href= web:link("/add/"..v[1]..":"..c_id..":"..v.p_id..":"..v.sv_id), strings.add }
-            else
-               link = a{ href= web:link("/insert_host/"..v.p_id..":"..v.sv_id..":"..v.c_id..":"..v.n_id..":"
-                                         ..hst_name..":"..ip), strings.add.." host" }
-            end
-         else
-            link = "--"
+      hst_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
+      if hst_name == nil then hst_name = v.ax_name end
+
+
+      -- determina o "tipo" de objeto a ser apresentado
+      if m_name and m_name ~= config.monitor.check_host and m_name ~=  "" then
+         typename = strings.service
+         obj_name = make_obj_name(find_hostname(v.c_alias, v.c_name, v.c_itv_key).." ("..v.p_ip..")", v.m_name)
+      elseif v.p_itemtype then 
+         if v.p_itemtype == "Computer" then
+            typename = "Computador"
+         elseif v.p_itemtype == "NetworkEquipment" then
+            typename = "Rede"
          end
-      else
-         link = "--"
+         obj_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key).." ("..v.p_ip..")"
+      else 
+         if v.ax_is_entity_root == "1" then 
+            typename = strings.entity 
+            obj_name = "+ "..v.ax_name
+         else 
+            typename = strings.application 
+            obj_name = "# "..v.ax_name
+         end
       end
 
-      if probe == nil then
+      -- define os links dos objetos para as suas vizões detalhadas
+      if m_name == nil then
          web.prefix = "/orb/app_tabs"
          url = web:link("/list/"..v.ax_id..":6")
-         probe = ""
-      else if probe ~= config.monitor.check_host and probe ~=  "" then
+         m_name = "-"
+      else if m_name ~= config.monitor.check_host and m_name ~=  "" then
          web.prefix = "/orb/obj_info"
          url = web:link("/svc/"..v.m_service_object_id)
-         itemtype = strings.service
       else 
          web.prefix = "/orb/obj_info"
          url = web:link("/hst/"..v.m_service_object_id)
@@ -256,35 +250,44 @@ function render_list(web, ics, filter, msg)
       end
       web.prefix = "/orb/app_monitor"
 
-      local name
       if permission == "w" then
-         name = a{ href=url, hst_name}
+         name = a{ href=url, obj_name}
       else
-         name = hst_name
+         name = obj_name
       end
 
+      -- seta estado e resultado da probe de teste do nagios
       local state
       if tonumber(v.ss_has_been_checked) == 1 then
          if tonumber(v.m_state) == 0 then
+            state = tonumber(APPLIC_DISABLE)
+            output = ""
+         elseif tonumber(v.ax_is_active) == 0 then
             state = tonumber(APPLIC_DISABLE)
             output = ""
          else
             state = tonumber(v.ss_current_state)
             output = v.ss_output
          end
-
+      elseif tonumber(v.ax_is_active) == 0 then
+            state = tonumber(APPLIC_DISABLE)
+            output = ""
       else
          state = 4
+         output = ""
       end
       local statename = applic_alert[state].name
-      row[#row + 1] = { status={ state=state, colnumber=2 }, name, statename, ip, probe, itemtype, output }
-      --row[#row + 1] = { name, { value=statename, state=state }, ip, probe, itemtype, output }
+
+      -- esta imagem em branco é usada somente para formatacao, aumentando o espaço entre as linhas.
+      -- isso poderia ser feito no css!
+      local img_blk = img{src="/pics/blank.png",  height="20px"}
+
+      row[#row + 1] = { status={ state=state, colnumber=2 }, name, statename, typename, m_name, output..img_blk }
    end
 
 
    res[#res+1] = render_resume(web)
-   res[#res+1] = render_content_header(auth, "Monitoração", nil, web:link("/pre_list"))
-   --DEBUG: msg = filter.status.." | "..APPLIC_DISABLE; res[#res+1] = p{ font{ color="red", msg } }
+   res[#res+1] = render_content_header(auth, "Lista de Objetos", nil, web:link("/pre_list"))
    res[#res+1] = render_form_bar( render_filter(web, filter), strings.search, web:link("/pre_list"), web:link("/pre_list") )
    res[#res+1] = render_table(row, header)
    res[#res+1] = { br(), br(), br(), br() }

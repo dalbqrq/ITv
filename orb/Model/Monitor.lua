@@ -33,7 +33,7 @@ local DEBUG = false
 
 
         QUERY 1 - computador/networkequip com porta sem software e sem monitor
-        XXX nao faz mais sentido XXX QUERY 2 - computador              com porta com software e sem monitor
+        XXX nao faz mais sentido XXX QUERY 2 - computador com porta com software e sem monitor
         QUERY 3 - computador/networkequip com porta sem software e com monitor - monitoracao de host onde o service eh ping
         QUERY 4 - computador/networkequip com porta sem software e com monitor - monitoracao de service 
 	QUERY 5 - aplicacao com monitor - monitoracao de service 
@@ -43,6 +43,7 @@ local DEBUG = false
         XXX nao faz mais sentido XXX QUERY 9 - computador com porta com software e com monitor e service state pendente
         QUERY 10 - aplicacao com monitor para grafico de arvore 
 	QUERY 11 - aplicacao com monitor para grafico de arvore com ss pendente
+        QUERY 12 - aplicacao sem monitor que foi criada mais nunca foi ativada
         
 ]]
 
@@ -241,6 +242,8 @@ end
         QUERY 8 - computador com porta sem software e com monitor e service state pendente
         QUERY 9 - computador com porta com software e com monitor e service state pendente
         QUERY 10 - aplicacao com monitor para grafico de arvore 
+        QUERY 11 - aplicacao com monitor para grafico de arvore com ss pendente
+        QUERY 12 - aplicacao sem monitor que foi criada mais nunca foi ativada
         
 ]]
 
@@ -333,7 +336,7 @@ end
 
 
 ----------------------------------------------------------------------
---  QUERY 3 - computador com porta sem software e com monitor - monitoracao de host onde o service eh ping
+--  QUERY 3 - computador/networkequip com porta sem software e com monitor - monitoracao de host onde o service eh ping
 ----------------------------------------------------------------------
 function make_query_3(c_id, p_id, a_id, clause)
    local q, t = {}, {}
@@ -510,8 +513,8 @@ function make_query_5(a_id, clause, all_apps)
 
    cond_ = cond_ .. [[ 
       and o.name1 = ']]..config.monitor.check_app..[[' 
-      and o.is_active = 1
    ]]
+      --and o.is_active = 1
 
    if a_id then cond_ = cond_ .. " and a.id = " .. a_id end
    if clause then cond_ = cond_ .. " and " .. clause end
@@ -736,10 +739,10 @@ function make_query_10(a_id, clause)
    columns_ = string.gsub(columns_, "__", "_") 
 
    cond_ = cond_ .. [[ 
-      and a_.is_active = 1   
       and a_.is_entity_root = 1   
       and o_.name1 = ']]..config.monitor.check_app..[[' 
    ]]
+      --and a_.is_active = 1   
       --and a_.id in ( select distinct(id) from itvision_apps )        
 
    if a_id then cond_ = cond_ .. " and a_.id = " .. a_id end
@@ -760,8 +763,8 @@ end
 function make_query_11(a_id, clause)
    local q, t = {}, {}
    --t = { "o_", "s_", "a_", "t_" }
-   t = { "o_", "s_", "a_" }
-   z = { "ss_" }
+   t = { "o_", "a_" }
+   z = { "s_", "ss_" }
 
    local columns_ = make_columns(t)
    local _,_,zeros_ = make_columns(z)
@@ -771,11 +774,11 @@ function make_query_11(a_id, clause)
    columns_ = string.gsub(columns_, "__", "_") 
 
    cond_ = cond_ .. [[ 
-      and a_.is_active = 1
+      and a_.is_active = 0
       and a_.is_entity_root = 1   
       and o_.name1 = ']]..config.monitor.check_app..[[' 
-      and s_.service_object_id not in (select service_object_id from nagios_servicestatus)
    ]]
+      --and s_.service_object_id not in (select service_object_id from nagios_servicestatu)
       --and a_.id in ( select distinct(app_id) from itvision_app_trees )
 
    if a_id then cond_ = cond_ .. " and a_.id = " .. a_id end
@@ -787,6 +790,46 @@ function make_query_11(a_id, clause)
    for _,v in ipairs(q) do table.insert(v, 1, 11) end
 
    --if DEBUG then print( "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
+
+   return q
+end
+
+
+----------------------------------------------------------------------
+--  QUERY 12 - aplicacao sem monitor - criada e nunca ativada
+----------------------------------------------------------------------
+function make_query_12(a_id, clause, all_apps)
+   local q, t = {}, {}
+   if a_id or all_apps then
+      t = { "ax" }
+   else
+      t = {  }
+   end
+   n = { "o", "s", "ss", "ao", "a", "c", "p", "m", "csv", "sv", "sw" }
+
+   local columns_ = make_columns(t)
+   local _,nulls_ = make_columns(n)
+   local tables_  = make_tables(t)
+   local cond_    = make_where(t)
+
+   if clause then clause = string.gsub(clause, "p.entities_id", "ax.entities_id") end
+   if a_id or all_apps then
+      if clause then clause = string.gsub(clause, "c.name", "a.name") end
+   else 
+      if clause then clause = string.gsub(clause, "c.name", "ax.name") end
+   end
+
+   cond_ = cond_ .. [[ 
+      ax.service_object_id is NULL
+   ]]
+
+   if a_id then cond_ = cond_ .. " and a.id = " .. a_id end
+   if clause then cond_ = cond_ .. clause end
+
+   q = Model.query(tables_, cond_, nil, columns_)
+   for _,v in ipairs(q) do table.insert(v, 1, 12) end
+
+   if DEBUG then print( "\nselect\n"..columns_.."\nfrom\n"..tables_.."\nwhere\n"..cond_.."\n") end
 
    return q
 end
@@ -821,6 +864,8 @@ end
         QUERY 8 - computador com porta sem software e com monitor e service state pendente
         QUERY 9 - computador com porta com software e com monitor e service state pendente
         QUERY 10 - aplicacao com monitor para grafico de arvore 
+        QUERY 11 - aplicacao com monitor para grafico de arvore com ss pendente
+        QUERY 12 - aplicacao sem monitor que foi criada mais nunca foi ativada
         
 ]]
 
@@ -903,8 +948,9 @@ function select_ics(clause)
 end
 
 
-function select_monitors_app_objs(app_id, clause, clause34, clause5)
+function select_monitors_app_objs(app_id, clause, clause34, clause5, clause12)
    local q = {}
+   clause12 = clause12 or false
 
    if clause and clause34 then
       clause34 = clause..clause34
@@ -921,11 +967,13 @@ function select_monitors_app_objs(app_id, clause, clause34, clause5)
       clause5 = clause
    end
    local q5 = make_query_5(app_id, clause5)
-
+   local q12 = nil
+   if clause12 then q12 = make_query_12(nil, clause12, true) end
 
    for _,v in ipairs(q3) do table.insert(q, v) end
    for _,v in ipairs(q4) do table.insert(q, v) end
    for _,v in ipairs(q5) do table.insert(q, v) end
+   if clause12 then for _,v in ipairs(q12) do table.insert(q, v) end end
 
    table.sort(q, function (a, b) 
       a.c_alias = a.c_alias  or ""
@@ -964,6 +1012,27 @@ function select_monitors_relat_objs_to_tree(app_id, clause)
    for _,v in ipairs(q10) do table.insert(q, v) end
 
    return q
+end
+
+
+-- Retorna nome do objeto. Se host, soh o nome/alias/key. Se service, inclui o nome do servico.
+function get_obj_name(service_object_id)
+   local q = {}
+   local clause = "m.service_object_id = ".. service_object_id
+   local q3 = make_query_3(nil, nil, nil, clause)
+   local q4 = make_query_4(nil, nil, nil, clause)
+   for _,v in ipairs(q3) do table.insert(q, v) end
+   for _,v in ipairs(q4) do table.insert(q, v) end
+
+   local v = q[1]
+   local hostname = find_hostname(v.c_alias, v.c_name, v.c_itv_key).." ("..v.p_ip..")"
+
+   if v.m_name == config.monitor.check_host then
+      return hostname
+   else
+      return make_obj_name(hostname, v.m_name)
+   end
+
 end
 
 

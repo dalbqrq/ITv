@@ -303,7 +303,6 @@ function update(web, query, c_id, p_id, sv_id, do_test, service_object_id, no_he
    if not auth then return Auth.redirect(web) end
    local ics = {}
    do_test = tonumber(do_test)
-   --if no_header == nil then no_header = 1 else no_header = 0 end
    if no_header == nil then no_header = 0 end
    no_header = tonumber(no_header)
    query = tonumber(query)
@@ -322,6 +321,7 @@ function update(web, query, c_id, p_id, sv_id, do_test, service_object_id, no_he
 
    local monitor = monitors:select_monitor_from_service(service_object_id) 
    local chk = Checkcmds.select_checkcmds(nil, monitor[1].cmd_object_id)
+   --DEBUG: text_file_writer("/tmp/ss", #monitor.."\n"..monitor[1].service_object_id.."\n"..#ics.."\n"..#chk.."\n")
 
    if do_test == 1 then
       do_test = true
@@ -381,14 +381,16 @@ ITvision:dispatch_post(remove, "/remove/(%d+)")
 
 ------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------
--- executa a operacao de remocao da monitoracao e de todos os servicos associados se objeto for hsot
+-- executa a operacao de remocao da monitoracao e de todos os servicos associados se objeto for host
 -- remove ainda todas as entrada relacionada aos hosts e servicos que existam em alguma aplicacao
 function delete(web, service_object_id)
+   local auth = Auth.check(web)
    local msg = ""
    local monitor = monitors:select_monitor_from_service(service_object_id) 
    local hostname = monitor[1].name1
    local service_desc = monitor[1].name2
    local cond_
+   local obj_name = Monitor.get_obj_name(service_object_id)
 
    -- remove o monitor e o host/sevice de todas as apps
    remove_svc_cfg_file (hostname, service_desc)
@@ -396,6 +398,7 @@ function delete(web, service_object_id)
    app_objects:delete_cond("service_object_id = "..service_object_id)
    app_relats:delete_cond("from_object_id = "..service_object_id.." or to_object_id = "..service_object_id)
    --DEBUG: text_file_writer("/tmp/rr", hostname.."\n"..service_desc.."\n"..service_object_id.."\n")
+
 
    -- se o objeto for um host remova os servicos associados e as aplicacoes associadas a estes servicos
    if service_desc == config.monitor.check_host then
@@ -414,6 +417,7 @@ function delete(web, service_object_id)
       end
    end
 
+   Glpi.log_event(service_object_id, "probe", auth.user_name, 14, obj_name)
    msg = "Check de SERVIÇO: "..monitor[1].name.." removido."
 
    os.reset_monitor()
@@ -443,6 +447,8 @@ ITvision:dispatch_get(pend, "/pend/")
 ------------------------------------------------------------------------------------------------------------------------------
 -- executa a operacao de insersao de host
 function insert_host(web, p_id, sv_id, c_id, n_id, c_name, ip)
+   local auth
+   if web then auth = Auth.check(web) end
    local msg, check_args = "", ""
    local hst_name = c_id.."_"..p_id
    local h = monitors:select_monitors(hst_name)
@@ -475,6 +481,11 @@ function insert_host(web, p_id, sv_id, c_id, n_id, c_name, ip)
       insert_service_cfg_file (hst_name, config.monitor.check_host, config.monitor.check_host, check_args)
 
       msg = msg.."Check do HOST: "..c_name.." para o IP "..ip.." "..error_message(11)
+
+      if web then
+         local hostname = find_hostname(c_alias, c_name, c_itv_key).." ("..ip..")"
+         Glpi.log_event(nil, "probe", auth.user_name, 12, hostname)
+      end
    else
       msg = msg.."Check do HOST: "..c_name.." já existe! "
    end   
@@ -497,6 +508,7 @@ ITvision:dispatch_post(insert_host, "/insert_host/(%d+):(%d+):(%d+):(%d+):(.+):(
 ------------------------------------------------------------------------------------------------------------------------------
 -- executa a operacao de insersao de service
 function insert_service(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, ip)
+   local auth = Auth.check(web)
    local msg = ""
    local hst_name = c_id.."_"..p_id
 
@@ -533,6 +545,8 @@ function insert_service(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, 
    insert_service_cfg_file (hst_name, service_desc, chk_name, check_args)
 
    msg = "Check de SERVIÇO: "..monitor_name.." - HOST: ".. c_name.." - COMANDO: "..chk_name.." criado."
+   local obj_name = make_obj_name(find_hostname(c_alias, c_name, c_itv_key).." ("..ip..")", chk_name)
+   Glpi.log_event(nil, "probe", auth.user_name, 12, obj_name)
 
    if web then
       --os.sleep(1)
@@ -550,6 +564,7 @@ ITvision:dispatch_post(insert_service, "/insert_service/(%d+):(%d+):(%d+):(%d+):
 ------------------------------------------------------------------------------------------------------------------------------
 -- executa a operacao de update de monitoracao de servico
 function update_service(web, service_object_id, c_id, p_id, query, no_header)
+   local auth = Auth.check(web)
    local msg = ""
 
    local flags, opts = {}, {}
@@ -577,12 +592,14 @@ function update_service(web, service_object_id, c_id, p_id, query, no_header)
    local monitor = monitors:select_monitor_from_service(service_object_id) 
    local host_name = monitor[1].name1
    local service_desc = monitor[1].name2
+   local obj_name = Monitor.get_obj_name(service_object_id)
    insert_service_cfg_file (host_name, service_desc, chk_name, check_args)
 
+   Glpi.log_event(service_object_id, "probe", auth.user_name, 13, obj_name)
    msg = "Check de SERVIÇO: "..monitor_name.." atualizado."
 
    if web then
-      --os.sleep(1)
+      os.sleep(1) --precisa ter!!!
       return web:redirect(web:link("/update/"..query..":"..c_id..":"..p_id..":0:0:"..service_object_id..":"..no_header..":"..msg))
    else
       return msg --para criacao de probes em massa
@@ -595,9 +612,11 @@ ITvision:dispatch_post(update_service, "/update_service/(%d+):(%d+):(%d+):(%d+):
 
 ------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------
---executa a desabilitacao de monitoracao de servico
-function desable_service(web, service_object_id, c_id, p_id, query, no_header, flag)
-   local msg = ""
+--executa a desligamento de monitoracao de servico
+function disable_service(web, service_object_id, c_id, p_id, query, no_header, flag)
+   local auth = Auth.check(web)
+   local obj_name = Monitor.get_obj_name(service_object_id)
+   local msg, log = "", 0
    local flags, opts = {}, {}
    local chk, chk_id
    flag = tonumber(flag)
@@ -610,9 +629,17 @@ function desable_service(web, service_object_id, c_id, p_id, query, no_header, f
    local chk_name = web.input.chk_name
    local check_args = ""
 
-   for i = 1,count do
-      check_args = check_args.."!"..web.input["opt"..i]
-      update_params( service_object_id, i, web.input["opt"..i] )
+   if count then
+      for i = 1,count do
+         check_args = check_args.."!"..web.input["opt"..i]
+         update_params( service_object_id, i, web.input["opt"..i] )
+      end
+   else
+      local chk_params = Checkcmds.get_checkcmd_params(service_object_id)
+      for i,v in ipairs(chk_params) do
+         if v.value then check_args = check_args.."!"..v.value end
+         if v.name then chk_name = v.name end
+      end
    end
 
    ------------------------------------------------------
@@ -626,21 +653,24 @@ function desable_service(web, service_object_id, c_id, p_id, query, no_header, f
    insert_service_cfg_file (host_name, service_desc, chk_name, check_args, flag)
 
    if tonumber(flag) == 0 then
-      msg = "Check de SERVIÇO: desabilitado."
+      msg = "Check de SERVIÇO: desligado."
+      log = 16
    else
-      msg = "Check de SERVIÇO: habilitado."
+      msg = "Check de SERVIÇO: ligado."
+      log = 15
    end
+   Glpi.log_event(nil, "probe", auth.user_name, log, obj_name)
 
-   if web then
-      --os.sleep(1)
+   os.sleep(1)
+   if count then
       return web:redirect(web:link("/update/"..query..":"..c_id..":"..p_id..":0:0:"..service_object_id..":"..no_header..":"..msg))
    else
-      return true, msg --para criacao de probes em massa
+      return  web:redirect(web:link("/list/"..msg)) --para criacao de probes em massa
    end
 
 end
-ITvision:dispatch_get(desable_service, "/desable_service/(%d+):(%d+):(%d+):(%d+):(%d+):(%d+)")
-ITvision:dispatch_post(desable_service, "/desable_service/(%d+):(%d+):(%d+):(%d+):(%d+):(%d+)")
+ITvision:dispatch_get(disable_service, "/disable_service/(%d+):(%d+):(%d+):(%d+):(%d+):(%d+)")
+ITvision:dispatch_post(disable_service, "/disable_service/(%d+):(%d+):(%d+):(%d+):(%d+):(%d+)")
 
 
 
@@ -682,33 +712,100 @@ end
 ---------------------------------------------------------------------------------------------------------------------
 function render_list(web, ics, chk, msg)
    local permission, auth = Auth.check_permission(web, "checkcmds")
-   local row, res, link_add_host, link_del_host, link_add_serv, url = {}, {}, "", "", nil
+   local row, res, url_add_host, url_edit_host, url_del_host, url_add_serv, url = {}, {}, "", "", nil
+   local typename
 
-   local header = { -- sem o nome do comando 'chk'. Só que agora o alias aparece como o 'Comando' na tabela
-      "Dispositivo", "IP", "Status", strings.type, strings.command, "Ação"
-   }
+   local header = { strings.object, "Status", strings.type, strings.command, "", "", "", "" }
 
    for i, v in ipairs(ics) do
-      local ip, itemtype, id, hst_name, m_name, name = "", "", "", nil, nil, nil
+      local ip, itemtype, id, m_name, name = "", "", "", nil, nil
+      local img_blk = img{src="/pics/blank.png",  height="20px"}
+      local img_add, img_edit, img_remove, img_disable, img_add = img_blk, img_blk, img_blk, img_blk, img_blk
+      local flag = 0
+      local obj_name = ""
+
       v.c_id = v.c_id or 0 v.n_id = v.n_id or 0 v.p_id = v.p_id or 0 v.sv_id = v.sv_id or 0
-      hst_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
       if v.m_name == "" then m_name = "-" else m_name = v.m_name end -- nome do comando de checagem
-      link_add_host = "-"
-      link_add_serv = "-"
+      url_add_host = "-"
+      url_add_serv = "-"
 
       -- os ifs abaixo existem em funcao da direrenca entre as queries com Computer e as com Network
       if v.p_itemtype then itemtype = v.p_itemtype else itemtype = "NetworkEquipment" end
       if v.p_ip then ip = v.p_ip else ip = v.n_ip end
       if v.c_id ~= 0 then c_id = v.c_id else c_id = v.n_id end
 
+      -- Determina o valor da coluna "Tipo"
+      if m_name == config.monitor.check_host or m_name ==  "-" then
+         if itemtype == "Computer" then
+            typename = "Computador"
+         elseif itemtype == "NetworkEquipment" then
+            typename = "Rede"
+         end
+         obj_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key).." ("..v.p_ip..")"
+      else
+         typename = strings.service
+         obj_name = make_obj_name(find_hostname(v.c_alias, v.c_name, v.c_itv_key).." ("..v.p_ip..")", v.m_name)
+      end
+
+      web.prefix = "/orb/obj_info"
+
+      -- Determina o link da primeira columa "Dispositivo"
+      if v.m_service_object_id == nil then
+         web.prefix = "/servdesk"
+         if itemtype == "Computer" then
+            url = web:link("/front/computer.form.php?id="..c_id)
+         elseif itemtype == "NetworkEquipment" then
+            url = web:link("/front/networkequipment.form.php?id="..c_id)
+         end
+      elseif m_name == config.monitor.check_host then
+         url = web:link("/hst/"..v.m_service_object_id)
+      else 
+         url = web:link("/svc/"..v.m_service_object_id)
+      end
+
+      -- Determina o valor da coluna "Objeto"
+      if permission == "w" and url ~= nil then
+         name = a{ href=url, obj_name}
+      else
+         name = obj_name
+      end
+
+      -- Determina o valor da coluna "Status"
+      local state, statename, status
+      if tonumber(v.ss_has_been_checked) == 1 then
+         if tonumber(v.m_state) == 0 then
+            state = tonumber(APPLIC_DISABLE)
+            output = ""
+         else
+            state = tonumber(v.ss_current_state)
+            output = v.ss_output
+         end
+         statename = applic_alert[state].name
+         status={ state=state, colnumber=2 }
+      --elseif tonumber(v.service_object_id) == nil then
+      elseif v.m_state ~= nil then
+            state = tonumber(APPLIC_PENDING)
+            statename = applic_alert[state].name
+            status={ state=state, colnumber=2 }
+      else
+         state = -1
+         statename = "-"
+         status=nil
+      end
+
+      web.prefix = "/orb/probe"
+
+      -- Determina quais são os links de açao que deverão aparece para cada entrada (linha contendo dispositivo ou serviço
+
       if v.s_check_command_object_id == nil then -- se o ic não possuir um comando de check associado entao...
          chk = ""
          if permission == "w" then
             if tonumber(v.m_service_object_id) == -1 then -- se check cmd pendente...
-               link_add_host = font{ color="orange", "Pendente" }
+               url_add = font{ color="orange", "Pendente" }
             else
-               link_add_host = a{ href= web:link("/insert_host/"..v.p_id..":"..v.sv_id..":"..v.c_id..":"..v.n_id..":"
-                                         ..hst_name..":"..ip), strings.add.." "..strings.host }
+               local hst_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
+               url_add = web:link("/insert_host/"..v.p_id..":"..v.sv_id..":"..v.c_id..":"..v.n_id..":"..hst_name..":"..ip)
+               img_add = a{ href=url_add, title="Adicionar dispositivo", img{src="/pics/plus.png",   height="20px"}}
             end
          end
       else -- caso o ic possua um comando de check associado...
@@ -720,75 +817,39 @@ function render_list(web, ics, chk, msg)
                                        -- Deve estar relacionado a demora do ndo2db
                                        -- Por isso estou tirando esta entrada da tabela na tela de checagem!
          end
-         link_add_host = a{ href= web:link("/update/"..v[1]..":"..c_id..":"..v.p_id..":0:0:"..v.m_service_object_id..":0"), strings.edit }
-         link_del_host = a{ href= web:link("/remove/"..v.m_service_object_id), strings.remove }
-         link_add_host = link_add_host.." | "..link_del_host
-         link_del_host = nil
-         link_add_serv = a{ href= web:link("/add/"..v[1]..":"..c_id..":"..v.p_id..":0"), strings.add.." "..strings.service }
-      end
+         if permission == "w" then
+            if state == APPLIC_DISABLE then
+               flag = 1
+               alarm_icon = "/pics/alarm_check.png"
+               title = "Ligar alerta"
+            else
+               alarm_icon = "/pics/alarm_off.png"
+               title = "Desligar alerta"
+            end
+            if  m_name == config.monitor.check_host or m_name ==  "-" then query = 3 else query = 4 end
 
-      web.prefix = "/orb/obj_info"
-      if v.m_service_object_id == nil then
-         name = hst_name
-         --url = nil
-         web.prefix = "/servdesk"
-         if itemtype == "Computer" then
-            url = web:link("/front/computer.form.php?id="..c_id)
-         elseif itemtype == "NetworkEquipment" then
-            url = web:link("/front/networkequipment.form.php?id="..c_id)
+            url_add = web:link("/add/"..v[1]..":"..c_id..":"..v.p_id..":0")
+            url_edit = web:link("/update/"..v[1]..":"..c_id..":"..v.p_id..":0:0:"..v.m_service_object_id..":0")
+            url_remove = web:link("/remove/"..v.m_service_object_id)
+            url_disable = web:link("/disable_service/"..v.m_service_object_id..":"..c_id..":".. v.p_id..":"..query..":0:"..flag)
+
+            if  m_name == config.monitor.check_host or m_name ==  "-" then 
+               img_add = a{ href=url_add, title="Adicionar serviço", img{src="/pics/plus.png",   height="20px"}}
+            end
+            img_edit = a{ href=url_edit, title="Editar", img{src="/pics/pencil.png", height="20px"}}
+            img_remove = a{ href=url_remove, title="Remover", img{src="/pics/trash.png",  height="20px"}}
+	    img_disable = a{ href=url_disable, title=title, img{src=alarm_icon,  height="20px"}}
          end
-      elseif m_name == config.monitor.check_host or m_name ==  "-" then
-         url = web:link("/hst/"..v.m_service_object_id)
-      else 
-         url = web:link("/svc/"..v.m_service_object_id)
       end
 
-      if permission == "w" and url ~= nil then
-         name = a{ href=url, hst_name}
-      else
-         name = hst_name
-      end
-
-      if v.sw_name ~= "" then itemtype = "Service" end
-      web.prefix = "/orb/probe"
-
-      local state, statename, status
-      if tonumber(v.ss_has_been_checked) == 1 then
-         if tonumber(v.m_state) == 0 then
-            state = tonumber(APPLIC_DISABLE)
-            output = ""
-         else
-            state = tonumber(v.ss_current_state)
-            output = v.ss_output
-         end
-         statename = applic_alert[state].name
-         status={ state=state, colnumber=3 }
-      else
-         state = -1
-         statename = "-"
-         status=nil
-      end
-
---[[ AS imagens abaixo irão substituir os link em texto usado para editar, remover e acicionar..."
-      imgs = { a{ href="#", title="Editar", img{src="/pics/pencil.png", height="20px"}}, " ", 
-               a{ href="#", title="Adicionar", img{src="/pics/plus.png",   height="20ps"}}, " ", 
-               a{ href="#", title="Remover", img{src="/pics/trash.png",  height="20ps"}}, " ", 
-      }
-]]
-
-      -- com nome do comando de checagem
-      row[#row + 1] = { status=status, name, ip, statename, itemtype, m_name, link_add_host } 
-
-      -- se o nome do comando é o HOST_ALIVE, deve-se abrir a opcao para a criacao de mais um servico
-      if ( m_name == config.monitor.check_host ) then 
-         row[#row + 1] = { hst_name, ip, "-", "-", "-", link_add_serv } -- sem nome do comando de checagem
-      end
+      row[#row + 1] = { status=status, name, statename, typename, m_name, img_edit, img_remove, img_disable, img_add } 
    end
 
+
    res[#res+1] = render_resume(web)
+   web.prefix = "/orb/probe"
    res[#res+1] = render_content_header(auth, "Checagem", nil, web:link("/list"))
    if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ font{ color="red", msg } } end
-   local bar = {}
    web.prefix = "/orb/probe"
    res[#res+1] = render_form_bar( render_filter(web), strings.search, web:link("/list"), web:link("/list") )
    res[#res+1] = render_table(row, header)
@@ -812,7 +873,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------
-function render_checkcmd(web, chk_id, hst_name, ip, url_test, url_insert, url_update, url_desable, url_remove, chk_params, monitor_name, do_test, origin, monitor_state)
+function render_checkcmd(web, chk_id, hst_name, ip, url_test, url_insert, url_update, url_disable, url_remove, chk_params, monitor_name, do_test, origin, monitor_state)
    local permission = Auth.check_permission(web, "checkcmds")
    local row, row_hidden, cmd = {}, {}, ""
    local readonly, text = "", ""
@@ -885,7 +946,7 @@ function render_checkcmd(web, chk_id, hst_name, ip, url_test, url_insert, url_up
       "<INPUT TYPE=HIDDEN NAME=\"chk_name\" value=\""..c[1].name1.."\">",
       "<INPUT TYPE=HIDDEN NAME=\"count\" value=\""..count.."\">" 
    }
-   -- desabilita campo caso o comando seja o HOST_ALIVE que nao pode ser mudado
+   -- desliga campo caso o comando seja o HOST_ALIVE que nao pode ser mudado
    if monitor_name == config.monitor.check_host then disabled="disabled" end
    local display_show = {
       { strings.alias, "<INPUT TYPE=TEXT "..disabled.." NAME=\"monitor_name\" value=\""..monitor_name.."\">", 
@@ -915,13 +976,13 @@ function render_checkcmd(web, chk_id, hst_name, ip, url_test, url_insert, url_up
             res[#res+1] = center{ render_form(web:link(url_update), nil, params_hidden, true, "Atualizar checagem" ) }
          end
          if monitor_state == 1 then 
-            b_name = "Desabilitar checagem"
+            b_name = "Desligar alerta"
             flag = ":0"
          else
-            b_name = "Habilitar checagem"
+            b_name = "Ligar checagem"
             flag = ":1"
          end
-         res[#res+1] = center{ render_form(web:link(url_desable..flag), nil, { hidden, row_hidden } , true, b_name ) }
+         res[#res+1] = center{ render_form(web:link(url_disable..flag), nil, { hidden, row_hidden } , true, b_name ) }
          local r_name = "Remover checagem"
          res[#res+1] = center{ render_form(web:link(url_remove), nil, { hidden, row_hidden } , true, r_name ) }
       end
@@ -942,7 +1003,7 @@ function render_add(web, ics, chk, params, chk_params, monitor_name)
    local row = {}
    local res = {}
    local serv, ip, itemtype, id, hst_name = "", "", "", "", nil
-   local s, r, url_test, url_insert, url_update, url_desable, url_remove, chk_id
+   local s, r, url_test, url_insert, url_update, url_disable, url_remove, chk_id
 
    -- ESTE RENDER SOh SERVE PARA SERVICES.
    --if params.cmd then chk_id = params.cmd else chk_id = chk[1].object_id end
@@ -952,12 +1013,15 @@ function render_add(web, ics, chk, params, chk_params, monitor_name)
 
    if v then
       v.c_id = v.c_id or 0; v.n_id = v.n_id or 0; v.p_id = v.p_id or 0; v.sv_id = v.sv_id or 0;
+      ip = v.p_id
 
       hst_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
 
       url_insert = "/insert_service/"..v.p_id..":"..v.sv_id..":"..v.c_id..":"..v.n_id..":"..hst_name..":nana:nono:"..v.p_ip
-      url_update = "/update_service/"..params.service_object_id..":"..params.c_id..":".. params.p_id..":"..params.query..":".. params.no_header
-      url_desable = "/desable_service/"..params.service_object_id..":"..params.c_id..":".. params.p_id..":"..params.query..":".. params.no_header
+      url_update = "/update_service/"..params.service_object_id..":"..params.c_id..":".. params.p_id..":"..params.query..":"
+         ..params.no_header
+      url_disable = "/disable_service/"..params.service_object_id..":"..params.c_id..":".. params.p_id..":"..params.query..":"
+         ..params.no_header
       url_remove = "/remove/"..params.service_object_id
       url_test   = "/"..params.origin.."/"..params.query..":"..params.c_id
 
@@ -988,7 +1052,8 @@ function render_add(web, ics, chk, params, chk_params, monitor_name)
       res[#res + 1] = p{ font{ color="red", params.msg }, br()  }
    end
    res[#res+1] = render_table(row, header)
-   res[#res+1] = render_checkcmd(web, chk_id, hst_name, v.p_ip, url_test, url_insert, url_update, url_desable, url_remove, chk_params, monitor_name, params.do_test, params.origin, params.monitor_state)
+   res[#res+1] = render_checkcmd(web, chk_id, hst_name, v.p_ip, url_test, url_insert, 
+      url_update, url_disable, url_remove, chk_params, monitor_name, params.do_test, params.origin, params.monitor_state)
 
 
    return render_layout(res)

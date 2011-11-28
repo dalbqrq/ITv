@@ -5,8 +5,10 @@ require "Model"
 require "Monitor"
 require "Auth"
 require "View"
+require "App"
 require "util"
 require "state"
+require "probe"
 
 module(Model.name, package.seeall,orbit.new)
 
@@ -111,14 +113,13 @@ function info(web, tab, obj_id)
    local A = Monitor.make_query_3(nil, nil, nil, "m.service_object_id = "..obj_id)
 
    if tab == 1 then
-      local APPS = Monitor.make_query_5(nil,
-                      "ax.id in (select app_id from itvision_app_objects where service_object_id = "..obj_id..")", true) 
+      local APPS = App.select_app_parent_objects(obj_id)
       return render_info(web, obj_id, A, APPS)
    elseif tab == 2 then
       local H = statehistory:select(obj_id)
       return render_history(web, obj_id, A, H)
    elseif tab == 3 then
-      local A = Monitor.make_query_4(nil, nil, nil, "m.service_object_id = "..obj_id)
+      --local A = Monitor.make_query_4(nil, nil, nil, "m.service_object_id = "..obj_id)
       return render_cmdb(web, obj_id, A)
    elseif tab == 4 then
       return render_data(web, obj_id, A)
@@ -184,15 +185,19 @@ function render_info(web, obj_id, A, APPS)
 
 
    tab = {}
-   state = h.ss_current_state
-   tab[#tab+1] = { status={ state=state, colnumber=2, nolightcolor=true}, b{"Status atual: "}, name_ok_warning_critical_unknown(h.ss_current_state) }
+   if tonumber(h.m_state) == 0 then
+      state = tonumber(APPLIC_DISABLE)
+   else
+      state = h.ss_current_state
+   end
+   tab[#tab+1] = { status={ state=state, colnumber=2, nolightcolor=true}, b{"Status atual: "}, name_ok_warning_critical_unknown(state) }
    tab[#tab+1] = { b{"Status info: "}, h.ss_output }
    tab[#tab+1] = { b{"No. de tentativas/Máximo de tentativas: "}, h.ss_current_check_attempt.."/"..h.ss_max_check_attempts }
    tab[#tab+1] = { b{"Ultima checagem: "}, string.extract_datetime(h.ss_last_check) }
    tab[#tab+1] = { b{"Próxima checagem: "}, string.extract_datetime(h.ss_next_check) }
    tab[#tab+1] = { b{"Última mudança de estado: "}, string.extract_datetime(h.ss_last_state_change) }
    tab[#tab+1] = { b{"Última mudança de estado tipo 'HARD': "}, string.extract_datetime(h.ss_last_hard_state_change) }
-   if h.ss_is_flapping == 1 then state = 2 else state = h.ss_is_flapping end
+   if tonumber(h.ss_is_flapping) == 1 then state = APPLIC_CRITICAL else state = APPLIC_OK end
    tab[#tab+1] = { status={ state=state, colnumber=2, nolightcolor=true}, b{"Está flapping: "}, name_yes_no(h.ss_is_flapping) }
    tab[#tab+1] = { b{"Último status tipo 'HARD': "}, name_ok_warning_critical_unknown(h.ss_last_hard_state) }
    tab[#tab+1] = { b{"Tempo entre checagens: "}, h.ss_normal_check_interval.."min" }
@@ -205,16 +210,47 @@ function render_info(web, obj_id, A, APPS)
 
    row[#row+1] = {lft, rgt }
    res[#res+1] = render_table( row, header )
-   res[#res+1] = { br(), br() }
+   res[#res+1] = { br() }
+
+   -- LINKS para CMDB e para CHECAGEM
+   local url
+   row = {}
+
+   web.prefix = "/servdesk"
+   if A[1].p_itemtype == "Computer" then
+      url = web:link("/front/computer.form.php?id="..A[1].c_id)
+   else
+      url = web:link("/front/networkequipment.form.php?id="..A[1].c_id)
+   end
+   local link_cmdb = center{  button_link("CMDB", url) }
+
+   web.prefix = "/orb/probe"
+   url = web:link("/update/3:"..A[1].c_id..":"..A[1].p_id..":0:0:"..obj_id..":0")
+   local link_probe = center{  button_link("Checagem", url) }
+
+
+   row[#row+1] = { link_cmdb, link_probe }
+   res[#res+1] = render_table( row )
+   res[#res+1] = { br(), br(), br() }
+
 
    -- APLICACOES
    row = {}
    header = { "APLICAÇÕES QUE POSSUEM ESTE DISPOSITIVO", "STATUS ATUAL", "Última checagem", "Próxima checagem", "Última mudança de estado"  }
 
    for i, v in ipairs(APPS) do
-      row[#row+1] = { v.ax_name, {value=name_ok_warning_critical_unknown(v.ss_current_state), state=v.ss_current_state}, 
-                      string.extract_datetime(v.ss_last_check),
-                      string.extract_datetime(v.ss_next_check), string.extract_datetime(v.ss_last_state_change), }
+      if tonumber(v.is_active) == 0 then
+         state = APPLIC_DISABLE
+      else
+         state = v.current_state
+      end
+
+      web.prefix = "/orb/app_tabs"
+      link = button_link(v.name, web:link("/list/"..v.app_id..":6"), "negative")
+      row[#row+1] = { link,
+                      {value=name_ok_warning_critical_unknown(state), state=state}, 
+                      string.extract_datetime(v.last_check),
+                      string.extract_datetime(v.next_check), string.extract_datetime(v.last_state_change), }
    end
 
    res[#res+1] = render_table( row, header )
@@ -303,7 +339,7 @@ function render_cmdb(web, obj_id, A)
    else
       url = web:link("/front/networkequipment.form.php?id="..A[1].c_id)
    end
-   res[#res+1] = iframe{ src=url, width="980px", height="90%", frameborder="0", "---" }
+   res[#res+1] = iframe{ src=url, width="980px", height="90px", frameborder="2", "---" }
 
    return render_layout(res)
 end

@@ -12,12 +12,31 @@ require "app"
 
 module(Model.name, package.seeall,orbit.new)
 
+local apps        = Model.itvision:model "apps"
 local app_relats = Model.itvision:model "app_relats"
 local app_relat_types = Model.itvision:model "app_relat_types"
 
 local tab_id = 3
 
 -- models ------------------------------------------------------------
+
+function apps:select(id, clause_)
+   local clause = nil
+
+   if id and clause_ then
+      clause = "id = "..id.." and "..clause_
+   elseif id then
+      clause = "id = "..id
+   elseif clause_ then
+      clause = clause_
+   end
+
+   extra  = " order by name "
+
+   local content = Model.query("itvision_apps", clause, extra)
+   return content
+end
+
 
 
 function app_relats:delete_app_relat(id, from, to)
@@ -69,6 +88,7 @@ ITvision:dispatch_get(add, "/add/", "/add/(%d+)", "/add/(%d+):(.+)")
 function insert_relat(web)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
+   local A = apps:select(web.input.app_id)
 
    local msg = ""
    local from, to
@@ -95,7 +115,8 @@ function insert_relat(web)
       app_relats:save()
    end
 
-   --return web:redirect(web:link("/add/"..app_relats.app_id)..msg)
+   Glpi.log_event(web.input.app_id, "application", auth.user_name, 8, A[1].name)
+
    web.prefix = "/orb/app_tabs"
    return web:redirect(web:link("/list/"..app_relats.app_id..":"..tab_id))
 end
@@ -106,9 +127,11 @@ ITvision:dispatch_post(insert_relat, "/insert_relat")
 function delete_relat(web, app_id, from, to)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
+   local A = apps:select(app_id)
 
    app_relats:delete_app_relat(app_id, from, to)
-   --return web:redirect(web:link("/add/"..app_id))
+   Glpi.log_event(app_id, "application", auth.user_name, 9, A[1].name)
+
    web.prefix = "/orb/app_tabs"
    return web:redirect(web:link("/list/"..app_id..":"..tab_id))
 end
@@ -123,8 +146,8 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 
 function make_app_relat_table(web, AR)
    local row, ic = {}, {}
-   local remove_button = ""
    local permission = Auth.check_permission(web, "application")
+   local url_remove
 
    web.prefix = "/orb/app_relats"
 
@@ -174,12 +197,10 @@ function make_app_relat_table(web, AR)
          to = tag..v.to_name
       end
 
-
       if permission == "w" then
-         remove_button = button_link(strings.remove, web:link("/delete_relat/"..v.app_id..":"..v.from_object_id
-             ..":"..v.to_object_id), "negative")
+         url_remove = web:link("/delete_relat/"..v.app_id..":"..v.from_object_id ..":"..v.to_object_id)
       else
-         remove_button = "-"
+         url_remove = nil
       end
 
       if v.connection_type == "physical" then contype = strings.physical else contype = strings.logical end
@@ -188,7 +209,7 @@ function make_app_relat_table(web, AR)
          from,
          v.art_name,
          to,
-         remove_button
+         url_remove
       }
    end
 
@@ -206,17 +227,26 @@ function render_add(web, APPOBJ, AR, RT, app_id, msg)
    local header = ""
    local permission = Auth.check_permission(web, "application")
 
+   local relats = make_app_relat_table(web, AR)
+   for _,v in ipairs(relats) do
+      if v[4] then
+         v[4] = a{ href=v[4], title=strings.remove, img{src="/pics/trash.png",  height="20px"}}
+      else
+         v[4] = img{src="/pics/blank.png",  height="20px"}
+      end
+   end
+
    -----------------------------------------------------------------------
    -- Relacionamentos da aplicacao
    -----------------------------------------------------------------------
+   header =  { strings.origin, strings.type, strings.destiny, "" }
    res[#res+1] = show(web, app_id)
    res[#res+1] = br()
-   --res[#res+1] = render_content_header(strings.relation)
    res[#res+1] = render_title(strings.relation.."s")
-   header =  { strings.origin, strings.type, strings.destiny, "." }
-   res[#res+1] = render_table(make_app_relat_table(web, AR), header)
+   res[#res+1] = render_table(relats, header)
    res[#res+1] = br()
 
+   web.prefix = "/orb/app_relats"
    if permission == "w" then
 
       -- LISTA APP ORIGEM DOS RELACIONAMENTO ---------------------------------
@@ -251,7 +281,6 @@ function render_add(web, APPOBJ, AR, RT, app_id, msg)
             opt_from[#opt_from+1] = option{ value=v.object_id, obj }
          end
       end
-      --local from = H("select") { multiple="multiple", size=list_size, name="from", opt_from, }
       local from = H("select") { size=list_size, name="from", opt_from }
 
       -- LISTA TIPOS DE RELACIONAMENTO  ---------------------------------
@@ -302,7 +331,6 @@ function render_add(web, APPOBJ, AR, RT, app_id, msg)
       if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ font{ color="red", msg } }  end
 
       header =  { strings.origin, strings.type, strings.destiny }
-      --res[#res+1] = render_form_bar( render_table(t, header) , strings.add, web:link(url_relat), web:link("/add/"..app_id))
       res[#res+1] = render_form( web:link(url_relat), web:link("/add/"..app_id), render_table(t, header), true, strings.add )
    end
 

@@ -19,7 +19,8 @@ local entities = Model.glpi:model "entities"
 
 function apps:select_apps(id, clause_)
    --local clause = " is_active = 1 and app_type_id > 1" -- tentativa de colocar selecao por entidades
-   local clause = " is_active = 1"
+   --local clause = " is_active = 1"
+   local clause = " is_active in (0,1) "
    if id then clause = clause.." and  id = "..id end
    if clause_ then clause = clause.." and "..clause_ end
 
@@ -122,7 +123,7 @@ function render_show(web, app, entities, app_name, app_id, obj, rel, obj_id, no_
    if no_header == nil then
       if auth then -- se nao estiver logado, valor de auth é "false" e não a arvore de autenticacao (mod Auth)
          res[#res+1] = render_resume(web)
-         res[#res+1] = render_content_header(auth, strings.vision, nil, nil, nil)
+         res[#res+1] = render_content_header(auth, "Grafo", nil, nil, nil)
       end
       web.prefix = "/orb"
       res[#res+1] = render_bar( 

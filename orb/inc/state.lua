@@ -29,7 +29,7 @@ applic_alert = {
 	[APPLIC_CRITICAL] = { name= "CRITICO", 		status = APPLIC_CRITICAL,	color = color.red,	lightcolor = color.lightred,	color_name = "red" },
 	[APPLIC_UNKNOWN]  = { name= "INDETERMINADO",	status = APPLIC_UNKNOWN,	color = color.gray,	lightcolor = color.lightgray,	color_name = "gray" },
 	[APPLIC_PENDING]  = { name= "PENDENTE",		status = APPLIC_PENDING,	color = color.blue,	lightcolor = color.lightblue,	color_name = "blue" },
-	[APPLIC_DISABLE]  = { name= "DESABILITADO",	status = APPLIC_DISABLE,	color = color.orange,	lightcolor = color.lightorange,	color_name = "orange" }
+	[APPLIC_DISABLE]  = { name= "DESLIGADO",	status = APPLIC_DISABLE,	color = color.orange,	lightcolor = color.lightorange,	color_name = "orange" }
 }
 
 
@@ -39,7 +39,7 @@ host_alert = {
 	[HOST_DOWN]        = { name= "CRITICO", 	status = HOST_DOWN,		color = color.red,	color_name = "red" },
 	[HOST_UNREACHABLE] = { name= "INDETERMINADO",	status = HOST_UNREACHABLE,	color = color.gray,	color_name = "gray" },
 	[HOST_PENDING]     = { name= "PENDENTE", 	status = HOST_PENDING,		color = color.blue,	color_name = "blue" },
-	[HOST_DISABLE]     = { name= "DESABILITADO",	status = HOST_DISABLE,		color = color.orange,	color_name = "orange" }
+	[HOST_DISABLE]     = { name= "DESLIGADO",	status = HOST_DISABLE,		color = color.orange,	color_name = "orange" }
 }
 
 
@@ -50,6 +50,6 @@ service_alert = {
 	[STATE_CRITICAL] = { name= "CRITICO", 		status = STATE_CRITICAL,	color = color.red,	color_name = "red" },
 	[STATE_UNKNOWN]  = { name= "INDETERMINADO",	status = STATE_UNKNOWN,		color = color.gray,	color_name = "gray" },
 	[STATE_PENDING]  = { name= "PENDENTE",		status = STATE_PENDING,		color = color.blue,	color_name = "blue" },
-	[STATE_DISABLE]  = { name= "DESABILITADO",	status = STATE_DISABLE,		color = color.orange,	color_name = "orange" }
+	[STATE_DISABLE]  = { name= "DESLIGADO",		status = STATE_DISABLE,		color = color.orange,	color_name = "orange" }
 }
 

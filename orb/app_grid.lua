@@ -52,9 +52,11 @@ end
 -- controllers ---------------------------------------------------------
 
 
+-- a variavel 'recursive' diz se todas as sub-entidades da árvore serão apresentadas nesta tela
 function show(web, app_id, recursive)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
+   recursive = recursive or 1
 
    local clause = nil
    if auth then clause = " entities_id in "..Auth.make_entity_clause(auth) end
@@ -121,7 +123,7 @@ function make_grid(web, O, recursive)
    local permission = Auth.check_permission(web, "application")
    local auth = Auth.check(web)
    local col_count = 1
-   local max_cols = 5
+   local max_cols = 6
 
    if recursive then O = get_subobjects(O) end
 
@@ -154,8 +156,21 @@ function make_grid(web, O, recursive)
                   web.prefix = "/orb/app_grid"
                   obj = button_link(obj, web:link("/show/"..v.ax_id..notrec), "negative")
                end
-      
-               col[#col+1] = { value=obj, state=v.ss_current_state }
+
+               local state
+               if v.ax_is_active == "0"  then
+                  state = APPLIC_DISABLE
+               elseif tonumber(v.ss_has_been_checked) == 1 then
+                  if tonumber(v.m_state) == 0 then
+                     state = tonumber(APPLIC_DISABLE)
+                  else
+                     state = tonumber(v.ss_current_state)
+                  end
+               else
+                  state = APPLIC_PENDING
+               end
+
+               col[#col+1] = { value=obj, state=state }
             end
 
 
@@ -212,9 +227,9 @@ function render_show(web, app, entities, app_name, app_id, obj, rel, obj_id, app
 
    res[#res+1] = render_resume(web)
    web.prefix = "/orb"
-   res[#res+1] = render_content_header(auth, "Grade", nil, web:link("/app_grid/show/1:1"))
+   res[#res+1] = render_content_header(auth, "Grade", nil, web:link("/app_grid/show"))
    --rec_checkbox = [[<p><input type="checkbox" onchange="location=']]..lnkrec..[[';" ]]..sel..[[> Visualização recursiva</p>]]
-   res[#res+1] = render_bar( { render_selector_bar(web, app, app_id, "/app_grid/show/1:1", notrec), rec_checkbox,
+   res[#res+1] = render_bar( { render_selector_bar(web, app, app_id, "/app_grid/show", notrec), rec_checkbox,
            a{ href=lnkapp,  strings.status } ,
            a{ href=lnkgeo,  "Mapa" } ,
            a{ href=lnkedt,  strings.edit } ,

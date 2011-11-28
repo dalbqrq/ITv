@@ -62,12 +62,6 @@ end
 function update_apps(web)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
-
---[[ CODIGO VELHO COM ARVORE
-   local APPS = App.select_uniq_app_in_tree()
-   make_all_apps_config(APPS)
-   os.sleep(1) -- CLUDGE Espera um pouco pois as queries das caixas de insercao estao retornando vazias!
-]]
    App.remake_apps_config_file()
 end
 
@@ -85,13 +79,10 @@ function add(web, app_id, msg)
          clause  = [[ and p.entities_id in ]]..entity_auth
    local extra   = [[ order by c.alias, c.name ]]
    local HST = Monitor.make_query_3(nil, nil, nil, exclude .. clause .. extra)
-   --   clause = clause..[[ and o.name2 <> ']]..config.monitor.check_host..[[' ]]
-   --local SVC = Monitor.make_query_4(nil, nil, nil, nil, exclude .. clause .. extra)
    local SVC = Monitor.make_query_4(nil, nil, nil, exclude .. clause .. extra)
 
    clause = " ( a.entities_id in "..entity_auth.." or a.visibility = 1 )"
    local APP = App.select_app_service_object(clause, nil, nil, app_id)
-   --local APPOBJ = App.select_app_app_objects(app_id)
    local APPOBJ = Monitor.select_monitors_app_objs(app_id)
 
    return render_add(web, HST, SVC, APP, APPOBJ, app_id, msg)
@@ -101,6 +92,8 @@ ITvision:dispatch_get(add, "/add/(%d+)", "/add/(%d+):(.+)")
 
 
 function insert_obj(web, app_id)
+   local auth = Auth.check(web)
+
    app_objects:new()
    -- inclusão de multiplos itens. deve-se acionar a selecao de multiplos itens na interface. bug abaixo
    if type(web.input.item) == "table" then
@@ -118,6 +111,9 @@ function insert_obj(web, app_id)
          app_objects.instance_id = Model.db.instance_id
          app_objects.service_object_id = web.input.item
          app_objects:save()
+
+         local A = apps:select(app_objects.app_id)
+         Glpi.log_event(app_id, "application", auth.user_name, 6, A[1].name)
       end
    end
 
@@ -127,10 +123,9 @@ function insert_obj(web, app_id)
    end
 
    web.prefix = "/orb/app_tabs"
-   --return web:redirect(web:link("/list/"..app_objects.app_id..":"..tab_id))
    return web:redirect(web:link("/list/"..app_id..":"..tab_id))
 end
-ITvision:dispatch_post(insert_obj, "/insert_obj:(%d+)")
+ITvision:dispatch_post(insert_obj, "/insert_obj/(%d+)")
 
 
 
@@ -141,6 +136,7 @@ function delete_obj(web, app_id, obj_id)
    local msg = ""
 
    if app_id and obj_id then
+      local A = apps:select(app_id)
       local subapp = objects:select_app(obj_id)
 
       local clause = "app_id = "..app_id.." and service_object_id = "..obj_id
@@ -150,9 +146,11 @@ function delete_obj(web, app_id, obj_id)
       -- apaga tambem todos os relacionamentos 
       app_relats:delete_app_relat(app_id, obj_id, nil)
       app_relats:delete_app_relat(app_id, nil, obj_id)
+
+      Glpi.log_event(app_id, "application", auth.user_name, 7, A[1].name)
+      update_apps(web)
    end
 
-   update_apps(web)
 
    web.prefix = "/orb/app_tabs"
    return web:redirect(web:link("/list/"..app_id..":"..tab_id..msg))
@@ -210,18 +208,22 @@ function make_app_objects_table(web, A)
       end
       web.prefix = "/orb/app_objects"
 
+      local url_remove
+
       if permission == "w" and v.app_type_id ~= "1" and is_ent ~= 1 then
-         remove_button = button_link(strings.remove, web:link("/delete_obj/"..v.a_id..":"..v.o_object_id), "negative")
+         url_remove = web:link("/delete_obj/"..v.a_id..":"..v.o_object_id)
       else
-         remove_button = { "-" }
+         url_remove = { "-" }
       end
 
       local state 
       if tonumber(v.ss_has_been_checked) == 1 then
-         if tonumber(v.m_state) == 0 then
+         if tonumber(v.m_state) == 0 or v.ao_type == "app" and tonumber(v.ax_is_active) == 0 then
             state = tonumber(APPLIC_DISABLE)
             output = ""
-         else     
+            state = tonumber(APPLIC_DISABLE)
+            output = ""
+         else
             state = tonumber(v.ss_current_state)
             output = v.ss_output
          end      
@@ -233,9 +235,9 @@ function make_app_objects_table(web, A)
 
       row[#row+1] = { 
          obj,
-         name_hst_svc_app_ent(v.ao_type, is_ent),
+         name_hst_svc_app_ent(v.ao_type, is_ent, v.p_itemtype),
          { value=statename, state=state },
-         remove_button
+         url_remove,
       }
    end
 
@@ -245,8 +247,8 @@ end
 
 
 function render_add(web, HST, SVC, APP, APPOBJ, app_id, msg)
-   local res = {}
-   local url_app = "/insert_obj:"..app_id
+   local res, objs = {}, {}
+   local url_app = "/insert_obj/"..app_id
    local url_relat = "/insert_relat"
    local list_size = 10
    local header = ""
@@ -255,16 +257,20 @@ function render_add(web, HST, SVC, APP, APPOBJ, app_id, msg)
    -----------------------------------------------------------------------
    -- Objetos da Aplicacao
    -----------------------------------------------------------------------
+   if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ font{ color="red", msg } } end
+   header = { strings.object, strings.type, strings.status, "" }
+   objs = make_app_objects_table(web, APPOBJ)
+   for _,v in ipairs(objs) do
+      v[4] = a{ href=v[4], title="Remover objeto", img{src="/pics/trash.png",  height="20px"}}
+   end
+
    res[#res+1] = show(web, app_id)
    res[#res+1] = br()
-   if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ font{ color="red", msg } } end
-   --res[#res+1] = render_content_header(strings.app_object)
    res[#res+1] = render_title(strings.app_object)
-   --header = { strings.object.." ("..strings.host.." / "..strings.service.."@"..strings.host.." / "..strings.application.." / "..strings.entity..")", strings.status, strings.type, "." }
-   header = { strings.object, strings.type, strings.status, "." }
-   res[#res+1] = render_table(make_app_objects_table(web, APPOBJ), header)
+   res[#res+1] = render_table(objs, header)
    res[#res+1] = br()
 
+   web.prefix = "/orb/app_objects"
 
    if permission == "w" then
 
@@ -303,7 +309,7 @@ function render_add(web, HST, SVC, APP, APPOBJ, app_id, msg)
                     input{ type="hidden", name="type", value="app" } }, true, strings.add ) }
 
 
-      header = { strings.host, strings.service.."@"..strings.host, strings.application }
+      header = { strings.host, strings.host.."(IP)@"..strings.service, strings.application }
       res[#res+1] = render_table({ {hst, svc, app} }, header)
 
       res[#res+1] = { br(), br(), br(), br() }

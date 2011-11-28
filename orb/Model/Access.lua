@@ -34,7 +34,7 @@ end
 
 function connect ()
    local db_ = dado.connect (db.dbname, db.dbuser, db.dbpass, db.driver)
-   --local err = assert(db_:assertexec ("SET NAMES 'utf8'"))
+   local err = assert(db_:assertexec ("SET NAMES 'utf8'"))
    return db_
 end
 

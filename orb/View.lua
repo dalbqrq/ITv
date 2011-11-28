@@ -99,7 +99,8 @@ function render_menu_frame(inner_html)
          script{ type="text/javascript", change_script },
       },
 
-      body{ onLoad="show_clock()",  -- show_clock() é uma funcao do do código javascript liveclock.js
+      --body{ onLoad="show_clock()",  -- show_clock() é uma funcao do do código javascript liveclock.js
+      body{ 
          div{ id="header", header_imgs, inner_html }
       }
    }
@@ -725,10 +726,14 @@ HostOrServiceOrAppOrEnt = {
    { id = "svc", name = strings.service},
    { id = "app", name = strings.application},
    { id = "ent", name = strings.entity},
+   { id = "com", name = strings.computer},
+   { id = "net", name = strings.network},
 }
 
-function name_hst_svc_app_ent(id, is_entity)
+function name_hst_svc_app_ent(id, is_entity, itemtype)
    if is_entity == 1 then id = "ent" end
+   if id == "hst" and itemtype == "Computer" then id = "com" end
+   if id == "hst" and itemtype == "NetworkEquipment" then id = "net" end
    return choose_name(HostOrServiceOrAppOrEnt, id, is_entity)
 end
 
@@ -900,7 +905,7 @@ function render_content_header(auth, name, add, list, edit, geotag, back)
       --DEBUG myul[#myul+1] = li{ Auth.make_entity_clause(auth) }
    end
 
-       clock = div{ id="clock", "[ "..os.week_pt(os.date("%w"))..", "..os.date("%d").." de "..
+   clock = div{ id="clock", "[ "..os.week_pt(os.date("%w"))..", "..os.date("%d").." de "..
                                   os.month_pt(os.date("%m"))..os.date(" - %H:%M:%S]") }
 
    return div{ id='menu_navigate', div { id='c_ssmenu2', ul{ myul }, clock } }

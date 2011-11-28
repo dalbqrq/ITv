@@ -9,6 +9,7 @@ require "Resume"
 require "Glpi"
 require "util"
 require "monitor_util"
+require "messages"
 
 module(Model.name, package.seeall,orbit.new)
 
@@ -18,6 +19,7 @@ local app_objects = Model.itvision:model "app_objects"
 local app_relats  = Model.itvision:model "app_relats"
 local objects     = Model.nagios:model   "objects"
 local services    = Model.nagios:model   "services"
+local events      = Model.glpi:model     "events"
 
 local tab_id = 1
 
@@ -122,8 +124,6 @@ function list(web, msg)
 
    local clause = " entities_id in "..Auth.make_entity_clause(auth)
    if web.input.app_name then clause = clause.." and name like '%"..web.input.app_name.."%' " end
-   --OLD: local A, root = apps:select(nil, clause)
-   --local A = App.select_app(clause)
    local A = App.select_app()
    local AS = App.select_app_state(clause)
    local root = App.select_root_app()
@@ -138,8 +138,7 @@ function show(web, app_id)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
 
-   local clause = "id = "..app_id.." and entities_id in "..Auth.make_entity_clause(auth)
-   --OLD: local A, root = apps:select(nil, clause)
+   local clause = "a.id = "..app_id.." and a.entities_id in "..Auth.make_entity_clause(auth)
    local A = App.select_app(clause)
    local AS = App.select_app_state(clause)
    local root = App.select_root_app()
@@ -160,7 +159,9 @@ ITvision:dispatch_get(edit, "/edit/(%d+):(.+):(%a+):(%d):(%d+)")
 
 
 function update(web, id)
+   local auth = Auth.check(web)
    local A = {}
+
    if id then
       local tables = "itvision_apps"
       local clause = "id = "..id
@@ -173,35 +174,33 @@ function update(web, id)
       Model.update (tables, A, clause) 
    end
 
+   Glpi.log_event(id, "application", auth.user_name, 2, A.name)
+
    web.prefix = "/orb/app_tabs"
    return web:redirect(web:link("/list/"..id..":"..tab_id))
 end
 ITvision:dispatch_post(update, "/update/(%d+)")
 
 
-function add(web)
+function add(web, msg)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
 
-   return render_add(web)
+   return render_add(web, nil, msg)
 end
-ITvision:dispatch_get(add, "/add")
+ITvision:dispatch_get(add, "/add", "/add/(.+)")
 
 
 function insert(web)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
+   local clause = "name = '"..web.input.name.."' and entities_id in "..Auth.make_entity_clause(auth)
+   local app = apps:select(nil, clause)
 
-   --[[
-      tag: VERSAO_APP_01 
-
-      O codigo comendado com o tag acima é uma tentativa de definir a aplicacoa pai de uma aplicacao
-      que está sendo criada. A altenativa que será programada é definir somente a entidade pai e
-      deixar a aplicacao fora da arvore de aplicacoes, uma especie de limbo, para ser colocada na
-      árvore a posteriore.
-   ]]
-
-   --VERSAO_APP_01: local app_parent = apps:select(web.input.app_parent)
+   if app[1] then
+      web.prefix = "/orb/app"
+      return web:redirect(web:link("/add/Uma aplicação com o nome "..web.input.name.." já existe!"))
+   end
 
    apps:new()
    apps.name = web.input.name
@@ -210,20 +209,15 @@ function insert(web)
    apps.service_object_id = nil
    apps.instance_id = Model.db.instance_id
    apps.is_entity_root = 0
-   --VERSAO_APP_01: apps.entities_id = app_parent[1].entities_id
    apps.entities_id = web.input.entity
    apps.app_type_id = 2 -- leva em conta que a inicializacao da tabela itvision_app_type colocou o tipo aplicacao com id=1
    apps.visibility = web.input.visibility
    apps:save()
 
-   local app = apps:select(nil, "name = '"..web.input.name.."'")
-   --[[ VERSAO_APP_01:
-   local parent_app_tree = app_trees:select(nil, "app_id = "..web.input.app_parent)
-   for i,v in ipairs(parent_app_tree) do
-      App.insert_node_app_tree(app[1].id, app_parent[1].entity_id, v.id, 1)
-   end
-   ]]
+   local app = apps:select(nil, clause)
+
    App.remake_apps_config_file()
+   Glpi.log_event(id, "application", auth.user_name, 1, apps.name)
 
    web.prefix = "/orb/app_tabs"
    return web:redirect(web:link("/list/"..app[1].id..":2"))
@@ -242,14 +236,11 @@ ITvision:dispatch_get(remove, "/remove/(%d+)")
 
 
 function delete(web, id)
-   if id then
-      --[[ nao existe mais arvore: itvision_app_tree
-      local tree_id = App.find_node_id(id)
-      for _,v in ipairs(tree_id) do
-         App.delete_node_app_tree(v.id)
-      end
-      ]]
+   local auth = Auth.check(web)
+   local A = apps:select(id)
+   Glpi.log_event(id, "application", auth.user_name, 3, A[1].name)
 
+   if id then
       local o = objects:select_app(id)
       if o[1] then
          Model.delete ("itvision_app_objects", "service_object_id = "..o[1].object_id)
@@ -276,44 +267,25 @@ end
 
 
 function activate(web, id, flag)
+   local auth = Auth.check(web)
    if tonumber(flag) == 0 then flag = 1 else flag = 0 end
-   local msg, counter
+   local msg, counter = "", 0
 
    if id then
       local clause = "id = "..id
       local tables = "itvision_apps"
-
       local A = apps:select(id)
-      local count = App.count_app_objects(id)
-      if A[1] and count > 0 then
-         -- se for uma operacao de ativacao entao atualiza o service_object_id da aplicacao criada
-         if flag == 1 then
-            App.activate_app(id) 
 
---[[
-            -- app as id local s = objects:select_app(app_to_id(A[1].name))
-            s = objects:select_app(A[1].id)
-            -- caso host ainda nao tenha sido incluido aguarde e tente novamente
-            counter = 0
-            while s[1] == nil do
-               counter = counter + 1
-               os.reset_monitor()
-               os.sleep(1)
-               s = objects:select_app(A[1].id)
-            end
-            local svc = { id = A[1].id, service_object_id = s[1].object_id }
-            apps:update(svc)
-]]
-         else
-            App.deactivate_app(id) 
-         end
-
-         msg = "/"..error_message(9).." "..A[1].name
+      if flag == 1 then
+         App.activate_app(id) 
+         Glpi.log_event(id, "application", auth.user_name, 4, A[1].name)
       else
-         msg = "/"..error_message(10).." "..A[1].name
+         App.deactivate_app(id) 
+         Glpi.log_event(id, "application", auth.user_name, 5, A[1].name)
       end
    end
 
+   os.sleep(1)
    return web:redirect(web:link("/list"..msg))
 end
 ITvision:dispatch_get(activate, "/activate/(%d+):(%d+)")
@@ -330,48 +302,52 @@ end
 
 
 function render_list(web, A, AS, root, msg, no_header)
-   local res = {}
-   local row = {}
-   local svc, stract
+   local res, row = {}, {}
    local permission, auth = Auth.check_permission(web, "application")
-   local tag = ""
+   local svc, stract, tag = "", "", ""
+   local header = { 
+      strings.object, strings.entity, strings.type, strings.status, strings.logic, strings.visibility, "", "" , ""
+   }
 
    for i, v in ipairs(AS) do
-      local button_remove, button_edit, button_active = "-", "-", "-"
       local category = strings.entity
+      -- esta imagem em branco é usada somente para formatacao, aumentando o espaço entre as linhas.
+      -- isso poderia ser feito no css!
+      local img_blk = img{src="/pics/blank.png",  height="20px"}
+      local img_edit, img_remove = img_blk, img_blk
 
-      web.prefix = "/orb/app_tabs"
-      local lnk = web:link("/list/"..v.id..":2")
       web.prefix = "/orb/app"
+      -- prepara botoes (icones) com as possiveis operacoes sobre o objeto
+      if v.is_active == "0" then
+         stract = strings.activate
+         alarm_icon = "/pics/alarm_check.png"
+      else
+         stract = strings.deactivate
+         alarm_icon = "/pics/alarm_off.png"
+      end
+      url_disable = web:link("/activate/"..v.id..":"..v.is_active)
+      img_disable = a{ href=url_disable, title=stract, img{src=alarm_icon,  height="20px"}}
 
       if v.is_entity_root == "0" then
          category = strings.application
-         button_remove = button_link(strings.remove, web:link("/remove/"..v.id), "negative")
-         button_edit   = button_link(strings.edit, web:link("/edit/"..v.id..":"..v.name..":"..v.type..":"..v.visibility..":"..v.entity_id))
+         url_edit = web:link("/edit/"..v.id..":"..v.name..":"..v.type..":"..v.visibility..":"..v.entity_id)
+         url_remove = web:link("/remove/"..v.id)
+         img_edit = a{ href=url_edit, title=strings.edit, img{src="/pics/pencil.png", height="20px"}}
+         img_remove = a{ href=url_remove, title=strings.remove, img{src="/pics/trash.png",  height="20px"}}
       end
-
-      if v.is_active == "0" then
-         stract = strings.activate
-      else
-         stract = strings.deactivate
-      end
-      button_active = button_link(stract, web:link("/activate/"..v.id..":"..v.is_active)) 
 
       if permission == "r" then
-         button_remove = "-"
-         button_edit = "-"
-         button_active = "-"
+         img_edit, img_remove, img_disable = img_blk, img_blk, img_blk
       end
 
-      -- leva em conta a inicializacao padrao da tabela itvision_app_type
+      -- selecioma o tag com a indicação do tipo de objeto
       if v.app_type_id == "1" then
          tag = "+ "
       elseif v.app_type_id == "2" then
          tag = "# "
-      else
-         tag = "- "
       end
 
+      -- Inclui estado e cor na coluna status
       local state, statename, status
       if tonumber(v.has_been_checked) == 1 then
          if tonumber(v.state) == 0 then
@@ -380,33 +356,37 @@ function render_list(web, A, AS, root, msg, no_header)
             state = tonumber(v.current_state)
          end
          statename = applic_alert[state].name
-         status={ state=state, colnumber=3, nolightcolor=true }
+         status={ state=state, colnumber=4, nolightcolor=true }
+      elseif v.is_active == "0"  then
+         state = APPLIC_DISABLE
+         statename = applic_alert[state].name
+         status={ state=state, colnumber=4, nolightcolor=true }
       else
-         state = -1
-         statename = "-"
-         status=nil
+         state = APPLIC_PENDING
+         statename = applic_alert[state].name
+         status={ state=state, colnumber=4, nolightcolor=true }
       end
+
+      web.prefix = "/orb/app_tabs"
 
       row[#row+1] = { 
          status=status,
-         a{ href=lnk, tag..v.name },
+         a{ href=web:link("/list/"..v.id..":2"), tag..v.name },
          v.entity_completename,
-         statename,
          category,
+         statename,
          strings["logical_"..v.type],
-         NoOrYes[tonumber(v.is_active)+1].name,
+         --NoOrYes[tonumber(v.is_active)+1].name,
          PrivateOrPublic[tonumber(v.visibility)+1].name,
-         button_remove,
-         button_edit,
-         button_active,
+         img_edit,
+         img_remove,
+         img_disable,
       }
    end
 
-   local header =  { strings.name, strings.entity, strings.status, strings.type, strings.logic, strings.is_active, strings.visibility,".", ".", "." }
-   local c_header = {}
    if no_header == nil then
       res[#res+1] = render_resume(web)
-      web.prefix="/orb/app"
+      web.prefix = "/orb/app"
       if permission == "w" then
          res[#res+1] = render_content_header(auth, strings.application, web:link("/add"), web:link("/list"))
       else
@@ -415,6 +395,7 @@ function render_list(web, A, AS, root, msg, no_header)
       res[#res+1] = render_form_bar( render_filter(web), strings.search, web:link("/list"), web:link("/list") )
       if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ font{ color="red", msg } } end
    end
+
    res[#res+1] = render_table(row, header)
    if not no_header then res[#res+1] = { br(), br(), br(), br() } end
 
@@ -423,12 +404,11 @@ end
 
 
 -- TODO: edit deve receber os valores a serem alterados
-function render_add(web, edit)
+function render_add(web, edit, msg)
    local val1, val2, strbar, link
    local add_link = web:link("/add")
    local res = {}
    local permission, auth = Auth.check_permission(web, "application", true)
-   --local auth = Auth.check(web)
 
    if edit then 
       strbar = strings.update 
@@ -439,23 +419,21 @@ function render_add(web, edit)
       edit = { id = 0, name = "", type = "", visibility = "" }
    end
 
-   -- recupera entidades da tabela glpi_entities baseado nas entidades ativas de auth
-   local entities = Glpi.select_active_entities(auth)
-   --VERSAO_APP_01: local apps = apps:select(nil, "entities_id in "..Auth.make_entity_clause(auth))
+   clause = " entities_id in "..Auth.make_entity_clause(auth).." and app_type_id = 1"
+   local entities = apps:select(nil, clause)
 
    -- cria conteudo do formulario em barra
    local inc = {
       strings.name..": ", input{ type="text", name="name", value = edit.name }, " ",
       strings.logic..": ", select_and_or("type", edit.type ),  " ",
       strings.visibility..": ", select_private_public("visibility", edit.visibility ),  " ",
-      strings.entity..": ", select_option("entity", entities, "id", "completename", edit.entity_id ),  " ",
-      --VERSAO_APP_01: strings.application..": ", select_option("app_parent", apps, "id", "name", auth.session.glpidefault_entity ),  " ",
+      strings.entity..": ", select_option("entity", entities, "entities_id", "name", edit.entity_id ),  " ",
       "<INPUT TYPE=HIDDEN NAME=\"is_active\" value=\"0\">",
    }
    
    res[#res+1] = render_content_header(auth, strings.application, add_link, web:link("/list"))
+   if msg ~= "/" and msg ~= "/add" and msg ~= "/add/" then res[#res+1] = p{ font{ color="red", msg } } end
    res[#res+1] = render_form_bar( inc, strbar, link, add_link )
-   --res[#res+1] = render_form(link, add_link, inc, true, strings.add )
 
    return render_layout(res)
 end

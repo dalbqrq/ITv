@@ -5,6 +5,7 @@ require "Model"
 require "Monitor"
 require "Auth"
 require "View"
+require "App"
 require "util"
 require "state"
 
@@ -111,8 +112,7 @@ function info(web, tab, obj_id)
    local A = Monitor.make_query_5(nil, "o.object_id = "..obj_id)
 
    if tab == 1 then
-      local APPS = Monitor.make_query_5(nil,
-                      "ax.id in (select app_id from itvision_app_objects where service_object_id = "..obj_id..")", true) 
+      local APPS = App.select_app_parent_objects(obj_id)
       return render_info(web, obj_id, A, APPS)
    elseif tab == 2 then
       local H = statehistory:select(obj_id)
@@ -172,8 +172,13 @@ function render_info(web, obj_id, A, APPS)
 
 
    tab = {}
-   state = a.ss_current_state
-   tab[#tab+1] = { status={ state=state, colnumber=2, nolightcolor=true}, b{"Status atual: "}, name_ok_warning_critical_unknown(a.ss_current_state) }
+   if tonumber(a.ax_is_active) == 0 then
+      state = APPLIC_DISABLE
+   else
+      state = a.ss_current_state
+   end
+
+   tab[#tab+1] = { status={ state=state, colnumber=2, nolightcolor=true}, b{"Status atual: "}, name_ok_warning_critical_unknown(state) }
    tab[#tab+1] = { b{"Status info: "}, a.ss_output }
    tab[#tab+1] = { b{"No. de tentativas/Máximo de tentativas: "}, a.ss_current_check_attempt.."/"..a.ss_max_check_attempts }
    tab[#tab+1] = { b{"Ultima checagem: "}, string.extract_datetime(a.ss_last_check) }
@@ -199,13 +204,22 @@ function render_info(web, obj_id, A, APPS)
    row = {}
    header = { "APLICAÇÕES QUE POSSUEM ESTA APLICAÇÃO", "STATUS ATUAL", "Última checagem", "Próxima checagem", "Última mudança de estado"  }
 
+
    for i, v in ipairs(APPS) do
-      row[#row+1] = { v.ax_name, {value=name_ok_warning_critical_unknown(v.ss_current_state), state=v.ss_current_state}, 
-                      string.extract_datetime(v.ss_last_check),
-                      string.extract_datetime(v.ss_next_check), string.extract_datetime(v.ss_last_state_change), }
+      if tonumber(v.is_active) == 0 then
+         state = APPLIC_DISABLE
+      else
+         state = v.current_state
+      end
+
+      web.prefix = "/orb/app_tabs"
+      link = button_link(v.name, web:link("/list/"..v.app_id..":6"), "negative")
+      row[#row+1] = { link,
+                      {value=name_ok_warning_critical_unknown(state), state=state}, 
+                      string.extract_datetime(v.last_check),
+                      string.extract_datetime(v.next_check), string.extract_datetime(v.last_state_change), }
    end
 
-   --res[#res+1] = { "APPS: "..obj_id.." : "..#APPS }
    res[#res+1] = render_table( row, header )
    res[#res+1] = { br(), br(), br() }
 
