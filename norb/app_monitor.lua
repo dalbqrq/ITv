@@ -1,5 +1,7 @@
 #!/usr/bin/env wsapi.cgi
 
+local loo = require "loop.base"
+
 -- includes & defs ------------------------------------------------------
 require "Model"
 require "Monitor"
@@ -11,11 +13,10 @@ require "monitor_util"
 
 module(Model.name, package.seeall,orbit.new)
 
-local objects  = Model.nagios:model "objects"
 local monitors = Model.itvision:model "monitors"
+local objects  = Model.nagios:model "objects"
 local apps = Model.itvision:model "apps"
 
---local loo = require "loop.base"
 
 
 -- models ------------------------------------------------------------

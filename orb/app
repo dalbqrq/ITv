@@ -2,6 +2,6 @@
 
 require "app"
 
-return ITvision
+return Model.name
 
 
