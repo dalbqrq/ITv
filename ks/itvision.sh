@@ -449,8 +449,9 @@ cd $itvhome/ks/servdesk
 tar cf - * | ( cd /usr/local/servdesk; tar xfp -)
 
 
-mysql -u root --password=$dbpass $dbname < $itvhome/ks/db/glpi_init.sql
+mysql -u root --password=$dbpass $dbname < $itvhome/ks/db/glpi.sql
 mysql -u root --password=$dbpass $dbname < $itvhome/ks/db/glpi_extra_columns.sql
+mysql -u root --password=$dbpass $dbname < $itvhome/ks/db/glpi_init.sql
 
 
  
