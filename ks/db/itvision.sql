@@ -161,7 +161,7 @@ CREATE TABLE `itvision_checkcmd_params` (
   `service_object_id` int(11) NOT NULL,
   `name1` varchar(40) COLLATE utf8_unicode_ci DEFAULT NULL,
   `name2` varchar(40) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `checkcmds_id` int(11) NOT NULL,
+  `cmd_object_id` int(11) NOT NULL,
   `sequence` int(11) DEFAULT NULL,
   `value` varchar(40) COLLATE utf8_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
@@ -195,6 +195,7 @@ CREATE TABLE `itvision_monitors` (
   `instance_id` smallint(6) NOT NULL,
   `entities_id` int(11) NOT NULL DEFAULT '0',
   `service_object_id` int(11) NOT NULL,
+  `cmd_object_id` int(11) DEFAULT NULL,
   `networkports_id` int(11) NOT NULL,
   `softwareversions_id` int(11) DEFAULT NULL,
   `name` varchar(40) DEFAULT NULL,

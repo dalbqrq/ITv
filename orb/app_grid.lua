@@ -189,6 +189,14 @@ function render_show(web, app, entities, app_name, app_id, obj, rel, obj_id, app
 end
 
 
+function render_blank(web)
+   local res = {}
+   res[#res+1]  = { b{ "Não há aplicações configuradas" } }
+
+   return render_layout(res)
+end
+
+
 
 orbit.htmlify(ITvision, "render_.+")
 
