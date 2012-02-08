@@ -360,6 +360,7 @@ menu_itens = {
       --{ name="Acompanhamento", field=nil, link="/servdesk/front/tracking.php" },
       { name="Ticket", field=nil, link="/servdesk/front/ticket.php" },
       { name="Estatística", field=nil, link="/servdesk/front/stat.php" },
+      { name="Exportar", field=nil, link="/orb/export/show" },
       { name="Relatorios", field=nil, link="/servdesk/relatorios/index.php" },
       },
    },

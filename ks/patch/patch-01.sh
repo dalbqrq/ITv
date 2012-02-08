@@ -46,7 +46,8 @@ Alias /monitor /usr/share/nagios3/htdocs
 </DirectoryMatch>
 EOF
 
-sed -i.bkp.$data -e "s/\/cgi-bin\/nagios3/\/cgi-bin\/monitor/" /usr/share/nagios3/htdocs/config.inc.php
+# TODO: nao existe o arquivo .inc.php abaixo!!!!
+#sed -i.bkp.$data -e "s/\/cgi-bin\/nagios3/\/cgi-bin\/monitor/" /usr/share/nagios3/htdocs/config.inc.php
 
 #/etc/init.d/nagios3 restart
 #sudo /etc/init.d/apache2 restart
