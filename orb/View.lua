@@ -327,7 +327,7 @@ function render_table(t, h, class)
       --
       -- A coluna "status" (uma sub-tabela) não deve ser apresentada. Serve somente para trazer as informações de 
       -- cores de determinada linha dada pelo status de um objeto
-      if v.status then 
+      if v.status and v.status.state then 
           color = applic_alert[tonumber(v.status.state)].color
           if v.status.nolightcolor ~= true then
              lightcolor = applic_alert[tonumber(v.status.state)].lightcolor
