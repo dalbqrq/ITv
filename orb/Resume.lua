@@ -125,7 +125,7 @@ function count_hosts()
 end
 
 
-function count_services()
+function count_services(clause)
    local res = {}
 
 --SERVICES HABILITADOS
@@ -137,10 +137,11 @@ function count_services()
    group by ss.current_state;]]
 
    c = [[count(*) as count, ss.current_state as state]]
-   t = [[nagios_servicestatus ss, nagios_objects o, itvision_monitors m]]
-   r = [[ss.service_object_id = o.object_id and ss.active_checks_enabled = 1
+   t = [[nagios_servicestatus ss, nagios_objects o, itvision_monitors m, glpi_networkports n]]
+   r = [[ss.service_object_id = o.object_id and ss.active_checks_enabled = 1 and m.networkports_id = n.id
        and o.name2 <> ']]..config.monitor.check_host..[[' and o.name1 <> ']]..config.monitor.check_app..[[' and o.objecttype_id = 2
-       and o.is_active = 1 and o.name1 <> 'dummy' and m.service_object_id = ss.service_object_id]]
+       and o.is_active = 1 and o.name1 <> 'dummy' and m.service_object_id = ss.service_object_id
+       and n.entities_id in ]]..clause
    e = [[group by ss.current_state]]
    q = Model.query(t, r, e, c)
 
@@ -153,8 +154,8 @@ function count_services()
        and o.is_active = 1 and o.name1 <> 'dummy']]
 
    c = [[count(*) as count, 5 as state]]
-   t = [[nagios_servicestatus ss, nagios_objects o, itvision_monitors m]]
-   r = [[ss.service_object_id = o.object_id and ss.active_checks_enabled = 0
+   t = [[nagios_servicestatus ss, nagios_objects o, itvision_monitors m , glpi_networkports n]]
+   r = [[ss.service_object_id = o.object_id and ss.active_checks_enabled = 0 and m.networkports_id = n.id
        and o.name2 <> ']]..config.monitor.check_host..[[' and o.name1 <> ']]..config.monitor.check_app..[[' and o.objecttype_id = 2
        and o.is_active = 1 and o.name1 <> 'dummy' and m.service_object_id = ss.service_object_id]]
    e = nil
@@ -216,7 +217,8 @@ function count_entities()
 end
 
 
-function render_resume(web)
+function render_resume(clause)
+
    local row = {}
    local col = {}
    local hea = {}
@@ -229,7 +231,7 @@ function render_resume(web)
    local counts = counter()
 
    local h = count_hosts()
-   local s = count_services()
+   local s = count_services(clause)
    local a = count_apps()
    local e = count_entities()
    local white = "#FFFFFF"

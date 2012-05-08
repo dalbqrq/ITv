@@ -119,13 +119,13 @@ function monitors:select_monitor_from_service(service_object_id)
 end
 
 
-function monitors:insert_monitor(networkport, softwareversion, service_object, cmd_object, name, name1, name2, monitor_state, type_)
+function monitors:insert_monitor(entity, networkport, softwareversion, service_object, cmd_object, name, name1, name2, monitor_state, type_)
    if tonumber(networkport)      == 0 then networkport      = nil end         
    if tonumber(softwareversion)  == 0 then softwareversion  = nil end         
 
    local mon = { 
       instance_id = Model.db.instance_id,
-      entities_id = 0,
+      entities_id = entity,
       service_object_id    = service_object,
       cmd_object_id        = cmd_object,
       networkports_id      = networkport,
@@ -471,10 +471,10 @@ function insert_host(web, p_id, sv_id, c_id, n_id, c_name, ip)
 
       -- cria monitor sem a referencia do servico check_alive associado.
       insert_host_cfg_file (hst_name, hst_name, ip)
-      monitors:insert_monitor(p_id, nil, -1, cmd_object, config.monitor.check_host, hst_name, config.monitor.check_host, 0, "hst")
+      monitors:insert_monitor(c_entity_id, p_id, nil, -1, cmd_object, config.monitor.check_host, hst_name, config.monitor.check_host, 0, "hst")
       insert_service_cfg_file (hst_name, config.monitor.check_host, config.monitor.check_host, check_args)
 
-      msg = msg.."Check do HOST: "..c_name.." para o IP "..ip.." criado. "..error_message(11)
+      msg = msg.."Check do HOST: "..c_name.." para o IP "..ip.." criado para a entidade "..c_entity_id.." "..error_message(11)
    else
       msg = msg.."Check do HOST: "..c_name.." já existe! "
    end   
@@ -529,7 +529,7 @@ function insert_service(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, 
    -- cria o service check caso tenha sido requisitado
    -- e cria monitor sem a referencia do servico associado.
    ------------------------------------------------------
-   monitors:insert_monitor(p_id, sv_id, -1, cmd_object, monitor_name, hst_name, service_desc, 0, "svc")
+   monitors:insert_monitor(c_entity_id, p_id, sv_id, -1, cmd_object, monitor_name, hst_name, service_desc, 0, "svc")
    insert_service_cfg_file (hst_name, service_desc, chk_name, check_args)
 
    msg = "Check de SERVIÇO: "..monitor_name.." - HOST: ".. c_name.." - COMANDO: "..chk_name.." criado."
@@ -685,7 +685,7 @@ function render_list(web, ics, chk, msg)
    local row, res, link_add_host, link_del_host, link_add_serv, url = {}, {}, "", "", nil
 
    local header = { -- sem o nome do comando 'chk'. Só que agora o alias aparece como o 'Comando' na tabela
-      "Dispositivo", "IP", "Nann", strings.type, strings.command, "."
+      "Dispositivo", "IP", "Status", strings.type, strings.command, "."
    }
 
    for i, v in ipairs(ics) do

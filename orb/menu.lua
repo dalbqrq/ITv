@@ -41,6 +41,8 @@ function render_menu(web, item, subitem)
    end
    itens[#itens+1] = li{ a{ class="logout", href=js, 
                      onClick="changePage('/orb/menu/0:0', '/orb/login/logout')", "Logout: "..auth.user_name } }
+   itens[#itens+1] = li{ a{ class=none, " " } }
+   itens[#itens+1] = script{ type="text/javascript", src='/js/liveclock.js' }
 
    for i,v in ipairs(menu_itens[item].submenu) do
       local active = ""

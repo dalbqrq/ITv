@@ -117,8 +117,12 @@ function make_grid(web, O)
                   obj = button_link(make_obj_name(find_hostname(v.c_alias, v.c_name, v.c_itv_key), v.m_name), url, "negative")
                else
                   obj = v.ax_name
-                  web.prefix = "/orb/app_tabs"
-                  obj = button_link(obj, web:link("/list/"..v.ax_id..":"..tab_id), "negative")
+                  -- Navega para a apresentacao do detalhe da aplicacao/entidade 
+                  --web.prefix = "/orb/app_tabs"
+                  --obj = button_link(obj, web:link("/list/"..v.ax_id..":"..tab_id), "negative")
+                  -- Navega para a apresentacao em grid da aplicacao/entidade 
+                  web.prefix = "/orb/app_grid"
+                  obj = button_link(obj, web:link("/show/"..v.ax_id), "negative")
                end
       
                col[#col+1] = { value=obj, state=v.ss_current_state }

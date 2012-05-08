@@ -206,7 +206,7 @@ function make_app_objects_table(web, A)
 
          obj = tag..v.ax_name
          web.prefix = "/orb/app_tabs"
-         obj = button_link(obj, web:link("/list/"..v.a_id..":"..tab_id), "negative")
+         obj = button_link(obj, web:link("/list/"..v.ax_id..":"..tab_id), "negative")
       end
       web.prefix = "/orb/app_objects"
 
