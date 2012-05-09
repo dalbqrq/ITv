@@ -5,6 +5,12 @@ require "sync_entities"
 require "sync_ip"
 require "sync_ic"
 
+--[[
+
+externals[.sh,.lua] é o wrapper para que o glpi realize chamadas no itvision.
+
+]]
+
 
 function execute_external_command(op, arg1, arg2, arg3)
 

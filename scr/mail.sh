@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# mail[.sh,.lua] é o wrapper para realizar chamadas de envio de email 
+#
 
 PROGDIR=$(dirname $(readlink -f $0))
 

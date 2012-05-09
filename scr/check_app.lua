@@ -1,11 +1,13 @@
 --[[ 
+
+check_app[.sh,.lua] é o check_command utilizado pelo nagios para checar o status de uma aplicação.
+
 ]]
 require "Model"
 require "Monitor"
 require "App"
 require "util"
 require "monitor_util"
---require "monitor_inc"
 require "state"
 
 
