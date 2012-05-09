@@ -402,15 +402,11 @@ function render_list(web, A, AS, root, msg, no_header)
       }
    end
 
-   local auth_clause = Auth.check(web)
-   if not auth_clause then return Auth.redirect(web) end
-   local clause = Auth.make_entity_clause(auth_clause)
-
-   --res[#res+1] = render_resume(web)
    local header =  { strings.name, strings.entity, strings.status, strings.type, strings.logic, strings.is_active, strings.visibility,".", ".", "." }
    local c_header = {}
    if no_header == nil then
-         res[#res+1] = render_resume(clause)
+      res[#res+1] = render_resume(web)
+      web.prefix="/orb/app"
       if permission == "w" then
          res[#res+1] = render_content_header(auth, strings.application, web:link("/add"), web:link("/list"))
       else

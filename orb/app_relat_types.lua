@@ -1,9 +1,10 @@
 #!/usr/bin/env wsapi.cgi
 
 -- includes & defs ------------------------------------------------------
-require "Model"
-require "View"
 require "Auth"
+require "Model"
+require "Resume"
+require "View"
 require "util"
 
 module(Model.name, package.seeall,orbit.new)
@@ -151,6 +152,7 @@ function render_list(web, A)
       }
    end
 
+   res[#res + 1]  = render_resume(web)
    if permission == "w" then
       res[#res + 1]  = render_content_header(auth, "Tipo de Relacionamento", web:link("/add"), web:link("/list"))
    else

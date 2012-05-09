@@ -210,7 +210,7 @@ function make_app_objects_table(web, A)
       end
       web.prefix = "/orb/app_objects"
 
-      if permission == "w" and v.app_type_id ~= "1" then
+      if permission == "w" and v.app_type_id ~= "1" and is_ent ~= 1 then
          remove_button = button_link(strings.remove, web:link("/delete_obj/"..v.a_id..":"..v.o_object_id), "negative")
       else
          remove_button = { "-" }

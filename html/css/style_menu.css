@@ -40,6 +40,7 @@
 #tablist li a.current{
   color: black;
   background: #F0F0F0;
+  background: #D0D0D0;
 }
 
 #tablist li a.logout{
@@ -84,6 +85,7 @@
 #subtablist li a.current{
   color: black;
   background: #F0F0F0;
+  background: #D0D0D0;
 }
 
 

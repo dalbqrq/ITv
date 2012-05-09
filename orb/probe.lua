@@ -474,7 +474,7 @@ function insert_host(web, p_id, sv_id, c_id, n_id, c_name, ip)
       monitors:insert_monitor(c_entity_id, p_id, nil, -1, cmd_object, config.monitor.check_host, hst_name, config.monitor.check_host, 0, "hst")
       insert_service_cfg_file (hst_name, config.monitor.check_host, config.monitor.check_host, check_args)
 
-      msg = msg.."Check do HOST: "..c_name.." para o IP "..ip.." criado para a entidade "..c_entity_id.." "..error_message(11)
+      msg = msg.."Check do HOST: "..c_name.." para o IP "..ip.." "..error_message(11)
    else
       msg = msg.."Check do HOST: "..c_name.." já existe! "
    end   

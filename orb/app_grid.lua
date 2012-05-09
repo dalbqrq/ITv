@@ -96,7 +96,7 @@ function make_grid(web, O)
    local permission = Auth.check_permission(web, "application")
    local auth = Auth.check(web)
    local col_count = 1
-   local max_cols = 4
+   local max_cols = 5
 
    web.prefix = "/orb/app_objects"
 
