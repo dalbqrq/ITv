@@ -29,15 +29,19 @@ function render_list(web)
    if patch < 10 then patch = "0"..patch end
    
    res = center{ img{ src="/pics/logopurple_big.png", alt="ITVision", border=0 },
-
-     p{ br(), b{"ITvision"}, " &eacute; um sistema de monitora&ccedil;&atilde;o, gerenciamento", br(), 
-          "e gest&atilde;o para infra-estruturas computacionais desenvolvido pela", br(),
-          b{"Verto Technologies"}, br(), br(),
-           img{ src="/pics/logo_verto.jpg", alt="Verto",  height=34, border=0 }, 
-           br(), br(),
-          "Versão: ", b{version}, "_", b{patch} 
+      p{ br(), b{"ITvision"}, " &eacute; um sistema de monitora&ccedil;&atilde;o, gerenciamento", br(), 
+         "e gest&atilde;o para infra-estruturas computacionais desenvolvido pela", br(),
+         b{"Verto Technologies"}, br(), br(),
+         img{ src="/pics/logo_verto.jpg", alt="Verto",  height=34, border=0 }, 
+         br(), br(),
+         "Versão: ", b{version}, "_", b{patch} 
       }
    }
+
+   local notes = string.gsub(description,"- ", "<br><br>-")
+
+   res = { res, div{ id="notes", b{"Release Notes"}, br(), br(), br(), notes, } }
+
    return render_layout(res)
 end
 

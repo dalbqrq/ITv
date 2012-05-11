@@ -34,6 +34,7 @@ function render_menu(web, item, subitem)
 
    local menu_itens = Auth.get_menu_itens(auth.profile)
 
+   -- Menu principal (superior)
    for i,v in pairs(menu_itens) do
       local active = ""
       if i == item then active = "current" end
@@ -41,9 +42,11 @@ function render_menu(web, item, subitem)
    end
    itens[#itens+1] = li{ a{ class="logout", href=js, 
                      onClick="changePage('/orb/menu/0:0', '/orb/login/logout')", "Logout: "..auth.user_name } }
-   itens[#itens+1] = li{ a{ class=none, " " } }
-   itens[#itens+1] = script{ type="text/javascript", src='/js/liveclock.js' }
 
+   -- Relogio
+   itens[#itens+1] = [[<div id="clock">]]..script{ type="text/javascript", src='/js/liveclock.js' }..[[</div>]]
+
+   -- Menu secundário selecionado de acordo com o menu principal (submenu)
    for i,v in ipairs(menu_itens[item].submenu) do
       local active = ""
       if i == subitem then active = "current" end

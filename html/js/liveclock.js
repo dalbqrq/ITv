@@ -27,7 +27,7 @@
 	var myfont_face = "Arial";
 
 	// Set the clock's font size (in point):
-	var myfont_size = "8";
+	var myfont_size = "9";
 
 	// Set the clock's font color:
 	var myfont_color = "#4E5763";
@@ -43,7 +43,7 @@
 
 	// Display the time in 24 or 12 hour time?
 	// 0 = 24, 1 = 12
-	var my12_hour = 1;
+	var my12_hour = 0;
 
 	// How often do you want the clock updated?
 	// 0 = Never, 1 = Every Second, 2 = Every Minute
@@ -52,7 +52,7 @@
 
 	// Display the date?
 	// 0 = No, 1 = Yes
-	var DisplayDate = 1;
+	var DisplayDate = 0;
 
 /////////////// END CONFIGURATION /////////////////////////
 ///////////////////////////////////////////////////////////
@@ -154,7 +154,7 @@
 		myclock += hours+':'+minutes;
 		if ((myupdate < 2) || (myupdate == 0)) { myclock += ':'+seconds; }
 		myclock += ' '+dn;
-		if (DisplayDate) { myclock = font+'[ '+DaysOfWeek[day]+', '+mday+' de '+MonthsOfYear[month]+' - '+myclock+' ]'; }
+		if (DisplayDate) { myclock = font+'[ '+DaysOfWeek[day]+', '+mday+' de '+MonthsOfYear[month]+' - '+myclock+' ]'; } else { myclock = '[ '+myclock+' ]'; }
 		myclock += '</font>';
 
 		if (old == "true") {

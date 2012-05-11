@@ -153,6 +153,7 @@ function render_layout(inner_html, refresh_time)
          refresh, {"\n"},
 
          --link{ rel='stylesheet', type='text/css', media='screen', href="/css/style.css" }, {"\n"},
+         link{ href="/css/style.css", media="screen", rel="stylesheet", type="text/css" },
          link{ rel='stylesheet', type='text/css', media='screen', href="/servdesk/css/styles.css" }, {"\n"},
          link{ rel='stylesheet', type='text/css', media='print',  href='/servdesk/css/print.css' }, {"\n"},
          link{ rel="shortcut icon", href="/pics/favicon.ico" }, {"\n"},
@@ -371,7 +372,15 @@ function render_table(t, h, class)
       col = {}
    end
 
-   return H("table") { border="0", class=class, thead{ hea }, tbody{ row } }
+   local res
+
+   if h then
+      res = H("table") { border="0", class=class, thead{ hea }, tbody{ row } }
+   else
+      res = H("table") { border="0", class=class, tbody{ row } }
+   end
+
+   return res
 end
 
 
@@ -427,18 +436,18 @@ function render_form_bar(form_content, button_name, url_post, url_reset)
 end
 
 
-function render_selector_bar(web, A, id, path)
+function render_selector_bar(web, A, id, path, params)
    local url = ""
    local res = {}
    local selected = ""
-   local curr_app = 0
    id = id or -1
 
+   params = params or ""
+
    for i, v in ipairs(A) do
-      url = web:link(path.."/"..v.id)
+      url = web:link(path.."/"..v.id..params)
       if tonumber(v.id) == tonumber(id) then
          selected = "selected"
-         curr_app = i
       else
          selected = nil
       end
@@ -771,8 +780,8 @@ end
 
 
 function render_title(name)
-   local myul = { li{ a{href='#', class='here', title="'"..name.."'", name} }, }
-   --local myul = name
+   local myul = { li{ a{href='#', class='there', title="'"..name.."'", name} } }
+   --local myul = { div{ id='subtitle', li{ name }}}
    return div{ id='menu_navigate', div { id='c_ssmenu2', ul{ myul } } }
 end
 
@@ -780,7 +789,7 @@ end
 function render_content_header(auth, name, add, list, edit, geotag, back)
    local myul = { li{ a{href='#', class='here', title="'"..name.."'", name} }, }
 
-   myul[#myul+1] = li{ "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" }
+   --myul[#myul+1] = li{ "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" }
 
    if add then
       myul[#myul+1] = li{ a{ href=add, img{ src='/servdesk/pics/menu_add.png', title='Adicionar', alt='Adicionar'} } }

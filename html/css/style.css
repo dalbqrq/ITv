@@ -19,3 +19,23 @@ body {
 	font-size: 35px;
 }
 
+#notes { 
+	width: 950px;
+	margin: 100 auto;
+	padding: 100;
+	position: relative; 
+	padding: 5px 0 0 0;
+        font-family: Verdana,Arial,Helvetica,sans-serif;
+	font-size: 12px;
+	text-align: left;
+	background: #c0c0c0;
+}
+
+#clock {
+	float: right;
+}
+
+#subtitle {
+        font-family: Verdana,Arial,Helvetica,sans-serif;
+	font-size:14px;
+}

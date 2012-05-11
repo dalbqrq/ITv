@@ -344,10 +344,10 @@ end
 menu_itens = {
    { name="Monitor", link="#",
       submenu = {
-      { name="Grade", field="application", link="/orb/app_grid/show" },
-      { name="Grafo", field="application", link="/orb/gviz/show" },
-      { name="Lista", field="application", link="/orb/app_monitor" },
       { name="Árvore", field="application", link="/orb/treeviz/show" },
+      { name="Grafo", field="application", link="/orb/gviz/show" },
+      { name="Grade", field="application", link="/orb/app_grid/show" },
+      { name="Lista", field="application", link="/orb/app_monitor/all:ent:0:-1" },
       { name="Aplicações", field="application", link="/orb/app" },
       { name="Checagem", field="checkcmds", link="/orb/probe" },
       { name="Tipo de Relacionamento", field="app_relat_type", link="/orb/app_relat_types" },
