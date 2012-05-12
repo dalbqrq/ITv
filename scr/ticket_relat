@@ -7,5 +7,5 @@ progdir=$(dirname $(readlink -f $0))
 tmpfile=$progdir"/../html/csv/ticket_relat.csv"
 
 
-dbcon $progdir/../bin/ticket_relat.sql > $tmpfile
+$progdir/../bin/dbcon $progdir/../bin/ticket_relat.sql > $tmpfile
 sed -i -e 's/\r//g' -e 's/\\n/ /g' $tmpfile

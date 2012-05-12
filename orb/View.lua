@@ -136,7 +136,6 @@ local entity_script2 = [[
 
 
 
---function render_layout(header, inner_html, refresh_time)
 function render_layout(inner_html, refresh_time)
    local refresh = {}
    if type(tonumber(refresh_time)) == "number" then

@@ -1,0 +1,7 @@
+#!/usr/bin/env wsapi.cgi
+
+require "init"
+
+return ITvision
+
+
