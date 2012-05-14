@@ -762,6 +762,51 @@ function select_ok_warning_critical_unknown(name, default)
    return select_option(name, OkOrWarningOrCritialOrUnknown, "id", "name", default)
 end
 
+-- Meses do ano 
+Months = {
+   { id = 1, name = strings.jan },
+   { id = 2, name = strings.fev },
+   { id = 3, name = strings.mar },
+   { id = 4, name = strings.apr },
+   { id = 5, name = strings.may },
+   { id = 6, name = strings.jun },
+   { id = 7, name = strings.jul },
+   { id = 8, name = strings.aug },
+   { id = 9, name = strings.sep },
+   { id = 10, name = strings.oct },
+   { id = 11, name = strings.nov },
+   { id = 12, name = strings.dec },
+}
+
+function name_months(id)
+   return choose_name(Months, tonumber(id))
+end
+
+function select_months(name, default)
+   return select_option(name, Months, "id", "name", default)
+end
+
+-- Anos - Deve ser funcao para atualizacoa automática do ano corrente
+function Years()
+   local years = {}
+   local now = tonumber(os.date("%Y"))
+
+   for i = 1,4 do
+      year = now - i + 1
+      table.insert(years,{ id = year, name = tostring(year)})
+   end
+
+   return years
+end
+
+function name_years(id)
+   return choose_name(Years(), tonumber(id))
+end
+
+function select_years(name, default)
+   return select_option(name, Years(), "id", "name", default)
+end
+
 
 function choose_name(opts, id, is_entity)
    for _, v in ipairs(opts) do

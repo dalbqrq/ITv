@@ -63,8 +63,8 @@ function update(web, id)
       local tables = "itvision_app_relat_types"
       local clause = "id = "..id
       --A:new()
-      A.name = web.input.name
-      A.type = web.input.type
+      A.year  = web.input.year
+      A.month = web.input.month
 
       Model.update (tables, A, clause) 
    end
@@ -192,7 +192,10 @@ function render_show(web, A)
    res[#res + 1] = p{ br(), br() }
 ]]
 
+   res[#res+1] = render_resume(web)
+
    if A then
+      web.prefix = "/orb/app_relat_types"
       render_content_header(auth, "Tipo de Relacionamento", web:link("/add"), web:link("/list"))
       res[#res + 1] = { H("table") { border="0", class="tab_cadrehov",
          tbody{
@@ -201,6 +204,7 @@ function render_show(web, A)
          }
       } }
    else
+      web.prefix = "/orb/app_relat_types"
       res = { error_message(3),
          p(),
          a{ href= web:link("/list"), strings.list}, " ",

@@ -174,12 +174,13 @@ end
 
 -- Transform an array of strings into CSV 
 function toCSV (t, sep)
-   sep = sep or ','     -- ny default, use 'semi-colon' (,) as field delimiter instead of 'comma' (;)
+   sep = sep or ';'     -- my default, use 'semi-colon' (,) as field delimiter instead of 'comma' (;)
    local s = ""
    local p
 
    for _,p in pairs(t) do
-      s = s .. sep .. escapeCSV(p, sep)
+      --s = s .. sep .. escapeCSV(p, sep)
+      s = s .. sep ..'"'.. p ..'"'
    end
    return string.sub(s, 2)      -- remove first comma
 end
@@ -276,7 +277,7 @@ function line_writer(filename, table_of_tables)
    f = io.open(filename, 'a')
    -- Append each table in CSV format to the file
    for _, v in ipairs(table_of_tables) do
-      f:write(toCSV(v))
+      f:write(toCSV(v,";"))
    end
    f:close()
 

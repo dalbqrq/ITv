@@ -91,6 +91,21 @@ strgs.pt_BR = {
 	networkequipment = "Equipamento de rede",
 	informations = "Informações",
 	checkcommand = "Comando de Checagem",
+	month = "Mês",
+	jan = "Janeiro",
+	fev = "Fevereiro",
+	mar = "Março",
+	apr = "Abril",
+	may = "Maio",
+	jun = "Junho",
+	jul = "Julho",
+	aug = "agosto",
+	sep = "Setembro",
+	oct = "Outubro",
+	nov = "Novembro",
+	dec = "Dezembro",
+	year = "Ano",
+
 
 }
 
@@ -182,6 +197,20 @@ strgs.us = {
 	networkequipment = "Network Equipment",
 	informations = "Informations",
 	checkcommand = "Check command",
+	month = "Month",
+	jan = "January",
+	fev = "February",
+	mar = "March",
+	apr = "April",
+	may = "May",
+	jun = "June",
+	jul = "July",
+	aug = "August",
+	sep = "September",
+	oct = "October",
+	nov = "November",
+	dec = "December",
+	year = "Year",
 }
 
 
