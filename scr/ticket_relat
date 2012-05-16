@@ -3,9 +3,17 @@
 progdir=$(dirname $(readlink -f $0))
 . $progdir/../bin/dbconf
 
-#d=`date "+%Y-%m-%d"`
-tmpfile=$progdir"/../html/csv/ticket_relat.csv"
+outfile=$progdir"/../html/csv/ticket_relat.csv"
+tmpfile="/tmp/ticket_relat.csv"
+sqlfile="/tmp/ticket_relat.sql"
 
 
-$progdir/../bin/dbcon $progdir/../bin/ticket_relat.sql > $tmpfile
+$progdir/../bin/dbcon $sqlfile > $tmpfile
 sed -i -e 's/\r//g' -e 's/\\n/ /g' $tmpfile
+# Extrai o cabeçalho (como sao várias queries são vários os cabeçalhos e por isso o 'uniq'
+grep ticketsolutiontype_name $tmpfile |uniq > $outfile
+# Retira os cabeçalhos e colocatodo o resto no arquivo final
+grep -v ticketsolutiontype_name $tmpfile >> $outfile
+
+#\rm -f $tmpfile $sqlfile
+

@@ -685,7 +685,7 @@ function render_list(web, ics, chk, msg)
    local row, res, link_add_host, link_del_host, link_add_serv, url = {}, {}, "", "", nil
 
    local header = { -- sem o nome do comando 'chk'. Só que agora o alias aparece como o 'Comando' na tabela
-      "Dispositivo", "IP", "Status", strings.type, strings.command, ".","Ação"
+      "Dispositivo", "IP", "Status", strings.type, strings.command, "Ação"
    }
 
    for i, v in ipairs(ics) do
@@ -769,13 +769,15 @@ function render_list(web, ics, chk, msg)
          status=nil
       end
 
+--[[ AS imagens abaixo irão substituir os link em texto usado para editar, remover e acicionar..."
       imgs = { a{ href="#", title="Editar", img{src="/pics/pencil.png", height="20px"}}, " ", 
-               a{ href="#", title="Editar", img{src="/pics/plus.png",   height="20ps"}}, " ", 
-               a{ href="#", title="Editar", img{src="/pics/trash.png",  height="20ps"}}, " ", 
+               a{ href="#", title="Adicionar", img{src="/pics/plus.png",   height="20ps"}}, " ", 
+               a{ href="#", title="Remover", img{src="/pics/trash.png",  height="20ps"}}, " ", 
       }
+]]
 
       -- com nome do comando de checagem
-      row[#row + 1] = { status=status, name, ip, statename, itemtype, m_name, link_add_host, imgs } 
+      row[#row + 1] = { status=status, name, ip, statename, itemtype, m_name, link_add_host } 
 
       -- se o nome do comando é o HOST_ALIVE, deve-se abrir a opcao para a criacao de mais um servico
       if ( m_name == config.monitor.check_host ) then 

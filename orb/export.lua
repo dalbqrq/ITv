@@ -35,8 +35,6 @@ function tickets(web)
    if tonumber(web.input.month) < 10 then web.input.month = "0"..web.input.month end
    local clause = " and t.entities_id in "..Auth.make_entity_clause(auth)
                 .." and t.date like '"..web.input.year.."-"..web.input.month.."%'"
-         --clause =  " U.date like \'"..web.input.year.."-"..web.input.month.."%\'"
-         --clause = ""
 
    local tkts = select_tickets(clause)
 
@@ -66,7 +64,7 @@ function render_show(web)
    local month, year = tonumber(os.date("%m")) - 1, tonumber(os.date("%Y"))
    if month == 0 then month = 12; year = year - 1 end
    local inc = {
-      "LISTAGEM DE TICKETS | ",
+      "LISTAGEM DE TICKETS | Abertos em: ",
       strings.month..": ", select_months("month", month),  " ",
       strings.year..": ", select_years("year", year),  " ",
    }
@@ -77,28 +75,16 @@ end
 
 
 function render_tickets(web, tkts, clause)
-   --os.capture("/usr/local/itvision/scr/ticket_relat")
    local res = {}
    local filename = "/ticket_relat.csv"
    web.prefix = "/csv"
 
---[[
-   for _,v in ipairs(tkts) do
-      table.insert(res, toCSV(v,";"))
-      --table.insert(res, v)
-   end
+   -- Codigo original:
+   os.capture(config.path.itvision.."/scr/ticket_relat")
 
-tkts = {
- { 1,2,3,4 },
- { 5,6,7,8 },
- { 9,0,9,8 },
- { 7,6,5,4 }
-}
-]]
-
-   --line_writer(config.path.itvision.."/html/csv/"..filename, { { tec = clause, n = #tkts } })
-   line_writer(config.path.itvision.."/html/csv/"..filename, tkts)
-
+   -- Código novo que nao funcionou pois retorna com problemas de mais de uma linha para a mesma
+   -- tupla e com as colunas fora de ordem e sem nome:
+   -- line_writer(config.path.itvision.."/html/csv/"..filename, tkts, "\t")
 
    return web:redirect(web:link(filename))
 end
