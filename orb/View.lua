@@ -871,7 +871,9 @@ function render_content_header(auth, name, add, list, edit, geotag, back)
       --DEBUG myul[#myul+1] = li{ Auth.make_entity_clause(auth) }
    end
 
-   return div{ id='menu_navigate', div { id='c_ssmenu2', ul{ myul } } }
+   local clock = div{ id="clock", os.date("[Status atualizado em: %H:%M:%S]") }
+
+   return div{ id='menu_navigate', div { id='c_ssmenu2', ul{ myul }, clock } }
 end
 
 

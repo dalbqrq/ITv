@@ -53,17 +53,18 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 function render_show(web)
    local auth = Auth.check(web)
    local permission = Auth.check_permission(web, "application")
+   local inc = {}
    local res = {}
    local tab = {}
+   local month, year = tonumber(os.date("%m")) - 1, tonumber(os.date("%Y"))
 
    res[#res+1] = render_resume(web)
 
    web.prefix = "/orb/export"
    res[#res+1] = render_content_header(auth, "Exportar Arquivos CSV ", nil, web:link("/show"))
 
-   local month, year = tonumber(os.date("%m")) - 1, tonumber(os.date("%Y"))
    if month == 0 then month = 12; year = year - 1 end
-   local inc = {
+   inc = {
       "LISTAGEM DE TICKETS | Abertos em: ",
       strings.month..": ", select_months("month", month),  " ",
       strings.year..": ", select_years("year", year),  " ",
