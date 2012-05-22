@@ -714,8 +714,8 @@ end
 HostOrServiceOrASubppOrSubEnt = {
    { id = "hst", name = strings.host },
    { id = "svc", name = strings.service},
-   { id = "app", name = "Sub-"..strings.application},
-   { id = "ent", name = "Sub-"..strings.entity},
+   { id = "app", name = strings.application},
+   { id = "ent", name = strings.entity.."(s) e Sub-"..strings.entity},
 }
 
 function name_hst_svc_subapp_subent(id, is_entity)
