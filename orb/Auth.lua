@@ -347,7 +347,7 @@ menu_itens = {
       submenu = {
       { name="Árvore", field="application", link="/orb/treeviz/show" },
       { name="Grafo", field="application", link="/orb/gviz/show" },
-      { name="Grade", field="application", link="/orb/app_grid/show" },
+      { name="Grade", field="application", link="/orb/app_grid/show/1:1" },
       { name="Lista", field="application", link="/orb/app_monitor/all:ent:0:-1" },
       { name="Aplicações", field="application", link="/orb/app" },
       { name="Checagem", field="checkcmds", link="/orb/probe" },
