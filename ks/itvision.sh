@@ -736,6 +736,7 @@ chmod u+s /sbin/reboot
 useradd -d /usr/local/servdesk/relatorios -c "Programacao Relatorios PHP" -g $dbuser relats
 cd /usr/local/servdesk/relatorios
 ln -s $itvhome/orb/relat_menu.lua
+chown -R relats /usr/local/servdesk/relatorios
 chmod g+w relats $itvhome/orb/relat_menu.lua
 
 echo ""
