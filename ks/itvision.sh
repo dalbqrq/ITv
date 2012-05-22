@@ -205,7 +205,7 @@ dbpass=itv
 dbname=$dbname
 EOF
 
-mkdir $itvhome/html/gv
+mkdir $itvhome/html/gv $itvhome/html/csv
 printf "html/gv\norb/config.lua\nbin/dbconf\nbin/lua_path\n" >> $itvhome/.git/info/exclude
 
 sed -i -e 's/ErrorLog \/var\/log\/apache2\/error.log/ErrorLog \/var\/log\/itvision\/apache2\/error.log/g' \
