@@ -733,7 +733,7 @@ chmod u+s /sbin/poweroff
 chmod u+s /sbin/reboot
 
 # Cria usuário para implementar relatorios em php para o servicedesk
-useradd -d /usr/local/servdesk/relatorios -c "Programacao Relatorios PHP" -g $dbname relats
+useradd -d /usr/local/servdesk/relatorios -c "Programacao Relatorios PHP" -g $dbuser relats
 cd /usr/local/servdesk/relatorios
 ln -s $itvhome/orb/relat_menu.lua
 chmod g+w relats $itvhome/orb/relat_menu.lua
