@@ -56,7 +56,7 @@ function render_login(web, login_error)
    web.prefix = "/servdesk"
    local url = web:link("/login.php")
 
-   res[#res + 1] = center{ img{ src="/pics/itv_logo.png", alt="ITVision", height=120, border=0 }, }
+   res[#res + 1] = center{ img{ src="/pics/itv_logo.png", alt="ITVision", height=180, border=0 }, }
 
    res[#res + 1] = form{
       name = "input",
