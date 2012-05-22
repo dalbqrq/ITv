@@ -732,7 +732,11 @@ chown -R $user.$user $itvhome/html/gv $itvhome/bin/dbconf $itvhome/bin/lua_path
 chmod u+s /sbin/poweroff
 chmod u+s /sbin/reboot
 
-
+# Cria usuário para implementar relatorios em php para o servicedesk
+useradd -d /usr/local/servdesk/relatorios -c "Programacao Relatorios PHP" -g $dbname relats
+cd /usr/local/servdesk/relatorios
+ln -s $itvhome/orb/relat_menu.lua
+chmod g+w relats $itvhome/orb/relat_menu.lua
 
 echo ""
 echo "======================================================================================="

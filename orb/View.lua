@@ -10,6 +10,7 @@ require "Model"
 require "Auth"
 require "messages"
 require "state"
+require "util"
 require "monitor_inc"
 
 module(Model.name, package.seeall, orbit.new)
@@ -831,6 +832,7 @@ end
 
 
 function render_content_header(auth, name, add, list, edit, geotag, back)
+   local clock = ""
    local myul = { li{ a{href='#', class='here', title="'"..name.."'", name} }, }
 
    --myul[#myul+1] = li{ "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" }
@@ -871,7 +873,8 @@ function render_content_header(auth, name, add, list, edit, geotag, back)
       --DEBUG myul[#myul+1] = li{ Auth.make_entity_clause(auth) }
    end
 
-   local clock = div{ id="clock", os.date("[Status atualizado em: %H:%M:%S]") }
+       clock = div{ id="clock", "[ "..os.week_pt(os.date("%w"))..", "..os.date("%d").." de "..
+                                  os.month_pt(os.date("%m"))..os.date(" - %H:%M:%S]") }
 
    return div{ id='menu_navigate', div { id='c_ssmenu2', ul{ myul }, clock } }
 end

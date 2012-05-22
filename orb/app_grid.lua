@@ -189,6 +189,7 @@ function render_show(web, app, entities, app_name, app_id, obj, rel, obj_id, app
    local lnkgeo, lnkedt  = nil, nil
    local refresh_time = 20
    local rec, notrec, sel = "", ":1", "checked"
+   local rec_checkbox = ""
 
    if not recursive then rec = ":1"; notrec=""; sel = "" end
 
@@ -207,10 +208,10 @@ function render_show(web, app, entities, app_name, app_id, obj, rel, obj_id, app
 
 
    res[#res+1] = render_resume(web)
-   res[#res+1] = render_content_header(auth, "Grade", nil, web:link("/show"))
    web.prefix = "/orb"
-   res[#res+1] = render_bar( { render_selector_bar(web, app, app_id, "/app_grid/show", notrec),
-           [[<p><input type="checkbox" onchange="location=']]..lnkrec..[[';" ]]..sel..[[> Visualização recursiva</p>]], 
+   res[#res+1] = render_content_header(auth, "Grade", nil, web:link("/app_grid/show/1:1"))
+   --rec_checkbox = [[<p><input type="checkbox" onchange="location=']]..lnkrec..[[';" ]]..sel..[[> Visualização recursiva</p>]]
+   res[#res+1] = render_bar( { render_selector_bar(web, app, app_id, "/app_grid/show", notrec), rec_checkbox,
            a{ href=lnkapp,  strings.status } ,
            a{ href=lnkgeo,  "Mapa" } ,
            a{ href=lnkedt,  strings.edit } ,

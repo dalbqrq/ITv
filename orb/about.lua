@@ -40,7 +40,7 @@ function render_list(web)
 
    local notes = string.gsub(description,"- ", "<br><br>-")
 
-   res = { res, div{ id="notes", b{"Release Notes"}, br(), br(), br(), notes, } }
+   res = { res, div{ id="notes", b{"Release Notes"}, br(), notes, } }
 
    return render_layout(res)
 end

@@ -1,11 +1,18 @@
-version = "1.0.1"
+version = "1.0.2"
 patch = 0
 
 
 description = [[
 
+<br><br><b> Versão 1.0.2 (21 de Maio de 2012) </b>
 
-<b> Versão 1.0.1 (11 de Maio de 2012) </b>
+- Relário é colocado e atualizado somente nas páginas que fazer refresh e apresentam status de aplicações.
+
+- Apresentação da tela de grade montrando todas a entidades de forma recursiva é agora o padrão e não há mais a opção do usuário alterar isso.
+
+- Incluido novo menu Relatórios e mecanismo para o desenvolvimento independente de páginas em php para este fim, com a possibilidade inclusive de se criar entradas no seu respectivo submenu.
+
+<br><br><b> Versão 1.0.1 (11 de Maio de 2012) </b>
 
 - Submenu de Monitor foi reordenado.
 

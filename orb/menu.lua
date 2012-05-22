@@ -44,7 +44,7 @@ function render_menu(web, item, subitem)
                      onClick="changePage('/orb/menu/0:0', '/orb/login/logout')", "Logout: "..auth.user_name } }
 
    -- Relogio
-   itens[#itens+1] = [[<div id="clock">]]..script{ type="text/javascript", src='/js/liveclock.js' }..[[</div>]]
+   --itens[#itens+1] = [[<div id="clock">]]..script{ type="text/javascript", src='/js/liveclock.js' }..[[</div>]]
 
    -- Menu secundário selecionado de acordo com o menu principal (submenu)
    for i,v in ipairs(menu_itens[item].submenu) do

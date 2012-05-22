@@ -326,6 +326,36 @@ function os.splittime(time_)
 end
 
 
+function os.week_pt(week)
+   local weeks = { "Domingo",
+                   "Segunda-feira",
+                   "Terça-feira", 
+                   "Quarta-feira", 
+                   "Quinta-feira", 
+                   "Sexta-feira", 
+                   "Sábado" }
+
+    return weeks[tonumber(week)]
+end
+
+
+function os.month_pt(month)
+   local months = { "Janeiro", 
+                    "Fevereiro", 
+                    "Março", 
+                    "Abril", 
+                    "Maio", 
+                    "Junho", 
+                    "Julho", 
+                    "Agosto", 
+                    "Setembro", 
+                    "Outubro", 
+                    "Novembro", 
+                    "Dezembro" }
+   return months[tonumber(month)]
+end
+
+
 function os.capture(cmd, raw)
 --DEBUG: text_file_writer("/tmp/cmd", cmd)
    local f = assert(io.popen(cmd, 'r'))

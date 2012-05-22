@@ -2,6 +2,7 @@ module("Auth", package.seeall)
 
 require "Glpi"
 require "App"
+require "relat_menu"
 
 -- COOKIES ------------------------------------------------------------------------------
 
@@ -361,8 +362,10 @@ menu_itens = {
       { name="Ticket", field=nil, link="/servdesk/front/ticket.php" },
       { name="Estatística", field=nil, link="/servdesk/front/stat.php" },
       { name="Exportar", field=nil, link="/orb/export/show" },
-      { name="Relatorios", field=nil, link="/servdesk/relatorios/index.php" },
       },
+   },
+   { name="Relatórios", link="#",
+      submenu = relat_menu.submenu,
    },
    { name="CMDB", link="#",
       submenu = {
