@@ -52,7 +52,7 @@ end
 -- controllers ---------------------------------------------------------
 
 
-function show(web, app_id, no_header)
+function show(web, app_id, recursive)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
 
@@ -78,7 +78,7 @@ function show(web, app_id, no_header)
    local obj_id = app[1].service_object_id
    local app_name = app[1].name
 
-   return render_show(web, all_apps, all_entities, app_name, app_id, obj, rel, obj_id, appobj, no_header)
+   return render_show(web, all_apps, all_entities, app_name, app_id, obj, rel, obj_id, appobj, recursive)
 end
 ITvision:dispatch_get(show,"/show", "/show/(%d+)", "/show/(%d+):(%d+)")
 
@@ -90,13 +90,43 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 
 -- views ------------------------------------------------------------
 
+function get_subobjects(O)
 
-function make_grid(web, O)
+   local res = {}
+
+   -- A lista de objetos "O" será percorrida 4 vezes, uma para cada tipo de objeto.
+   for i,v in ipairs(O) do
+      if v.ao_type == "app" and v.ax_is_entity_root and v.ax_is_entity_root == "1" then
+         obj = Monitor.select_monitors_app_objs(v.ax_id)
+         sub = get_subobjects(obj)
+         for _, o in ipairs(sub) do
+            -- faz recursao somente nas aplicacoes de entidades
+            if o.ao_type == "app" and o.ax_is_entity_root and o.ax_is_entity_root == "1" then
+            -- faz recursao somente da aplicacoes e aplicacoes de entidades
+            --if o.ao_type == "app" then 
+               table.insert(res, o)
+            end
+         end
+      end
+      table.insert(res, v)
+   end
+
+   return res
+
+end
+
+
+function make_grid(web, O, recursive)
    local res, row, col = {}, {}, {}
    local permission = Auth.check_permission(web, "application")
    local auth = Auth.check(web)
    local col_count = 1
-   local max_cols = 4
+   local max_cols = 5
+
+   if recursive then O = get_subobjects(O) end
+
+   local rec, notrec, sel = "", ":1", "checked"
+   if not recursive then rec = ":1"; notrec=""; sel = "" end
 
    web.prefix = "/orb/app_objects"
 
@@ -117,8 +147,12 @@ function make_grid(web, O)
                   obj = button_link(make_obj_name(find_hostname(v.c_alias, v.c_name, v.c_itv_key), v.m_name), url, "negative")
                else
                   obj = v.ax_name
-                  web.prefix = "/orb/app_tabs"
-                  obj = button_link(obj, web:link("/list/"..v.ax_id..":"..tab_id), "negative")
+                  -- Navega para a apresentacao do detalhe da aplicacao/entidade 
+                  --web.prefix = "/orb/app_tabs"
+                  --obj = button_link(obj, web:link("/list/"..v.ax_id..":"..tab_id), "negative")
+                  -- Navega para a apresentacao em grid da aplicacao/entidade 
+                  web.prefix = "/orb/app_grid"
+                  obj = button_link(obj, web:link("/show/"..v.ax_id..notrec), "negative")
                end
       
                col[#col+1] = { value=obj, state=v.ss_current_state }
@@ -151,12 +185,16 @@ function make_grid(web, O)
 end
 
 
-function render_show(web, app, entities, app_name, app_id, obj, rel, obj_id, appobj, no_header)
+function render_show(web, app, entities, app_name, app_id, obj, rel, obj_id, appobj, recursive)
    local auth = Auth.check(web)
    local permission = Auth.check_permission(web, "application")
    local res = {}
    local lnkgeo, lnkedt  = nil, nil
    local refresh_time = 20
+   local rec, notrec, sel = "", ":1", "checked"
+   local rec_checkbox = ""
+
+   if not recursive then rec = ":1"; notrec=""; sel = "" end
 
    if obj_id then 
       web.prefix = "/orb/obj_info"
@@ -166,21 +204,24 @@ function render_show(web, app, entities, app_name, app_id, obj, rel, obj_id, app
       lnkedt = web:link("/list/"..app_id..":2") 
       web.prefix = "/orb/app_monitor"
       lnklst = web:link("/all:all:"..app_id..":-1") 
+      web.prefix = "/orb/app_grid"
+      lnkrec = web:link("/show/"..app_id..rec) 
    end
    web.prefix = "/orb"
 
 
    res[#res+1] = render_resume(web)
-   res[#res+1] = render_content_header(auth, "Grade", nil, web:link("/show"))
    web.prefix = "/orb"
-   res[#res+1] = render_bar( { render_selector_bar(web, app, app_id, "/app_grid/show"),
+   res[#res+1] = render_content_header(auth, "Grade", nil, web:link("/app_grid/show/1:1"))
+   --rec_checkbox = [[<p><input type="checkbox" onchange="location=']]..lnkrec..[[';" ]]..sel..[[> Visualização recursiva</p>]]
+   res[#res+1] = render_bar( { render_selector_bar(web, app, app_id, "/app_grid/show/1:1", notrec), rec_checkbox,
            a{ href=lnkapp,  strings.status } ,
            a{ href=lnkgeo,  "Mapa" } ,
            a{ href=lnkedt,  strings.edit } ,
            a{ href=lnklst,  strings.list } ,
          } )
 
-   res[#res+1] = make_grid(web, obj)
+   res[#res+1] = make_grid(web, obj, recursive)
    res[#res+1] = { br(), br(), br(), br() }
 
 

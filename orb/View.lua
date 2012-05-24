@@ -10,6 +10,7 @@ require "Model"
 require "Auth"
 require "messages"
 require "state"
+require "util"
 require "monitor_inc"
 
 module(Model.name, package.seeall, orbit.new)
@@ -98,7 +99,7 @@ function render_menu_frame(inner_html)
          script{ type="text/javascript", change_script },
       },
 
-      body{
+      body{ onLoad="show_clock()",  -- show_clock() é uma funcao do do código javascript liveclock.js
          div{ id="header", header_imgs, inner_html }
       }
    }
@@ -136,7 +137,6 @@ local entity_script2 = [[
 
 
 
---function render_layout(header, inner_html, refresh_time)
 function render_layout(inner_html, refresh_time)
    local refresh = {}
    if type(tonumber(refresh_time)) == "number" then
@@ -153,6 +153,7 @@ function render_layout(inner_html, refresh_time)
          refresh, {"\n"},
 
          --link{ rel='stylesheet', type='text/css', media='screen', href="/css/style.css" }, {"\n"},
+         link{ href="/css/style.css", media="screen", rel="stylesheet", type="text/css" },
          link{ rel='stylesheet', type='text/css', media='screen', href="/servdesk/css/styles.css" }, {"\n"},
          link{ rel='stylesheet', type='text/css', media='print',  href='/servdesk/css/print.css' }, {"\n"},
          link{ rel="shortcut icon", href="/pics/favicon.ico" }, {"\n"},
@@ -371,7 +372,15 @@ function render_table(t, h, class)
       col = {}
    end
 
-   return H("table") { border="0", class=class, thead{ hea }, tbody{ row } }
+   local res
+
+   if h then
+      res = H("table") { border="0", class=class, thead{ hea }, tbody{ row } }
+   else
+      res = H("table") { border="0", class=class, tbody{ row } }
+   end
+
+   return res
 end
 
 
@@ -427,18 +436,18 @@ function render_form_bar(form_content, button_name, url_post, url_reset)
 end
 
 
-function render_selector_bar(web, A, id, path)
+function render_selector_bar(web, A, id, path, params)
    local url = ""
    local res = {}
    local selected = ""
-   local curr_app = 0
    id = id or -1
 
+   params = params or ""
+
    for i, v in ipairs(A) do
-      url = web:link(path.."/"..v.id)
+      url = web:link(path.."/"..v.id..params)
       if tonumber(v.id) == tonumber(id) then
          selected = "selected"
-         curr_app = i
       else
          selected = nil
       end
@@ -732,8 +741,8 @@ end
 HostOrServiceOrASubppOrSubEnt = {
    { id = "hst", name = strings.host },
    { id = "svc", name = strings.service},
-   { id = "app", name = "Sub-"..strings.application},
-   { id = "ent", name = "Sub-"..strings.entity},
+   { id = "app", name = strings.application},
+   { id = "ent", name = strings.entity.."(s) e Sub-"..strings.entity},
 }
 
 function name_hst_svc_subapp_subent(id, is_entity)
@@ -781,6 +790,51 @@ function select_ok_warning_critical_unknown(name, default)
    return select_option(name, OkOrWarningOrCritialOrUnknown, "id", "name", default)
 end
 
+-- Meses do ano 
+Months = {
+   { id = 1, name = strings.jan },
+   { id = 2, name = strings.fev },
+   { id = 3, name = strings.mar },
+   { id = 4, name = strings.apr },
+   { id = 5, name = strings.may },
+   { id = 6, name = strings.jun },
+   { id = 7, name = strings.jul },
+   { id = 8, name = strings.aug },
+   { id = 9, name = strings.sep },
+   { id = 10, name = strings.oct },
+   { id = 11, name = strings.nov },
+   { id = 12, name = strings.dec },
+}
+
+function name_months(id)
+   return choose_name(Months, tonumber(id))
+end
+
+function select_months(name, default)
+   return select_option(name, Months, "id", "name", default)
+end
+
+-- Anos - Deve ser funcao para atualizacoa automática do ano corrente
+function Years()
+   local years = {}
+   local now = tonumber(os.date("%Y"))
+
+   for i = 1,4 do
+      year = now - i + 1
+      table.insert(years,{ id = year, name = tostring(year)})
+   end
+
+   return years
+end
+
+function name_years(id)
+   return choose_name(Years(), tonumber(id))
+end
+
+function select_years(name, default)
+   return select_option(name, Years(), "id", "name", default)
+end
+
 
 function choose_name(opts, id, is_entity)
    for _, v in ipairs(opts) do
@@ -798,16 +852,17 @@ end
 
 
 function render_title(name)
-   local myul = { li{ a{href='#', class='here', title="'"..name.."'", name} }, }
-   --local myul = name
+   local myul = { li{ a{href='#', class='there', title="'"..name.."'", name} } }
+   --local myul = { div{ id='subtitle', li{ name }}}
    return div{ id='menu_navigate', div { id='c_ssmenu2', ul{ myul } } }
 end
 
 
 function render_content_header(auth, name, add, list, edit, geotag, back)
+   local clock = ""
    local myul = { li{ a{href='#', class='here', title="'"..name.."'", name} }, }
 
-   myul[#myul+1] = li{ "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" }
+   --myul[#myul+1] = li{ "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" }
 
    if add then
       myul[#myul+1] = li{ a{ href=add, img{ src='/servdesk/pics/menu_add.png', title='Adicionar', alt='Adicionar'} } }
@@ -845,7 +900,10 @@ function render_content_header(auth, name, add, list, edit, geotag, back)
       --DEBUG myul[#myul+1] = li{ Auth.make_entity_clause(auth) }
    end
 
-   return div{ id='menu_navigate', div { id='c_ssmenu2', ul{ myul } } }
+       clock = div{ id="clock", "[ "..os.week_pt(os.date("%w"))..", "..os.date("%d").." de "..
+                                  os.month_pt(os.date("%m"))..os.date(" - %H:%M:%S]") }
+
+   return div{ id='menu_navigate', div { id='c_ssmenu2', ul{ myul }, clock } }
 end
 
 

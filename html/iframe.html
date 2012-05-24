@@ -7,15 +7,12 @@
 <head>
 <title>ITvision</title>
 </head>
-<frameset rows="95,*" frameborder="0" border="0" framespacing="0">
-
-	<frame name="headFrame" src="orb/menu/1:3"  marginheight="0" marginwidth="0" scrolling="no" noresize>
-	<frame name="bodyFrame" src="orb/app_grid/show/1:1" marginheight="0" marginwidth="0" scrolling="yes" resize>
-
-	<noframes>
-		<p>ITvision - Este browser na&tilde;o suporta o uso de frames!</p>
-	</noframes>
-
-</frameset>
+<body>
+<style> * { width: 100px; height:40px } </style>
+<ol>
+  <li><iframe id="iframe_head" src="http://itv5/orb/menu/1:3" scrolling="no"></iframe></li>
+  <li><iframe id="iframe_body" src="/orb/about" scrolling="no"></iframe></li>
+</ol>
+</body>
 </html>
 

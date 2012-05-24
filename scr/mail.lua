@@ -1,3 +1,8 @@
+--[[
+
+mail[.sh,.lua] é o wrapper para realizar chamadas de envio de email 
+
+]]
 require "Model"
 require "Monitor"
 require "monitor_inc"

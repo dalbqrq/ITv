@@ -1,4 +1,5 @@
 require "Model"
+require "Auth"
 require "messages"
 require "state"
 require "monitor_inc"
@@ -29,7 +30,7 @@ function print_result(res)
    print("=============================")
 end
 
-function count_hosts()
+function count_hosts(clause)
    local res = {}
 
 -- COMPUTERS HABILITADOS
@@ -48,7 +49,8 @@ function count_hosts()
        and o.name2 = ']]..config.monitor.check_host..[[' and o.objecttype_id = 2 and o.is_active = 1
        and m.service_object_id = o.object_id
        and m.networkports_id = p.id and p.items_id = c.id and p.itemtype = 'Computer'
-       and c.is_deleted = 0 and c.is_template = 0 and c.states_id = 1]]
+       and c.is_deleted = 0 and c.is_template = 0 and c.states_id = 1
+       and p.entities_id in ]]..clause
    e = [[group by ss.current_state]]
    q = Model.query(t, r, e, c)
 --[[DEBUG
@@ -74,7 +76,8 @@ function count_hosts()
        and o.name2 = ']]..config.monitor.check_host..[[' and o.objecttype_id = 2 and o.is_active = 1
        and m.service_object_id = o.object_id
        and m.networkports_id = p.id and p.items_id = c.id and p.itemtype = 'NetworkEquipment'
-       and c.is_deleted = 0 and c.is_template = 0 and c.states_id = 1]]
+       and c.is_deleted = 0 and c.is_template = 0 and c.states_id = 1
+       and p.entities_id in ]]..clause
    e = [[group by ss.current_state]]
    q2 = Model.query(t, r, e, c)
 
@@ -93,7 +96,8 @@ function count_hosts()
        and o.name2 = ']]..config.monitor.check_host..[[' and o.objecttype_id = 2 and o.is_active = 1
        and m.service_object_id = o.object_id
        and m.networkports_id = p.id and p.items_id = c.id and p.itemtype = 'Computer'
-       and c.is_deleted = 0 and c.is_template = 0 and c.states_id = 1]]
+       and c.is_deleted = 0 and c.is_template = 0 and c.states_id = 1
+       and p.entities_id in ]]..clause
    e = nil
    q3 = Model.query(t, r, e, c)
    
@@ -112,7 +116,8 @@ function count_hosts()
        and o.name2 = ']]..config.monitor.check_host..[[' and o.objecttype_id = 2 and o.is_active = 1
        and m.service_object_id = o.object_id
        and m.networkports_id = p.id and p.items_id = c.id and p.itemtype = 'NetworkEquipment'
-       and c.is_deleted = 0 and c.is_template = 0 and c.states_id = 1]]
+       and c.is_deleted = 0 and c.is_template = 0 and c.states_id = 1
+       and p.entities_id in ]]..clause
    e = nil
    q4 = Model.query(t, r, e, c)
 
@@ -125,7 +130,7 @@ function count_hosts()
 end
 
 
-function count_services()
+function count_services(clause)
    local res = {}
 
 --SERVICES HABILITADOS
@@ -137,10 +142,11 @@ function count_services()
    group by ss.current_state;]]
 
    c = [[count(*) as count, ss.current_state as state]]
-   t = [[nagios_servicestatus ss, nagios_objects o, itvision_monitors m]]
-   r = [[ss.service_object_id = o.object_id and ss.active_checks_enabled = 1
+   t = [[nagios_servicestatus ss, nagios_objects o, itvision_monitors m, glpi_networkports n]]
+   r = [[ss.service_object_id = o.object_id and ss.active_checks_enabled = 1 and m.networkports_id = n.id
        and o.name2 <> ']]..config.monitor.check_host..[[' and o.name1 <> ']]..config.monitor.check_app..[[' and o.objecttype_id = 2
-       and o.is_active = 1 and o.name1 <> 'dummy' and m.service_object_id = ss.service_object_id]]
+       and o.is_active = 1 and o.name1 <> 'dummy' and m.service_object_id = ss.service_object_id
+       and n.entities_id in ]]..clause
    e = [[group by ss.current_state]]
    q = Model.query(t, r, e, c)
 
@@ -153,8 +159,8 @@ function count_services()
        and o.is_active = 1 and o.name1 <> 'dummy']]
 
    c = [[count(*) as count, 5 as state]]
-   t = [[nagios_servicestatus ss, nagios_objects o, itvision_monitors m]]
-   r = [[ss.service_object_id = o.object_id and ss.active_checks_enabled = 0
+   t = [[nagios_servicestatus ss, nagios_objects o, itvision_monitors m , glpi_networkports n]]
+   r = [[ss.service_object_id = o.object_id and ss.active_checks_enabled = 0 and m.networkports_id = n.id
        and o.name2 <> ']]..config.monitor.check_host..[[' and o.name1 <> ']]..config.monitor.check_app..[[' and o.objecttype_id = 2
        and o.is_active = 1 and o.name1 <> 'dummy' and m.service_object_id = ss.service_object_id]]
    e = nil
@@ -166,7 +172,7 @@ function count_services()
 end
 
 
-function count_apps()
+function count_apps(clause)
    local res = {}
 
    --[[select count(*), ss.current_state 
@@ -182,7 +188,8 @@ function count_apps()
    r = [[ss.service_object_id = o.object_id
        and o.name1 = ']]..config.monitor.check_app..[[' and o.objecttype_id = 2
        and o.object_id = a.service_object_id and o.is_active = 1
-       and a.is_entity_root = 0]]
+       and a.is_entity_root = 0
+       and a.entities_id in ]]..clause
    e = [[group by ss.current_state]]
    q = Model.query(t, r, e, c)
 
@@ -191,7 +198,7 @@ function count_apps()
 end
 
 
-function count_entities()
+function count_entities(clause)
    local res = {}
 
    --[[select count(*), ss.current_state 
@@ -207,7 +214,8 @@ function count_entities()
    r = [[ss.service_object_id = o.object_id
        and o.name1 = ']]..config.monitor.check_app..[[' and o.objecttype_id = 2
        and o.object_id = a.service_object_id
-       and a.is_entity_root = 1]]
+       and a.is_entity_root = 1
+       and a.entities_id in ]]..clause
    e = [[group by ss.current_state]]
    q = Model.query(t, r, e, c)
 
@@ -217,6 +225,11 @@ end
 
 
 function render_resume(web)
+   local auth = Auth.check(web)
+   if not auth then return Auth.redirect(web) end
+   local clause = Auth.make_entity_clause(auth)
+
+
    local row = {}
    local col = {}
    local hea = {}
@@ -228,10 +241,10 @@ function render_resume(web)
    local class = "tab_resume"
    local counts = counter()
 
-   local h = count_hosts()
-   local s = count_services()
-   local a = count_apps()
-   local e = count_entities()
+   local h = count_hosts(clause)
+   local s = count_services(clause)
+   local a = count_apps(clause)
+   local e = count_entities(clause)
    local white = "#FFFFFF"
 
    web.prefix = "/orb/app_monitor"

@@ -2,6 +2,7 @@ module("Auth", package.seeall)
 
 require "Glpi"
 require "App"
+require "relat_menu"
 
 -- COOKIES ------------------------------------------------------------------------------
 
@@ -344,10 +345,10 @@ end
 menu_itens = {
    { name="Monitor", link="#",
       submenu = {
-      { name="Grade", field="application", link="/orb/app_grid/show" },
-      { name="Grafo", field="application", link="/orb/gviz/show" },
-      { name="Lista", field="application", link="/orb/app_monitor" },
       { name="Árvore", field="application", link="/orb/treeviz/show" },
+      { name="Grafo", field="application", link="/orb/gviz/show" },
+      { name="Grade", field="application", link="/orb/app_grid/show/1:1" },
+      { name="Lista", field="application", link="/orb/app_monitor/all:ent:0:-1" },
       { name="Aplicações", field="application", link="/orb/app" },
       { name="Checagem", field="checkcmds", link="/orb/probe" },
       { name="Tipo de Relacionamento", field="app_relat_type", link="/orb/app_relat_types" },
@@ -361,9 +362,10 @@ menu_itens = {
       { name="Ticket", field=nil, link="/servdesk/front/ticket.php" },
       { name="Estatística", field=nil, link="/servdesk/front/stat.php" },
       { name="Exportar", field=nil, link="/orb/export/show" },
-      { name="Relatorios", field=nil, link="/servdesk/relatorios/index.php" },
-      { name="Exporta Relatorios", field=nil, link="/orb/relat_ticket/add" },
       },
+   },
+   { name="Relatórios", link="#",
+      submenu = relat_menu.submenu,
    },
    { name="CMDB", link="#",
       submenu = {

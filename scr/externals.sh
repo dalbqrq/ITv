@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# externals[.sh,.lua] é o wrapper para que o glpi realize chamadas no itvision.
+#
 
 PROGDIR=$(dirname $(readlink -f $0))
 

@@ -206,11 +206,11 @@ function make_app_objects_table(web, A)
 
          obj = tag..v.ax_name
          web.prefix = "/orb/app_tabs"
-         obj = button_link(obj, web:link("/list/"..v.a_id..":"..tab_id), "negative")
+         obj = button_link(obj, web:link("/list/"..v.ax_id..":"..tab_id), "negative")
       end
       web.prefix = "/orb/app_objects"
 
-      if permission == "w" and v.app_type_id ~= "1" then
+      if permission == "w" and v.app_type_id ~= "1" and is_ent ~= 1 then
          remove_button = button_link(strings.remove, web:link("/delete_obj/"..v.a_id..":"..v.o_object_id), "negative")
       else
          remove_button = { "-" }

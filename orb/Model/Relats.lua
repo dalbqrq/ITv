@@ -3,10 +3,9 @@ module("Relats", package.seeall)
 require "Model"
 
 
-function select_tickets()
+function select_tickets(clause)
 
    local tables_  = [[  
-
       
       (
             select 
@@ -74,6 +73,7 @@ function select_tickets()
             t.ticketsolutiontypes_id = ts.id and
             t.itemtype = 'NetworkEquipment' and
             t.items_id = i.id
+            ]]..clause..[[
             
             union
             
@@ -142,6 +142,7 @@ function select_tickets()
             t.ticketsolutiontypes_id = ts.id and
             t.itemtype = 'Computer' and
             t.items_id = i.id
+            ]]..clause..[[
             
             union
             
@@ -210,6 +211,7 @@ function select_tickets()
             t.ticketsolutiontypes_id = ts.id and
             t.itemtype = 'Peripheral' and
             t.items_id = i.id
+            ]]..clause..[[
             
             
             union
@@ -279,6 +281,7 @@ function select_tickets()
             t.ticketsolutiontypes_id = ts.id and
             t.itemtype = 'Phone' and
             t.items_id = i.id
+            ]]..clause..[[
             
             
             union
@@ -346,16 +349,18 @@ function select_tickets()
             t.ticketcategories_id = tc.id and
             t.ticketsolutiontypes_id = ts.id and
             t.itemtype = ''
+            ]]..clause..[[
             
             ) as U
 
    ]]
 
-   --local tables_ = [[ glpi_tickets ]]
-            
    local cond_  = nil
    local extra_ = [[ order by U.id ]]
-   --local columns_  = "*"
+
+   -- Codigo antigo agora tendo a query gerada dinamicamente com a restricao (clause) de entidade e data:
+   --text_file_writer("/tmp/ticket_relat.sql", "SET NAMES 'utf8';select * from "..tables_..extra_..";")
+   text_file_writer("/tmp/ticket_relat.sql", "select * from "..tables_..extra_..";")
 
    return Model.query(tables_, cond_, extra_, columns_)
 

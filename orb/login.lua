@@ -49,13 +49,14 @@ function render_login(web, login_error)
 
    if Auth.is_logged_at_glpi(web) then
       web.prefix = "/"
+      --return web:redirect(web:link("iframe.html"))
       return web:redirect(web:link("login.html"))
    end
 
    web.prefix = "/servdesk"
    local url = web:link("/login.php")
 
-   res[#res + 1] = center{ img{ src="/pics/itv_logo.png", alt="ITVision", border=0 }, }
+   res[#res + 1] = center{ img{ src="/pics/itv_logo.png", alt="ITVision", height=180, border=0 }, }
 
    res[#res + 1] = form{
       name = "input",
@@ -64,16 +65,10 @@ function render_login(web, login_error)
 
       strings.login..": ", input{ type="text", name="login_name", value = nil }, " ", 
       strings.password..": ", input{ type="password", name="login_password", value = nil }, " ", 
-      --button_form(strings.send, "submit", "positive"),
       button_form(">", "submit", "positive"),
-      --button_form(strings.reset, "reset", "negative"),
    }
 
---[[
-   res[#res + 1] = center{ 
-     p{ br(), br(), br(), img{ src="/pics/logo_verto.jpg", alt="Verto",  height=34, border=0 }, br(), br(), }
-   }
-]]
+   --res[#res + 1] = center{ img{ src="/pics/VideoWall.jpeg", alt="VideoWall", height=400, border=0 }, }
 
    if login_error then res[#res + 1] = p{ font{ color="red", error_message(13) }, br()  } end
 

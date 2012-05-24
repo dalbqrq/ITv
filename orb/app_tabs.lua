@@ -1,8 +1,9 @@
 #!/usr/bin/env wsapi.cgi
 
 -- includes & defs ------------------------------------------------------
-require "Model"
 require "Auth"
+require "Model"
+require "Resume"
 require "View"
 require "util"
 
@@ -107,8 +108,9 @@ function render_list(web, app_id, active_tab, no_menu, msg)
 
    local res = {}
    web.prefix = "/orb/app"
-   --res[#res+1] = render_content_header(auth, strings.application, web:link("/add"), web:link("/list"))
+
    if no_menu == false then
+      res[#res+1] = render_resume(web)
       res[#res+1] = render_content_header(auth.session.glpiactive_entity_shortname, strings.application, web:link("/add"), web:link("/list"))
    end
 

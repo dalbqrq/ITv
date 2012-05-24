@@ -205,8 +205,8 @@ dbpass=itv
 dbname=$dbname
 EOF
 
-mkdir $itvhome/html/gv
-printf "html/gv\norb/config.lua\nbin/dbconf\nbin/lua_path\n" >> $itvhome/.git/info/exclude
+mkdir $itvhome/html/gv $itvhome/html/csv
+printf "html/gv\nhtml/csv\norb/config.lua\nbin/dbconf\nbin/lua_path\n" >> $itvhome/.git/info/exclude
 
 sed -i -e 's/ErrorLog \/var\/log\/apache2\/error.log/ErrorLog \/var\/log\/itvision\/apache2\/error.log/g' \
 	-e 's/CustomLog \/var\/log\/apache2\/other_vhosts_access.log/CustomLog \/var\/log\/itvision\/apache2\/other_vhosts_access.log/g' /etc/apache2/apache2.conf
@@ -732,7 +732,12 @@ chown -R $user.$user $itvhome/html/gv $itvhome/bin/dbconf $itvhome/bin/lua_path
 chmod u+s /sbin/poweroff
 chmod u+s /sbin/reboot
 
-
+# Cria usuário para implementar relatorios em php para o servicedesk
+useradd -d /usr/local/servdesk/relatorios -c "Programacao Relatorios PHP" -g $dbuser relats
+cd /usr/local/servdesk/relatorios
+ln -s $itvhome/orb/relat_menu.lua
+chown -R relats /usr/local/servdesk/relatorios
+chmod g+w relats $itvhome/orb/relat_menu.lua
 
 echo ""
 echo "======================================================================================="

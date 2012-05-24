@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# check_app.sh é o check_command utilizado pelo nagios para verificar o status de uma aplicacao.
+#
 
 PROGDIR=$(dirname $(readlink -f $0))
 

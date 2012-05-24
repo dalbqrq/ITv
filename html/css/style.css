@@ -19,3 +19,55 @@ body {
 	font-size: 35px;
 }
 
+#notes { 
+	width: 950px;
+	margin: 100 auto;
+	padding: 100;
+	position: relative; 
+	padding: 5px 0 0 0;
+        font-family: Verdana,Arial,Helvetica,sans-serif;
+	font-size: 12px;
+	text-align: left;
+	background: #c0c0c0;
+}
+
+#clock {
+        font-family: Verdana,Arial,Helvetica,sans-serif;
+	font-size:10px;
+	font-weight: bold;
+	color: #4E5763;
+	float: right;
+}
+
+#subtitle {
+        font-family: Verdana,Arial,Helvetica,sans-serif;
+	font-size:14px;
+}
+
+/* iframes */
+
+#iframe_head {
+	top:0;
+	width: 950px;
+	height: 104px;
+	background: #c0c0c0;
+}
+
+
+#iframe_body {
+	width: 950px;
+	height: 200px;
+	top:105;
+	background: #987434;
+} 
+
+iframe {
+  position: absolute;
+  border-top: 0px;
+  border-right: 0px;
+  border-left: 0px;
+  border-bottom: 0px;
+}
+
+
+

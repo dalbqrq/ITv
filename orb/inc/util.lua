@@ -174,12 +174,13 @@ end
 
 -- Transform an array of strings into CSV 
 function toCSV (t, sep)
-   sep = sep or ','     -- ny default, use 'semi-colon' (,) as field delimiter instead of 'comma' (;)
+   sep = sep or ','     -- my default, use 'semi-colon' (,) as field delimiter instead of 'comma' (;)
    local s = ""
    local p
 
    for _,p in pairs(t) do
-      s = s .. sep .. escapeCSV(p, sep)
+      --s = s .. sep .. escapeCSV(p, sep)
+      s = s .. sep .. p 
    end
    return string.sub(s, 2)      -- remove first comma
 end
@@ -268,7 +269,7 @@ function line_reader(filename)
 end
 
 
-function line_writer(filename, table_of_tables)
+function line_writer(filename, table_of_tables, sep)
    -- Empty file
    local f = io.open(filename, 'w')
    f:close()
@@ -276,7 +277,7 @@ function line_writer(filename, table_of_tables)
    f = io.open(filename, 'a')
    -- Append each table in CSV format to the file
    for _, v in ipairs(table_of_tables) do
-      f:write(toCSV(v))
+      f:write(toCSV(v,sep).."\n")
    end
    f:close()
 
@@ -322,6 +323,36 @@ function os.splittime(time_)
    S, _ = math.modf(S * 60)
 
    return D, H, M, S
+end
+
+
+function os.week_pt(week)
+   local weeks = { "Domingo",
+                   "Segunda-feira",
+                   "Terça-feira", 
+                   "Quarta-feira", 
+                   "Quinta-feira", 
+                   "Sexta-feira", 
+                   "Sábado" }
+
+    return weeks[tonumber(week)]
+end
+
+
+function os.month_pt(month)
+   local months = { "Janeiro", 
+                    "Fevereiro", 
+                    "Março", 
+                    "Abril", 
+                    "Maio", 
+                    "Junho", 
+                    "Julho", 
+                    "Agosto", 
+                    "Setembro", 
+                    "Outubro", 
+                    "Novembro", 
+                    "Dezembro" }
+   return months[tonumber(month)]
 end
 
 

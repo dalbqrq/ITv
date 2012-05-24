@@ -118,6 +118,7 @@ function info(web, tab, obj_id)
       local H = statehistory:select(obj_id)
       return render_history(web, obj_id, A, H)
    elseif tab == 3 then
+      local A = Monitor.make_query_4(nil, nil, nil, "m.service_object_id = "..obj_id)
       return render_cmdb(web, obj_id, A)
    elseif tab == 4 then
       return render_data(web, obj_id, A)
