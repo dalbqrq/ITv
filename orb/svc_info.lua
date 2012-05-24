@@ -52,7 +52,7 @@ function info(web, tab, obj_id)
 
    if tab == 1 then
       local APPS = Monitor.make_query_5(nil, 
-                      "ax.id in (select app_id from itvision_app_objects where service_object_id = "..obj_id..")", true) 
+         "ax.id in (select app_id from itvision_app_objects where service_object_id = "..obj_id..")", true) 
       local C = objects:select(A[1].s_check_command_object_id) --check_command
       return render_info(web, obj_id, A, C, APPS)
    elseif tab == 2 then
@@ -154,6 +154,30 @@ function render_info(web, obj_id, A, C, APPS)
    res[#res+1] = render_table( row, header )
    res[#res+1] = { br(), br() }
    
+
+   -- LINKS para CMDB e para CHECAGEM
+
+   local url
+   row = {}
+
+   web.prefix = "/servdesk"
+   if A[1].p_itemtype == "Computer" then
+      url = web:link("/front/computer.form.php?id="..A[1].c_id)
+   else
+      url = web:link("/front/networkequipment.form.php?id="..A[1].c_id)
+   end
+   local link_cmdb = center{  button_link("CMDB", url) }
+
+   web.prefix = "/orb/probe"
+   url = web:link("/update/3:"..A[1].c_id..":"..A[1].p_id..":0:0:"..obj_id..":0")
+   local link_probe = center{  button_link("Checagem", url) }
+
+
+   row[#row+1] = { link_cmdb, link_probe }
+   res[#res+1] = render_table( row )
+   res[#res+1] = { br(), br(), br() }
+
+
 
    -- APLICACOES
    row = {}

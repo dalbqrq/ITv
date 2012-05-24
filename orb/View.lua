@@ -99,7 +99,8 @@ function render_menu_frame(inner_html)
          script{ type="text/javascript", change_script },
       },
 
-      body{ onLoad="show_clock()",  -- show_clock() é uma funcao do do código javascript liveclock.js
+      --body{ onLoad="show_clock()",  -- show_clock() é uma funcao do do código javascript liveclock.js
+      body{ 
          div{ id="header", header_imgs, inner_html }
       }
    }

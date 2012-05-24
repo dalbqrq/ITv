@@ -206,7 +206,7 @@ dbname=$dbname
 EOF
 
 mkdir $itvhome/html/gv $itvhome/html/csv
-printf "html/gv\nhtml/csv\norb/config.lua\nbin/dbconf\nbin/lua_path\n" >> $itvhome/.git/info/exclude
+printf "html/gv\nhtml/csv\norb/config.lua\nbin/dbconf\nbin/lua_path\nscr/*.queue" >> $itvhome/.git/info/exclude
 
 sed -i -e 's/ErrorLog \/var\/log\/apache2\/error.log/ErrorLog \/var\/log\/itvision\/apache2\/error.log/g' \
 	-e 's/CustomLog \/var\/log\/apache2\/other_vhosts_access.log/CustomLog \/var\/log\/itvision\/apache2\/other_vhosts_access.log/g' /etc/apache2/apache2.conf

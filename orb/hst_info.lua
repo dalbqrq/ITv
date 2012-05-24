@@ -7,6 +7,7 @@ require "Auth"
 require "View"
 require "util"
 require "state"
+require "probe"
 
 module(Model.name, package.seeall,orbit.new)
 
@@ -112,13 +113,13 @@ function info(web, tab, obj_id)
 
    if tab == 1 then
       local APPS = Monitor.make_query_5(nil,
-                      "ax.id in (select app_id from itvision_app_objects where service_object_id = "..obj_id..")", true) 
+         "ax.id in (select app_id from itvision_app_objects where service_object_id = "..obj_id..")", true) 
       return render_info(web, obj_id, A, APPS)
    elseif tab == 2 then
       local H = statehistory:select(obj_id)
       return render_history(web, obj_id, A, H)
    elseif tab == 3 then
-      local A = Monitor.make_query_4(nil, nil, nil, "m.service_object_id = "..obj_id)
+      --local A = Monitor.make_query_4(nil, nil, nil, "m.service_object_id = "..obj_id)
       return render_cmdb(web, obj_id, A)
    elseif tab == 4 then
       return render_data(web, obj_id, A)
@@ -205,7 +206,30 @@ function render_info(web, obj_id, A, APPS)
 
    row[#row+1] = {lft, rgt }
    res[#res+1] = render_table( row, header )
-   res[#res+1] = { br(), br() }
+   res[#res+1] = { br() }
+
+   -- LINKS para CMDB e para CHECAGEM
+
+   local url
+   row = {}
+
+   web.prefix = "/servdesk"
+   if A[1].p_itemtype == "Computer" then
+      url = web:link("/front/computer.form.php?id="..A[1].c_id)
+   else
+      url = web:link("/front/networkequipment.form.php?id="..A[1].c_id)
+   end
+   local link_cmdb = center{  button_link("CMDB", url) }
+
+   web.prefix = "/orb/probe"
+   url = web:link("/update/3:"..A[1].c_id..":"..A[1].p_id..":0:0:"..obj_id..":0")
+   local link_probe = center{  button_link("Checagem", url) }
+
+
+   row[#row+1] = { link_cmdb, link_probe }
+   res[#res+1] = render_table( row )
+   res[#res+1] = { br(), br(), br() }
+
 
    -- APLICACOES
    row = {}
@@ -303,7 +327,7 @@ function render_cmdb(web, obj_id, A)
    else
       url = web:link("/front/networkequipment.form.php?id="..A[1].c_id)
    end
-   res[#res+1] = iframe{ src=url, width="980px", height="90%", frameborder="0", "---" }
+   res[#res+1] = iframe{ src=url, width="980px", height="90px", frameborder="2", "---" }
 
    return render_layout(res)
 end
