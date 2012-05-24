@@ -96,11 +96,14 @@ function get_subobjects(O)
 
    -- A lista de objetos "O" será percorrida 4 vezes, uma para cada tipo de objeto.
    for i,v in ipairs(O) do
-      if v.ao_type == "app" then
+      if v.ao_type == "app" and v.ax_is_entity_root and v.ax_is_entity_root == "1" then
          obj = Monitor.select_monitors_app_objs(v.ax_id)
          sub = get_subobjects(obj)
          for _, o in ipairs(sub) do
-            if o.ao_type == "app" then -- faz recursao somente da aplicacoes e aplicacoes de entidades
+            -- faz recursao somente nas aplicacoes de entidades
+            if o.ao_type == "app" and o.ax_is_entity_root and o.ax_is_entity_root == "1" then
+            -- faz recursao somente da aplicacoes e aplicacoes de entidades
+            --if o.ao_type == "app" then 
                table.insert(res, o)
             end
          end
