@@ -359,8 +359,8 @@ function select_tickets(clause)
    local extra_ = [[ order by U.id ]]
 
    -- Codigo antigo agora tendo a query gerada dinamicamente com a restricao (clause) de entidade e data:
-   --text_file_writer("/tmp/ticket_relat.sql", "SET NAMES 'utf8';select * from "..tables_..extra_..";")
-   text_file_writer("/tmp/ticket_relat.sql", "select * from "..tables_..extra_..";")
+   text_file_writer("/tmp/ticket_relat.sql", "SET NAMES 'utf8';select * from "..tables_..extra_..";")
+   --text_file_writer("/tmp/ticket_relat.sql", "select * from "..tables_..extra_..";")
 
    return Model.query(tables_, cond_, extra_, columns_)
 
