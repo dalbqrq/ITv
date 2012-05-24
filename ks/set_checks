@@ -1,9 +1,0 @@
-#!/bin/bash
-
-dir=/etc/nagios-plugins/config
-
-#grep '	check_' *
-#grep ' check_' *
-
-sed '	check_' *
-	
