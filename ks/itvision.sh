@@ -737,7 +737,7 @@ useradd -d /usr/local/servdesk/relatorios -c "Programacao Relatorios PHP" -g $db
 cd /usr/local/servdesk/relatorios
 ln -s $itvhome/orb/relat_menu.lua
 chown -R relats /usr/local/servdesk/relatorios
-chmod g+w relats $itvhome/orb/relat_menu.lua
+chmod g+w $itvhome/orb/relat_menu.lua
 
 echo ""
 echo "======================================================================================="
