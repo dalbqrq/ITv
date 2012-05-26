@@ -214,7 +214,7 @@ function render_show(web, app, entities, app_name, app_id, obj, rel, obj_id, app
    web.prefix = "/orb"
    res[#res+1] = render_content_header(auth, "Grade", nil, web:link("/app_grid/show/1:1"))
    --rec_checkbox = [[<p><input type="checkbox" onchange="location=']]..lnkrec..[[';" ]]..sel..[[> Visualização recursiva</p>]]
-   res[#res+1] = render_bar( { render_selector_bar(web, app, app_id, "/app_grid/show/1:1", notrec), rec_checkbox,
+   res[#res+1] = render_bar( { render_selector_bar(web, app, app_id, "/app_grid/show", notrec), rec_checkbox,
            a{ href=lnkapp,  strings.status } ,
            a{ href=lnkgeo,  "Mapa" } ,
            a{ href=lnkedt,  strings.edit } ,

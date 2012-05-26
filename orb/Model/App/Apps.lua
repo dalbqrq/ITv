@@ -46,8 +46,9 @@ function select_app (cond__, extra_, columns_)
 end
 
 
--- Retorna as aplicacoes já com os nomes da entidades COM os seus estados (nagios_servicestatus).
 function select_app_state (cond__, extra_, columns_)
+   
+   -- Retorna as aplicacoes já com os nomes da entidades COM os seus estados (nagios_servicestatus).
    local tables_  = [[  itvision_apps a, nagios_servicestatus ss ,
                         (select a.entities_id as entity_id, a.name as entity_name, a.name as entity_completename 
                          from itvision_apps a where a.entities_id = 0 and is_entity_root = 1
@@ -61,6 +62,21 @@ function select_app_state (cond__, extra_, columns_)
    local content = query (tables_, cond_, extra_, columns_)
 
 
+   -- Retorna as aplicacoes destivadas e por isso não possuem entradas no nagios
+   local tables_  = [[  itvision_apps a, 
+                        (select a.entities_id as entity_id, a.name as entity_name, a.name as entity_completename 
+                         from itvision_apps a where a.entities_id = 0
+                         union 
+                         select id as entity_id, name as entity_name, completename asentity_completename 
+                         from glpi_entities) as e ]]
+   local cond_   = [[ a.entities_id = e.entity_id and a.is_active = 0 ]]
+   local extra_  = [[ order by entity_completename ]]
+
+   if cond__ then cond_ = cond_.." and "..cond__ end
+   local content2 = query (tables_, cond_, extra_, columns_)
+
+
+   -- Retorna as aplicacoes já com os nomes da entidades que ainda não possuem entrada em nagios_services
    local tables_  = [[  itvision_apps a, 
                         (select a.entities_id as entity_id, a.name as entity_name, a.name as entity_completename 
                          from itvision_apps a where a.entities_id = 0
@@ -71,10 +87,14 @@ function select_app_state (cond__, extra_, columns_)
    local extra_  = [[ order by entity_completename ]]
 
    if cond__ then cond_ = cond_.." and "..cond__ end
-   local content2 = query (tables_, cond_, extra_, columns_)
+   local content3 = query (tables_, cond_, extra_, columns_)
 
 
    for _,v in ipairs(content2) do
+      table.insert(content,v)
+   end
+
+   for _,v in ipairs(content3) do
       table.insert(content,v)
    end
 

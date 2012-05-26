@@ -1,8 +1,18 @@
-version = "1.0.2"
+version = "1.0.3"
 patch = 0
 
 
 description = [[
+
+<br><br><b> Versão 1.0.3 (25 de Maio de 2012) </b>
+
+- As ações na tela de Checagem agora são simbilizados por icones. É possivel agora a partir dela desabilitar as probes. A linha extra na tabela que era usada para criar um serviço associado à um dispositivo não existe mais. A inclusão de um novo serviço é feito através do icone '+' na mesma linha do comando HOST_ALIVE.
+
+- Fixed: Aplicação desparecia quando destivada. Agora aparece com status correto e de cor laranja.
+
+- Fixed: caixa de seleção de aplicações na tela de Grafo estava com link quebrado.
+
+- Nome do botão "Desabilitar checagem" da tela de edição de probe alterado para "Desabilitar alerta".
 
 <br><br><b> Versão 1.0.2 (21 de Maio de 2012) </b>
 

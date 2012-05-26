@@ -283,7 +283,7 @@ function render_list(web, ics, filter, msg)
 
 
    res[#res+1] = render_resume(web)
-   res[#res+1] = render_content_header(auth, "Monitoração", nil, web:link("/pre_list"))
+   res[#res+1] = render_content_header(auth, "Lista", nil, web:link("/pre_list"))
    --DEBUG: msg = filter.status.." | "..APPLIC_DISABLE; res[#res+1] = p{ font{ color="red", msg } }
    res[#res+1] = render_form_bar( render_filter(web, filter), strings.search, web:link("/pre_list"), web:link("/pre_list") )
    res[#res+1] = render_table(row, header)

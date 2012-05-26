@@ -381,10 +381,14 @@ function render_list(web, A, AS, root, msg, no_header)
          end
          statename = applic_alert[state].name
          status={ state=state, colnumber=3, nolightcolor=true }
+      elseif v.is_active == "0"  then
+         state = 5
+         statename = applic_alert[state].name
+         status={ state=state, colnumber=3, nolightcolor=true }
       else
-         state = -1
-         statename = "-"
-         status=nil
+         state = 4
+         statename = applic_alert[state].name
+         status={ state=state, colnumber=3, nolightcolor=true }
       end
 
       row[#row+1] = { 
@@ -417,6 +421,7 @@ function render_list(web, A, AS, root, msg, no_header)
    end
    res[#res+1] = render_table(row, header)
    if not no_header then res[#res+1] = { br(), br(), br(), br() } end
+
 
    return render_layout(res)
 end
