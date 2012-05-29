@@ -195,13 +195,13 @@ function render_list(web, ics, filter, msg)
    local refresh_time = 60
 
    local header = { 
-      strings.name, strings.status, "IP", "CHECAGEM", strings.type, "."
+      strings.object, strings.status, "IP", strings.command, strings.type, "Resultado do comando de checagem"
    }
 
 
    for i, v in ipairs(ics) do
       local probe = v.m_name
-      local serv, ip, itemtype, id, hst_name, alias = "", "", "", "", nil, nil
+      local serv, ip, typename, id, hst_name, alias = "", "", "", "", nil, nil
       if v.sw_name ~= "" and v.sv_name ~= nil then serv = v.sw_name.." / "..v.sv_name end
 
       -- muitos dos ifs abaixo existem em funcao da direrenca entre as queries com Computer e as com Network
@@ -212,12 +212,16 @@ function render_list(web, ics, filter, msg)
       alias = v.m_name
 
       if v.p_itemtype then 
-         itemtype = v.p_itemtype 
+         if v.p_itemtype == "Computer" then
+            typename = "Computador"
+         elseif itemtype == "NetworkEquipment" then
+            typename = "Rede"
+         end
       else 
          if v.ax_is_entity_root == "1" then 
-            itemtype = strings.entity 
+            typename = strings.entity 
          else 
-            itemtype = strings.application 
+            typename = strings.application 
          end
       end
       if v.p_ip then ip = v.p_ip else ip = v.n_ip end
@@ -247,7 +251,7 @@ function render_list(web, ics, filter, msg)
       else if probe ~= config.monitor.check_host and probe ~=  "" then
          web.prefix = "/orb/obj_info"
          url = web:link("/svc/"..v.m_service_object_id)
-         itemtype = strings.service
+         typename = strings.service
       else 
          web.prefix = "/orb/obj_info"
          url = web:link("/hst/"..v.m_service_object_id)
@@ -277,14 +281,12 @@ function render_list(web, ics, filter, msg)
          state = 4
       end
       local statename = applic_alert[state].name
-      row[#row + 1] = { status={ state=state, colnumber=2 }, name, statename, ip, probe, itemtype, output }
-      --row[#row + 1] = { name, { value=statename, state=state }, ip, probe, itemtype, output }
+      row[#row + 1] = { status={ state=state, colnumber=2 }, name, statename, ip, probe, typename, output }
    end
 
 
    res[#res+1] = render_resume(web)
    res[#res+1] = render_content_header(auth, "Lista", nil, web:link("/pre_list"))
-   --DEBUG: msg = filter.status.." | "..APPLIC_DISABLE; res[#res+1] = p{ font{ color="red", msg } }
    res[#res+1] = render_form_bar( render_filter(web, filter), strings.search, web:link("/pre_list"), web:link("/pre_list") )
    res[#res+1] = render_table(row, header)
    res[#res+1] = { br(), br(), br(), br() }

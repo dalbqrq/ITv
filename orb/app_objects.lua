@@ -210,10 +210,12 @@ function make_app_objects_table(web, A)
       end
       web.prefix = "/orb/app_objects"
 
+      local url_remove
+
       if permission == "w" and v.app_type_id ~= "1" and is_ent ~= 1 then
-         remove_button = button_link(strings.remove, web:link("/delete_obj/"..v.a_id..":"..v.o_object_id), "negative")
+         url_remove = web:link("/delete_obj/"..v.a_id..":"..v.o_object_id)
       else
-         remove_button = { "-" }
+         url_remove = { "-" }
       end
 
       local state 
@@ -235,7 +237,7 @@ function make_app_objects_table(web, A)
          obj,
          name_hst_svc_app_ent(v.ao_type, is_ent),
          { value=statename, state=state },
-         remove_button
+         url_remove
       }
    end
 
@@ -245,7 +247,7 @@ end
 
 
 function render_add(web, HST, SVC, APP, APPOBJ, app_id, msg)
-   local res = {}
+   local res, objs = {}, {}
    local url_app = "/insert_obj:"..app_id
    local url_relat = "/insert_relat"
    local list_size = 10
@@ -255,14 +257,17 @@ function render_add(web, HST, SVC, APP, APPOBJ, app_id, msg)
    -----------------------------------------------------------------------
    -- Objetos da Aplicacao
    -----------------------------------------------------------------------
+   if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ font{ color="red", msg } } end
+   header = { strings.object, strings.type, strings.status, "." }
+   objs = make_app_objects_table(web, APPOBJ)
+   for _,v in ipairs(objs) do
+      v[4] = a{ href=v[4], title="Remover objeto", img{src="/pics/trash.png",  height="20px"}}
+   end
+
    res[#res+1] = show(web, app_id)
    res[#res+1] = br()
-   if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ font{ color="red", msg } } end
-   --res[#res+1] = render_content_header(strings.app_object)
    res[#res+1] = render_title(strings.app_object)
-   --header = { strings.object.." ("..strings.host.." / "..strings.service.."@"..strings.host.." / "..strings.application.." / "..strings.entity..")", strings.status, strings.type, "." }
-   header = { strings.object, strings.type, strings.status, "." }
-   res[#res+1] = render_table(make_app_objects_table(web, APPOBJ), header)
+   res[#res+1] = render_table(objs, header)
    res[#res+1] = br()
 
 
@@ -303,7 +308,7 @@ function render_add(web, HST, SVC, APP, APPOBJ, app_id, msg)
                     input{ type="hidden", name="type", value="app" } }, true, strings.add ) }
 
 
-      header = { strings.host, strings.service.."@"..strings.host, strings.application }
+      header = { strings.host, strings.host.."(IP)@"..strings.service, strings.application }
       res[#res+1] = render_table({ {hst, svc, app} }, header)
 
       res[#res+1] = { br(), br(), br(), br() }

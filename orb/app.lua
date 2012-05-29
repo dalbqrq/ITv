@@ -344,26 +344,34 @@ function render_list(web, A, AS, root, msg, no_header)
       local lnk = web:link("/list/"..v.id..":2")
       web.prefix = "/orb/app"
 
-      if v.is_entity_root == "0" then
-         category = strings.application
-         button_remove = button_link(strings.remove, web:link("/remove/"..v.id), "negative")
-         button_edit   = button_link(strings.edit, web:link("/edit/"..v.id..":"..v.name..":"..v.type..":"..v.visibility..":"..v.entity_id))
-      end
 
       if v.is_active == "0" then
          stract = strings.activate
+         alarm_icon = "/pics/alarm_check.png"
       else
          stract = strings.deactivate
+         alarm_icon = "/pics/alarm_off.png"
       end
-      button_active = button_link(stract, web:link("/activate/"..v.id..":"..v.is_active)) 
+      url_disable = web:link("/activate/"..v.id..":"..v.is_active)
+      img_disable = { a{ href=url_disable, title=stract, img{src=alarm_icon,  height="20px"}}}
+
+      img_edit = "-"
+      img_remove = "-"
+      if v.is_entity_root == "0" then
+         category = strings.application
+         url_edit = web:link("/edit/"..v.id..":"..v.name..":"..v.type..":"..v.visibility..":"..v.entity_id)
+         url_remove = web:link("/remove/"..v.id)
+         img_edit = { a{ href=url_edit, title=strings.edit, img{src="/pics/pencil.png", height="20px"}}}
+         img_remove = { a{ href=url_remove, title=strings.remove, img{src="/pics/trash.png",  height="20px"}}}
+      end
 
       if permission == "r" then
-         button_remove = "-"
-         button_edit = "-"
-         button_active = "-"
+         img_edit = "-"
+         img_remove = "-"
+         img_disable = "-"
       end
 
-      -- leva em conta a inicializacao padrao da tabela itvision_app_type
+
       if v.app_type_id == "1" then
          tag = "+ "
       elseif v.app_type_id == "2" then
@@ -400,13 +408,14 @@ function render_list(web, A, AS, root, msg, no_header)
          strings["logical_"..v.type],
          NoOrYes[tonumber(v.is_active)+1].name,
          PrivateOrPublic[tonumber(v.visibility)+1].name,
-         button_remove,
-         button_edit,
-         button_active,
+         img_edit,
+         img_remove,
+         --img_disable,
       }
    end
 
-   local header =  { strings.name, strings.entity, strings.status, strings.type, strings.logic, strings.is_active, strings.visibility,".", ".", "." }
+   --local header =  { strings.name, strings.entity, strings.status, strings.type, strings.logic, strings.is_active, strings.visibility,".", ".", "." }
+   local header =  { strings.name, strings.entity, strings.status, strings.type, strings.logic, strings.is_active, strings.visibility,".", "." }
    local c_header = {}
    if no_header == nil then
       res[#res+1] = render_resume(web)
