@@ -130,7 +130,7 @@ function insert_obj(web, app_id)
    --return web:redirect(web:link("/list/"..app_objects.app_id..":"..tab_id))
    return web:redirect(web:link("/list/"..app_id..":"..tab_id))
 end
-ITvision:dispatch_post(insert_obj, "/insert_obj:(%d+)")
+ITvision:dispatch_post(insert_obj, "/insert_obj/(%d+)")
 
 
 
@@ -248,7 +248,7 @@ end
 
 function render_add(web, HST, SVC, APP, APPOBJ, app_id, msg)
    local res, objs = {}, {}
-   local url_app = "/insert_obj:"..app_id
+   local url_app = "/insert_obj/"..app_id
    local url_relat = "/insert_relat"
    local list_size = 10
    local header = ""
@@ -270,6 +270,7 @@ function render_add(web, HST, SVC, APP, APPOBJ, app_id, msg)
    res[#res+1] = render_table(objs, header)
    res[#res+1] = br()
 
+   web.prefix = "/orb/app_objects"
 
    if permission == "w" then
 
