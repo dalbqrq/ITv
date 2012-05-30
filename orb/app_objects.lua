@@ -248,7 +248,7 @@ function render_add(web, HST, SVC, APP, APPOBJ, app_id, msg)
    -- Objetos da Aplicacao
    -----------------------------------------------------------------------
    if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ font{ color="red", msg } } end
-   header = { strings.object, strings.type, strings.status, "." }
+   header = { strings.object, strings.type, strings.status, "" }
    objs = make_app_objects_table(web, APPOBJ)
    for _,v in ipairs(objs) do
       v[4] = a{ href=v[4], title="Remover objeto", img{src="/pics/trash.png",  height="20px"}}

@@ -125,7 +125,7 @@ ITvision:dispatch_static("/css/%.css", "/script/%.js")
 
 function make_app_contacts_table(web, CONTACTS)
    local row = {}
-   local remove_link = ""
+   local url_remove
    web.prefix = "/orb/app_contacts"
    local permission = Auth.check_permission(web, "application")
 
@@ -135,15 +135,15 @@ function make_app_contacts_table(web, CONTACTS)
       v.realname  = v.realname  or " "
       v.email     = v.email     or " "
       if permission == "w" then
-         remove_link = button_link(strings.remove, web:link("/delete/"..v.app_id..":"..v.user_id), "negative")
+         url_remove = web:link("/delete/"..v.app_id..":"..v.user_id)
       else
-         remove_link =  "-"
+         url_remove = nil
       end
       row[#row + 1] = { 
          v.name,
          v.firstname.." "..v.realname,
          v.email,
-         remove_link
+         url_remove
       }
    end
 
@@ -157,14 +157,14 @@ function make_app_users_table(web, USERS, app_id)
    local permission = Auth.check_permission(web, "application")
 
    for i, v in ipairs(USERS) do
-      local button = "-"
+      local url_add, url_edit = nil, nil
       if permission == "w" then
          if v.email and string.find(v.email,"@") then 
             web.prefix = "/orb/app_contacts"
-            button = button_link(strings.add, web:link("/insert/"..app_id..":"..v.id), "positive")
+            url_add = web:link("/insert/"..app_id..":"..v.id)
          else
             web.prefix = "/servdesk"
-            button = button_link(strings.edit, web:link("/front/user.form.php?id="..v.id), "positive")
+            url_edit = web:link("/front/user.form.php?id="..v.id)
          end
       end
       v.firstname = v.firstname or " "
@@ -174,7 +174,8 @@ function make_app_users_table(web, USERS, app_id)
          v.name,
          v.firstname.." "..v.realname,
          v.email,
-         button,
+         url_add,
+         url_edit,
       }
    end
 
@@ -195,12 +196,26 @@ function render_add(web, APP, CONTACTS, USERS, app_id, msg)
    -----------------------------------------------------------------------
    res[#res+1] = show(web, app_id)
    res[#res+1] = br()
+   local contacts = make_app_contacts_table(web, CONTACTS)
+   local users = make_app_users_table(web, USERS, app_id)
+
+   for _, v in ipairs(contacts) do
+      v[4] = a{ href=v[4], title=strings.remove, img{src="/pics/trash.png",  height="20px"}}
+   end
+   for _, v in ipairs(users) do
+      if v[5] then
+         v[4] = a{ href=v[5], title=strings.edit, img{src="/pics/pencil.png",  height="20px"}}
+         table.remove(v,5)
+      else
+         v[4] = a{ href=v[4], title=strings.add, img{src="/pics/plus.png",  height="20px"}}
+      end
+   end
 
    res[#res+1] = render_title(strings.contact.."s")
-   header = { "Login", strings.name, "E-mail", "." }
-   res[#res+1] = render_table(make_app_contacts_table(web, CONTACTS), header)
+   header = { "Login", strings.name, "E-mail", "" }
+   res[#res+1] = render_table(contacts, header)
    res[#res+1] = br()
-   res[#res+1] = render_table(make_app_users_table(web, USERS, app_id), header)
+   res[#res+1] = render_table(users, header)
    res[#res+1] = br()
 
    if msg ~= "/" and msg ~= "/list" and msg ~= "/list/" then res[#res+1] = p{ msg } end

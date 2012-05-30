@@ -7,7 +7,9 @@ description = [[
 <br><br><b> Versão 1.0.4 (29 de Maio de 2012) </b>
 
 
-- As telas Lista, Aplicações e Checagem tiveram sua interface alteradas para torna-las mais homogêneas quanto à apresentação e à forma.
+- As telas Lista, Aplicações e Checagem tiveram sua interfaces alteradas para torna-las mais homogêneas quanto à apresentação e à forma.
+
+- As telas de Relacionamento e Contatos de Aplicações tiveram sua interfaces alteradas para torna-las mais homogêneas quanto à apresentação e à forma.
 
 - BugFix: Inclusão de novos objetos em uma aplicação com erro de Page Not Found.
 
