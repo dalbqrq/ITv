@@ -55,7 +55,7 @@ function select_app_state (cond__, extra_, columns_)
                          union 
                          select id as entity_id, name as entity_name, completename asentity_completename 
                          from glpi_entities) as e ]]
-   local cond_   = [[ a.entities_id = e.entity_id and a.service_object_id = ss.service_object_id ]]
+   local cond_   = [[ a.entities_id = e.entity_id and a.service_object_id = ss.service_object_id and a.is_active = 1 ]]
    local extra_  = [[ order by entity_completename ]]
 
    if cond__ then cond_ = cond_.." and "..cond__ end
@@ -65,7 +65,7 @@ function select_app_state (cond__, extra_, columns_)
    -- Retorna as aplicacoes destivadas e por isso não possuem entradas no nagios
    local tables_  = [[  itvision_apps a, 
                         (select a.entities_id as entity_id, a.name as entity_name, a.name as entity_completename 
-                         from itvision_apps a where a.entities_id = 0
+                         from itvision_apps a where a.entities_id = 0 and is_entity_root = 1
                          union 
                          select id as entity_id, name as entity_name, completename asentity_completename 
                          from glpi_entities) as e ]]

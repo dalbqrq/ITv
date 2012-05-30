@@ -210,10 +210,12 @@ function make_app_objects_table(web, A)
 
       local state 
       if tonumber(v.ss_has_been_checked) == 1 then
-         if tonumber(v.m_state) == 0 then
+         if tonumber(v.m_state) == 0 or v.ao_type == "app" and tonumber(v.ax_is_active) == 0 then
             state = tonumber(APPLIC_DISABLE)
             output = ""
-         else     
+            state = tonumber(APPLIC_DISABLE)
+            output = ""
+         else
             state = tonumber(v.ss_current_state)
             output = v.ss_output
          end      
@@ -225,9 +227,10 @@ function make_app_objects_table(web, A)
 
       row[#row+1] = { 
          obj,
-         name_hst_svc_app_ent(v.ao_type, is_ent),
+    -- TODO: daniel fazer esta funcao abaixo funcionar  para apresetar se um host é um computador ou equip de rede
+         name_hst_svc_app_ent(v.ao_type, is_ent, v.itemtype),
          { value=statename, state=state },
-         url_remove
+         url_remove,
       }
    end
 

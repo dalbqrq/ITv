@@ -139,7 +139,7 @@ function show(web, app_id)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
 
-   local clause = "id = "..app_id.." and entities_id in "..Auth.make_entity_clause(auth)
+   local clause = "a.id = "..app_id.." and a.entities_id in "..Auth.make_entity_clause(auth)
    --OLD: local A, root = apps:select(nil, clause)
    local A = App.select_app(clause)
    local AS = App.select_app_state(clause)
@@ -335,7 +335,8 @@ function render_list(web, A, AS, root, msg, no_header)
    local permission, auth = Auth.check_permission(web, "application")
    local svc, stract, tag = "", "", ""
    local header = { 
-      strings.object, strings.entity, strings.status, strings.type, strings.logic, strings.is_active, strings.visibility, "", "" 
+      strings.object, strings.entity, strings.status, strings.type, strings.logic, strings.is_active, 
+      strings.visibility, "", "" , ""
    }
 
    for i, v in ipairs(AS) do
@@ -409,8 +410,7 @@ function render_list(web, A, AS, root, msg, no_header)
          PrivateOrPublic[tonumber(v.visibility)+1].name,
          img_edit,
          img_remove,
-         -- link para desabilitar aplicacao com erro. Ver pivotaltracker!!!
-         --img_disable,
+         img_disable,
       }
    end
 

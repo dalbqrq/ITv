@@ -699,10 +699,14 @@ HostOrServiceOrAppOrEnt = {
    { id = "svc", name = strings.service},
    { id = "app", name = strings.application},
    { id = "ent", name = strings.entity},
+   { id = "com", name = strings.computer},
+   { id = "net", name = strings.network},
 }
 
-function name_hst_svc_app_ent(id, is_entity)
+function name_hst_svc_app_ent(id, is_entity, itemtype)
    if is_entity == 1 then id = "ent" end
+   if itemtype == "Computer" then id = "com" end
+   if itemtype == "NetworkEquipment" then id = "net" end
    return choose_name(HostOrServiceOrAppOrEnt, id, is_entity)
 end
 
