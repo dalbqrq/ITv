@@ -285,8 +285,8 @@ function activate(web, id, flag)
       local tables = "itvision_apps"
 
       local A = apps:select(id)
-      local count = App.count_app_objects(id)
-      if A[1] and count > 0 then
+      --local count = App.count_app_objects(id)
+--      if A[1] and count > 0 then  -- este if existia para impedir a desabilitacao de apps que nao possuiam objetos
          -- se for uma operacao de ativacao entao atualiza o service_object_id da aplicacao criada
          if flag == 1 then
             App.activate_app(id) 
@@ -310,9 +310,9 @@ function activate(web, id, flag)
          end
 
          msg = "/"..error_message(9).." "..A[1].name
-      else
-         msg = "/"..error_message(10).." "..A[1].name
-      end
+--      else
+--         msg = "/"..error_message(10).." "..A[1].name
+--      end
    end
 
    return web:redirect(web:link("/list"..msg))
@@ -411,7 +411,6 @@ function render_list(web, A, AS, root, msg, no_header)
          img_edit,
          img_remove,
          img_disable,
-v.has_been_checked, v.current_state
       }
    end
 

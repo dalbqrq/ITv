@@ -20,7 +20,7 @@ local apps = Model.itvision:model "apps"
 
 function apps:select_apps(id, clause_)
    local q = {}
-   local clause = " is_active = 1"
+   --local clause = " is_active = 1"
    if id then clause = clause.." and  id = "..id end
    if clause_ then clause = clause.." and "..clause_ end
 

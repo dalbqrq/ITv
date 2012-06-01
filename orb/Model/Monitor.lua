@@ -736,10 +736,10 @@ function make_query_10(a_id, clause)
    columns_ = string.gsub(columns_, "__", "_") 
 
    cond_ = cond_ .. [[ 
-      and a_.is_active = 1   
       and a_.is_entity_root = 1   
       and o_.name1 = ']]..config.monitor.check_app..[[' 
    ]]
+      --and a_.is_active = 1   
       --and a_.id in ( select distinct(id) from itvision_apps )        
 
    if a_id then cond_ = cond_ .. " and a_.id = " .. a_id end
@@ -760,8 +760,8 @@ end
 function make_query_11(a_id, clause)
    local q, t = {}, {}
    --t = { "o_", "s_", "a_", "t_" }
-   t = { "o_", "s_", "a_" }
-   z = { "ss_" }
+   t = { "o_", "a_" }
+   z = { "s_", "ss_" }
 
    local columns_ = make_columns(t)
    local _,_,zeros_ = make_columns(z)
@@ -771,11 +771,11 @@ function make_query_11(a_id, clause)
    columns_ = string.gsub(columns_, "__", "_") 
 
    cond_ = cond_ .. [[ 
-      and a_.is_active = 1
+      and a_.is_active = 0
       and a_.is_entity_root = 1   
       and o_.name1 = ']]..config.monitor.check_app..[[' 
-      and s_.service_object_id not in (select service_object_id from nagios_servicestatus)
    ]]
+      --and s_.service_object_id not in (select service_object_id from nagios_servicestatu)
       --and a_.id in ( select distinct(app_id) from itvision_app_trees )
 
    if a_id then cond_ = cond_ .. " and a_.id = " .. a_id end

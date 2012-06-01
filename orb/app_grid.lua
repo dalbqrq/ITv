@@ -154,8 +154,21 @@ function make_grid(web, O, recursive)
                   web.prefix = "/orb/app_grid"
                   obj = button_link(obj, web:link("/show/"..v.ax_id..notrec), "negative")
                end
-      
-               col[#col+1] = { value=obj, state=v.ss_current_state }
+
+               local state
+               if v.ax_is_active == "0"  then
+                  state = APPLIC_DISABLE
+               elseif tonumber(v.ss_has_been_checked) == 1 then
+                  if tonumber(v.m_state) == 0 then
+                     state = tonumber(APPLIC_DISABLE)
+                  else
+                     state = tonumber(v.ss_current_state)
+                  end
+               else
+                  state = APPLIC_PENDING
+               end
+
+               col[#col+1] = { value=obj, state=state }
             end
 
 

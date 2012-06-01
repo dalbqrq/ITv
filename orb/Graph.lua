@@ -29,39 +29,23 @@ local node_def = {
 }
 
 
-function set_color(state, has_been_checked, monitor_state, obj_type)
+function set_color(current_state, has_been_checked, monitor_state, is_active, obj_type)
    local color
-   if tonumber(has_been_checked) == 1 then
-      if tonumber(monitor_state) == 0 then -- monitor_state == o indica que o probe está desabilitado
+   local state
+
+   if is_active == "0"  then
+      state = APPLIC_DISABLE
+   elseif tonumber(has_been_checked) == 1 then
+      if tonumber(monitor_state) == 0 then
          state = tonumber(APPLIC_DISABLE)
       else
-         state = tonumber(state)
+         state = tonumber(current_state)
       end
    else
-      state = 4
+      state = APPLIC_PENDING
    end
 
---[[
-   if obj_type == 'hst' then
-      color = host_alert[state+1].color
-   elseif obj_type == 'svc' then
-   if obj_type == 'svc' then
-      color = service_alert[state].color
-   elseif obj_type == 'app' then
-      color = applic_alert[state+1].color
-   end
-]]
-
-   if obj_type == 'app' then
-      -- state é nil quando uma aplicacao é reativada e ainda nao possui servicestatus
-      if state == nil then state = APPLIC_PENDING end
-      color = applic_alert[state].color
-   elseif obj_type == 'svc' then
-      color = service_alert[state].color
-   elseif obj_type == 'hst' then
-      --color = host_alert[state].color
-      color = service_alert[state].color
-   end
+   color = service_alert[state].color
 
    return color
 end
@@ -126,7 +110,7 @@ function make_content(obj, rel)
 
          name = v.o_object_id
 
-         color = set_color(v.ss_current_state, v.ss_has_been_checked, v.m_state, v.ao_type)
+         color = set_color(v.ss_current_state, v.ss_has_been_checked, v.m_state, v.ax_is_active, v.ao_type)
          table.insert(content, 
             node {
                name, 
@@ -236,7 +220,7 @@ function make_tree_content(obj, rel, sep)
             shape = "hexagon"
          end
 
-         color = set_color(v.ss_current_state, v.ss_has_been_checked, v.m_state, "app")
+         color = set_color(v.ss_current_state, v.ss_has_been_checked, v.m_state, v.a_is_active, "app")
          table.insert(content, 
             node {
                name, 
