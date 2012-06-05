@@ -286,7 +286,7 @@ function activate(web, id, flag)
 
       local A = apps:select(id)
       --local count = App.count_app_objects(id)
---      if A[1] and count > 0 then  -- este if existia para impedir a desabilitacao de apps que nao possuiam objetos
+--      if A[1] and count > 0 then  -- este if existia para impedir a desligamento de apps que nao possuiam objetos
          -- se for uma operacao de ativacao entao atualiza o service_object_id da aplicacao criada
          if flag == 1 then
             App.activate_app(id) 

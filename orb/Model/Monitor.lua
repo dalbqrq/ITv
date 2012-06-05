@@ -510,8 +510,8 @@ function make_query_5(a_id, clause, all_apps)
 
    cond_ = cond_ .. [[ 
       and o.name1 = ']]..config.monitor.check_app..[[' 
-      and o.is_active = 1
    ]]
+      --and o.is_active = 1
 
    if a_id then cond_ = cond_ .. " and a.id = " .. a_id end
    if clause then cond_ = cond_ .. " and " .. clause end

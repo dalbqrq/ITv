@@ -595,7 +595,7 @@ ITvision:dispatch_post(update_service, "/update_service/(%d+):(%d+):(%d+):(%d+):
 
 ------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------
---executa a desabilitacao de monitoracao de servico
+--executa a desligamento de monitoracao de servico
 function disable_service(web, service_object_id, c_id, p_id, query, no_header, flag)
    local msg = ""
    local flags, opts = {}, {}
@@ -634,9 +634,9 @@ function disable_service(web, service_object_id, c_id, p_id, query, no_header, f
    insert_service_cfg_file (host_name, service_desc, chk_name, check_args, flag)
 
    if tonumber(flag) == 0 then
-      msg = "Check de SERVIÇO: desabilitado."
+      msg = "Check de SERVIÇO: desligado."
    else
-      msg = "Check de SERVIÇO: habilitado."
+      msg = "Check de SERVIÇO: ligado."
    end
 
    os.sleep(1)
@@ -799,8 +799,10 @@ function render_list(web, ics, chk, msg)
             if state == APPLIC_DISABLE then
                flag = 1
                alarm_icon = "/pics/alarm_check.png"
+               title = "Ligar alerta"
             else
                alarm_icon = "/pics/alarm_off.png"
+               title = "Desligar alerta"
             end
             if  m_name == config.monitor.check_host or m_name ==  "-" then query = 3 else query = 4 end
 
@@ -814,7 +816,7 @@ function render_list(web, ics, chk, msg)
             end
             img_edit = a{ href=url_edit, title="Editar", img{src="/pics/pencil.png", height="20px"}}
             img_remove = a{ href=url_remove, title="Remover", img{src="/pics/trash.png",  height="20px"}}
-	    img_disable = a{ href=url_disable, title="Desabilitar alerta", img{src=alarm_icon,  height="20px"}}
+	    img_disable = a{ href=url_disable, title=title, img{src=alarm_icon,  height="20px"}}
          end
       end
 
@@ -922,7 +924,7 @@ function render_checkcmd(web, chk_id, hst_name, ip, url_test, url_insert, url_up
       "<INPUT TYPE=HIDDEN NAME=\"chk_name\" value=\""..c[1].name1.."\">",
       "<INPUT TYPE=HIDDEN NAME=\"count\" value=\""..count.."\">" 
    }
-   -- desabilita campo caso o comando seja o HOST_ALIVE que nao pode ser mudado
+   -- desliga campo caso o comando seja o HOST_ALIVE que nao pode ser mudado
    if monitor_name == config.monitor.check_host then disabled="disabled" end
    local display_show = {
       { strings.alias, "<INPUT TYPE=TEXT "..disabled.." NAME=\"monitor_name\" value=\""..monitor_name.."\">", 
@@ -952,10 +954,10 @@ function render_checkcmd(web, chk_id, hst_name, ip, url_test, url_insert, url_up
             res[#res+1] = center{ render_form(web:link(url_update), nil, params_hidden, true, "Atualizar checagem" ) }
          end
          if monitor_state == 1 then 
-            b_name = "Desabilitar alerta"
+            b_name = "Desligar alerta"
             flag = ":0"
          else
-            b_name = "Habilitar checagem"
+            b_name = "Ligar checagem"
             flag = ":1"
          end
          res[#res+1] = center{ render_form(web:link(url_disable..flag), nil, { hidden, row_hidden } , true, b_name ) }

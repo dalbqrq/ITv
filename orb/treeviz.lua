@@ -116,7 +116,7 @@ text_file_writer("/tmp/cont", table.dump(content, "    ", false))
    res[#res+1] = render_content_header(auth, strings.tree, nil, nil, nil)
    res[#res+1] = render_bar( { 
          --a{ href=web:link("/show/0"),  "Unificada" } ,
-         --a{ href=web:link("/show/1"),  "Separada" } ,     -- VISAO EM SAPARADO DESABILITADO. Com ERRO EM GRAPH.LUA
+         --a{ href=web:link("/show/1"),  "Separada" } ,     -- VISAO EM SAPARADO DESLIGADO. Com ERRO EM GRAPH.LUA
          ". ",
    } )
    res[#res+1] = br()

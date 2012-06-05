@@ -39,11 +39,25 @@ function check_app(debug, app_id)
    end
    if debug then print("LOGIC: ", logic) end
 
+
    for i, v in ipairs(app_object_states) do
-     if debug then  print(i,v.ss_current_state, v.a_name, v.ao_service_object_id) end
+     obj_name = v.ax_name
      current_state = tonumber(v.ss_current_state)
      monitor_state = tonumber(v.m_state)
-     if monitor_state ~= 0 then
+     is_active = tonumber(v.ax_is_active)
+
+     -- se objeto for uma host ou service e nao uma aplicacao
+     is_active = is_active or monitor_state
+     if obj_name == "" then obj_name = v.m_name end
+     
+
+     if debug then  print(i,applic_alert[current_state].name, is_active, obj_name, v.ao_service_object_id) end
+
+     -- as duas linhas abaixo colocam os estados de WARNING e CRITICAL como mais relevantes na escala de prioridades
+     if current_state == APPLIC_WARNING then current_state = APPLIC_DISABLE + 1 end
+     if current_state == APPLIC_CRITICAL then current_state = APPLIC_DISABLE + 2 end
+
+     if is_active ~= 0 then
         if logic == "and" then
            if current_state > state then
               state = current_state
@@ -55,6 +69,10 @@ function check_app(debug, app_id)
         end
      end
    end
+
+   -- as duas linhas abaixo recolocam os estados de WARNING e CRITICAL com valores originais
+   if state == APPLIC_DISABLE + 1 then state = APPLIC_WARNING end
+   if state == APPLIC_DISABLE + 2 then state = APPLIC_CRITICAL end
 
    if state == APPLIC_UNDEF then state = APPLIC_UNKNOWN end
 

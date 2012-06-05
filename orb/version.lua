@@ -1,8 +1,22 @@
-version = "1.0.4"
+version = "1.0.5"
 patch = 0
 
 
 description = [[
+
+<br><br><b> Versão 1.0.5 (4 de junho de 2012) </b>
+
+
+- Corrigida as regras para determinação do status das aplicações e aplicações de entidades.
+
+- Habilitar/Desabilitar passou a ser Ligar/Desligar no sentido de se ligar ou desligar a monitoração de determinado objeto (dispositivo, serviço ou aplicação.
+
+- Nas telas de informação de dispositivo, serviços e aplicações foram colocados links para as aplicações que possuem tal objeto.
+
+- Todos os objetos desativados agora aparecem em todas as telas (árvore, grafo, grade, lista, aplicações e checagem).
+
+- Foram corrigidas todas as telas onde objetos desligados não apareciam como tal.
+
 
 <br><br><b> Versão 1.0.4 (29 de Maio de 2012) </b>
 
@@ -15,18 +29,18 @@ description = [[
 
 - Link de inclusão de novasa aplicações com erro na tela de Lista.
 
-- Status nas telas de detalhe de informação tanto de dispositivos quanto de serviços não apresentava o status "DESABILITADO".
+- Status nas telas de detalhe de informação tanto de dispositivos quanto de serviços não apresentava o status "DESLIGADO".
 
 
 <br><br><b> Versão 1.0.3 (25 de Maio de 2012) </b>
 
-- As ações na tela de Checagem agora são simbilizadas por icones. É possivel agora a partir desta tela habilitar e desabilitar as probes. A linha extra na tabela que era usada para criar um serviço associado à um dispositivo não existe mais. Agora a  inclusão de um novo serviço é feito através do icone '+' na mesma linha do comando HOST_ALIVE.
+- As ações na tela de Checagem agora são simbilizadas por icones. É possivel agora a partir desta tela ligar e desligar as probes. A linha extra na tabela que era usada para criar um serviço associado à um dispositivo não existe mais. Agora a  inclusão de um novo serviço é feito através do icone '+' na mesma linha do comando HOST_ALIVE.
 
 - BugFix: Aplicação desparecia quando destivada. Agora aparece com status correto e de cor laranja.
 
 - BugFix: caixa de seleção de aplicações na tela de Grafo estava com link quebrado.
 
-- Nome do botão "Desabilitar checagem" da tela de edição de probe alterado para "Desabilitar alerta".
+- Nome do botão "Desligar checagem" da tela de edição de probe alterado para "Desligar alerta".
 
 - Links para CMDB e Status nos balões que se abrem quando o pino do mapa é clicado.
 

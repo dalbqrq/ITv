@@ -33,7 +33,7 @@ end
 function count_hosts(clause)
    local res = {}
 
--- COMPUTERS HABILITADOS
+-- COMPUTERS LIGADOS
    --[[select count(*), ss.current_state
    from nagios_servicestatus ss, nagios_objects o, itvision_monitors m, glpi_networkports p, glpi_computers c
    where ss.service_object_id = o.object_id and ss.active_checks_enabled = 1
@@ -60,7 +60,7 @@ function count_hosts(clause)
    print("------------------------------")
 ]]
    
--- NETWORKEQUIPMENTS HABILITADOS
+-- NETWORKEQUIPMENTS LIGADOS
    --[[select count(*), ss.current_state 
    from nagios_servicestatus ss, nagios_objects o, itvision_monitors m, glpi_networkports p, glpi_networkequipments c
    where ss.service_object_id = o.object_id and ss.active_checks_enabled = 1
@@ -81,7 +81,7 @@ function count_hosts(clause)
    e = [[group by ss.current_state]]
    q2 = Model.query(t, r, e, c)
 
--- COMPUTERS DESABILITADOS
+-- COMPUTERS DESLIGADOS
    --[[select count(*) as count, 5 as state
    from nagios_servicestatus ss, nagios_objects o, itvision_monitors m, glpi_networkports p, glpi_computers c
    where ss.service_object_id = o.object_id and ss.active_checks_enabled = 0
@@ -101,7 +101,7 @@ function count_hosts(clause)
    e = nil
    q3 = Model.query(t, r, e, c)
    
--- NETWORKEQUIPMENTS DESABILITADOS
+-- NETWORKEQUIPMENTS DESLIGADOS
    --[[select count(*) as count, 5 as state
    from nagios_servicestatus ss, nagios_objects o, itvision_monitors m, glpi_networkports p, glpi_networkequipments c
    where ss.service_object_id = o.object_id and ss.active_checks_enabled = 0
@@ -133,7 +133,7 @@ end
 function count_services(clause)
    local res = {}
 
---SERVICES HABILITADOS
+--SERVICES LIGADOS
    --[[select count(*), ss.current_state 
    from nagios_servicestatus ss, nagios_objects o
    where ss.service_object_id = o.object_id and ss.active_checks_enabled = 1
@@ -151,7 +151,7 @@ function count_services(clause)
    q = Model.query(t, r, e, c)
 
 
---SERVICES DESABILITADOS
+--SERVICES DESLIGADOS
    --[[select count(*) as count, 5 as state
    from nagios_servicestatus ss, nagios_objects o
    where ss.service_object_id = o.object_id and ss.active_checks_enabled = 0
@@ -175,7 +175,7 @@ end
 function count_apps(clause)
    local res = {}
 
---APPS HABILITADOS
+--APPS LIGADOS
    --[[select count(*), ss.current_state 
    from nagios_servicestatus ss, nagios_objects o, itvision_apps a
    where ss.service_object_id = o.object_id
@@ -194,7 +194,7 @@ function count_apps(clause)
    e = [[group by ss.current_state]]
    q = Model.query(t, r, e, c)
 
---APPS DESABILITADOS
+--APPS DESLIGADOS
    c = [[count(*) as count, 5 as state]]
    t = [[itvision_apps a]]
    r = [[a.is_active = 0
@@ -213,7 +213,7 @@ end
 function count_entities(clause)
    local res = {}
 
---ENTIDADES HABILITADAS
+--ENTIDADES LIGADOS
    --[[select count(*), ss.current_state 
    from nagios_servicestatus ss, nagios_objects o, itvision_apps a
    where ss.service_object_id = o.object_id
@@ -232,7 +232,7 @@ function count_entities(clause)
    e = [[group by ss.current_state]]
    q = Model.query(t, r, e, c)
 
---ENTIDADES DESABILITADAS
+--ENTIDADES DESLIGADOS
    c = [[count(*) as count, 5 as state]]
    t = [[itvision_apps a]]
    r = [[a.is_active = 0

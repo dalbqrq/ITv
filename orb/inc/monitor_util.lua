@@ -69,7 +69,7 @@ end
 
 
 
--- o parametro enable deve receber nulo ou 1 para abilitar e 0 para desabilitar.
+-- o parametro enable deve receber nulo ou 1 para abilitar e 0 para desligar.
 function insert_service_cfg_file (hostname, service_desc, check_cmd, check_args, enable)
    local content, cmd, filename
 
@@ -191,7 +191,7 @@ end
 
   display 0 - significa usar o template de service "generic-bp-detail-service" que possiu 
               os parametros de configuracao active_checks_enabled=0 e passive_checks_enabled=0
-              para desabilitar os alertas de um servico no nagios
+              para desligar os alertas de um servico no nagios
 
   display 1 - sinifica usar o template de service "generic-bp-service" que corresponde a
               um servico ativo.

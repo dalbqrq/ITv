@@ -257,6 +257,9 @@ function render_list(web, ics, filter, msg)
          if tonumber(v.m_state) == 0 then
             state = tonumber(APPLIC_DISABLE)
             output = ""
+         elseif tonumber(v.ax_is_active) == 0 then
+            state = tonumber(APPLIC_DISABLE)
+            output = ""
          else
             state = tonumber(v.ss_current_state)
             output = v.ss_output

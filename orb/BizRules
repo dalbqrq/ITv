@@ -16,7 +16,7 @@
 
 
 - inserir obj em outra app
-	ativar app se inativa
+	ligar app se inativa
 	inserir obj em _app_objects
 	se obj for uma app {
 	   inserir sub-arvore de sub-app em _app_tree abaixo de app
@@ -27,7 +27,7 @@
 
 
 - remover obj de outra app
-	desativar se for o ultimo objeto
+	desligar se for o ultimo objeto
 	se obj for uma app {
 	   inserir sub-arvore de sub-app em _app_tree abaixo de root se nao existir
         }
