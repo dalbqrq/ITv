@@ -67,7 +67,7 @@ function select_app_state (cond__, extra_, columns_)
                         (select a.entities_id as entity_id, a.name as entity_name, a.name as entity_completename 
                          from itvision_apps a where a.entities_id = 0 and is_entity_root = 1
                          union 
-                         select id as entity_id, name as entity_name, completename asentity_completename 
+                         select id as entity_id, name as entity_name, completename as entity_completename 
                          from glpi_entities) as e ]]
    local cond_   = [[ a.entities_id = e.entity_id and a.is_active = 0 ]]
    local extra_  = [[ order by entity_completename ]]

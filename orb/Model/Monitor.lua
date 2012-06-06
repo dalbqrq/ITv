@@ -798,14 +798,14 @@ end
 ----------------------------------------------------------------------
 --  QUERY 12 - aplicacao sem monitor - criada e nunca ativada
 ----------------------------------------------------------------------
-function make_query_12(a_id, all_apps)
+function make_query_12(a_id, clause, all_apps)
    local q, t = {}, {}
    if a_id or all_apps then
-      t = { "a" }
+      t = { "ax" }
    else
       t = {  }
    end
-   n = { "o", "s", "ss", "ao", "ax", "c", "p", "m", "csv", "sv", "sw" }
+   n = { "o", "s", "ss", "ao", "a", "c", "p", "m", "csv", "sv", "sw" }
 
    local columns_ = make_columns(t)
    local _,nulls_ = make_columns(n)
@@ -820,11 +820,11 @@ function make_query_12(a_id, all_apps)
    end
 
    cond_ = cond_ .. [[ 
-      a.service_object_id is NULL
+      ax.service_object_id is NULL
    ]]
 
    if a_id then cond_ = cond_ .. " and a.id = " .. a_id end
-   if clause then cond_ = cond_ .. " and " .. clause end
+   if clause then cond_ = cond_ .. clause end
 
    q = Model.query(tables_, cond_, nil, columns_)
    for _,v in ipairs(q) do table.insert(v, 1, 12) end
@@ -950,6 +950,7 @@ end
 
 function select_monitors_app_objs(app_id, clause, clause34, clause5, clause12)
    local q = {}
+   clause12 = clause12 or false
 
    if clause and clause34 then
       clause34 = clause..clause34
@@ -967,12 +968,12 @@ function select_monitors_app_objs(app_id, clause, clause34, clause5, clause12)
    end
    local q5 = make_query_5(app_id, clause5)
    local q12 = nil
-   --if clause12 then q12 = make_query_12(nil, true) end
+   if clause12 then q12 = make_query_12(nil, clause12, true) end
 
    for _,v in ipairs(q3) do table.insert(q, v) end
    for _,v in ipairs(q4) do table.insert(q, v) end
    for _,v in ipairs(q5) do table.insert(q, v) end
-   --for _,v in ipairs(q12) do table.insert(q, v) end
+   if clause12 then for _,v in ipairs(q12) do table.insert(q, v) end end
 
    table.sort(q, function (a, b) 
       a.c_alias = a.c_alias  or ""

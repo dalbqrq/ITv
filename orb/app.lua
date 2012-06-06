@@ -19,6 +19,7 @@ local app_objects = Model.itvision:model "app_objects"
 local app_relats  = Model.itvision:model "app_relats"
 local objects     = Model.nagios:model   "objects"
 local services    = Model.nagios:model   "services"
+local events      = Model.glpi:model     "events"
 
 local tab_id = 1
 
@@ -226,6 +227,9 @@ function insert(web)
    ]]
    App.remake_apps_config_file()
 
+   local auth = Auth.check(web)
+   Glpi.insert_event(id, "application", auth.user_name, 1, apps.name)
+
    web.prefix = "/orb/app_tabs"
    return web:redirect(web:link("/list/"..app[1].id..":2"))
 end
@@ -261,6 +265,10 @@ function delete(web, id)
       Model.delete ("itvision_apps", "id = "..id) 
    end
 
+   local auth = Auth.check(web)
+   local a = apps:select(id)
+   Glpi.insert_event(id, "application", auth.user_name, 3, a[1].name)
+
    App.remake_apps_config_file()
 
    web.prefix = "/orb/app"
@@ -277,6 +285,7 @@ end
 
 
 function activate(web, id, flag)
+   local auth = Auth.check(web)
    if tonumber(flag) == 0 then flag = 1 else flag = 0 end
    local msg, counter = "", 0
 
@@ -305,9 +314,12 @@ function activate(web, id, flag)
             local svc = { id = A[1].id, service_object_id = s[1].object_id }
             apps:update(svc)
 ]]
+            Glpi.insert_event(id, "application", auth.user_name, 4, A[1].name)
          else
             App.deactivate_app(id) 
+            Glpi.insert_event(id, "application", auth.user_name, 5, A[1].name)
          end
+
 
          --msg = "/"..error_message(9).." "..A[1].name
 --      else

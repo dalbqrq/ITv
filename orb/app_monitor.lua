@@ -106,12 +106,13 @@ function list(web, hostname, tipo, app, status)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
    local filter = { hostname = hostname, tipo = tipo, app = app, status = status }
-   local clause, clause34, clause5 = nil, "", ""
+   local clause, clause34, clause5, clause12 = nil, "", "", ""
 
    -- Filtro de hostname
    if filter.hostname ~= "" and filter.hostname ~= nil and filter.hostname ~= "all" then 
       clause34 = "and (c.name like '%"..filter.hostname.."%' or c.alias like '%"..filter.hostname.."%' or c.itv_key like '%"..filter.hostname.."%')"
       clause5 = "and c.name like '%"..filter.hostname.."%' "
+      clause12 = "and ax.name like '%"..filter.hostname.."%' "
    end
    -- Filtro de tipo
    if filter.tipo ~= "" and filter.tipo ~= nil then 
@@ -119,20 +120,24 @@ function list(web, hostname, tipo, app, status)
          local a = ""
          if clause then a = " and " else clause = ""  end
          clause = clause..a.."o.name2 = '"..config.monitor.check_host.."' and o.objecttype_id = 2"
+         clause12 = clause12.." and ax.is_entity_root = -1000" -- exclude this query!
       elseif filter.tipo == 'svc' then
          local a = ""
          if clause then a = " and " else clause = ""  end
          clause = clause..a.."o.name2 <> '"..config.monitor.check_host.."' and o.name1 <> '"..config.monitor.check_app.."' and o.objecttype_id = 2"
+         clause12 = clause12.." and ax.is_entity_root = -1000" -- exclude this query!
       elseif filter.tipo == 'app' then
          local a = ""
          if clause then a = " and " else clause = ""  end
          clause = clause..a.."o.name1 = '".. config.monitor.check_app.."' and o.objecttype_id = 2"  
          clause5 = clause5.." and ax.is_entity_root = 0"
+         clause12 = clause12.." and ax.is_entity_root = 0"
       elseif filter.tipo == 'ent' then
          local a = ""
          if clause then a = " and " else clause = ""  end
          clause = clause..a.."o.name1 = '".. config.monitor.check_app.."' and o.objecttype_id = 2"  
          clause5 = clause5.." and ax.is_entity_root = 1"
+         clause12 = clause12.." and ax.is_entity_root = 1"
       end
    end
    -- Filtro de app
@@ -156,7 +161,7 @@ function list(web, hostname, tipo, app, status)
    if clause then a = " and " else clause = "" end
    clause = clause..a.." p.entities_id in "..Auth.make_entity_clause(auth)
 
-   local ics = Monitor.select_monitors_app_objs(app, clause, clause34, clause5, true)
+   local ics = Monitor.select_monitors_app_objs(app, clause, clause34, clause5, clause12)
 
    return render_list(web, ics, filter)
 end
@@ -269,6 +274,7 @@ function render_list(web, ics, filter, msg)
             output = ""
       else
          state = 4
+         output = ""
       end
       local statename = applic_alert[state].name
 
