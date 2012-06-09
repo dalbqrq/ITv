@@ -318,11 +318,12 @@ event_msg = {
    [14] = "Removeu a checagem ",
    [15] = "Ligou a checagem ",
    [16] = "Desligou a checagem ",
-   [17] = "Incluiu objeto na checagem ",
-   [18] = "Removeu objeto da checagem ",
+   [17] = "Incluiu tipo de relacionamento ",
+   [18] = "Removeu tipo de relacionamento ",
+   [19] = "Alterou tipo de relacionamento ",
 }
 
-function insert_event( items_id, event_type, username, message, object_name )
+function log_event( items_id, event_type, username, message, object_name )
    -- event_type = [ 'application', 'probe' ]
    local date = os.date("%Y-%m-%d %H:%M:%S")
    local service = "setup"

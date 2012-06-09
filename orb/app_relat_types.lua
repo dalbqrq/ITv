@@ -62,11 +62,11 @@ function update(web, id)
    if id then
       local tables = "itvision_app_relat_types"
       local clause = "id = "..id
-      --A:new()
-      A.year  = web.input.year
-      A.month = web.input.month
+      A.name  = web.input.name
+      A.type = web.input.type
 
       Model.update (tables, A, clause) 
+      Glpi.log_event(id, "app_relation", auth.user_name, 19, web.input.name)
    end
 
    return web:redirect(web:link("/list"))
@@ -91,6 +91,9 @@ function insert(web)
    app_relat_types.name = web.input.name
    app_relat_types.type = web.input.type
    app_relat_types:save()
+
+   Glpi.log_event(nil, "app_relation", auth.user_name, 17, web.input.name)
+
    return web:redirect(web:link("/list"))
 end
 ITvision:dispatch_post(insert, "/insert")
@@ -101,6 +104,7 @@ function remove(web, id)
    if not auth then return Auth.redirect(web) end
 
    local A = app_relat_types:select_app_relat_types(id)
+
    return render_remove(web, A)
 end
 ITvision:dispatch_get(remove, "/remove/(%d+)")
@@ -109,12 +113,16 @@ ITvision:dispatch_get(remove, "/remove/(%d+)")
 function delete(web, id)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
+   A = app_relat_types:select_app_relat_types(id)
+
+   Glpi.log_event(id, "app_relation", auth.user_name, 18, A[1].name)
 
    if id then
       local clause = "id = "..id
       local tables = "itvision_app_relat_types"
       Model.delete (tables, clause) 
    end
+
 
    return web:redirect(web:link("/list"))
 end
@@ -131,28 +139,28 @@ function render_list(web, A)
    local res = {}
    local permission, auth = Auth.check_permission(web, "app_relat_type")
    
---[[
-   res[#res + 1] = p{ button_link(strings.add, web:link("/add")) }
-   res[#res + 1] = p{ br(), br() }
-]]
-
    for i, v in ipairs(A) do
-      local button_remove, button_edit = "-", "-"
+      local img_blk = img{src="/pics/blank.png",  height="20px"}
+      local img_edit, img_remove = img_blk, img_blk
       if permission == "w" then
-         button_remove = button_link(strings.remove, web:link("/remove/"..v.id), "negative")
-         button_edit = button_link(strings.edit, web:link("/edit/"..v.id))
+         --button_remove = button_link(strings.remove, web:link("/remove/"..v.id), "negative")
+         --button_edit = button_link(strings.edit, web:link("/edit/"..v.id))
+
+         url_edit = web:link("/edit/"..v.id)
+         url_remove = web:link("/remove/"..v.id)
+         img_edit = a{ href=url_edit, title=strings.edit, img{src="/pics/pencil.png", height="20px"}}
+         img_remove = a{ href=url_remove, title=strings.remove, img{src="/pics/trash.png",  height="20px"}}
       end
-         -- link usado para acessar o render_show() 
-         --td{ a{ href= web:link("/show/"..v.id), v.name} }, 
       rows[#rows + 1] = tr{ class='tab_bg_1',
          td{ v.name },
          td{ strings[v.type] },
-         td{ button_remove },
-         td{ button_edit },
+         td{ img_edit },
+         td{ img_remove },
       }
    end
 
    res[#res + 1]  = render_resume(web)
+   web.prefix = "/orb/app_relat_types"
    if permission == "w" then
       res[#res + 1]  = render_content_header(auth, "Tipo de Relacionamento", web:link("/add"), web:link("/list"))
    else
@@ -164,8 +172,8 @@ function render_list(web, A)
          tr{ class="tab_bg_2",
              th{ strings.name }, 
              th{ strings.type }, 
-             th{ "." },
-             th{ "." },
+             th{ "" },
+             th{ "" },
          }
       },
       tbody{
@@ -266,7 +274,7 @@ function render_remove(web, A)
 
    res[#res + 1] = p{
       --"Voce tem certeza que deseja excluir o usuario "..A.name.."?",
-      strings.exclude_quest.." "..strings.app_relat_types.." "..A.name.."?",
+      strings.exclude_quest.." "..strings.app_relat_type.." "..A.name.."?",
       p{ button_link(strings.yes, web:link(url_ok)) },
       p{ button_link(strings.cancel, web:link(url_cancel)) },
    }

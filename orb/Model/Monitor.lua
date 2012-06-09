@@ -33,7 +33,7 @@ local DEBUG = false
 
 
         QUERY 1 - computador/networkequip com porta sem software e sem monitor
-        XXX nao faz mais sentido XXX QUERY 2 - computador              com porta com software e sem monitor
+        XXX nao faz mais sentido XXX QUERY 2 - computador com porta com software e sem monitor
         QUERY 3 - computador/networkequip com porta sem software e com monitor - monitoracao de host onde o service eh ping
         QUERY 4 - computador/networkequip com porta sem software e com monitor - monitoracao de service 
 	QUERY 5 - aplicacao com monitor - monitoracao de service 
@@ -1012,6 +1012,27 @@ function select_monitors_relat_objs_to_tree(app_id, clause)
    for _,v in ipairs(q10) do table.insert(q, v) end
 
    return q
+end
+
+
+-- Retorna nome do objeto. Se host, soh o nome/alias/key. Se service, inclui o nome do servico.
+function get_obj_name(service_object_id)
+   local q = {}
+   local clause = "m.service_object_id = ".. service_object_id
+   local q3 = make_query_3(nil, nil, nil, clause)
+   local q4 = make_query_4(nil, nil, nil, clause)
+   for _,v in ipairs(q3) do table.insert(q, v) end
+   for _,v in ipairs(q4) do table.insert(q, v) end
+
+   local v = q[1]
+   local hostname = find_hostname(v.c_alias, v.c_name, v.c_itv_key).." ("..v.p_ip..")"
+
+   if v.m_name == config.monitor.check_host then
+      return hostname
+   else
+      return make_obj_name(hostname, v.m_name)
+   end
+
 end
 
 

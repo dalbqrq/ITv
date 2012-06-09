@@ -124,8 +124,6 @@ function list(web, msg)
 
    local clause = " entities_id in "..Auth.make_entity_clause(auth)
    if web.input.app_name then clause = clause.." and name like '%"..web.input.app_name.."%' " end
-   --OLD: local A, root = apps:select(nil, clause)
-   --local A = App.select_app(clause)
    local A = App.select_app()
    local AS = App.select_app_state(clause)
    local root = App.select_root_app()
@@ -141,7 +139,6 @@ function show(web, app_id)
    if not auth then return Auth.redirect(web) end
 
    local clause = "a.id = "..app_id.." and a.entities_id in "..Auth.make_entity_clause(auth)
-   --OLD: local A, root = apps:select(nil, clause)
    local A = App.select_app(clause)
    local AS = App.select_app_state(clause)
    local root = App.select_root_app()
@@ -162,7 +159,9 @@ ITvision:dispatch_get(edit, "/edit/(%d+):(.+):(%a+):(%d):(%d+)")
 
 
 function update(web, id)
+   local auth = Auth.check(web)
    local A = {}
+
    if id then
       local tables = "itvision_apps"
       local clause = "id = "..id
@@ -174,6 +173,8 @@ function update(web, id)
       A.entities_id = web.input.entity
       Model.update (tables, A, clause) 
    end
+
+   Glpi.log_event(id, "application", auth.user_name, 2, A.name)
 
    web.prefix = "/orb/app_tabs"
    return web:redirect(web:link("/list/"..id..":"..tab_id))
@@ -193,17 +194,7 @@ ITvision:dispatch_get(add, "/add")
 function insert(web)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
-
-   --[[
-      tag: VERSAO_APP_01 
-
-      O codigo comendado com o tag acima é uma tentativa de definir a aplicacoa pai de uma aplicacao
-      que está sendo criada. A altenativa que será programada é definir somente a entidade pai e
-      deixar a aplicacao fora da arvore de aplicacoes, uma especie de limbo, para ser colocada na
-      árvore a posteriore.
-   ]]
-
-   --VERSAO_APP_01: local app_parent = apps:select(web.input.app_parent)
+   local app = apps:select(nil, "name = '"..web.input.name.."'")
 
    apps:new()
    apps.name = web.input.name
@@ -212,23 +203,13 @@ function insert(web)
    apps.service_object_id = nil
    apps.instance_id = Model.db.instance_id
    apps.is_entity_root = 0
-   --VERSAO_APP_01: apps.entities_id = app_parent[1].entities_id
    apps.entities_id = web.input.entity
    apps.app_type_id = 2 -- leva em conta que a inicializacao da tabela itvision_app_type colocou o tipo aplicacao com id=1
    apps.visibility = web.input.visibility
    apps:save()
 
-   local app = apps:select(nil, "name = '"..web.input.name.."'")
-   --[[ VERSAO_APP_01:
-   local parent_app_tree = app_trees:select(nil, "app_id = "..web.input.app_parent)
-   for i,v in ipairs(parent_app_tree) do
-      App.insert_node_app_tree(app[1].id, app_parent[1].entity_id, v.id, 1)
-   end
-   ]]
    App.remake_apps_config_file()
-
-   local auth = Auth.check(web)
-   Glpi.insert_event(id, "application", auth.user_name, 1, apps.name)
+   Glpi.log_event(id, "application", auth.user_name, 1, apps.name)
 
    web.prefix = "/orb/app_tabs"
    return web:redirect(web:link("/list/"..app[1].id..":2"))
@@ -247,14 +228,11 @@ ITvision:dispatch_get(remove, "/remove/(%d+)")
 
 
 function delete(web, id)
-   if id then
-      --[[ nao existe mais arvore: itvision_app_tree
-      local tree_id = App.find_node_id(id)
-      for _,v in ipairs(tree_id) do
-         App.delete_node_app_tree(v.id)
-      end
-      ]]
+   local auth = Auth.check(web)
+   local A = apps:select(id)
+   Glpi.log_event(id, "application", auth.user_name, 3, A[1].name)
 
+   if id then
       local o = objects:select_app(id)
       if o[1] then
          Model.delete ("itvision_app_objects", "service_object_id = "..o[1].object_id)
@@ -264,10 +242,6 @@ function delete(web, id)
       Model.delete ("itvision_app_contacts", "app_id = "..id) 
       Model.delete ("itvision_apps", "id = "..id) 
    end
-
-   local auth = Auth.check(web)
-   local a = apps:select(id)
-   Glpi.insert_event(id, "application", auth.user_name, 3, a[1].name)
 
    App.remake_apps_config_file()
 
@@ -292,39 +266,15 @@ function activate(web, id, flag)
    if id then
       local clause = "id = "..id
       local tables = "itvision_apps"
-
       local A = apps:select(id)
-      --local count = App.count_app_objects(id)
---      if A[1] and count > 0 then  -- este if existia para impedir a desligamento de apps que nao possuiam objetos
-         -- se for uma operacao de ativacao entao atualiza o service_object_id da aplicacao criada
-         if flag == 1 then
-            App.activate_app(id) 
 
---[[
-            -- app as id local s = objects:select_app(app_to_id(A[1].name))
-            s = objects:select_app(A[1].id)
-            -- caso host ainda nao tenha sido incluido aguarde e tente novamente
-            counter = 0
-            while s[1] == nil do
-               counter = counter + 1
-               os.reset_monitor()
-               os.sleep(1)
-               s = objects:select_app(A[1].id)
-            end
-            local svc = { id = A[1].id, service_object_id = s[1].object_id }
-            apps:update(svc)
-]]
-            Glpi.insert_event(id, "application", auth.user_name, 4, A[1].name)
-         else
-            App.deactivate_app(id) 
-            Glpi.insert_event(id, "application", auth.user_name, 5, A[1].name)
-         end
-
-
-         --msg = "/"..error_message(9).." "..A[1].name
---      else
---         msg = "/"..error_message(10).." "..A[1].name
---      end
+      if flag == 1 then
+         App.activate_app(id) 
+         Glpi.log_event(id, "application", auth.user_name, 4, A[1].name)
+      else
+         App.deactivate_app(id) 
+         Glpi.log_event(id, "application", auth.user_name, 5, A[1].name)
+      end
    end
 
    os.sleep(1)
@@ -465,7 +415,6 @@ function render_add(web, edit)
 
    -- recupera entidades da tabela glpi_entities baseado nas entidades ativas de auth
    local entities = Glpi.select_active_entities(auth)
-   --VERSAO_APP_01: local apps = apps:select(nil, "entities_id in "..Auth.make_entity_clause(auth))
 
    -- cria conteudo do formulario em barra
    local inc = {
@@ -473,13 +422,11 @@ function render_add(web, edit)
       strings.logic..": ", select_and_or("type", edit.type ),  " ",
       strings.visibility..": ", select_private_public("visibility", edit.visibility ),  " ",
       strings.entity..": ", select_option("entity", entities, "id", "completename", edit.entity_id ),  " ",
-      --VERSAO_APP_01: strings.application..": ", select_option("app_parent", apps, "id", "name", auth.session.glpidefault_entity ),  " ",
       "<INPUT TYPE=HIDDEN NAME=\"is_active\" value=\"0\">",
    }
    
    res[#res+1] = render_content_header(auth, strings.application, add_link, web:link("/list"))
    res[#res+1] = render_form_bar( inc, strbar, link, add_link )
-   --res[#res+1] = render_form(link, add_link, inc, true, strings.add )
 
    return render_layout(res)
 end

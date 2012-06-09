@@ -22,6 +22,21 @@ local tab_id = 4
 -- models ------------------------------------------------------------
 
 
+function apps:select(id, clause_)
+   local clause = nil
+
+   if id and clause_ then
+      clause = "id = "..id.." and "..clause_
+   elseif id then
+      clause = "id = "..id
+   elseif clause_ then
+      clause = clause_
+   end
+
+   extra  = " order by id "
+   return Model.query("itvision_apps", clause, extra)
+end
+
 
 function app_contacts:delete_app_contact(id, user_id)
    local clause = ""
@@ -84,6 +99,7 @@ end
 function insert(web, app_id, user_id)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
+   local A = apps:select(app_id)
 
    app_contacts:new()
    app_contacts.instance_id = Model.db.instance_id
@@ -92,6 +108,7 @@ function insert(web, app_id, user_id)
    app_contacts:save()
 
    update_contact(web, user_id)
+   Glpi.log_event(app_id, "application", auth.user_name, 10, A[1].name)
 
    web.prefix = "/orb/app_tabs"
    return web:redirect(web:link("/list/"..app_id..":"..tab_id))
@@ -102,6 +119,7 @@ ITvision:dispatch_get(insert, "/insert/(%d+):(%d+)")
 function delete(web, app_id, user_id)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
+   local A = apps:select(app_id)
 
    if app_id and user_id then
       local clause = "app_id = "..app_id.." and user_id = "..user_id
@@ -110,6 +128,7 @@ function delete(web, app_id, user_id)
    end
 
    update_contact(web, user_id)
+   Glpi.log_event(app_id, "application", auth.user_name, 11, A[1].name)
 
    web.prefix = "/orb/app_tabs"
    return web:redirect(web:link("/list/"..app_id..":"..tab_id))

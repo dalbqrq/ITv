@@ -381,14 +381,16 @@ ITvision:dispatch_post(remove, "/remove/(%d+)")
 
 ------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------
--- executa a operacao de remocao da monitoracao e de todos os servicos associados se objeto for hsot
+-- executa a operacao de remocao da monitoracao e de todos os servicos associados se objeto for host
 -- remove ainda todas as entrada relacionada aos hosts e servicos que existam em alguma aplicacao
 function delete(web, service_object_id)
+   local auth = Auth.check(web)
    local msg = ""
    local monitor = monitors:select_monitor_from_service(service_object_id) 
    local hostname = monitor[1].name1
    local service_desc = monitor[1].name2
    local cond_
+   local obj_name = Monitor.get_obj_name(service_object_id)
 
    -- remove o monitor e o host/sevice de todas as apps
    remove_svc_cfg_file (hostname, service_desc)
@@ -396,6 +398,7 @@ function delete(web, service_object_id)
    app_objects:delete_cond("service_object_id = "..service_object_id)
    app_relats:delete_cond("from_object_id = "..service_object_id.." or to_object_id = "..service_object_id)
    --DEBUG: text_file_writer("/tmp/rr", hostname.."\n"..service_desc.."\n"..service_object_id.."\n")
+
 
    -- se o objeto for um host remova os servicos associados e as aplicacoes associadas a estes servicos
    if service_desc == config.monitor.check_host then
@@ -414,6 +417,7 @@ function delete(web, service_object_id)
       end
    end
 
+   Glpi.log_event(service_object_id, "probe", auth.user_name, 14, obj_name)
    msg = "Check de SERVIÇO: "..monitor[1].name.." removido."
 
    os.reset_monitor()
@@ -443,6 +447,8 @@ ITvision:dispatch_get(pend, "/pend/")
 ------------------------------------------------------------------------------------------------------------------------------
 -- executa a operacao de insersao de host
 function insert_host(web, p_id, sv_id, c_id, n_id, c_name, ip)
+   local auth
+   if web then auth = Auth.check(web) end
    local msg, check_args = "", ""
    local hst_name = c_id.."_"..p_id
    local h = monitors:select_monitors(hst_name)
@@ -475,6 +481,11 @@ function insert_host(web, p_id, sv_id, c_id, n_id, c_name, ip)
       insert_service_cfg_file (hst_name, config.monitor.check_host, config.monitor.check_host, check_args)
 
       msg = msg.."Check do HOST: "..c_name.." para o IP "..ip.." "..error_message(11)
+
+      if web then
+         local hostname = find_hostname(c_alias, c_name, c_itv_key).." ("..ip..")"
+         Glpi.log_event(nil, "probe", auth.user_name, 12, hostname)
+      end
    else
       msg = msg.."Check do HOST: "..c_name.." já existe! "
    end   
@@ -497,6 +508,7 @@ ITvision:dispatch_post(insert_host, "/insert_host/(%d+):(%d+):(%d+):(%d+):(.+):(
 ------------------------------------------------------------------------------------------------------------------------------
 -- executa a operacao de insersao de service
 function insert_service(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, ip)
+   local auth = Auth.check(web)
    local msg = ""
    local hst_name = c_id.."_"..p_id
 
@@ -533,6 +545,8 @@ function insert_service(web, p_id, sv_id, c_id, n_id, c_name, sw_name, sv_name, 
    insert_service_cfg_file (hst_name, service_desc, chk_name, check_args)
 
    msg = "Check de SERVIÇO: "..monitor_name.." - HOST: ".. c_name.." - COMANDO: "..chk_name.." criado."
+   local obj_name = make_obj_name(find_hostname(c_alias, c_name, c_itv_key).." ("..ip..")", chk_name)
+   Glpi.log_event(nil, "probe", auth.user_name, 12, obj_name)
 
    if web then
       --os.sleep(1)
@@ -550,6 +564,7 @@ ITvision:dispatch_post(insert_service, "/insert_service/(%d+):(%d+):(%d+):(%d+):
 ------------------------------------------------------------------------------------------------------------------------------
 -- executa a operacao de update de monitoracao de servico
 function update_service(web, service_object_id, c_id, p_id, query, no_header)
+   local auth = Auth.check(web)
    local msg = ""
 
    local flags, opts = {}, {}
@@ -577,8 +592,10 @@ function update_service(web, service_object_id, c_id, p_id, query, no_header)
    local monitor = monitors:select_monitor_from_service(service_object_id) 
    local host_name = monitor[1].name1
    local service_desc = monitor[1].name2
+   local obj_name = Monitor.get_obj_name(service_object_id)
    insert_service_cfg_file (host_name, service_desc, chk_name, check_args)
 
+   Glpi.log_event(service_object_id, "probe", auth.user_name, 13, obj_name)
    msg = "Check de SERVIÇO: "..monitor_name.." atualizado."
 
    if web then
@@ -597,7 +614,9 @@ ITvision:dispatch_post(update_service, "/update_service/(%d+):(%d+):(%d+):(%d+):
 ------------------------------------------------------------------------------------------------------------------------------
 --executa a desligamento de monitoracao de servico
 function disable_service(web, service_object_id, c_id, p_id, query, no_header, flag)
-   local msg = ""
+   local auth = Auth.check(web)
+   local obj_name = Monitor.get_obj_name(service_object_id)
+   local msg, log = "", 0
    local flags, opts = {}, {}
    local chk, chk_id
    flag = tonumber(flag)
@@ -635,9 +654,12 @@ function disable_service(web, service_object_id, c_id, p_id, query, no_header, f
 
    if tonumber(flag) == 0 then
       msg = "Check de SERVIÇO: desligado."
+      log = 16
    else
       msg = "Check de SERVIÇO: ligado."
+      log = 15
    end
+   Glpi.log_event(nil, "probe", auth.user_name, log, obj_name)
 
    os.sleep(1)
    if count then
@@ -991,6 +1013,7 @@ function render_add(web, ics, chk, params, chk_params, monitor_name)
 
    if v then
       v.c_id = v.c_id or 0; v.n_id = v.n_id or 0; v.p_id = v.p_id or 0; v.sv_id = v.sv_id or 0;
+      ip = v.p_id
 
       hst_name = find_hostname(v.c_alias, v.c_name, v.c_itv_key)
 

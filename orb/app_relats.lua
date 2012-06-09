@@ -12,12 +12,31 @@ require "app"
 
 module(Model.name, package.seeall,orbit.new)
 
+local apps        = Model.itvision:model "apps"
 local app_relats = Model.itvision:model "app_relats"
 local app_relat_types = Model.itvision:model "app_relat_types"
 
 local tab_id = 3
 
 -- models ------------------------------------------------------------
+
+function apps:select(id, clause_)
+   local clause = nil
+
+   if id and clause_ then
+      clause = "id = "..id.." and "..clause_
+   elseif id then
+      clause = "id = "..id
+   elseif clause_ then
+      clause = clause_
+   end
+
+   extra  = " order by name "
+
+   local content = Model.query("itvision_apps", clause, extra)
+   return content
+end
+
 
 
 function app_relats:delete_app_relat(id, from, to)
@@ -69,6 +88,7 @@ ITvision:dispatch_get(add, "/add/", "/add/(%d+)", "/add/(%d+):(.+)")
 function insert_relat(web)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
+   local A = apps:select(web.input.app_id)
 
    local msg = ""
    local from, to
@@ -95,7 +115,8 @@ function insert_relat(web)
       app_relats:save()
    end
 
-   --return web:redirect(web:link("/add/"..app_relats.app_id)..msg)
+   Glpi.log_event(web.input.app_id, "application", auth.user_name, 8, A[1].name)
+
    web.prefix = "/orb/app_tabs"
    return web:redirect(web:link("/list/"..app_relats.app_id..":"..tab_id))
 end
@@ -106,9 +127,11 @@ ITvision:dispatch_post(insert_relat, "/insert_relat")
 function delete_relat(web, app_id, from, to)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
+   local A = apps:select(app_id)
 
    app_relats:delete_app_relat(app_id, from, to)
-   --return web:redirect(web:link("/add/"..app_id))
+   Glpi.log_event(app_id, "application", auth.user_name, 9, A[1].name)
+
    web.prefix = "/orb/app_tabs"
    return web:redirect(web:link("/list/"..app_id..":"..tab_id))
 end

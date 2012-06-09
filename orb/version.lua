@@ -1,8 +1,15 @@
-version = "1.0.5"
+version = "1.0.6"
 patch = 0
 
 
 description = [[
+
+<br><br><b> Versão 1.0.6 (.. de junho de 2012) </b>
+
+
+- Incluido no log (Administrar -> Logs) os eventos relacionados às aplicações (criação, remoção, alteração, etc..).
+
+
 
 <br><br><b> Versão 1.0.5 (4 de junho de 2012) </b>
 

@@ -92,6 +92,8 @@ ITvision:dispatch_get(add, "/add/(%d+)", "/add/(%d+):(.+)")
 
 
 function insert_obj(web, app_id)
+   local auth = Auth.check(web)
+
    app_objects:new()
    -- inclusão de multiplos itens. deve-se acionar a selecao de multiplos itens na interface. bug abaixo
    if type(web.input.item) == "table" then
@@ -109,6 +111,9 @@ function insert_obj(web, app_id)
          app_objects.instance_id = Model.db.instance_id
          app_objects.service_object_id = web.input.item
          app_objects:save()
+
+         local A = apps:select(app_objects.app_id)
+         Glpi.log_event(app_id, "application", auth.user_name, 6, A[1].name)
       end
    end
 
@@ -131,6 +136,7 @@ function delete_obj(web, app_id, obj_id)
    local msg = ""
 
    if app_id and obj_id then
+      local A = apps:select(app_id)
       local subapp = objects:select_app(obj_id)
 
       local clause = "app_id = "..app_id.." and service_object_id = "..obj_id
@@ -140,9 +146,11 @@ function delete_obj(web, app_id, obj_id)
       -- apaga tambem todos os relacionamentos 
       app_relats:delete_app_relat(app_id, obj_id, nil)
       app_relats:delete_app_relat(app_id, nil, obj_id)
+
+      Glpi.log_event(app_id, "application", auth.user_name, 7, A[1].name)
+      update_apps(web)
    end
 
-   update_apps(web)
 
    web.prefix = "/orb/app_tabs"
    return web:redirect(web:link("/list/"..app_id..":"..tab_id..msg))
