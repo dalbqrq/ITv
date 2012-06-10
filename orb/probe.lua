@@ -303,7 +303,6 @@ function update(web, query, c_id, p_id, sv_id, do_test, service_object_id, no_he
    if not auth then return Auth.redirect(web) end
    local ics = {}
    do_test = tonumber(do_test)
-   --if no_header == nil then no_header = 1 else no_header = 0 end
    if no_header == nil then no_header = 0 end
    no_header = tonumber(no_header)
    query = tonumber(query)
@@ -322,6 +321,7 @@ function update(web, query, c_id, p_id, sv_id, do_test, service_object_id, no_he
 
    local monitor = monitors:select_monitor_from_service(service_object_id) 
    local chk = Checkcmds.select_checkcmds(nil, monitor[1].cmd_object_id)
+   --DEBUG: text_file_writer("/tmp/ss", #monitor.."\n"..monitor[1].service_object_id.."\n"..#ics.."\n"..#chk.."\n")
 
    if do_test == 1 then
       do_test = true
@@ -599,7 +599,7 @@ function update_service(web, service_object_id, c_id, p_id, query, no_header)
    msg = "Check de SERVIÇO: "..monitor_name.." atualizado."
 
    if web then
-      --os.sleep(1)
+      os.sleep(1) --precisa ter!!!
       return web:redirect(web:link("/update/"..query..":"..c_id..":"..p_id..":0:0:"..service_object_id..":"..no_header..":"..msg))
    else
       return msg --para criacao de probes em massa
