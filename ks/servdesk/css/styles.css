@@ -40,6 +40,7 @@ body{
 	padding: 0;
 	background: white;
 }
+}
 
 ul, li, dt, dl, dd, form,img, input{
 	margin: 0;
@@ -319,10 +320,6 @@ td { }
 	width: 900px;
 	margin: 10 auto;
 	border-spacing: 5px;
-
-/*
-	border: 2px solid #cccccc;
-*/
 }
 
 
@@ -350,12 +347,12 @@ td { }
 	font-size: 11px;
 	width:900px;
 	background-color: #ffffff;
-	margin: 0 auto;
-	border: 0px solid #FFFFFF;
+	background-color: #493234;
 */
-	margin: 0 auto;
+	font-family:Arial, Helvetica, sans-serif;
 	width: 950px;
-	border-spacing: 20px 10px;
+	margin: 5px auto;
+	border-spacing: 5px 5px;
 }
 
 /* até aqui - aniel@itvision.com.br */
@@ -413,8 +410,8 @@ td { }
 .tab_cadre_appgrid td, .tab_cadre_appgridhov td {
 	font-size: 11px;
 	font-weight: bold;
-	padding: 10px;
-	border-spacing: 30px;
+	padding: 5px;
+	border-spacing: 20px;
 	text-align: center;
 	border: 3px solid #000000;
 	border: 0px solid #000000;
@@ -422,7 +419,7 @@ td { }
 }
 
 .tab_cadre_appgrid a, .tab_cadre_appgrid a:link {
-	font-size: 13px;
+	font-size: 11px;
 	color: #000000;
 }
 
@@ -501,6 +498,21 @@ td { }
 .tab_bg_5 {
 	background-color: #f2f2f2;
 }
+
+.tab_bg_X {
+	background-color: #c0c0c0;
+/*
+	margin: 0 auto;
+	-moz-border-radius: 4px;
+	border: 10px solid #cccccc;
+	z-index:1;
+	text-align: left;
+	font-size: 11px;
+	width:950px;
+*/
+
+}
+
 
 
 .tab_find {
@@ -1424,14 +1436,14 @@ div#c_ssmenu2{
 /* daniel
 	background: url("../pics/fd_nav3.png") 0 0 repeat-x;
 */
-	height: 28px;
+	height: 25px;
 	clear: both;
 	font-size: 0.9em; 
 	
 }
 div#c_ssmenu2 ul{
 	position: relative;
-	top: 5px;
+	top: 0px;
 	left: 0px;
 	list-style: none;
 }
@@ -1439,7 +1451,7 @@ div#c_ssmenu2 ul{
 div#c_ssmenu2 ul li{
 	position:relative;
 	float: left;
-	padding: 0 10px;
+	padding: 0px 15px;
 }
 
 div#c_ssmenu2 ul li a{
@@ -1449,6 +1461,12 @@ div#c_ssmenu2 ul li a{
 
 div#c_ssmenu2  a.here{
 	font-size:14px;
+}
+
+div#c_ssmenu2  a.there{
+	font-size:12px;
+	padding: 0px;
+	border: 0px solid  #CC9900;
 }
 
 
