@@ -194,7 +194,8 @@ ITvision:dispatch_get(add, "/add", "/add/(.+)")
 function insert(web)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
-   local app = apps:select(nil, "name = '"..web.input.name.."'")
+   local clause = "name = '"..web.input.name.."' and entities_id in "..Auth.make_entity_clause(auth)
+   local app = apps:select(nil, clause)
 
    if app[1] then
       web.prefix = "/orb/app"
@@ -213,7 +214,7 @@ function insert(web)
    apps.visibility = web.input.visibility
    apps:save()
 
-   app = apps:select(nil, "name = '"..web.input.name.."'")
+   local app = apps:select(nil, clause)
 
    App.remake_apps_config_file()
    Glpi.log_event(id, "application", auth.user_name, 1, apps.name)
