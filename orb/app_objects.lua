@@ -235,8 +235,7 @@ function make_app_objects_table(web, A)
 
       row[#row+1] = { 
          obj,
-    -- TODO: daniel fazer esta funcao abaixo funcionar  para apresetar se um host é um computador ou equip de rede
-         name_hst_svc_app_ent(v.ao_type, is_ent, v.itemtype),
+         name_hst_svc_app_ent(v.ao_type, is_ent, v.p_itemtype),
          { value=statename, state=state },
          url_remove,
       }

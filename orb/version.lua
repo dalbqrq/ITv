@@ -4,13 +4,14 @@ patch = 0
 
 description = [[
 
-<br><br><b> Versão 1.0.6 (.. de junho de 2012) </b>
+<br><br><b> Versão 1.0.6 (12 de junho de 2012) </b>
 
 
 - Incluido no log (Administrar -> Logs) os eventos relacionados às aplicações (criação, remoção, alteração, etc..).
 
 - Novos comandos de checagem (SPOP3, SSMTP, SIMAP) incluidos. Nome dos omandos de checagem HTTP_2 e POP alterados para HTTP_Hostname e POP3 respectivamente.
 
+- BugFix: Corrigigo o bug que permitia que aplicações de outras entidades pudessem ser visualizadas.
 
 
 <br><br><b> Versão 1.0.5 (4 de junho de 2012) </b>

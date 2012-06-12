@@ -97,6 +97,9 @@ function select_app_state (cond__, extra_, columns_)
 --      table.insert(content,v)
 --   end
 
+   table.sort(content, function(a,b)
+      return a.entity_id..a.name < b.entity_id..b.name
+   end )
 
    return content
 end

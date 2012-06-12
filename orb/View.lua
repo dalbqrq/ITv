@@ -705,8 +705,8 @@ HostOrServiceOrAppOrEnt = {
 
 function name_hst_svc_app_ent(id, is_entity, itemtype)
    if is_entity == 1 then id = "ent" end
-   if itemtype == "Computer" then id = "com" end
-   if itemtype == "NetworkEquipment" then id = "net" end
+   if id == "hst" and itemtype == "Computer" then id = "com" end
+   if id == "hst" and itemtype == "NetworkEquipment" then id = "net" end
    return choose_name(HostOrServiceOrAppOrEnt, id, is_entity)
 end
 

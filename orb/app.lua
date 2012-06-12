@@ -182,19 +182,24 @@ end
 ITvision:dispatch_post(update, "/update/(%d+)")
 
 
-function add(web)
+function add(web, msg)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
 
-   return render_add(web)
+   return render_add(web, nil, msg)
 end
-ITvision:dispatch_get(add, "/add")
+ITvision:dispatch_get(add, "/add", "/add/(.+)")
 
 
 function insert(web)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
    local app = apps:select(nil, "name = '"..web.input.name.."'")
+
+   if app[1] then
+      web.prefix = "/orb/app"
+      return web:redirect(web:link("/add/Uma aplicação com o nome "..web.input.name.." já existe!"))
+   end
 
    apps:new()
    apps.name = web.input.name
@@ -207,6 +212,8 @@ function insert(web)
    apps.app_type_id = 2 -- leva em conta que a inicializacao da tabela itvision_app_type colocou o tipo aplicacao com id=1
    apps.visibility = web.input.visibility
    apps:save()
+
+   app = apps:select(nil, "name = '"..web.input.name.."'")
 
    App.remake_apps_config_file()
    Glpi.log_event(id, "application", auth.user_name, 1, apps.name)
@@ -397,12 +404,11 @@ end
 
 
 -- TODO: edit deve receber os valores a serem alterados
-function render_add(web, edit)
+function render_add(web, edit, msg)
    local val1, val2, strbar, link
    local add_link = web:link("/add")
    local res = {}
    local permission, auth = Auth.check_permission(web, "application", true)
-   --local auth = Auth.check(web)
 
    if edit then 
       strbar = strings.update 
@@ -415,7 +421,6 @@ function render_add(web, edit)
 
    clause = " entities_id in "..Auth.make_entity_clause(auth).." and app_type_id = 1"
    local entities = apps:select(nil, clause)
-   --local entities = Glpi.select_active_entities(auth)
 
    -- cria conteudo do formulario em barra
    local inc = {
@@ -427,6 +432,7 @@ function render_add(web, edit)
    }
    
    res[#res+1] = render_content_header(auth, strings.application, add_link, web:link("/list"))
+   if msg ~= "/" and msg ~= "/add" and msg ~= "/add/" then res[#res+1] = p{ font{ color="red", msg } } end
    res[#res+1] = render_form_bar( inc, strbar, link, add_link )
 
    return render_layout(res)
