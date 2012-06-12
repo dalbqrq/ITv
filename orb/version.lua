@@ -13,6 +13,13 @@ description = [[
 
 - BugFix: Corrigigo o bug que permitia que aplicações de outras entidades pudessem ser visualizadas.
 
+- Agora não é possível criar aplicações com nomes já existentes."
+
+- BugFix: Tela de Aplicações agora é ordenada por entidades+nome da aplicação."
+
+- BugFix: Agora a tela de Objetos da Aplicação aparece com o 'Tipo' de objeto correto."
+
+
 
 <br><br><b> Versão 1.0.5 (4 de junho de 2012) </b>
 
