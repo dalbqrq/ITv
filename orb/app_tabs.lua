@@ -29,6 +29,7 @@ end
 function list(web, app_id, active_tab, no_menu, msg)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
+   if app_id then Auth.check_entity_permission(web, app_id) end
 
    return render_list(web, app_id, active_tab, msg)
 end

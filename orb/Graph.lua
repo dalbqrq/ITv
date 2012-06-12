@@ -197,6 +197,9 @@ function make_content(obj, rel)
 end
 
 
+-- sep era usado para apresentar de forma separada aplicacoes que apareciam debaixo de mais de uma
+-- super-aplicacao. Nao está fazendo sentido pois só é apresentada agora as entidades e nao mais as
+-- aplicacoes.
 function make_tree_content(obj, rel, sep)
    local content = {}
 
@@ -209,7 +212,7 @@ function make_tree_content(obj, rel, sep)
 
          label = v.a_name  -- DEBUG .." : "..v.a_is_entity_root  -- DEBUG ..":"..v.a_id
          name  = v.a_id
-         if sep == 1 then name = name..v.t_id end
+         --if sep == 1 then name = name..v.t_id end
          url   = "/orb/obj_info/app/"..v.a_service_object_id
          if v.a_is_entity_root == "1" then
             shape = "invhouse"

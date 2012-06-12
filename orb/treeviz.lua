@@ -44,6 +44,9 @@ end
 -- controllers ---------------------------------------------------------
 
 
+-- sep era usado para apresentar de forma separada aplicacoes que apareciam debaixo de mais de uma
+-- super-aplicacao. Nao está fazendo sentido pois só é apresentada agora as entidades e nao mais as
+-- aplicacoes.
 function show(web, sep)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
@@ -108,7 +111,6 @@ function render_show(web, obj, rel, sep)
    end
 
    local content = Graph.make_tree_content(obj, rel, sep)
-text_file_writer("/tmp/cont", table.dump(content, "    ", false))
    Graph.render(gv_name, file_type, engene, content)
    local imgmap = text_file_reader(mapfile)
 

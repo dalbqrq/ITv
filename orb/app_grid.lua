@@ -52,9 +52,11 @@ end
 -- controllers ---------------------------------------------------------
 
 
+-- a variavel 'recursive' diz se todas as sub-entidades da árvore serão apresentadas nesta tela
 function show(web, app_id, recursive)
    local auth = Auth.check(web)
    if not auth then return Auth.redirect(web) end
+   recursive = recursive or 1
 
    local clause = nil
    if auth then clause = " entities_id in "..Auth.make_entity_clause(auth) end
@@ -121,7 +123,7 @@ function make_grid(web, O, recursive)
    local permission = Auth.check_permission(web, "application")
    local auth = Auth.check(web)
    local col_count = 1
-   local max_cols = 5
+   local max_cols = 6
 
    if recursive then O = get_subobjects(O) end
 
@@ -225,7 +227,7 @@ function render_show(web, app, entities, app_name, app_id, obj, rel, obj_id, app
 
    res[#res+1] = render_resume(web)
    web.prefix = "/orb"
-   res[#res+1] = render_content_header(auth, "Grade", nil, web:link("/app_grid/show/1:1"))
+   res[#res+1] = render_content_header(auth, "Grade", nil, web:link("/app_grid/show"))
    --rec_checkbox = [[<p><input type="checkbox" onchange="location=']]..lnkrec..[[';" ]]..sel..[[> Visualização recursiva</p>]]
    res[#res+1] = render_bar( { render_selector_bar(web, app, app_id, "/app_grid/show", notrec), rec_checkbox,
            a{ href=lnkapp,  strings.status } ,

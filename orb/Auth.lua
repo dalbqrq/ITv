@@ -125,12 +125,11 @@ function check_permission(web, field, redirect_if_not_write_perm)
 end
 
 
--- 'entity_list' deve ser o resultado da chamada do metodo 'Auth.make_entity_clause(Auth.check(web))'
+-- 'entity_auth' deve ser o resultado da chamada do metodo 'Auth.make_entity_clause(Auth.check(web))'
 -- onde web é recebido pelo Orbit por um dos metodos do tipo controler.
 -- Este metodo é usado para dar autorizacao para a visualizacao de uma aplicacao.
 function check_entity_permission(web, app_id)
    if app_id then
-      --local entity_auth = make_entity_clause(check(web))
       local auth = check(web)
       if auth then
          local entity_auth = make_entity_clause(auth)
@@ -138,11 +137,11 @@ function check_entity_permission(web, app_id)
          local app = App.select_app(cond_)
 
          if app[1] then return true end
-     end
-   else
-     web.prefix = "/orb/no_permission"
-     return web:redirect(web:link("/"))
+      end
    end
+
+   web.prefix = "/orb/no_permission"
+   return web:redirect(web:link("/"))
 end
 
 
@@ -347,7 +346,7 @@ menu_itens = {
       submenu = {
       { name="Árvore", field="application", link="/orb/treeviz/show" },
       { name="Grafo", field="application", link="/orb/gviz/show" },
-      { name="Grade", field="application", link="/orb/app_grid/show/1:1" },
+      { name="Grade", field="application", link="/orb/app_grid/show" },
       { name="Lista", field="application", link="/orb/app_monitor/all:ent:0:-1" },
       { name="Aplicações", field="application", link="/orb/app" },
       { name="Checagem", field="checkcmds", link="/orb/probe" },

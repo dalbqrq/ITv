@@ -413,15 +413,16 @@ function render_add(web, edit)
       edit = { id = 0, name = "", type = "", visibility = "" }
    end
 
-   -- recupera entidades da tabela glpi_entities baseado nas entidades ativas de auth
-   local entities = Glpi.select_active_entities(auth)
+   clause = " entities_id in "..Auth.make_entity_clause(auth).." and app_type_id = 1"
+   local entities = apps:select(nil, clause)
+   --local entities = Glpi.select_active_entities(auth)
 
    -- cria conteudo do formulario em barra
    local inc = {
       strings.name..": ", input{ type="text", name="name", value = edit.name }, " ",
       strings.logic..": ", select_and_or("type", edit.type ),  " ",
       strings.visibility..": ", select_private_public("visibility", edit.visibility ),  " ",
-      strings.entity..": ", select_option("entity", entities, "id", "completename", edit.entity_id ),  " ",
+      strings.entity..": ", select_option("entity", entities, "entities_id", "name", edit.entity_id ),  " ",
       "<INPUT TYPE=HIDDEN NAME=\"is_active\" value=\"0\">",
    }
    
